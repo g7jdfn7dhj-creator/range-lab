@@ -196,6 +196,45 @@ button.wsgo{flex:1;background:linear-gradient(180deg,#f0c75a,#d29f22);color:#1b1
 .wssec>.ctrl{padding:2px 12px 10px}.wssec>.wscbs{padding:0 12px 10px}
 .wscard{display:flex;flex-direction:column;gap:2px;border-left:2px solid var(--amber);padding:3px 0 3px 9px;font-family:var(--mono);font-size:11.5px;color:var(--dim);line-height:1.45}
 .wscard b{color:var(--ink);font:700 12.5px var(--body)}
+
+/* ===== фирма ===== */
+.entsum{display:flex;flex-direction:column;gap:4px;padding:6px 9px!important;background:#151a11!important}
+.entsr{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.entsr b{color:var(--ink);font:700 13px var(--body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.entsr span{color:var(--amber);white-space:nowrap}
+.entkp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 8px}.entkp span{display:flex;flex-direction:column;font-size:9.5px;color:var(--dim);min-width:0;line-height:1.25}.entkp b{font:600 11.5px var(--mono);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.entkp b.neg,.entkv b.neg,.enttr b.neg,.tag.neg{color:#ff8d76}.entkp b.pos,.enttr b.pos{color:#8be08b}
+.entgo{display:flex;gap:6px}.entgo button{flex:1;min-height:34px;font-size:11.5px;padding:0 4px;white-space:nowrap}.entgo button:first-child{background:linear-gradient(180deg,#f0c75a,#d29f22);color:#1b1505;border:0}
+.entseg button{font-size:12px;padding:0 2px}
+.entmsg{border:1px solid rgba(240,194,79,.45);border-radius:10px;padding:8px 10px;font-size:12.5px;color:#ffd970}
+.entover{border:1px solid #ff8d76;border-radius:10px;padding:8px 10px;color:#ff8d76;font-size:12.5px}
+.entbox{display:flex;flex-direction:column;gap:6px}
+.entl{font-size:12px;line-height:1.4;color:var(--ink);border-left:2px solid var(--edge2);padding:2px 0 2px 8px}.entl i{display:block;font:10px var(--mono);color:var(--dim);font-style:normal}
+.entl.w{border-color:#ff9a5a;color:#ffd0b0}.entl.g{border-color:#8be08b}.entl.e{border-color:#7fd1ff}.entl b{color:var(--amber);font-weight:600}
+.entcharts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.entcharts>div{border:1px solid var(--edge);border-radius:10px;padding:6px 8px;min-width:0}.entcharts span{display:flex;flex-direction:column;font-size:10px;color:var(--dim)}.entcharts b{font:600 12px var(--mono);color:var(--ink)}
+.entsp{display:block;width:100%;height:42px}.enttr .entsp{height:22px}
+.entcard{display:flex;flex-direction:column;gap:6px;border:1px solid var(--edge);border-radius:12px;padding:9px 10px;background:rgba(255,255,255,.025)}.entcard.hl{border-color:rgba(240,194,79,.55)}.entcard.dim{opacity:.62}.entcard.paused{opacity:.72;border-style:dashed}
+.enth{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.enth b{font:700 13px var(--body);color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis}.enth span{font:11px var(--mono);color:var(--dim);text-align:right}
+.entsub{font:11.5px var(--mono);color:var(--amber)}
+.entkv{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:3px 10px;font-size:11.5px;color:var(--dim)}.entkv b{color:var(--ink);font:500 11.5px var(--mono);overflow-wrap:anywhere}
+.entbar{height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}.entbar i{display:block;height:100%;background:linear-gradient(90deg,#d29f22,#f0c75a)}.entbar.ok i{background:linear-gradient(90deg,#4f9a52,#8be08b)}.entbar.hot i{background:linear-gradient(90deg,#c0472f,#ff8d76)}
+.entrow{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:flex-end}.entrow label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--dim)}
+.entnum{display:inline-flex;align-items:center;gap:2px}.entnum button{min-width:34px;min-height:34px;padding:0;font-size:16px}.entnum input{min-height:34px;box-sizing:border-box;border-radius:8px;border:1px solid var(--edge2);background:#11150e;color:var(--ink);font:600 13px var(--mono);text-align:center;padding:0 2px;-moz-appearance:textfield}
+.entnum input::-webkit-outer-spin-button,.entnum input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.entin select{min-height:36px}.entbtns button{flex:1 1 auto;min-height:36px;font-size:12px}
+.enttab{display:flex;flex-direction:column;gap:0;font-size:11.5px;overflow-x:auto}.entth,.enttr{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(4,minmax(0,1fr));gap:6px;align-items:center;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.06)}
+.entth{color:var(--dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.03em}.enttr span{display:flex;flex-direction:column;gap:2px;min-width:0;color:var(--ink);font-family:var(--mono)}.enttr span>b{font:600 12px var(--body)}.enttr i{font:10px var(--mono);color:var(--dim);font-style:normal;overflow-wrap:anywhere}
+.enttr.sum span{color:var(--amber);font-weight:700}.enttab.pl .entth,.enttab.pl .enttr{grid-template-columns:minmax(0,1.5fr) repeat(3,minmax(0,1fr))}.enttab.bs .entth,.enttab.bs .enttr{grid-template-columns:minmax(0,2fr) minmax(0,1fr)}
+.enttab.osv .entth,.enttab.osv .enttr{grid-template-columns:minmax(0,1.4fr) repeat(4,minmax(0,1fr))}.enttr.cm{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,.7fr) minmax(0,.7fr) minmax(0,1fr)}
+.entmini{display:flex!important;flex-direction:row!important;gap:4px}.entmini button{min-width:30px;min-height:32px;padding:0 8px;font-size:11.5px}
+.entshop{display:flex;flex-direction:column;gap:6px;border-bottom:1px solid rgba(255,255,255,.07);padding:6px 0 9px}.entshop .enth span{font:10.5px var(--body)}.entld{flex:1 1 150px;min-width:140px}
+.enttab3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.enttab3>div{display:flex;flex-direction:column;gap:4px;align-items:flex-start;min-width:0}.enttab3 span{font-size:11px;color:var(--dim)}.enttab3 b{font:700 15px var(--mono);color:var(--ink)}.enttab3 i{font:10px var(--mono);color:var(--dim);font-style:normal}
+.enttab3 .entnum button{min-width:28px}.enttab3 .entnum input{width:46px!important}
+.entsh{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 40px;gap:8px;align-items:center;font-size:11.5px;color:var(--ink)}.entsh i{font:10.5px var(--mono);color:var(--dim);font-style:normal;text-align:right}
+.entj{display:grid;grid-template-columns:auto 1fr auto;gap:2px 8px;font-size:11px;border-bottom:1px solid rgba(255,255,255,.05);padding:4px 0}.entj i{font:10px var(--mono);color:var(--dim);font-style:normal}.entj b{font:600 11px var(--mono);color:var(--amber)}.entj span{font:11px var(--mono);color:var(--ink)}.entj em{grid-column:1/-1;font-style:normal;color:var(--dim)}
+.entpick{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;width:100%;min-height:52px;padding:8px 10px}.entpick span{font-size:11.5px;color:var(--dim);font-weight:400}.entpick[aria-pressed="true"]{border-color:var(--amber);background:rgba(240,194,79,.12)}
+.entbig{width:100%;min-height:48px;margin-top:4px}.entnote{margin:0}
+.entbid{display:flex;flex-direction:column;gap:6px;border-top:1px dashed var(--edge2);padding-top:6px}
+#entToast{position:absolute;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:min(92vw,460px);background:var(--glass2);border:1px solid rgba(240,194,79,.55);border-radius:12px;padding:7px 12px;color:#ffd970;font:600 12px var(--body);z-index:30;pointer-events:none;transition:opacity .4s}
+@media (max-width:380px){.entkp{grid-template-columns:repeat(2,minmax(0,1fr))}.enttab3{grid-template-columns:1fr}.entcharts{grid-template-columns:1fr}}
 @media (max-width:420px){.rail button{min-width:52px}.badge{max-width:58%}.dockrow{grid-template-columns:52px minmax(0,1fr) minmax(0,1.2fr)}.sq{width:52px}}
 </style>
 
@@ -225,6 +264,7 @@ button.wsgo{flex:1;background:linear-gradient(180deg,#f0c75a,#d29f22);color:#1b1
       <button role="tab" data-tab="t-fire" aria-selected="false">Стрельба</button>
       <button role="tab" data-tab="t-stat" aria-selected="false">Итоги</button>
       <button role="tab" data-tab="t-ws" aria-selected="false">Цех</button>
+      <button role="tab" data-tab="t-ent" aria-selected="false">Фирма</button>
     </div>
     <section id="t-gun" class="tab">
     <select id="gunSel" aria-label="Выбор орудия" style="width:100%"></select>
@@ -302,6 +342,7 @@ button.wsgo{flex:1;background:linear-gradient(180deg,#f0c75a,#d29f22);color:#1b1
       <div class="tag">Наибольший нагрев листа: <b id="plateT">≈ 20 °C</b> (горячие зоны светятся и остывают; в нагретой зоне металл слабее, керамика трескается от термоудара)</div>
     </section>
     <section id="t-ws" class="tab" hidden></section>
+    <section id="t-ent" class="tab" hidden></section>
   </div>
   <div class="card log" id="logCard" title="Нажмите, чтобы развернуть"><div id="taskTxt" class="tag" hidden></div><canvas id="xsec" width="600" height="84" style="width:100%;height:56px;display:block;margin-bottom:4px" hidden></canvas><div id="res">Орудие заряжено. Пробитие — игровая модель.</div></div>
   <div class="dock">
@@ -1167,7 +1208,7 @@ function updPlate(){
   const tot=layers.reduce((s,l)=>s+l.t,0);
   $("sumTxt").textContent=`Всего ${tot} мм · масса листа ${(S.mass/1000).toFixed(1)} т`;
 }
-const matOpts='<option value="none">— нет —</option>'+[...new Set(Object.values(MAT).map(m=>m.g))].map(g=>`<optgroup label="${g}">`+Object.entries(MAT).filter(([k,m])=>m.g===g).map(([k,m])=>`<option value="${k}">${m.n}</option>`).join("")+"</optgroup>").join("");
+let matOpts='<option value="none">— нет —</option>'+[...new Set(Object.values(MAT).map(m=>m.g))].map(g=>`<optgroup label="${g}">`+Object.entries(MAT).filter(([k,m])=>m.g===g).map(([k,m])=>`<option value="${k}">${m.n}</option>`).join("")+"</optgroup>").join("");
 $("matRef").innerHTML='<table class="ref"><thead><tr><th>Материал</th><th>Плотность, г/см³</th><th>Твёрдость</th><th>Прочность</th><th>Где применяется</th></tr></thead><tbody>'+
   Object.values(MAT).map(m=>`<tr><td>${m.n}</td><td>${m.i[0]}</td><td>${m.i[1]}</td><td>${m.i[2]}</td><td>${m.i[3]}</td></tr>`).join("")+'</tbody></table><p class="tag">Справочные значения ориентировочные; стойкость слоёв в игре задаётся игровыми коэффициентами.</p>';
 [0,1,2,3,4,5,6,7,8,9].forEach(i=>{$("m"+i).innerHTML=matOpts;$("m"+i).onchange=buildPlate;$("t"+i).oninput=()=>{updPlate();};$("t"+i).onchange=buildPlate;});
@@ -1346,9 +1387,9 @@ function wsRefK(cl){if(WSP.cache[cl])return WSP.cache[cl];const R=WSP.ref[cl],o=
 
 
 /* ===== Цех: проект орудия → боевое орудие игры ===== */
-var WS={guns:[],veh:[],gEdit:null,vEdit:null,tab:"g",open:{main:true}};
-try{const s=JSON.parse(localStorage.getItem("grom.ws")||"null");if(s){WS.guns=Array.isArray(s.guns)?s.guns:[];WS.veh=Array.isArray(s.veh)?s.veh:[];}}catch(e){}
-function wsSave(){try{localStorage.setItem("grom.ws",JSON.stringify({guns:WS.guns,veh:WS.veh}));}catch(e){}}
+var WS={guns:[],veh:[],alloys:[],gEdit:null,vEdit:null,tab:"g",open:{main:true}};
+try{const s=JSON.parse(localStorage.getItem("grom.ws")||"null");if(s){WS.guns=Array.isArray(s.guns)?s.guns:[];WS.veh=Array.isArray(s.veh)?s.veh:[];WS.alloys=Array.isArray(s.alloys)?s.alloys:[];}}catch(e){}
+function wsSave(){try{localStorage.setItem("grom.ws",JSON.stringify({guns:WS.guns,veh:WS.veh,alloys:WS.alloys||[]}));}catch(e){}}
 const WSG_DEF={tank:{cls:"tank",mount:"tank",cal:125,L:50,P:560,cham:1,prop:"sb",bore:"smooth",load:"car2",stroke:"short",brake:"none",ej:1,sleeve:1,mrs:1,steel:"esr",af:"hyd",lining:"chrome",breech:"wedge",case:"comb",elev:15,depr:-6,
     k_core:"w93",k_LD:28,k_seg:"mono",k_sabot:"al",k_tip:1,k_chg:"std",k_tst:0,h_liner:"cu",h_cone:42,h_hx:"okfol",h_probe:0,h_tandem:1,h_flute:0,e_hx:"aix2",e_fill:14,e_body:"hf",e_fuze:"multi"},
   auto:{cls:"auto",mount:"ifv",cal:30,L:80,P:380,cham:1,prop:"sb",bore:"rifled",load:"dual",brake:"none",ej:0,sleeve:0,rpm:450,steel:"esr",af:"hyd",lining:"chrome",twist:25,breech:"wedge",case:"metal",elev:70,depr:-6,
@@ -1497,7 +1538,7 @@ function renderAmmo(){S.balCache=null;setTimeout(()=>{try{updBal();}catch(e){}},
 $("newPlate").onclick=()=>{S.aim=null;if(typeof aimMark!=="undefined")aimMark.visible=false;buildPlate();if(typeof wHoles!=="undefined")updTally();$("res").textContent="Новый лист установлен.";};
 document.querySelectorAll&&document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
-  document.querySelectorAll(".tab").forEach(t=>t.hidden=t.id!==b.dataset.tab);});
+  document.querySelectorAll(".tab").forEach(t=>t.hidden=t.id!==b.dataset.tab);if(b.dataset.tab==="t-ent")try{entUI();}catch(e){console.error(e);}});
 $("logCard").onclick=()=>{const c=$("logCard");if(c.classList)c.classList.toggle("open");};
 function openSheet(tab){const m=$("more");m.hidden=false;$("toggle").setAttribute("aria-pressed",true);
   if(tab&&document.querySelectorAll)document.querySelectorAll(".tabs button").forEach(b=>{if(b.dataset.tab===tab)b.click();});}
@@ -1548,7 +1589,7 @@ function fireOne(){
     try{vh=vehShot(B,(lx-ax+lead-reachX)*sk,(ly-ay)*sk);}catch(e){vh=null;}miss=!(vh&&vh.hit);
     if(vh&&vh.hit){const m=vehAPS(vh,AMMO[S.a],g,gd,B);if(m)vmsg.push(m);}}
 
-  if(!gd)S.wear=Math.min(100,(S.wear||0)+(auto?.03:a.type==="ke"?.35:.12)*(1+S.heat/100)*(g.wearK||1));S.balCache=null;
+  if(!gd)S.wear=Math.min(100,(S.wear||0)+(auto?.03:a.type==="ke"?.35:.12)*(1+S.heat/100)*(g.wearK||1));S.balCache=null;try{if(typeof ENT!=="undefined"&&ENT&&typeof entShotHook==="function"){const t=entShotHook(g,S.a,S.veh?S.vt:null);if(t)entToast(t.trim());}}catch(e){}
   if(S.wear>=100&&!S.wornMsg){S.wornMsg=true;$("res").textContent="Ствол расстрелян: рассеивание резко выросло. Замените ствол в настройках.";}
   const ke=a.type==="ke";a.vimp=B.vx;if(ke){const v0r=B.v0-(B.dvT||0);if(a.key==="bops"&&B.vx>250&&v0r>250){const K=loK(260),rp=17600;a.pen=Math.round(a.pen*Math.exp(K/(rp*Math.pow(v0r/1000,2))-K/(rp*Math.pow(B.vx/1000,2))));}else a.pen=Math.round(a.pen*Math.pow(B.vx/v0r,1.4));}
   /* калиберные бронебойные и бетонобойные снаряды крупных калибров: пробитие по формуле Жакоб де Марра от скорости встречи и калибра */
@@ -3740,6 +3781,12 @@ function wsVehMake(d){wsENorm(d);const W=d.W,L=d.L,G=wsGeom(d),warn=[],note=[],m
   else{area.turF=.1;area.turS=.3;}
   /* ---- броня по уровню и опциям ---- */
   const pro=d.prot==="proto"&&!!d.pdef,PL=pro?(d.pl||"medium"):d.prot,def=JSON.parse(JSON.stringify(pro?d.pdef:(WSV_PROT[d.prot]||WSV_PROT.light)));
+  /* материал корпуса и башни: основные металлические слои заменяются выбранным сплавом той же стойкости против подкалиберных */
+  if(d.hm&&MAT[d.hm]&&!["era","slat","gap"].includes(MAT[d.hm].beh)){const M2=MAT[d.hm],base=["rha","s44","cast","hh","br2p","uhh","armox","dual","hardox","al","al7","al2519","ti","marag","bain"];let nS=0;
+    for(const z in def)def[z]=def[z].map(l=>{if(l[0]===d.hm||!base.includes(l[0])||!MAT[l[0]])return l;nS++;return[d.hm,Math.max(3,Math.round(l[1]*MAT[l[0]].ap/Math.max(.05,M2.ap)))];});
+    if(nS){note.push(`корпус и башня — «${M2.n.split(" (")[0]}»: толщины пересчитаны на равную стойкость против подкалиберных`);
+      if(M2.custom&&typeof ALY!=="undefined"&&ALY.res&&ALY.res[d.hm]&&ALY.res[d.hm].weld[1]>=2)warn.push(`«${M2.n.split(" (")[0]}»: свариваемость ${ALY.res[d.hm].weld[0]} — корпус дороже в производстве`);
+      if(M2.beh==="soft")note.push("алюминиевый корпус толще стального той же стойкости: жёстче, но съедает заброневой объём");}}
   if(d.era){const e=d.eraT&&MAT[d.eraT]?d.eraT:(PL==="heavy"?"relikt":"era5"),et=PL==="heavy"?60:40;def.hullF.unshift([e,et]);def.turF.unshift([e,et]);if(PL!=="heavy"&&!pro)warn.push("ДЗ на противоснарядной/противопульной броне: взрыв блока проламывает собственный тонкий лист и калечит десант снаружи");
     def.hullS=pro?[[e,PL==="heavy"?50:35]].concat(def.hullS):PL==="heavy"?[[e,50],["gap",150],["rha",60]]:[[e,40],["gap",120]].concat(def.hullS);}
   if(d.scr){if(PL!=="heavy"&&!d.era&&!pro)def.hullS=[["hh",6],["gap",300]].concat(def.hullS);else if(pro&&PL!=="heavy")def.hullS=[["slat",10],["gap",300]].concat(def.hullS);def.hullR=[["slat",10],["gap",300]].concat(def.hullR);}
@@ -4385,7 +4432,7 @@ function vehMine(where){if(!S.veh||!VEH)return;if(!VS)vehReset();const v=VT[S.vt
   if(VS.crewLost>=v.crew&&!VS.kill){VS.kill="crew";msgs.push("✖ Экипаж выведен из строя");}
   $("res").textContent=msgs.join("\n");vehState();}
 /* хладноломкость стали: ниже порога вязко-хрупкого перехода сталь трескается вместо пластичного течения */
-function brOf(k){const m=MAT[k];if(!m)return 0;const Tz=$("temp")?parseFloat($("temp").value):NaN,T=isNaN(Tz)?15:Tz,tt=k==="cast"?-20:{steel:-45,hard:-15,hc:-25,dual:-20}[m.beh];if(tt===undefined||T>=tt)return m.br;return Math.min(.95,m.br+(tt-T)*(m.beh==="hard"?.012:.008));}
+function brOf(k){const m=MAT[k];if(!m)return 0;const Tz=$("temp")?parseFloat($("temp").value):NaN,T=isNaN(Tz)?15:Tz,tt=m.tt!=null?m.tt:k==="cast"?-20:{steel:-45,hard:-15,hc:-25,dual:-20}[m.beh];if(tt===undefined||T>=tt)return m.br;return Math.min(.95,m.br+(tt-T)*(m.beh==="hard"?.012:.008));}
 
 function boxHit(b,p){return p.x>=b[0]&&p.x<=b[1]&&p.y>=b[2]&&p.y<=b[3]&&p.z>=b[4]&&p.z<=b[5];}
 function vehToTur(p){const T0=VT[S.vt].tur,a=-(VEH.tg.rotation.y||0),x=p.x-T0.p[0],z=p.z-T0.p[2];return new THREE.Vector3(x*Math.cos(a)+z*Math.sin(a),p.y-T0.p[1]+(VEH.sag||0),-x*Math.sin(a)+z*Math.cos(a));}
@@ -4761,10 +4808,11 @@ applyWx();
 function wsOpt(o,cur){return Object.entries(o).map(([k,t])=>`<option value="${k}"${k===cur?" selected":""}>${t}</option>`).join("");}
 function wsEsc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function wsUIinit(){const sec=$("t-ws");if(!sec)return;
-  sec.innerHTML=`<div class="seg wsseg" role="group" aria-label="Что проектировать"><button id="wsTG" aria-pressed="true">Пушка</button><button id="wsTV" aria-pressed="false">Машина</button></div>
-  <div id="wsG"></div><div id="wsV" hidden></div>`;
-  $("wsTG").onclick=()=>{WS.tab="g";wsTab();};$("wsTV").onclick=()=>{WS.tab="v";wsTab();};wsTab();}
-function wsTab(){$("wsTG").setAttribute("aria-pressed",WS.tab==="g");$("wsTV").setAttribute("aria-pressed",WS.tab==="v");$("wsG").hidden=WS.tab!=="g";$("wsV").hidden=WS.tab!=="v";if(WS.tab==="g")wsGForm();else wsVForm();}
+  sec.innerHTML=`<div class="seg wsseg" role="group" aria-label="Что проектировать"><button id="wsTG" aria-pressed="true">Пушка</button><button id="wsTV" aria-pressed="false">Машина</button><button id="wsTA" aria-pressed="false">Сплавы</button></div>
+  <div id="wsG"></div><div id="wsV" hidden></div><div id="wsA" hidden></div>`;
+  $("wsTG").onclick=()=>{WS.tab="g";wsTab();};$("wsTV").onclick=()=>{WS.tab="v";wsTab();};$("wsTA").onclick=()=>{WS.tab="a";wsTab();};wsTab();}
+function wsTab(){$("wsTG").setAttribute("aria-pressed",WS.tab==="g");$("wsTV").setAttribute("aria-pressed",WS.tab==="v");if($("wsTA"))$("wsTA").setAttribute("aria-pressed",WS.tab==="a");
+  $("wsG").hidden=WS.tab!=="g";$("wsV").hidden=WS.tab!=="v";if($("wsA"))$("wsA").hidden=WS.tab!=="a";if(WS.tab==="g")wsGForm();else if(WS.tab==="v")wsVForm();else alForm();}
 
 /* ---------- орудие: форма по разделам, прототипы, карточки боеприпасов ---------- */
 const WSG_LBL={cls:"Тип орудия",mount:"Установка",cal:"Калибр",L:"Длина ствола",bore:"Канал ствола",P:"Наибольшее давление газов",cham:"Объём каморы",dens:"Плотность заряжания",prop:"Порох",
@@ -4903,11 +4951,13 @@ const WSV_PRESETS={
 const WSV_LBL={cls:"Класс",run:"Ходовая часть",L:"Длина корпуса",W:"Ширина по гусеницам/колёсам",H:"Высота корпуса",ufp:"Наклон верхнего лобового листа",lfp:"Наклон нижнего лобового листа",eng:"Компоновка",susp:"Подвеска",
   epre:"Двигатель-прототип",et:"Тип двигателя",V:"Рабочий объём",cyl:"Цилиндров",rpm:"Номинальные обороты",boost:"Наддув",Pt:"Мощность турбины",fuel:"Топливо",fuelL:"Запас топлива во внутренних баках",
   tr:"Трансмиссия",gears:"Передач вперёд",vtop:"Скорость на высшей передаче",
-  tur:"Башня",ring:"Диаметр погона",ts:"Форма башни",gun:"Вооружение",stow:"Боеукладка",crew:"Экипаж",troops:"Десант",prot:"Защита",smk:"Дымовые гранатомёты",hyd:"Приводы башни",camo:"Окраска"};
+  tur:"Башня",ring:"Диаметр погона",ts:"Форма башни",gun:"Вооружение",stow:"Боеукладка",crew:"Экипаж",troops:"Десант",prot:"Защита",hm:"Материал корпуса и башни",smk:"Дымовые гранатомёты",hyd:"Приводы башни",camo:"Окраска"};
 function wsVNew(cls){const id=Date.now()%1e9;return Object.assign({id,name:"Машина "+(WS.veh.length+1)},JSON.parse(JSON.stringify(WSV_DEF[cls||"tank"])));}
 function wsGunOpts(cur){const L=guns.filter(g=>!GD(g)&&g.cls!=="drone").map(g=>[g.n,`${g.custom?"★ ":""}${g.n} · ${String(g.cal).replace(".",",")} мм`]);L.sort((a,b)=>(a[1][0]==="★"?-1:0)-(b[1][0]==="★"?-1:0));return L.map(([k,t])=>`<option value="${wsEsc(k)}"${k===cur?" selected":""}>${wsEsc(t)}</option>`).join("");}
 const WSV_FMT={L:v=>wfx(+v,2)+" м",W:v=>wfx(+v,2)+" м",H:v=>wfx(+v,2)+" м",ufp:v=>v+"° от вертикали",lfp:v=>v+"°",ring:v=>wfx(+v,2)+" м",crew:v=>v+" чел.",troops:v=>+v?v+" чел.":"нет",
   V:v=>wfx(+v,1)+" л",rpm:v=>v+" об/мин",Pt:v=>v+" л.с.",fuelL:v=>v+" л",gears:v=>v,vtop:v=>v+" км/ч"};
+function wsHmOpts(){const o={"":"Штатный по уровню защиты",rha:"Катаная броневая сталь",s44:"Броневая сталь 44С",hh:"Высокотвёрдая сталь",armox:"Сталь класса 600 HB",marag:"Мартенситностареющая сталь",
+  al:"Алюминиевый сплав 5083",al7:"Алюминиевый сплав 7039",al2519:"Алюминиевый сплав 2519",ti:"Титановый сплав ВТ6"};for(const k in MAT)if(MAT[k].custom)o[k]="★ "+MAT[k].n.replace(" (свой сплав)","");return o;}
 function wsVForm(){const el=$("wsV");if(!WS.vEdit)WS.vEdit=wsVNew("tank");const d=WS.vEdit;wsENorm(d);WS.vopen=WS.vopen||{body:true};
   const trk=d.run==="track",tank=d.cls==="tank",T=WSE.type[d.et],gt=d.et==="gt",R=WSE.trans[d.tr],turOn=d.tur!=="none",turGun=turOn&&d.tur!=="rws";
   const rng=(k,min,max,step)=>`<div><label for="wsv_${k}">${WSV_LBL[k]} <b id="wsvv_${k}">${(WSV_FMT[k]||(v=>v))(d[k])}</b></label><input id="wsv_${k}" data-k="${k}" type="range" min="${min}" max="${max}" step="${step}" value="${d[k]}"></div>`;
@@ -4937,8 +4987,8 @@ function wsVForm(){const el=$("wsV");if(!WS.vEdit)WS.vEdit=wsVNew("tank");const 
     (turOn?`<div><label for="wsv_gun">${WSV_LBL.gun}</label><select id="wsv_gun" data-k="gun">${wsGunOpts(d.gun)}</select></div>`:"")+`<div><label for="wsv_stow">${WSV_LBL.stow}</label><select id="wsv_stow" data-k="stow">${wsOpt(stowO,stowO[d.stow]?d.stow:Object.keys(stowO)[0])}</select></div>`+
     (turGun?sel("hyd",{el:"Электрические",oil:"Гидравлика на масле",fr:"Гидравлика, негорючая жидкость"}):""),cb("fcs","СУО с тепловизором и дальномером")+(turGun?cb("stab","Стабилизатор и приводы"):""))}
   ${sec("crew","Экипаж и десант",`${d.crew} + ${d.troops}`,rng("crew",2,4,1)+rng("troops",0,12,1))}
-  ${sec("prot","Защита",{light:"противопульная",medium:"противоснарядная",heavy:"танковая",proto:"по прототипу"}[d.prot]+(d.era?" · ДЗ":"")+(d.aps?" · КАЗ":""),
-    sel("prot",Object.assign({light:"Противопульная",medium:"Противоснарядная (до 30-мм)",heavy:"Танковая, комбинированная"},d.pdef?{proto:"По прототипу: реальная схема бронирования"}:{}))+sel("smk",{none:"Нет",vis:"Обычный дым",ir:"Аэрозоль против тепловизоров"}),
+  ${sec("prot","Защита",{light:"противопульная",medium:"противоснарядная",heavy:"танковая",proto:"по прототипу"}[d.prot]+(d.hm&&MAT[d.hm]?" · "+MAT[d.hm].n.split(" (")[0].toLowerCase():"")+(d.era?" · ДЗ":"")+(d.aps?" · КАЗ":""),
+    sel("prot",Object.assign({light:"Противопульная",medium:"Противоснарядная (до 30-мм)",heavy:"Танковая, комбинированная"},d.pdef?{proto:"По прототипу: реальная схема бронирования"}:{}))+sel("hm",wsHmOpts())+sel("smk",{none:"Нет",vis:"Обычный дым",ir:"Аэрозоль против тепловизоров"}),
     cb("era","Динамическая защита")+cb("scr","Экраны и кормовые решётки")+cb("lin","Противоосколочный подбой")+cb("cage","Решётка-«мангал» над крышей")+cb("aps","КАЗ")+cb("lws","Предупреждение о лазерном облучении"))}
   ${sec("eq","Оборудование",{green:"зелёная",olive:"оливковая",desert:"пустынная",dark:"тёмная"}[d.camo]+" окраска",sel("camo",{green:"Зелёная",olive:"Оливковая",desert:"Пустынная",dark:"Тёмная"}),cb("fvu","ФВУ")+cb("ppo","Автоматическая ППО"))}
   <div id="wsvOut" class="wsout"></div><div id="wsvWarn" class="wswarn"></div>
@@ -4983,6 +5033,9 @@ function wsVCalc(){const d=WS.vEdit;if(!d)return;let r;try{r=wsVehMake(d);}catch
   <span>STANAG 4569 (оценка)</span><b>${wsStanag(eqF,eqS,d,c)}</b>
   <span>Узлов внутри</span><b>${v.mods.length}${c.okFit?"":" (часть не поместилась)"}</b>${pre?`<span>Прототип в жизни</span><b>${wsEsc(pre.n)}: ≈${wfx(pre.real.m,1)} т, ${pre.real.v} км/ч (расчёт ${c.mass>pre.real.m?"+":"−"}${wf0(Math.abs(c.mass/pre.real.m-1)*100)} % по массе)</b>`:""}</div>`;
   $("wsvWarn").innerHTML=r.warn.map(w=>`<div${w[0]==="✖"?' class="x"':""}>⚠ ${w}</div>`).join("")+r.note.map(w=>`<div class="n">· ${w}</div>`).join("");
+  try{const it=entItemVeh(d),E2=typeof ENT!=="undefined"?ENT:null,k=E2?entKit(E2,it):null,hr=ENT_SHOPS.reduce((s,q)=>s+(it.h[q]||0),0);
+    $("wsvOut").insertAdjacentHTML("beforeend",`<div class="wsk"><span>Материалы и броня (биржевые цены)</span><b>≈${entUsd(entMBsum(it.mb))}</b><span>Комплектующие: двигатель, трансмиссия, орудие, СУО</span><b>≈${entUsd(it.comp)}</b>
+      <span>Трудоёмкость зрелой серии</span><b>≈${Math.round(hr/100)*100} нормо-ч</b><span>Объём ОКР</span><b>≈${Math.round(it.rdH/1000)} тыс. нормо-ч</b>${k?`<span>Для вашей фирмы (${ENT_CTRY[E2.c].n})</span><b>${entMoney(k.mat+k.comp,E2)} на машину</b>`:""}</div>`);}catch(e){}
   const bad=r.warn.filter(w=>w[0]==="✖").length;
   $("wsvSum").innerHTML=`<b>${wsEsc(d.name)}</b> · ${wfx(c.mass,1)} т · ${wf0(E.hp)} л.с. · ${c.vmax} км/ч · запас ${rR} км${c.press?` · ${wfx(c.press,2)} кгс/см²`:""} · лоб ${wf0(eqF.ke)} мм${r.warn.length?` · <span class="wsw">⚠ ${r.warn.length}${bad?` (✖ ${bad})`:""}</span>`:""}`;}
 function wsVehInstall(d){const r=wsVehMake(d),key=r.key,E=r.calc.E;VT[key]=r.v;FUELV[key]=[E.F.game+(E.gt?" (газовая турбина)":""),E.F.fl];SMKV[key]=d.smk==="ir"?"ir":"vis";
@@ -4998,7 +5051,1065 @@ function wsVBuild(){const d=WS.vEdit;d.name=(d.name||"Машина").replace(/[<
 function wsVLive(){const d=WS.vEdit;if(!d||!S.veh||S.vt!=="u"+d.id||WS.vBuilt!==d.id)return;clearTimeout(WS._vl);WS._vl=setTimeout(()=>{try{const i=WS.veh.findIndex(x=>x.id===d.id);const c=JSON.parse(JSON.stringify(d));if(i>=0)WS.veh[i]=c;wsSave();wsVehInstall(c);if(S.vp&&S.vp["u"+d.id]){delete S.vp["u"+d.id];vehSave();}vehBuild();vehReset();vehEditorRestore();vehUI();}catch(e){}},500);}
 function wsBootVeh(){WS.veh.forEach(d=>{try{wsVehInstall(d);}catch(e){}});}
 
+/* ===== Фирма (v59): справочники — страны, сырьё, цены материалов и комплектующих, цеха, заказчики, конкуренты, события =====
+   Цены — ориентир октября 2026 года в долларах США (биржевые котировки металлов, открытые оценки экспортных контрактов); пересчёт по курсу страны. */
+const ENT_CTRY={
+  ru:{n:"Россия",cur:"₽",fx:82.85,vat:.22,profit:.25,social:.30,ndfl:.13,key:.14,spread:.035,prop:.0066,lossLim:.5,winf:.09,fxd:.004,fxv:.025,hire:.06,lic:1,exc:.03,sev:2,
+    wage:{des:150000,eng:130000,tst:115000,wrk:95000,adm:110000},ext:3200,en:2200,offK:.55,matK:.85,cmpK:.55,toolK:.6,penM:.014,emb:{el:1.3},
+    home:"Министерство обороны России",homeStd:"su",homeMarg:.2,homeAdv:.5,homeCP:true,
+    note:"НДС 22 %, налог на прибыль 25 %, страховые взносы 30 %, ключевая ставка 14 %; гособоронзаказ — цена «затраты плюс» (до 20 % на собственные затраты, 1 % на покупные), авансы до 50 %; экспорт — через спецэкспортёра, санкции удорожают импортную электронику"},
+  de:{n:"Германия",cur:"€",fx:.889,vat:.19,profit:.30,social:.21,ndfl:0,key:.02,spread:.025,prop:.002,lossLim:.7,winf:.035,fxd:0,fxv:.015,hire:.08,lic:3,exc:0,sev:3,
+    wage:{des:7600,eng:6800,tst:6000,wrk:4900,adm:5600},ext:105,en:5200,offK:1.1,matK:1.1,cmpK:1.6,toolK:1.3,penM:.01,emb:{},
+    home:"Бундесвер (BAAINBw)",homeStd:"nato",homeMarg:.1,homeAdv:.3,homeCP:false,
+    note:"НДС 19 %, налоги на прибыль ≈30 %, взносы работодателя ≈21 %, ставка ЕЦБ 2 %; дорогие энергия и труд; экспорт по лицензии правительства — в страны с напряжённостью могут отказать"},
+  us:{n:"США",cur:"$",fx:1,vat:0,profit:.25,social:.29,ndfl:0,key:.0375,spread:.025,prop:.008,lossLim:.8,winf:.035,fxd:0,fxv:0,hire:.1,lic:2,exc:0,sev:.5,
+    wage:{des:11000,eng:9800,tst:8200,wrk:6500,adm:7800},ext:135,en:3400,offK:1.25,matK:1,cmpK:1.5,toolK:1.2,penM:.01,emb:{},
+    home:"Армия США",homeStd:"nato",homeMarg:.1,homeAdv:.15,homeCP:true,
+    note:"НДС нет, налог на прибыль ≈25 % (федеральный и штата), налоги на зарплату и страховка ≈29 %; госзаказ — «затраты плюс фиксированное вознаграждение»; экспорт через FMS или по лицензии ITAR"}};
+/* стартовые варианты: деньги в долларах, позиции оборудования по цехам, рабочие, штат КБ, репутация, начальная эффективность */
+const ENT_START={
+  kb:{n:"Частное КБ без завода",d:"мало денег, нет цехов: разработка, опытные образцы на стороне, продажа лицензий",cash:18e6,pos:{zag:0,meh:0,svar:0,sbor:0,snar:0},wrk:0,kb:{des:12,eng:5,tst:4},rep:25,eff:.8,admK:1},
+  pr:{n:"Частное предприятие",d:"КБ и небольшой завод: можно выпускать серийно, но всё впритык",cash:60e6,pos:{zag:3,meh:4,svar:3,sbor:2,snar:1},wrk:140,kb:{des:30,eng:16,tst:14},rep:40,eff:.8,admK:1},
+  gc:{n:"Государственная корпорация",d:"большой завод и КБ, госзаказ на родине; эффективность ниже, управленцев больше",cash:420e6,pos:{zag:14,meh:20,svar:16,sbor:10,snar:6},wrk:1500,kb:{des:180,eng:110,tst:90},rep:65,eff:.7,admK:1.5}};
+/* цеха: цена позиции — участок на ≈10 рабочих в смену (станки, ячейки, посты) с долей площади, $ */
+const ENT_SHOP={zag:{n:"Заготовительно-литейный",s:"Заготовка",pos:520e3,d:"резка броневого листа, ковка, литьё башен"},
+  meh:{n:"Механообработки",s:"Мехобработка",pos:1.15e6,d:"стволы, затворы, погоны, детали ходовой"},
+  svar:{n:"Сварочно-корпусной",s:"Сварка",pos:340e3,d:"корпуса, башни, лафеты"},
+  sbor:{n:"Сборочно-испытательный",s:"Сборка",pos:280e3,d:"сборка, окраска, пробег и отстрел"},
+  snar:{n:"Снаряжательный",s:"Снаряжение",pos:600e3,d:"снаряжение ВВ и порохом, сборка выстрелов"}};
+const ENT_SHOPS=["zag","meh","svar","sbor","snar"],ENT_HPM=165,ENT_WPP=10;
+/* сырьевой рынок: цена октября 2026, $/кг (или индекс 1), месячная волатильность, дрейф, возврат к уровню */
+const ENT_CMD={st:{n:"Сталь и металлопрокат",p:1,v:.025,d:.002},ni:{n:"Никель",p:17.3,v:.06,d:.001},cr:{n:"Хром (феррохром)",p:3,v:.04,d:.001},mo:{n:"Молибден",p:48,v:.07,d:.001},
+  v:{n:"Ванадий",p:28,v:.07,d:0},co:{n:"Кобальт",p:62,v:.08,d:.002},w:{n:"Вольфрам (порошок)",p:113,v:.11,d:.003,mr:.05,ref:1.3},al:{n:"Алюминий",p:3.1,v:.05,d:.002},cu:{n:"Медь",p:14.6,v:.05,d:.003},
+  ti:{n:"Титан (губка)",p:9,v:.04,d:.002},du:{n:"Обеднённый уран (передел)",p:85,v:.01,d:.002},cer:{n:"Бронекерамика",p:1,v:.02,d:.002},fib:{n:"Арамид, СВМПЭ, стеклоткань",p:1,v:.02,d:.002},
+  he:{n:"Взрывчатые вещества",p:1,v:.03,d:.004},pr:{n:"Пороха (нитроцеллюлоза)",p:1,v:.035,d:.004},el:{n:"Электроника и комплектующие",p:1,v:.012,d:.002}};
+const ENT_CMDS=Object.keys(ENT_CMD);
+/* материалы брони и конструкции, $/кг с обработкой; доля сырья в цене */
+const ENT_MATP={rha:4.6,s44:4.8,hh:5.2,br2p:5.6,uhh:6.5,cast:5.0,dual:6.8,perf:7.5,armox:7.5,bain:8,hardox:3.8,marag:22,al:9,al7:11,al2519:14,mag:16,ti:42,du:85,wha:175,
+  cer:28,sic:85,b4c:220,tib2:260,glass:30,alon:900,spinel:600,zta:45,si3n4:180,wc:150,stb:14,frp:12,cfrp:60,basf:10,pbo:120,ara:48,pe:55,nylon:20,rub:5,pu:9,
+  era:30,era5:40,relikt:60,malakhit:90,nozh:55,duplet:65,blazer:45,arat:70,slat:6,net:30,mmc:40,alfoam:25,rconc:.15,wood:1,soil:0,brick:.3,sand:.2,gap:0};
+const ENT_MATC={rha:{st:.72,ni:.18,mo:.07,cr:.03},s44:{st:.75,ni:.13,mo:.06,cr:.04,v:.02},cast:{st:.86,ni:.08,mo:.04,cr:.02},hh:{st:.8,ni:.1,mo:.07,cr:.03},uhh:{st:.72,ni:.15,mo:.09,cr:.04},
+  dual:{st:.75,ni:.13,mo:.08,cr:.04},perf:{st:.8,ni:.1,mo:.07,cr:.03},armox:{st:.66,ni:.2,mo:.1,cr:.04},bain:{st:.75,ni:.05,mo:.1,cr:.1},hardox:{st:.92,mo:.05,cr:.03},
+  marag:{st:.3,ni:.35,co:.22,mo:.13},br2p:{st:.8,ni:.1,mo:.07,cr:.03},al:{al:1},al7:{al:1},al2519:{al:.8,cu:.2},mag:{al:1},mmc:{al:.6,cer:.4},alfoam:{al:1},ti:{ti:1},du:{du:1},
+  wha:{w:.85,ni:.1,st:.05},wc:{w:.8,co:.2},cer:{cer:1},sic:{cer:1},b4c:{cer:1},tib2:{cer:.7,ti:.3},glass:{cer:1},alon:{cer:1},spinel:{cer:1},si3n4:{cer:1},zta:{cer:1},
+  stb:{fib:1},frp:{fib:1},cfrp:{fib:1},basf:{fib:1},ara:{fib:1},pbo:{fib:1},pe:{fib:1},nylon:{fib:1},pu:{fib:1},rub:{fib:1},
+  era:{he:.45,st:.55},era5:{he:.45,st:.55},relikt:{he:.4,st:.4,el:.2},malakhit:{he:.35,st:.35,el:.3},nozh:{he:.5,st:.5},duplet:{he:.45,st:.55},blazer:{he:.45,st:.55},arat:{he:.45,st:.55},
+  slat:{st:1},net:{fib:1},rconc:{st:1},wood:{st:1},soil:{st:1},brick:{st:1},sand:{st:1},gap:{}};
+const ENT_ENG={v:180,vh:600,x:350,op:250,tr:90,gt:800,pet:70},ENT_TRN={mech:90,hm:380,amt:250,el:500,wm:60,wa:140};
+/* категории изделий */
+const ENT_CAT={mbt:"Основные танки",ifv:"БМП",apc:"БТР",how_t:"Буксируемые гаубицы",how_sp:"Самоходные гаубицы",at:"Противотанковые пушки",tgun:"Танковые пушки",auto:"Автоматические пушки",
+  am_ke:"Подкалиберные выстрелы",am_heat:"Кумулятивные выстрелы",am_he:"Осколочно-фугасные выстрелы",am_auto:"Выстрелы к автоматическим пушкам"};
+const ENT_CO={ru:"Россия",de:"Германия",us:"США",kr:"Южная Корея",cn:"Китай",uk:"Великобритания",se:"Швеция",fr:"Франция",fi:"Финляндия"};
+/* конкуренты: реальные образцы. f — огонь, p — защита, m — подвижность, r — надёжность и ресурс (0–100); pr — экспортная цена, $; std — калибры; cap — выпуск в год; co — страна */
+const ENT_COMP=[
+ {n:"Т-90М «Прорыв»",mk:"УВЗ",co:"ru",cat:"mbt",sp:{ke:650,arm:560,side:90,era:1,pw:23.5,v:60,rng:550,life:600},pr:4.5e6,std:"su",cap:250},
+ {n:"Т-72Б3М",mk:"УВЗ",co:"ru",cat:"mbt",sp:{ke:600,arm:450,side:80,era:1,pw:24.6,v:60,rng:500,life:600},pr:2.6e6,std:"su",cap:300},
+ {n:"Leopard 2A8",mk:"KNDS",co:"de",cat:"mbt",sp:{ke:750,arm:800,side:80,aps:1,pw:23.4,v:68,rng:450,life:1300},pr:19e6,std:"nato",cap:120},
+ {n:"M1A2 SEPv3",mk:"GDLS",co:"us",cat:"mbt",sp:{ke:800,arm:820,side:90,aps:1,pw:22.5,v:67,rng:425,life:1500},pr:11e6,std:"nato",cap:140},
+ {n:"K2 Black Panther",mk:"Hyundai Rotem",co:"kr",cat:"mbt",sp:{ke:700,arm:700,side:70,pw:27,v:70,rng:450,life:1300,hydro:1},pr:9e6,std:"nato",cap:150},
+ {n:"VT-4",mk:"Norinco",co:"cn",cat:"mbt",sp:{ke:650,arm:600,side:70,era:1,pw:25,v:70,rng:500,life:900},pr:4.8e6,std:"su",cap:120},
+ {n:"Challenger 3",mk:"RBSL",co:"uk",cat:"mbt",sp:{ke:750,arm:780,side:90,aps:1,pw:18.2,v:60,rng:550,life:1000,hydro:1},pr:12e6,std:"nato",cap:30},
+ {n:"БМП-3М",mk:"КМЗ",co:"ru",cat:"ifv",sp:{ke:70,atgm:1,arm:60,side:25,pw:26,v:70,rng:600,amph:1,life:1500},pr:2.2e6,std:"su",cap:200},
+ {n:"БМП-2М",mk:"КМЗ",co:"ru",cat:"ifv",sp:{ke:70,atgm:1,arm:30,side:18,pw:21,v:65,rng:600,amph:1,life:1900},pr:1.0e6,std:"su",cap:250},
+ {n:"CV90 Mk IV",mk:"BAE Hägglunds",co:"se",cat:"ifv",sp:{ke:120,atgm:1,arm:160,side:45,pw:28,v:70,rng:600,life:1500},pr:8e6,std:"nato",cap:120},
+ {n:"Lynx KF41",mk:"Rheinmetall",co:"de",cat:"ifv",sp:{ke:110,atgm:1,arm:180,side:50,pw:26,v:70,rng:500,life:1500},pr:9e6,std:"nato",cap:100},
+ {n:"M2A4 Bradley",mk:"BAE Systems",co:"us",cat:"ifv",sp:{ke:60,atgm:1,arm:110,side:40,era:1,pw:19,v:61,rng:400,life:2500},pr:4.6e6,std:"nato",cap:150},
+ {n:"K21",mk:"Hanwha",co:"kr",cat:"ifv",sp:{ke:100,atgm:1,arm:90,side:30,pw:28,v:70,rng:500,amph:1,life:1500},pr:3.6e6,std:"nato",cap:90},
+ {n:"БТР-82А",mk:"АМЗ",co:"ru",cat:"apc",sp:{ke:70,arm:20,side:12,pw:19.5,v:80,rng:600,amph:1,life:3000},pr:.75e6,std:"su",cap:300},
+ {n:"Stryker",mk:"GDLS",co:"us",cat:"apc",sp:{ke:25,arm:50,side:40,pw:19,v:100,rng:500,life:2000},pr:4.9e6,std:"nato",cap:120},
+ {n:"Boxer",mk:"ARTEC",co:"de",cat:"apc",sp:{ke:70,arm:120,side:70,pw:20,v:103,rng:1050,life:1000},pr:9e6,std:"nato",cap:100},
+ {n:"Patria AMV XP",mk:"Patria",co:"fi",cat:"apc",sp:{ke:25,arm:90,side:50,pw:21,v:100,rng:800,amph:1,life:2000},pr:3.8e6,std:"nato",cap:120},
+ {n:"2А65 «Мста-Б»",mk:"Мотовилихинские заводы",co:"ru",cat:"how_t",sp:{rng:24.7,rate:7,mass:7.0},pr:1.3e6,std:"su",cap:60},
+ {n:"Д-30А",mk:"завод №9",co:"ru",cat:"how_t",sp:{rng:15.4,rate:7,mass:3.2},pr:.35e6,std:"su",cap:80},
+ {n:"M777A2",mk:"BAE Systems",co:"us",cat:"how_t",sp:{rng:24.7,rate:5,mass:4.2,fcs:1},pr:3.8e6,std:"nato",cap:60},
+ {n:"FH-70",mk:"консорциум",co:"de",cat:"how_t",sp:{rng:24.7,rate:6,mass:9.3},pr:2.2e6,std:"nato",cap:20},
+ {n:"K9A1 Thunder",mk:"Hanwha",co:"kr",cat:"how_sp",sp:{rng:30,rate:6,ch:"tr",fcs:1},pr:4e6,std:"nato",cap:120},
+ {n:"PzH 2000",mk:"KNDS",co:"de",cat:"how_sp",sp:{rng:30,rate:10,ch:"tr",fcs:1,al:1},pr:17e6,std:"nato",cap:30},
+ {n:"CAESAR Mk2",mk:"KNDS",co:"fr",cat:"how_sp",sp:{rng:33,rate:6,ch:"wh",fcs:1},pr:6e6,std:"nato",cap:70},
+ {n:"2С19М2 «Мста-С»",mk:"УВЗ",co:"ru",cat:"how_sp",sp:{rng:25,rate:10,ch:"tr",fcs:1,al:1},pr:4.5e6,std:"su",cap:60},
+ {n:"МТ-12 «Рапира»",mk:"Юргинский завод",co:"ru",cat:"at",f:48,p:30,m:60,r:80,pr:.35e6,std:"su",cap:40},
+ {n:"2А45М «Спрут-Б»",mk:"завод №9",co:"ru",cat:"at",f:66,p:34,m:48,r:74,pr:.6e6,std:"su",cap:20},
+ {n:"2А46М-5",mk:"завод №9",co:"ru",cat:"tgun",f:78,p:50,m:50,r:70,pr:.25e6,std:"su",cap:400},
+ {n:"Rh-120 L/55A1",mk:"Rheinmetall",co:"de",cat:"tgun",f:88,p:50,m:50,r:80,pr:.42e6,std:"nato",cap:150},
+ {n:"2А42",mk:"Туламашзавод",co:"ru",cat:"auto",f:50,p:40,m:60,r:80,pr:.06e6,std:"su",cap:900},
+ {n:"Mk44 Bushmaster II",mk:"Northrop Grumman",co:"us",cat:"auto",f:62,p:40,m:60,r:84,pr:.35e6,std:"nato",cap:400},
+ {n:"3БМ60 «Свинец-2»",mk:"НИМИ",co:"ru",cat:"am_ke",f:80,p:0,m:0,r:70,pr:4500,std:"su",cap:60000},
+ {n:"DM63A1",mk:"Rheinmetall",co:"de",cat:"am_ke",f:86,p:0,m:0,r:84,pr:11000,std:"nato",cap:40000},
+ {n:"M829A4",mk:"Northrop Grumman",co:"us",cat:"am_ke",f:90,p:0,m:0,r:80,pr:14000,std:"nato",cap:20000},
+ {n:"3БК31",mk:"НИМИ",co:"ru",cat:"am_heat",f:72,p:0,m:0,r:70,pr:3000,std:"su",cap:40000},
+ {n:"DM12A2",mk:"Rheinmetall",co:"de",cat:"am_heat",f:70,p:0,m:0,r:82,pr:5500,std:"nato",cap:30000},
+ {n:"3ОФ45 (152 мм)",mk:"заводы ВПК",co:"ru",cat:"am_he",f:70,p:0,m:0,r:72,pr:1300,std:"su",cap:1500000},
+ {n:"M795 (155 мм)",mk:"американские арсеналы",co:"us",cat:"am_he",f:72,p:0,m:0,r:80,pr:3600,std:"nato",cap:600000},
+ {n:"DM121 (155 мм)",mk:"Rheinmetall",co:"de",cat:"am_he",f:76,p:0,m:0,r:84,pr:7800,std:"nato",cap:400000},
+ {n:"3УБР8 (30 мм)",mk:"заводы ВПК",co:"ru",cat:"am_auto",f:60,p:0,m:0,r:72,pr:160,std:"su",cap:3000000},
+ {n:"Mk258 APFSDS-T (30 мм)",mk:"Northrop Grumman",co:"us",cat:"am_auto",f:74,p:0,m:0,r:84,pr:260,std:"nato",cap:1500000}];
+/* заказчики: вымышленные армии; std — калибры на вооружении; веса критериев; бюджет, $ в год; потребность, шт. в год; pol — отношение к странам-поставщикам */
+const ENT_CUST=[
+ {n:"Армия Северной республики",std:"su",bud:1.4e9,w:{f:1,p:1,m:.8,r:1,c:1.6,d:1},need:{mbt:60,ifv:120,apc:80,how_t:24,am_he:120000,am_ke:9000,am_auto:300000},pol:{ru:.3,cn:.15,de:-.25,us:-.45,uk:-.3,fr:-.2,kr:0,se:-.1,fi:-.1}},
+ {n:"Королевство Приморье",std:"nato",bud:3.2e9,w:{f:1.2,p:1.5,m:.8,r:1.2,c:.6,d:.8},need:{mbt:40,ifv:90,how_sp:24,am_ke:12000,am_he:80000},pol:{ru:-.9,cn:-.5,de:.2,us:.3,uk:.2,fr:.15,kr:.1,se:.15,fi:.1}},
+ {n:"Южная федерация",std:"mix",bud:.9e9,w:{f:.8,p:.7,m:1,r:1.3,c:2,d:1.1},need:{apc:150,how_t:36,at:24,auto:120,am_he:200000,am_auto:500000},pol:{ru:.1,cn:.2,de:0,us:0,uk:0,fr:.05,kr:.1,se:0,fi:0}},
+ {n:"Горная конфедерация",std:"nato",bud:.7e9,w:{f:.9,p:.8,m:1.6,r:1.2,c:1.2,d:1},need:{how_t:30,apc:60,ifv:30,am_he:60000},maxMass:32,pol:{ru:-.5,cn:-.2,de:.2,us:.1,uk:.1,fr:.15,kr:.05,se:.15,fi:.2}},
+ {n:"Островное государство",std:"nato",bud:1.6e9,w:{f:1,p:1.1,m:1.3,r:1.1,c:1,d:.9},need:{ifv:60,apc:70,how_sp:18,am_auto:200000},pol:{ru:-.7,cn:-.6,de:0,us:.4,uk:.2,fr:.05,kr:.25,se:0,fi:0}},
+ {n:"Пустынный эмират",std:"nato",bud:4.5e9,w:{f:1.4,p:1.3,m:1.2,r:1,c:.4,d:1.3},need:{mbt:80,ifv:100,how_sp:36,am_ke:15000},pol:{ru:0,cn:.1,de:-.15,us:.2,uk:.15,fr:.25,kr:.2,se:-.1,fi:0}},
+ {n:"Лесная республика",std:"su",bud:.8e9,w:{f:1,p:1,m:1,r:1.1,c:1.5,d:1},need:{mbt:30,ifv:60,how_t:20,am_he:90000,am_ke:5000},pol:{ru:.2,cn:.1,de:-.1,us:-.25,uk:-.15,fr:-.05,kr:0,se:0,fi:0}},
+ {n:"Степная федерация",std:"mix",bud:1.1e9,w:{f:1.1,p:.9,m:1.1,r:1,c:1.3,d:1.2},need:{mbt:45,apc:90,how_sp:12,tgun:30,am_he:100000},pol:{ru:.15,cn:.2,de:0,us:-.1,uk:-.05,fr:0,kr:.1,se:0,fi:0}}];
+/* события: вероятность в месяц ≈4 %; c — условие, f — действие */
+const ENT_EVT=[
+ {w:3,t:"Китай ужесточил экспортный контроль на вольфрам: цена порошка подскочила",f:E=>{E.ix.w*=1.45;}},
+ {w:2,t:"Спрос на вольфрам упал, склады переполнены: цена обвалилась",f:E=>{E.ix.w*=.72;}},
+ {w:2,t:"Квоты на экспорт кобальта: кобальт дорожает",f:E=>{E.ix.co*=1.3;}},
+ {w:2,t:"Избыток никеля на рынке: цена снизилась",f:E=>{E.ix.ni*=.85;}},
+ {w:3,t:"Дефицит нитроцеллюлозы: пороха дорожают",f:E=>{E.ix.pr*=1.25;}},
+ {w:2,t:"Дефицит взрывчатых веществ на мировом рынке",f:E=>{E.ix.he*=1.2;}},
+ {w:2,t:"Дефицит микросхем: электроника и комплектующие дорожают",f:E=>{E.ix.el*=1.08;}},
+ {w:2,c:E=>E.c==="ru",t:"Новые санкции: комплектующие через третьи страны дорожают на 10 %",f:E=>{E.emb.el=(E.emb.el||1)*1.1;}},
+ {w:2,c:E=>E.c==="ru",t:"Рубль резко ослаб",f:E=>{E.fx*=1.12;}},
+ {w:1,c:E=>E.c==="ru",t:"Рубль укрепился",f:E=>{E.fx*=.92;}},
+ {w:2,c:E=>E.c==="de",t:"Евро подорожал к доллару: экспорт менее выгоден",f:E=>{E.fx*=.95;}},
+ {w:3,t:"Обострение конфликта: {cu} увеличивает оборонный бюджет на 30 %",cu:1,f:(E,c)=>{c.bud*=1.3;for(const k in c.need)c.need[k]=Math.round(c.need[k]*1.25);}},
+ {w:2,t:"{cu} сокращает оборонный бюджет на четверть",cu:1,f:(E,c)=>{c.bud*=.75;}},
+ {w:3,t:"{comp} модернизирован: заказчики оценивают его выше",comp:1,f:(E,x)=>{x.up=(x.up||0)+entR(3,6);}},
+ {w:2,t:"{comp}: срыв поставок, у заказчиков упало доверие к производителю",comp:1,f:(E,x)=>{x.rep=(x.rep||70)-15;}},
+ {w:2,t:"Дефицит квалифицированных рабочих: зарплаты выросли на 4 %",f:E=>{E.wi*=1.04;}},
+ {w:1,c:E=>E.c==="ru",t:"Центробанк поднял ключевую ставку на 1 п.п.",f:E=>{E.key+=.01;}},
+ {w:2,t:"Центробанк снизил ключевую ставку на 0,5 п.п.",f:E=>{E.key=Math.max(.005,E.key-.005);}},
+ {w:2,t:"Крупный заказ: объявлен тендер увеличенного объёма",f:E=>{entGenTender(E,false,2.2);}}];
+
+/* ===== Металлургия (v59): свои сплавы. Состав → выплавка → термообработка → структура → твёрдость, прочность, вязкость → стойкость брони, пригодность
+   для стволов, сердечников и корпусов снарядов → цена по биржевым котировкам элементов. Модели — инженерные приближения по открытым справочникам
+   (прокаливаемость по Гроссману, твёрдость мартенсита по содержанию углерода, отпуск, упрочнение старением, плотность по правилу смесей). ===== */
+var ALY={list:[],ed:null,fam:"st",msg:""};
+const alCl=(x,a,b)=>Math.max(a,Math.min(b,x));
+/* цены элементов и полуфабрикатов, $/кг, октябрь 2026: никель LME ≈17,3 тыс.$/т, алюминий ≈3,1 тыс.$/т, медь ≈14,6 тыс.$/т, кобальт ≈28 $/фунт,
+   вольфрамовый порошок ≈805 юаней/кг (после пика 2400 в марте 2026), губчатый титан, ферросплавы */
+const ALY_EL={fe:.65,mn:1.8,si:2.0,cr:3.0,ni:17.3,mo:48,v:28,co:62,ti:9,b:6,w:113,al:3.1,mg:3.3,zn:3.0,cu:14.6,li:14,sc:3500,zr:30,o:0};
+/* куда относится цена элемента на сырьевом рынке фирмы */
+const ALY_CMD={fe:"st",mn:"st",si:"st",cr:"cr",ni:"ni",mo:"mo",v:"v",co:"co",ti:"ti",b:"st",w:"w",al:"al",mg:"al",zn:"al",cu:"cu",li:"al",sc:"al",zr:"al",o:"st"};
+const ALY_FAM={st:{n:"Сталь",d:"броневые, оружейные и снарядные стали: углерод даёт твёрдость мартенсита, никель — вязкость, хром, молибден и марганец — прокаливаемость"},
+  w:{n:"Вольфрам",d:"тяжёлые сплавы для сердечников и вставок: больше вольфрама — плотнее, но хрупче; ковка поднимает прочность"},
+  al:{n:"Алюминий",d:"лёгкие корпуса: магний и марганец — свариваемые сплавы, цинк с магнием и медь — термоупрочняемые"},
+  ti:{n:"Титан",d:"лёгкая броня высокой стойкости: алюминий и кислород упрочняют, ванадий и молибден дают отклик на старение"}};
+/* состав: [мин, макс, шаг, по умолчанию], % по массе */
+const ALY_RNG={st:{C:[.01,1,.01,.3],Mn:[.1,2,.05,.8],Si:[.1,2.2,.05,.3],Cr:[0,5,.05,1],Ni:[0,20,.1,2],Mo:[0,5,.05,.4],V:[0,.5,.01,.05],Co:[0,12,.1,0],Ti:[0,1,.05,0]},
+  w:{W:[85,98,.5,93],NiS:[40,90,5,70],Co:[0,40,5,0],Mo:[0,5,.5,0]},
+  al:{Mg:[0,7,.1,4.5],Zn:[0,9,.1,0],Cu:[0,7,.1,0],Mn:[0,1.2,.05,.6],Si:[0,1.5,.05,.2],Li:[0,2.5,.1,0],Sc:[0,.4,.02,0],Zr:[0,.2,.02,0]},
+  ti:{Al:[0,8,.1,6],V:[0,6,.1,4],Mo:[0,8,.1,0],Fe:[0,2.5,.05,.2],Cr:[0,4,.1,0],O:[.05,.3,.01,.15]}};
+const ALY_ELN={C:"Углерод",Mn:"Марганец",Si:"Кремний",Cr:"Хром",Ni:"Никель",Mo:"Молибден",V:"Ванадий",Co:"Кобальт",Ti:"Титан",W:"Вольфрам",NiS:"Никель в связке",
+  Mg:"Магний",Zn:"Цинк",Cu:"Медь",Li:"Литий",Sc:"Скандий",Zr:"Цирконий",Al:"Алюминий",Fe:"Железо",O:"Кислород"};
+const ALY_PROC={st:{melt:{arc:"Открытая дуговая плавка",lad:"Ковш-печь и вакуумирование",esr:"Электрошлаковый переплав (ЭШП)",var:"Вакуумно-дуговой переплав (ВДП)"},
+    ht:{qt:"Закалка и отпуск",age:"Закалка и старение (мартенситностареющие)",norm:"Нормализация (без закалки)"},form:{roll:"Катаный лист",cast:"Отливка (башни, маски)"}},
+  w:{proc:{sint:"Жидкофазное спекание",sht:"Спекание и вакуумный отжиг",swage:"Спекание, отжиг, ротационная ковка",swa:"Ковка и старение"}},
+  al:{temper:{O:"Отожжённый (O)",H:"Нагартованный (H131, H116)",T6:"Закалка и искусственное старение (T6)",T7:"Перестаренный, против коррозии (T7)",T8:"Закалка, правка растяжением и старение (T8)"}},
+  ti:{route:{var:"Двойной вакуумно-дуговой переплав",eb:"Электронно-лучевая плавка с холодным подом (дешевле)",pm:"Порошковая металлургия"},ht:{ma:"Отжиг (MA)",sta:"Закалка и старение (STA)"}}};
+/* реальные марки — отправные точки (составы по открытым стандартам, округлённо) */
+const ALY_PRE={
+ st:{rha:{n:"Броневая катаная сталь класса RHA",c:{C:.28,Mn:.8,Si:.3,Cr:1.2,Ni:2.8,Mo:.45,V:.05,Co:0,Ti:0},p:{melt:"lad",ht:"qt",T:600,form:"roll",B:0},t:80},
+   s44:{n:"Броневая сталь класса 44С-св-Ш",c:{C:.3,Mn:.9,Si:.9,Cr:1.1,Ni:1.4,Mo:.3,V:.1,Co:0,Ti:0},p:{melt:"esr",ht:"qt",T:630,form:"roll",B:0},t:80},
+   hhs:{n:"Высокотвёрдая сталь 500 HB (класса MIL-DTL-46100)",c:{C:.28,Mn:.9,Si:.4,Cr:.7,Ni:1,Mo:.35,V:0,Co:0,Ti:0},p:{melt:"lad",ht:"qt",T:200,form:"roll",B:1},t:12},
+   a600:{n:"Сверхтвёрдая сталь класса 600 HB",c:{C:.45,Mn:1,Si:.5,Cr:1,Ni:3,Mo:.7,V:0,Co:0,Ti:0},p:{melt:"esr",ht:"qt",T:180,form:"roll",B:1},t:10},
+   mar:{n:"Мартенситностареющая 18Ni(300)",c:{C:.01,Mn:.1,Si:.1,Cr:0,Ni:18,Mo:4.8,V:0,Co:9,Ti:.6},p:{melt:"var",ht:"age",T:480,form:"roll",B:0},t:30},
+   gun:{n:"Оружейная сталь класса 38ХН3МФА",c:{C:.38,Mn:.4,Si:.27,Cr:1.4,Ni:3.2,Mo:.45,V:.15,Co:0,Ti:0},p:{melt:"esr",ht:"qt",T:600,form:"roll",B:0},t:120},
+   cast:{n:"Литая броневая сталь",c:{C:.25,Mn:1,Si:.4,Cr:1,Ni:1.5,Mo:.3,V:0,Co:0,Ti:0},p:{melt:"lad",ht:"qt",T:600,form:"cast",B:0},t:150},
+   c60:{n:"Снарядная сталь класса С-60",c:{C:.6,Mn:.7,Si:.3,Cr:.2,Ni:.2,Mo:0,V:0,Co:0,Ti:0},p:{melt:"arc",ht:"norm",T:600,form:"roll",B:0},t:20},
+   hf:{n:"Высокоосколочная снарядная сталь",c:{C:.8,Mn:1.8,Si:1,Cr:.2,Ni:.2,Mo:0,V:0,Co:0,Ti:0},p:{melt:"lad",ht:"norm",T:600,form:"roll",B:0},t:20}},
+ w:{w90:{n:"ВНЖ-90 (W–Ni–Fe)",c:{W:90,NiS:70,Co:0,Mo:0},p:{proc:"sht",sw:0}},w93:{n:"ВНЖ-93 кованый (сердечники)",c:{W:93,NiS:70,Co:0,Mo:0},p:{proc:"swage",sw:15}},
+   w97:{n:"W97 спечённый",c:{W:97,NiS:70,Co:0,Mo:0},p:{proc:"sht",sw:0}},wco:{n:"W–Ni–Co высокопрочный",c:{W:93,NiS:60,Co:30,Mo:0},p:{proc:"swa",sw:25}},
+   wmo:{n:"W–Ni–Fe–Mo, самозатачивающийся",c:{W:91,NiS:70,Co:0,Mo:3},p:{proc:"swa",sw:20}}},
+ al:{a5083:{n:"5083-H131 (класса АМг6)",c:{Mg:4.5,Zn:0,Cu:0,Mn:.7,Si:.2,Li:0,Sc:0,Zr:0},p:{temper:"H"}},a7039:{n:"7039-T64",c:{Mg:2.8,Zn:4,Cu:.1,Mn:.25,Si:.1,Li:0,Sc:0,Zr:0},p:{temper:"T6"}},
+   a7017:{n:"7017-T651",c:{Mg:2.4,Zn:5.2,Cu:.1,Mn:.3,Si:.1,Li:0,Sc:0,Zr:.1},p:{temper:"T6"}},a2519:{n:"2519-T87",c:{Mg:.2,Zn:0,Cu:5.8,Mn:.3,Si:.1,Li:0,Sc:0,Zr:.15},p:{temper:"T8"}},
+   a7085:{n:"7085-T7",c:{Mg:1.5,Zn:7.5,Cu:1.6,Mn:0,Si:.05,Li:0,Sc:0,Zr:.1},p:{temper:"T7"}},a2195:{n:"Алюминий-литиевый 2195",c:{Mg:.4,Zn:0,Cu:4,Mn:0,Si:.05,Li:1,Sc:0,Zr:.1},p:{temper:"T8"}},
+   asc:{n:"Al–Mg–Sc (свариваемый, со скандием)",c:{Mg:5,Zn:0,Cu:0,Mn:.4,Si:.1,Li:0,Sc:.25,Zr:.1},p:{temper:"H"}}},
+ ti:{t64:{n:"Ti-6Al-4V (класса ВТ6)",c:{Al:6,V:4,Mo:0,Fe:.2,Cr:0,O:.15},p:{route:"var",ht:"ma"}},t64e:{n:"Ti-6Al-4V ELI",c:{Al:6,V:4,Mo:0,Fe:.1,Cr:0,O:.1},p:{route:"var",ht:"ma"}},
+   t64f:{n:"Ti-6Al-4V-0,5Fe, дешёвый",c:{Al:6,V:4,Mo:0,Fe:.5,Cr:0,O:.2},p:{route:"eb",ht:"ma"}},t5553:{n:"Ti-5553 (β-сплав)",c:{Al:5,V:5,Mo:5,Fe:.4,Cr:3,O:.15},p:{route:"var",ht:"sta"}},
+   vt23:{n:"Класса ВТ23",c:{Al:5,V:4.5,Mo:2,Fe:.6,Cr:1,O:.15},p:{route:"var",ht:"sta"}},cp4:{n:"Технический титан Grade 4",c:{Al:0,V:0,Mo:0,Fe:.4,Cr:0,O:.3},p:{route:"var",ht:"ma"}}}};
+/* твёрдость: перевод HRC ↔ HB (аппроксимация таблиц ASTM E140) */
+const alHB=hrc=>hrc>=20?215-2.8*hrc+.1675*hrc*hrc:100+6.3*hrc;
+const alHRC=hb=>hb>=226?(2.8+Math.sqrt(Math.max(0,7.84-4*.1675*(215-hb))))/(2*.1675):(hb-100)/6.3;
+/* цена набора элементов, $/кг сплава, и раскладка по сырьевым товарам */
+function alMix(parts,proc){const sp={};let s=0;for(const k in parts){const kg=parts[k],p=kg*(ALY_EL[k]||0)*1.08;s+=p;const c=ALY_CMD[k]||"st";sp[c]=(sp[c]||0)+p;}sp.st=(sp.st||0)+proc;return{base:s+proc,sp};}
+/* ---------------- сталь ---------------- */
+function alSteel(c,p,t){const mar=c.Ni>=12&&c.C<=.06&&p.ht==="age",N=[];
+  const fMn=c.Mn<=1.2?1+3.33*c.Mn:5+2.3*(c.Mn-1.2),DI=25.4*.54*Math.max(.08,c.C)*fMn*(1+.7*c.Si)*(1+2.16*c.Cr)*(1+.363*c.Ni)*(1+3*c.Mo)*(1+1.73*c.V)*(p.B&&c.C<.4?1.6:1),
+    tH=mar?999:DI*.55;let HRC,HB;
+  if(mar)HRC=Math.min(58,28+1.2*c.Co+2.2*c.Mo+9*c.Ti);
+  else if(p.ht==="norm"){HB=120+180*c.C+25*c.Mn+20*c.Cr+8*c.Ni+30*c.Mo+40*c.V;HRC=alHRC(HB);}
+  else{const Hq=Math.min(66,20+60*Math.sqrt(Math.max(.02,c.C))),T=p.ht==="age"?480:p.T,R=1/(1+.6*c.Mo+1.5*c.V+.15*c.Cr+.4*c.Si),
+      sec=(T>420&&T<650)?(1.5*c.Mo+5*c.V)*Math.exp(-Math.pow((T-550)/60,2)):0;HRC=Math.max(12,Hq-Math.max(0,T-150)*.075*(.6+c.C)*R+sec);
+    if(p.ht==="age")N.push("старение без высокого никеля и низкого углерода не даёт мартенситностареющего упрочнения — это просто отпуск при 480 °C");
+    if(t>tH){const k=Math.min(1,t/tH-1);HRC-=(HRC-18)*.45*k;N.push(`прокаливаемость мала для листа ${Math.round(t)} мм (сквозная закалка до ≈${Math.round(tH)} мм): сердцевина мягче поверхности`);}}
+  if(HB==null)HB=alHB(HRC);const UTS=3.45*HB,YS=UTS*(mar?.95:p.ht==="norm"?.6:.8+.1*alCl((p.T-150)/450,0,1)),clean={arc:.75,lad:1,esr:1.25,var:1.35}[p.melt]||1;
+  let KV;if(mar)KV=10+1.2*c.Ni-1.2*(HRC-50);
+  else{KV=160*Math.exp(-(HB-250)/170)*Math.min(1.8,1+.1*c.Ni)*Math.max(.35,1-1.2*Math.max(0,c.C-.32))*clean*(1+.5*c.V)*(c.Mn>1.5?.9:1)*(c.Si>1.5?.9:1);
+    if(p.ht==="qt"&&p.T>=250&&p.T<=400){KV*=.7;N.push("отпуск при 250–400 °C попадает в зону отпускной хрупкости первого рода: вязкость ниже");}
+    if(p.ht==="qt"&&p.T>=450&&p.T<=575&&c.Mo<.2){KV*=.75;N.push("отпуск при 450–575 °C без молибдена: обратимая отпускная хрупкость");}
+    if(p.ht==="norm")KV*=.55;}
+  if(p.form==="cast"){KV*=.7;N.push("в отливке неизбежны раковины и крупное зерно: вязкость и стойкость ниже катаной стали");}KV=alCl(KV,3,220);
+  const KIC=alCl(mar?100-1.5*(HRC-48):11*Math.sqrt(KV)*(p.form==="cast"?.85:1),12,140);
+  const tt=alCl(mar?-60:-45-8*c.Ni+.15*(HB-280)+60*(c.C-.3)+({arc:10,lad:0,esr:-10,var:-15}[p.melt]||0)+(p.form==="cast"?15:0)+(p.ht==="norm"?25:0),-120,40);
+  const CE=c.C+c.Mn/6+(c.Cr+c.Mo+c.V)/5+c.Ni/15,weld=mar?["хорошая (низкий углерод)",0]:CE<.45?["хорошая",0]:CE<.65?["удовлетворительная, нужен подогрев",1]:CE<1?["сложная: подогрев, аустенитная проволока",2]:["плохая: высокий риск холодных трещин",3];
+  const rho=7.85+.006*c.Ni+.006*c.Co+.023*c.Mo-.055*c.Si+.005*c.Cr;
+  /* стойкость против кинетических снарядов: твёрдость, поправка на вязкость относительно типичной для такой твёрдости */
+  const KVref=160*Math.exp(-(HB-250)/170),g=alCl(.8+.2*(KV/KVref)/1.3,.6,1.06);let ap=(HB<=500?1+.00085*(HB-290):1.1785+.0009*(HB-500))*g;if(p.form==="cast")ap*=.95;ap=Math.max(.55,ap);
+  const heat=1+.0002*(HB-290),he=(.9+.1*Math.min(1,KV/40))*(p.form==="cast"?.95:1),br=alCl(mar?.2+.01*Math.max(0,HRC-50):(.15+.0019*(HB-290))*Math.pow(KVref/Math.max(3,KV),.3),.05,.95)+(p.form==="cast"?.12:0);
+  const proc={arc:.9,lad:1.3,esr:2.6,var:4.2}[p.melt]+({qt:.6,age:1,norm:.25}[p.ht]||.6)+.004*Math.max(0,HB-300)+(p.form==="cast"?.8:0),
+    fe=Math.max(0,100-c.C-c.Mn-c.Si-c.Cr-c.Ni-c.Mo-c.V-c.Co-c.Ti)/100,mix=alMix({fe,mn:c.Mn/100,si:c.Si/100,cr:c.Cr/100,ni:c.Ni/100,mo:c.Mo/100,v:c.V/100,co:c.Co/100,ti:c.Ti/100},proc),
+    K=p.form==="cast"?1.25:1.45,price=mix.base*K;for(const k in mix.sp)mix.sp[k]*=K;
+  const life=({arc:.85,lad:1,esr:1.1,var:1.15}[p.melt]||1)*(1+.12*Math.min(c.Mo,1)+.5*Math.min(c.V,.3))*(mar?.8:1)*(KV<35?.85:1)*(p.ht==="qt"&&p.T<550?.9:1)/1.13;
+  return{fam:"st",rho,HB,HRC,UTS,YS,KV,KIC,el:null,tt,CE,weld,DI,tH,ap,heat,he,br,rico:alCl(Math.round((HB-300)/40),0,9),def:alCl(1-.0021*(HB-290),.3,1.2),beh:HB>=430?"hard":"steel",
+    burn:0,col:HB>=430?0x7c7d74:0x6f7564,tx:HB>=430?"hh":"rha",ph:{K:KIC,E:mar?190:207,sp:alCl(2.6+.0025*HB,2.5,4.5)*(p.form==="cast"?.75:1),Rt:(2.1+.0085*Math.min(HB,650))*(p.form==="cast"?.92:1),Tm:1480,c:5.9},
+    price,sp:mix.sp,life,mar,cast:p.form==="cast",C:c.C,Si:c.Si,N};}
+/* ---------------- вольфрамовый тяжёлый сплав ---------------- */
+function alW(c,p){const W=c.W/100,Mo=c.Mo/100,b=Math.max(.01,1-W-Mo),co=b*c.Co/100,ni=(b-co)*c.NiS/100,fe=b-co-ni,N=[];
+  const rho=1/(W/19.25+Mo/10.22+ni/8.9+fe/7.87+co/8.9),sw=(p.proc==="swage"||p.proc==="swa")?(p.sw||0):0,ht=p.proc!=="sint";
+  let UTS=(900-8*(c.W-90))+13*sw+(p.proc==="swa"?60:0)+3*c.Co+20*c.Mo;if(!ht){UTS*=.92;N.push("без вакуумного отжига в сплаве остаётся водород: пластичность вдвое ниже");}
+  const el=alCl((30-2.6*(c.W-90))*(1-sw/45)*(ht?1:.5)*(1-.004*c.Co)-.8*c.Mo,1,35),HRC=28+.4*sw+.4*(c.W-90)+(p.proc==="swa"?2:0)+.5*c.Mo,HB=alHB(HRC);
+  if(el<6)N.push("удлинение меньше 6 %: длинный сердечник может переломиться при сходе поддона и о наклонную броню");
+  if(c.Mo>=2)N.push("молибден в связке способствует полосам адиабатического сдвига: сердечник «самозатачивается», как урановый, но слабее");
+  const ldMax=22+.015*(UTS-900)+.15*el,a=alCl(.985+.035*(UTS-900)/500+.004*(c.W-93)+.012*Math.min(3,c.Mo)-(el<6?.01*(6-el):0),.9,1.05),rr=Math.sqrt(rho/7.85);
+  const proc={sint:22,sht:25,swage:25+.8*sw,swa:30+.8*sw}[p.proc]||25,mix=alMix({w:W,mo:Mo,ni:ni*1.45,fe:fe*7.7,co:co*1.15},proc),price=mix.base;
+  return{fam:"w",rho,HB,HRC,UTS,YS:UTS*.92,KV:null,KIC:40+2*el,el,tt:-80,CE:null,weld:["не сваривается (спечённый)",3],ap:1.12*rr*Math.pow(UTS/1000,.2),heat:1.07*rr,he:.97*rr,
+    br:alCl(.5-.012*el,.1,.9),rico:3,def:.5,beh:"steel",burn:0,col:0x4a4b4d,tx:"du",ph:{K:40+2*el,E:100+2.8*c.W,sp:3.8,Rt:2+.0035*UTS,Tm:3400,c:5.2},price,sp:mix.sp,a,ldMax,N};}
+/* ---------------- алюминиевый ---------------- */
+function alAl(c,p){const T=p.temper,x7=c.Zn>=3&&c.Mg>=1,x2=c.Cu>=2&&!x7,x6=c.Mg>=.4&&c.Si>=.4&&!x7&&!x2,li=c.Li>=.8,hta=x7||x2||x6||li,N=[];
+  let Y=30+16*Math.min(c.Mg,6)+40*Math.min(c.Mn,1.2)+600*Math.min(c.Sc,.25)+100*c.Zr,dp=0;
+  if(x7)dp=40*c.Zn+45*c.Mg*Math.min(1,c.Zn/4)+30*c.Cu;else if(x2)dp=60*c.Cu+30*c.Mg;else if(x6)dp=200*Math.min(c.Mg,c.Si*1.73);if(li)dp+=120*c.Li;dp=Math.min(dp,460);
+  if(["T6","T7","T8"].includes(T)){if(hta)Y+=dp*(T==="T7"?.9:T==="T8"?1.08:1);else N.push("сплав не упрочняется старением: нужен цинк с магнием, медь или литий");}
+  else if(T==="H"){Y+=hta?60:110;if(hta)N.push("термоупрочняемый сплав в нагартованном состоянии использует лишь часть своей прочности");}
+  if(T==="O")Y*=.6;const UTS=Y*(x7?1.1:x2?1.12:1.25),rho=2.70-.009*c.Mg+.018*c.Zn+.021*c.Cu-.08*c.Li+.005*c.Mn,scc=x7?(c.Zn+c.Mg)/(T==="T7"?1.6:1):0;
+  if(scc>7)N.push("высокое содержание цинка и магния в состоянии T6: склонность к коррозионному растрескиванию под напряжением (так было у 7039) — перестаривание T7 её снижает");
+  if(c.Mg>5.5)N.push("магния больше 5,5 %: β-фаза по границам зёрен, межкристаллитная коррозия при нагреве");
+  const weld=x2&&!(c.Cu>5&&c.Mg<.5)?["плохая: горячие трещины в шве",2]:li?["плохая",2]:x7&&c.Cu>.5?["плохая: медь даёт трещины в шве",2]:x7?["удовлетворительная: шов разупрочняется",1]:["хорошая",0];
+  const el=alCl(25-.04*Y+(T==="T7"?2:0),3,30),HB=UTS/3;
+  const proc=(T==="O"||T==="H"?3.5:T==="T8"?6.5:5.5)+(x2?2:0),mix=alMix({al:Math.max(0,100-c.Mg-c.Zn-c.Cu-c.Mn-c.Si-c.Li-c.Sc-c.Zr)/100,mg:c.Mg/100,zn:c.Zn/100,cu:c.Cu/100,mn:c.Mn/100,si:c.Si/100,li:c.Li/100,sc:c.Sc/100,zr:c.Zr/100},proc),
+    price=mix.base*1.3;for(const k in mix.sp)mix.sp[k]*=1.3;
+  return{fam:"al",rho,HB,HRC:null,UTS,YS:Y,KV:null,KIC:alCl(38-.03*Y+(T==="T7"?4:0),12,45),el,tt:-200,CE:null,weld,scc,ap:Math.min(.55,.18+.00062*Y),heat:.3+.00035*Y,he:.37+.00034*Y,
+    br:alCl(.03+.00015*Y+(scc>7?.06:0),.02,.3),rico:0,def:alCl(2.5-.0015*(Y-250),1.2,3),beh:"soft",burn:.04+.02*c.Mg/5,col:0xb4b8b2,tx:"al",
+    ph:{K:alCl(38-.03*Y,12,45),E:71+3*c.Li,sp:.9+.001*Y,Rt:1+.003*Y,Tm:c.Li>0?600:620,c:6.3},price,sp:mix.sp,N};}
+/* ---------------- титановый ---------------- */
+function alTi(c,p){const sta=p.ht==="sta",N=[];let Y=250+1000*c.O+55*c.Al+35*c.V+40*c.Mo+60*c.Fe+50*c.Cr;if(sta)Y+=120*Math.min(1,(c.V+c.Mo+2*c.Fe+c.Cr)/4);
+  if(sta&&c.V+c.Mo+c.Cr+c.Fe<2)N.push("почти без β-стабилизаторов закалка со старением почти ничего не даёт");
+  let el=16-30*(c.O-.13)-4*Math.max(0,c.Al-6.5)-(sta?4:0)-1.5*Math.max(0,c.Fe-1)-(p.route==="eb"?1:p.route==="pm"?2:0);el=alCl(el,3,25);
+  if(c.Al>6.5)N.push("алюминия больше 6,5 %: выделяется хрупкая фаза Ti₃Al");if(c.O>.2)N.push("кислород выше 0,2 %: прочнее, но хрупче и хуже на морозе");
+  const UTS=Y*(sta?1.06:1.08),rho=4.51-.0135*c.Al+.006*c.V+.02*c.Mo+.018*c.Fe+.01*c.Cr,HB=UTS/2.9,Em=1+.00035*(Y-300)*(el>=8?1:.85);
+  const tiK=Math.max(0,100-c.Al-c.V-c.Mo-c.Fe-c.Cr-c.O)/100,proc=({var:28,eb:18,pm:22}[p.route]||28)+(sta?3:0),
+    mix=alMix({ti:tiK,al:c.Al/100,v:c.V/100*1.4,mo:c.Mo/100,fe:c.Fe/100,cr:c.Cr/100},proc),price=mix.base*1.25;for(const k in mix.sp)mix.sp[k]*=1.25;
+  return{fam:"ti",rho,HB,HRC:alHRC(HB),UTS,YS:Y,KV:null,KIC:40+2.5*el,el,tt:-150,CE:null,weld:["хорошая в защитной среде (аргон)",1],ap:Em*rho/7.85*(p.route==="pm"?.97:1),heat:.17*rho,he:.135*rho,
+    br:alCl(.1+.015*(16-el),.05,.6),rico:3,def:.8,beh:"ti",burn:.25,col:0x9c9ca2,tx:"ti",ph:{K:40+2.5*el,E:110+c.Al-2*(c.V/15+c.Mo/10),sp:3.6,Rt:1+.0036*Y,Tm:1660,c:6.1},price,sp:mix.sp,N};}
+/* расчёт сплава целиком */
+function alCalc(a){const f=a.fam,c=Object.assign({},a.c),R0=ALY_RNG[f];for(const k in R0)c[k]=alCl(+c[k]||0,R0[k][0],R0[k][1]);
+  const r=f==="st"?alSteel(c,a.p,a.t||40):f==="w"?alW(c,a.p):f==="al"?alAl(c,a.p):alTi(c,a.p);
+  r.Em=r.ap*7.85/r.rho;/* массовая эффективность против кинетических относительно RHA */
+  r.use={armor:true,barrel:f==="st"&&!r.cast&&r.UTS>=1000&&(r.mar||(r.KV>=35&&r.HB<=520)),core:f==="w"||(f==="st"&&r.HB>=450&&!r.cast),body:f==="st"&&r.C>=.35&&!r.cast};
+  r.corePrice=f==="w"?r.price+35:r.price*1.8;return r;}
+/* сплав → реестры игры: материал брони, сталь ствола, сердечник, корпус снаряда, цена для фирмы */
+function alReg(a){const r=alCalc(a),k=a.key,nm=String(a.n||"Сплав").replace(/[<>&"]/g,"").slice(0,28);ALY.res=ALY.res||{};ALY.res[k]=r;
+  const hard=r.HRC!=null&&r.fam!=="al"?`${Math.round(r.HB)} HB (${Math.round(r.HRC)} HRC)`:`${Math.round(r.HB)} HB`;
+  MAT[k]={g:"Свои сплавы",n:`${nm} (свой сплав)`,ap:+r.ap.toFixed(3),he:+r.he.toFixed(3),heat:+r.heat.toFixed(3),br:+r.br.toFixed(3),rico:r.rico,liner:0,dens:+r.rho.toFixed(3),col:r.col,beh:r.beh,tx:r.tx,burn:+r.burn.toFixed(2),def:+r.def.toFixed(2),
+    bhn:Math.round(r.HB),tt:Math.round(r.tt),custom:true,i:[r.rho.toFixed(2).replace(".",","),hard,`≈ ${Math.round(r.UTS)} МПа`,`своя разработка · ${ALY_FAM[a.fam].n.toLowerCase()}`]};
+  if(typeof PHYK!=="undefined")PHYK[k]=Object.assign({},r.ph);
+  const del=o=>{if(o&&o[k])delete o[k];};
+  if(r.use.barrel)WSP.steel[k]={n:`Своя: ${nm} (≈${Math.round(r.UTS/10)*10} МПа)`,s:Math.round(.72*r.UTS),life:+r.life.toFixed(3),custom:true};else del(WSP.steel);
+  if(r.use.core)WSP.core[k]={n:`Своя: ${nm} (${r.rho.toFixed(1).replace(".",",")} г/см³)`,rho:Math.round(r.rho*1000),a:r.fam==="w"?+r.a.toFixed(3):+alCl(.78+.00015*r.HB,.8,.9).toFixed(3),ldMax:r.fam==="w"?+r.ldMax.toFixed(1):18,p:Math.round(r.corePrice),custom:true};else del(WSP.core);
+  if(r.use.body){const mu=alCl(1.7-.8*r.C-.25*r.Si-.006*(r.HRC||20),.45,1.4);WSP.body[k]={n:`Своя: ${nm}`,mu:+mu.toFixed(3),r:+Math.pow(mu,-.4).toFixed(3),custom:true};}else del(WSP.body);
+  if(typeof ENT_MATP!=="undefined")ENT_MATP[k]=+r.price.toFixed(2);if(typeof ENT_MATC!=="undefined"){const s=r.sp,t=Object.values(s).reduce((x,y)=>x+y,0)||1,o={};for(const c in s)o[c]=+(s[c]/t).toFixed(3);ENT_MATC[k]=o;}
+  try{if(WSP.cache)for(const q in WSP.cache)delete WSP.cache[q];}catch(e){}return r;}
+function alUnreg(k){[MAT,WSP.steel,WSP.core,WSP.body].forEach(o=>{if(o&&o[k])delete o[k];});try{if(typeof PHYK!=="undefined")delete PHYK[k];if(typeof ENT_MATP!=="undefined")delete ENT_MATP[k];if(typeof ENT_MATC!=="undefined")delete ENT_MATC[k];}catch(e){}}
+/* где используется сплав: проекты цеха, пакеты брони машин, текущий лист */
+function alUses(k){const u=[];try{WS.guns.forEach(d=>{if(d.steel===k)u.push(`ствол «${d.name}»`);if(d.k_core===k)u.push(`сердечник «${d.name}»`);if(d.e_body===k)u.push(`корпус ОФ «${d.name}»`);});
+    WS.veh.forEach(d=>{if(d.hm===k||JSON.stringify(d.pdef||{}).indexOf('"'+k+'"')>=0)u.push(`машина «${d.name}»`);});
+    if(S.vp)for(const v in S.vp)if(JSON.stringify(S.vp[v]).indexOf('"'+k+'"')>=0)u.push(`пакеты брони «${(VT[v]&&VT[v].n)||v}»`);
+    if(typeof layers!=="undefined"&&layers.some(l=>l.k===k))u.push("лист на стенде");
+    if(typeof ENT!=="undefined"&&ENT&&ENT.P)ENT.P.forEach(p=>{if(p.st!=="stop"&&JSON.stringify(p.d||{}).indexOf('"'+k+'"')>=0)u.push(`изделие фирмы «${p.n}»`);});}catch(e){}return u;}
+/* перестроить списки материалов на вкладке «Броня», сохранив выбор */
+function alMatOpts(){if(typeof matOpts==="undefined")return;matOpts='<option value="none">— нет —</option>'+[...new Set(Object.values(MAT).map(m=>m.g))].map(g=>`<optgroup label="${g}">`+Object.entries(MAT).filter(([k,m])=>m.g===g&&!m.hide).map(([k,m])=>`<option value="${k}">${m.n}</option>`).join("")+"</optgroup>").join("");
+  for(let i=0;i<10;i++){const s=$("m"+i);if(!s)continue;const v=s.value;s.innerHTML=matOpts;s.value=MAT[v]||v==="none"?v:"none";}}
+/* после изменения сплава — пересчитать орудия и машины, которые его используют */
+function alRefresh(k){try{WS.guns.forEach(d=>{if(d.steel===k||d.k_core===k||d.e_body===k)try{wsGunInstall(d,false);}catch(e){}});
+    WS.veh.forEach(d=>{if(d.hm===k)try{wsVehInstall(d);}catch(e){}});const m=MAT[k];if(m){delete m._ph;}
+    if(typeof layers!=="undefined"&&layers.some(l=>l.k===k)&&typeof buildPlate==="function")buildPlate();}catch(e){}}
+function alNew(fam,pre){const P=ALY_PRE[fam],pk=pre&&P[pre]?pre:Object.keys(P)[0],s=P[pk];
+  return{id:Date.now()%1e9,key:"x"+Date.now().toString(36),fam,n:"Сплав "+(ALY.list.length+1),c:Object.assign({},s.c),p:Object.assign({},s.p),t:s.t||40,pre:pk};}
+function alSave(){try{WS.alloys=ALY.list;if(typeof wsSave==="function")wsSave();}catch(e){}}
+function alBoot(){ALY.list=Array.isArray(WS.alloys)?WS.alloys:[];
+  ALY.list.forEach(a=>{try{alReg(a);}catch(e){console.warn("alloy",e);}});WS.alloys=ALY.list;alMatOpts();}
+
+/* ===== Цех: металлургическая лаборатория — свои сплавы ===== */
+const ALY_REF={st:"rha",w:"w93",al:"a5083",ti:"t64"},ALY_PL={melt:"Выплавка",ht:"Термообработка",form:"Изделие",proc:"Технология",temper:"Состояние поставки",route:"Выплавка"};
+const alF=(x,n)=>(+x).toFixed(n).replace(".",",");
+function alRefCalc(f){const P=ALY_PRE[f][ALY_REF[f]];return alCalc({fam:f,c:Object.assign({},P.c),p:Object.assign({},P.p),t:P.t||40});}
+function alForm(){const el=$("wsA");if(!el)return;if(!ALY.ed)ALY.ed=alNew("st","rha");const a=ALY.ed,f=a.fam,R0=ALY_RNG[f],PR=ALY_PROC[f];
+  const famB=Object.entries(ALY_FAM).map(([k,v])=>`<button data-fam="${k}" aria-pressed="${k===f}">${v.n}</button>`).join("");
+  const preO=`<option value="">— взять за основу реальную марку —</option>`+Object.entries(ALY_PRE[f]).map(([k,p])=>`<option value="${k}">${p.n}</option>`).join("");
+  const dig=st=>st<.05?2:st<1?1:0;
+  const comp=Object.entries(R0).map(([k,[mn,mx,st]])=>`<div><label for="al_${k}">${ALY_ELN[k]}${f==="w"&&(k==="NiS"||k==="Co")?", % связки":""} <b id="alv_${k}">${alF(a.c[k],dig(st))} %</b></label><input id="al_${k}" data-c="${k}" type="range" min="${mn}" max="${mx}" step="${st}" value="${a.c[k]}"></div>`).join("");
+  const psel=(k,o)=>`<div><label for="alp_${k}">${ALY_PL[k]}</label><select id="alp_${k}" data-p="${k}">${wsOpt(o,String(a.p[k]))}</select></div>`;
+  const rngP=(k,mn,mx,st,t,fm,v)=>`<div><label for="alp_${k}">${t} <b id="alpv_${k}">${fm(v)}</b></label><input id="alp_${k}" data-pr="${k}" type="range" min="${mn}" max="${mx}" step="${st}" value="${v}"></div>`;
+  let proc=Object.entries(PR).map(([k,o])=>psel(k,o)).join("");
+  if(f==="st"){if(a.p.ht==="qt")proc+=rngP("T",150,700,10,"Температура отпуска",v=>v+" °C",a.p.T);proc+=rngP("t",5,200,1,"Толщина листа (для прокаливаемости)",v=>v+" мм",a.t||40);}
+  if(f==="w"&&(a.p.proc==="swage"||a.p.proc==="swa"))proc+=rngP("sw",0,30,1,"Обжатие при ковке",v=>v+" %",a.p.sw||0);
+  const saved=ALY.list.find(x=>x.id===a.id),list=ALY.list.map(x=>{const r=(ALY.res&&ALY.res[x.key])||alCalc(x);
+    return`<div class="wscard"><b>${wsEsc(x.n)}</b>${ALY_FAM[x.fam].n.toLowerCase()} · ${alF(r.rho,2)} г/см³ · ${Math.round(r.HB)} HB · ${Math.round(r.UTS)} МПа · ${alF(r.price,1)} $/кг<div class="row1"><button data-ed="${x.id}">Изменить</button><button data-cp="${x.id}">Копия</button></div></div>`;}).join("");
+  el.innerHTML=`<div class="wssum" id="alSum"></div>
+  <div class="seg wsseg" role="group" aria-label="Класс сплава">${famB}</div>
+  <p class="tag" style="margin:0">${ALY_FAM[f].d}</p>
+  <select id="alPre" class="wspre" aria-label="Основа">${preO}</select>
+  <label class="lbl" for="al_name">Название сплава</label><input id="al_name" class="wsin" maxlength="28" value="${wsEsc(a.n)}">
+  <details class="wssec" data-sec="comp"${ALY.open&&ALY.open.comp===false?"":" open"}><summary><b>Состав, % по массе</b><span>${f==="w"?`W ${alF(a.c.W,1)}`:f==="st"?`C ${alF(a.c.C,2)} · Ni ${alF(a.c.Ni,1)}`:f==="al"?`Mg ${alF(a.c.Mg,1)} · Zn ${alF(a.c.Zn,1)} · Cu ${alF(a.c.Cu,1)}`:`Al ${alF(a.c.Al,1)} · V ${alF(a.c.V,1)}`}</span></summary><div class="ctrl">${comp}</div>
+    ${f==="st"?`<div class="wscbs"><label class="tag wscb"><input type="checkbox" id="alp_B"${a.p.B?" checked":""}> Микролегирование бором (0,002 %)</label></div>`:""}</details>
+  <details class="wssec" data-sec="proc"${ALY.open&&ALY.open.proc===false?"":" open"}><summary><b>Технология</b><span>${Object.keys(PR).map(k=>PR[k][a.p[k]]||"").join(" · ")}</span></summary><div class="ctrl">${proc}</div></details>
+  <div id="alOut" class="wsout"></div><div id="alWarn" class="wswarn"></div>
+  <div class="row1"><button id="alSave" class="wsgo">${saved?"Сохранить изменения":"Сохранить сплав"}</button><button id="alNew">Новый</button>${saved?`<button id="alDel">Удалить</button>`:""}</div>
+  ${ALY.msg?`<p class="tag" style="color:#ffd970">${ALY.msg}</p>`:""}
+  ${list?`<span class="lbl">Мои сплавы</span>${list}`:`<p class="tag">Сохранённый сплав появится в списках материалов на вкладке «Броня» (группа «Свои сплавы»), в выборе материала корпуса машины, а подходящие стали и вольфрамовые сплавы — в стволах, сердечниках и корпусах снарядов конструктора пушки. Цена сплава считается по биржевым ценам элементов и учитывается в себестоимости изделий фирмы.</p>`}`;
+  ALY.msg="";alOut();
+  el.querySelectorAll("[data-fam]").forEach(b=>b.onclick=()=>{if(b.dataset.fam===a.fam)return;const id=a.id,key=a.key,n=a.n;ALY.ed=alNew(b.dataset.fam);if(!saved){ALY.ed.n=n;}alForm();});
+  $("alPre").onchange=e=>{const P=ALY_PRE[f][e.target.value];if(!P)return;a.c=Object.assign({},P.c);a.p=Object.assign({},P.p);a.t=P.t||a.t;if(!saved||/^Сплав \d+$/.test(a.n))a.n=P.n.slice(0,28);alForm();};
+  $("al_name").oninput=e=>{a.n=e.target.value;alOut();};
+  el.querySelectorAll("details.wssec").forEach(x=>x.ontoggle=()=>{ALY.open=ALY.open||{};ALY.open[x.dataset.sec]=x.open;});
+  el.querySelectorAll("[data-c]").forEach(i=>i.oninput=()=>{const k=i.dataset.c;a.c[k]=+i.value;const st=R0[k][2];$("alv_"+k).textContent=alF(a.c[k],dig(st))+" %";alOut();});
+  el.querySelectorAll("[data-p]").forEach(i=>i.onchange=()=>{a.p[i.dataset.p]=i.value;alForm();});
+  el.querySelectorAll("[data-pr]").forEach(i=>i.oninput=()=>{const k=i.dataset.pr,v=+i.value;if(k==="t")a.t=v;else a.p[k]=v;$("alpv_"+k).textContent=v+(k==="T"?" °C":k==="t"?" мм":" %");alOut();});
+  if($("alp_B"))$("alp_B").onchange=e=>{a.p.B=e.target.checked?1:0;alOut();};
+  $("alSave").onclick=()=>{a.n=String(a.n||"").replace(/[<>&"]/g,"").trim().slice(0,28)||"Сплав";const copy=JSON.parse(JSON.stringify(a)),i=ALY.list.findIndex(x=>x.id===a.id);
+    if(i>=0)ALY.list[i]=copy;else ALY.list.push(copy);WS.alloys=ALY.list;let r;try{r=alReg(copy);}catch(e){ALY.msg="Ошибка: "+e.message;alForm();return;}alSave();alMatOpts();alRefresh(copy.key);
+    const u=[];if(r.use.barrel)u.push("стволы");if(r.use.core)u.push("сердечники");if(r.use.body)u.push("корпуса ОФ");
+    ALY.msg=`Сплав «${wsEsc(copy.n)}» сохранён: он в списке брони («Броня» → «Свои сплавы») и в материалах корпуса машин${u.length?", а также: "+u.join(", "):""}.`;alForm();};
+  $("alNew").onclick=()=>{ALY.ed=alNew(a.fam);alForm();};
+  if($("alDel"))$("alDel").onclick=()=>{const u=alUses(a.key);if(u.length){ALY.msg="Нельзя удалить: сплав используется — "+u.slice(0,5).join("; ")+(u.length>5?"…":"");alForm();return;}
+    ALY.list=ALY.list.filter(x=>x.id!==a.id);WS.alloys=ALY.list;alUnreg(a.key);alSave();alMatOpts();ALY.msg="Сплав удалён.";ALY.ed=alNew(a.fam);alForm();};
+  el.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>{const x=ALY.list.find(y=>String(y.id)===b.dataset.ed);if(x){ALY.ed=JSON.parse(JSON.stringify(x));alForm();}});
+  el.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>{const x=ALY.list.find(y=>String(y.id)===b.dataset.cp);if(x){const c=JSON.parse(JSON.stringify(x));c.id=Date.now()%1e9;c.key="x"+Date.now().toString(36);c.n=(x.n+" копия").slice(0,28);ALY.ed=c;alForm();}});}
+/* результаты расчёта — пересчитываются при каждом движении ползунка */
+function alOut(){const a=ALY.ed,f=a.fam;let r;try{r=alCalc(a);}catch(e){$("alOut").textContent="Ошибка расчёта: "+e.message;return;}const ref=alRefCalc(f),refN=ALY_PRE[f][ALY_REF[f]].n;
+  const hard=f!=="al"&&r.HRC!=null?`${Math.round(r.HB)} HB · ${Math.round(r.HRC)} HRC`:`${Math.round(r.HB)} HB`,pct=x=>Math.round(x*100)+" %",d=(x,y)=>{const q=(x/y-1)*100;return Math.abs(q)<.5?"":` <span class="tag">(${q>0?"+":"−"}${Math.abs(Math.round(q))} % к эталону)</span>`;};
+  const sp=r.sp||{},tot=Object.values(sp).reduce((x,y)=>x+y,0)||1,CN={st:"сталь и передел",ni:"никель",cr:"хром",mo:"молибден",v:"ванадий",co:"кобальт",w:"вольфрам",al:"алюминий и лёгкие",cu:"медь",ti:"титан"};
+  const costS=Object.entries(sp).sort((x,y)=>y[1]-x[1]).filter(x=>x[1]/tot>.04).map(([k,v])=>`${CN[k]||k} ${Math.round(v/tot*100)} %`).join(", ");
+  const why=r.use.barrel?"":f!=="st"?"только стали":r.cast?"литьё не годится":r.UTS<1000?"прочность меньше 1000 МПа":r.HB>520?"слишком твёрдая: трещины от циклов давления":"мала вязкость (нужно KCV от 35 Дж)";
+  const rows=[["Плотность",`${alF(r.rho,2)} г/см³`],["Твёрдость",hard],["Прочность σв / σт",`${Math.round(r.UTS)} / ${Math.round(r.YS)} МПа`+d(r.UTS,ref.UTS)],
+    f==="st"?["Ударная вязкость KCV, −40 °C",`${Math.round(r.KV)} Дж`+d(r.KV,ref.KV)]:["Удлинение",`${alF(r.el,1)} %`],["Вязкость разрушения K₁c",`${Math.round(r.KIC)} МПа·√м`],
+    f==="st"?["Порог хладноломкости",`${Math.round(r.tt)} °C`]:null,["Свариваемость",r.weld[0]+(r.CE!=null&&!r.mar?` (Cэкв ${alF(r.CE,2)})`:"")],
+    f==="st"&&!r.mar&&a.p.ht!=="norm"?["Прокаливаемость",`DI ≈ ${Math.round(r.DI)} мм: сквозная закалка листа до ≈${Math.round(r.tH)} мм`]:null,
+    ["Против подкалиберных",`×${alF(r.ap,2)} RHA по толщине · ×${alF(r.Em,2)} по массе`+d(r.Em,ref.Em)],["Против кумулятивной струи",`×${alF(r.heat,2)} по толщине · ×${alF(r.heat*7.85/r.rho,2)} по массе`],
+    ["Против фугаса и БФС",`×${alF(r.he,2)}`],["Хрупкость: трещины, откол",pct(r.br)],["Цена",`${alF(r.price,1)} $/кг`+d(r.price,ref.price)+(costS?` · ${costS}`:"")],
+    ["Ствол",r.use.barrel?`годится: допускаемое напряжение ≈${Math.round(.72*r.UTS)} МПа, ресурс ×${alF(r.life,2)}`:`нет — ${why}`],
+    ["Сердечник",r.use.core?(f==="w"?`годится: к-т ${alF(alCl(r.a,0,2),3)}, длинный сердечник без изгиба до L/D ≈${Math.round(r.ldMax)}, ≈${Math.round(r.corePrice)} $/кг`:"стальной сердечник: дёшево, но слабее вольфрама"):"нет — нужна твёрдость от 450 HB или вольфрамовый сплав"],
+    f==="st"?["Корпус ОФ снаряда",r.use.body?`годится: дробление ×${alF(1/alCl(1.7-.8*r.C-.25*r.Si-.006*(r.HRC||20),.45,1.4),2)} к С-60`:"нет — нужен углерод от 0,35 %"]:null].filter(Boolean);
+  $("alOut").innerHTML=`<div class="wsk">${rows.map(([k,v])=>`<span>${k}</span><b>${v}</b>`).join("")}</div><p class="tag" style="margin:0">Эталон для сравнения: ${refN}.</p>`;
+  $("alWarn").innerHTML=(r.N||[]).map(t=>`<div>⚠ ${t}</div>`).join("");
+  $("alSum").innerHTML=`<b>${wsEsc(a.n||"Сплав")}</b> · ${alF(r.rho,2)} г/см³ · ${Math.round(r.HB)} HB · σв ${Math.round(r.UTS)} МПа<br>КЭ ×${alF(r.ap,2)} (по массе ×${alF(r.Em,2)}) · хрупкость ${pct(r.br)} · <b>${alF(r.price,1)} $/кг</b>${(r.N||[]).length?` · <span class="wsw">${r.N.length} замеч.</span>`:""}`;}
+
+/* ===== Фирма (v59): своё КБ и предприятие. ОКР по стадиям (эскизный, технический проект, рабочая документация, опытные образцы, испытания), скрытые дефекты
+   и их выявление, литера и амортизация НИОКР, подготовка производства (оснастка), цеха, смены и рабочие, кривая освоения, склад материалов по сырью,
+   рынок (тендеры против реальных конкурентов, госзаказ «затраты плюс», прямые продажи, лицензии), договоры с авансами и неустойками, валютные разницы,
+   бухгалтерский учёт двойной записью по плану счетов с субсчетами, НДС, налог на прибыль с переносом убытков, кредиты и овердрафт, отчётность. Шаг — месяц. ===== */
+var ENT=null;
+const ENT_ACCN={"01.1":"ОС: оборудование цехов","01.2":"ОС: оснастка","02.1":"Амортизация оборудования","02.2":"Амортизация оснастки","04":"НИОКР (результаты)","05":"Амортизация НИОКР",
+  "08.1":"Оборудование к установке","08.8":"Выполнение НИОКР и ТПП","10":"Материалы и комплектующие","19":"НДС по приобретённым ценностям","20":"Основное производство",
+  "25":"Общепроизводственные расходы","26":"Общехозяйственные расходы","43":"Готовая продукция","44":"Расходы на продажу","51":"Расчётный счёт","60":"Расчёты с поставщиками",
+  "62":"Расчёты с покупателями","62.2":"Авансы полученные","66":"Кредиты банков","66.2":"Овердрафт","68.1":"НДФЛ","68.2":"НДС","68.4":"Налог на прибыль","68.8":"Налог на имущество",
+  "69":"Страховые взносы","70":"Оплата труда","80":"Уставный капитал","84":"Нераспределённая прибыль","90.1":"Выручка","90.2":"Себестоимость продаж","90.3":"НДС с выручки",
+  "90.7":"Расходы на продажу","90.8":"Управленческие расходы","90.9":"Прибыль/убыток от продаж","91.1":"Прочие доходы","91.2":"Прочие расходы","91.9":"Сальдо прочих доходов и расходов","99":"Прибыли и убытки"};
+const ENT_MON=["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
+const ENT_STG=[{n:"Эскизный проект",sh:.10,who:"des"},{n:"Технический проект",sh:.20,who:"des"},{n:"Рабочая документация",sh:.30,who:"des"},{n:"Опытные образцы",sh:.20,who:"eng"},{n:"Испытания",sh:.20,who:"tst"}];
+const ENT_MINM={veh:[1,2,2,4,12],gun:[1,1,2,3,8],ammo:[1,1,1,2,6],alloy:[1,1,1,2,4]},ENT_TPPM={veh:4,gun:3,ammo:2,alloy:1};
+const ENT_HELP={des:[["des",1],["eng",.6],["tst",.3]],eng:[["eng",1],["des",.6],["tst",.5]],tst:[["tst",1],["eng",.6],["des",.4]]};
+const ENT_POOLN={des:"конструкторов",eng:"инженеров-технологов",tst:"испытателей"};
+const ENT_LRN={veh:{ref:100,lr:.85},gun:{ref:150,lr:.87},ammo:{ref:20000,lr:.92},alloy:{ref:1,lr:1}};
+const ENT_SPOT={mbt:.25,ifv:.35,apc:.5,how_t:.4,how_sp:.25,at:.6,tgun:1.5,auto:3,am_ke:300,am_heat:250,am_he:2500,am_auto:15000};
+const entR=(a,b)=>a+Math.random()*(b-a),entCl=(x,a,b)=>Math.max(a,Math.min(b,x));
+function entGauss(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function entPois(l){if(!(l>0))return 0;if(l>40)return Math.max(0,Math.round(l+Math.sqrt(l)*entGauss()));const L=Math.exp(-l);let k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
+const entC=E=>ENT_CTRY[E.c]||ENT_CTRY.ru,entMon=(E,m)=>((m==null?E.m:m)+E.m0)%12,entYear=(E,m)=>2026+Math.floor(((m==null?E.m:m)+E.m0)/12);
+function entDate(E,m){return ENT_MON[entMon(E,m)]+" "+entYear(E,m);}
+function entMoney(x,E){const c=(E&&ENT_CTRY[E.c]||ENT_CTRY.ru).cur,a=Math.abs(x||0),s=x<0?"−":"";
+  if(a>=1e9)return s+(a/1e9).toFixed(a>=1e11?0:2).replace(".",",")+" млрд "+c;if(a>=1e6)return s+(a/1e6).toFixed(a>=1e8?0:1).replace(".",",")+" млн "+c;if(a>=1e3)return s+Math.round(a/1e3)+" тыс "+c;return s+Math.round(a)+" "+c;}
+function entUsd(x){const a=Math.abs(x||0),s=x<0?"−":"";return a>=1e9?s+"$"+(a/1e9).toFixed(2).replace(".",",")+" млрд":a>=1e6?s+"$"+(a/1e6).toFixed(2).replace(".",",")+" млн":a>=1e3?s+"$"+(a/1e3).toFixed(a>=1e4?0:1).replace(".",",")+" тыс":s+"$"+Math.round(a);}
+const entWage=(E,k)=>entC(E).wage[k]*E.wi,entIx=(E,c)=>(E.ix[c]||1)*((E.emb&&E.emb[c])||1);
+function entLog(E,t,k){E.log.unshift({m:E.m,t,k:k||"i"});if(E.log.length>150)E.log.length=150;}
+const entPN=(E,id)=>{const p=E.P.find(x=>x.id===id);return p?p.n:"изделие";};
+/* ---------- оценки изделия: огонь, защита, подвижность, надёжность — одни формулы для своих и чужих ---------- */
+function entScVeh(s){const f=entCl((s.ke||0)/8.6+(s.atgm?22:0)+(s.fcs===0?-8:0),0,100),p=entCl(100*(1-Math.exp(-(s.arm||0)/350))+(s.era?5:0)+(s.aps?8:0)+Math.min(8,(s.side||0)/12),0,100),
+  m=entCl(30+((s.pw||15)-15)*1.8+((s.v||55)-55)*.5+((s.rng||400)-400)/40+(s.amph?6:0)+(s.hydro?5:0),0,100),r=entCl(40+Math.min(40,(s.life||600)/40)-(s.cx||0),0,100);return{f:Math.round(f),p:Math.round(p),m:Math.round(m),r:Math.round(r)};}
+function entScArt(s){const f=entCl((s.rng||15)*2.6+(s.rate||5)*2.5+(s.fcs?6:0)+(s.al?4:0),0,100),m=s.ch?(s.ch==="tr"?62:80):entCl(100-(s.mass||5)*6,0,100);return{f:Math.round(f),p:s.ch?45:30,m:Math.round(m),r:72};}
+function entCompSc(c){if(c.sp)return(c.cat==="how_t"||c.cat==="how_sp")?entScArt(c.sp):entScVeh(c.sp);return{f:c.f,p:c.p,m:c.m,r:c.r};}
+function entCompScore(E,x){const s=x.sc,u=x.up||0,y=E.m/12*.4;return{f:Math.min(100,s.f+u*.6+y),p:s.cat==="am"?0:Math.min(100,s.p+u*.5+y),m:s.m,r:Math.min(100,s.r+u*.2)};}
+/* надёжность своего изделия: скрытые и неисправленные дефекты, незаконченные испытания */
+function entPSc(E,p){const s=p.it.sc,r=s.r-3*(p.hid||0)-(p.fixH>0?2:0)-(p.st==="rd"&&p.stg<4?8:p.st==="rd"?4:0);return{f:s.f,p:s.p,m:s.m,r:entCl(r,0,100)};}
+/* ---------- изделие: трудоёмкость по цехам (зрелый выпуск), сырьё ($ по базовым ценам, по видам сырья), комплектующие ($), объём ОКР ---------- */
+function entMB(mb,key,usd){if(!(usd>0))return;const sp=ENT_MATC[key]||{st:1};let t=0;for(const c in sp)t+=sp[c];if(!t){mb.st=(mb.st||0)+usd;return;}for(const c in sp)mb[c]=(mb[c]||0)+usd*sp[c]/t;}
+const entMBsum=mb=>Object.values(mb).reduce((a,b)=>a+b,0);
+function entGunInfo(name){const g=guns.find(x=>x.n===name)||guns[0];let Mgun=0,Mbar=0,ke=0,heat=0,r=g.ws||null;
+  if(r){Mgun=r.Mgun;Mbar=r.Mbar;ke=(r.pen&&(r.pen.bops||r.pen.apds||r.pen.apbc))||0;heat=(r.pen&&r.pen.heat)||0;}
+  else{const auto=g.cls==="auto"||g.cls==="mg",how=g.cls==="how";Mgun=auto?(g.cls==="mg"?(g.cal>13?35:12):115*Math.pow(g.cal/30,2.4)):how?3500*Math.pow(g.cal/152,2.6):2400*Math.pow(g.cal/125,2.6);Mbar=Mgun*.45;
+    try{const am=ammoFor(g);if(am.includes("bops"))ke=(g.penA&&g.penA.bops)||AMMO.bops.pen*g.pen;else if(am.includes("apds"))ke=(g.penA&&g.penA.apds)||AMMO.apds.pen*g.pen;else if(am.includes("mgap"))ke=AMMO.mgap.pen*(g.pen||1);}catch(e){}}
+  const tech=r&&r.d?((r.d.steel==="mar"?1.35:r.d.steel==="esr"?1.1:1)*(r.d.lining==="chrome"?1.12:r.d.lining==="liner"?1.1:r.d.lining==="nitr"?1.06:1)*(r.d.af==="swage"?1.08:1)):1.1;
+  const price=g.cls==="mg"?(g.cal>13?28e3:9e3):(30e3+75*Mgun)*tech;return{g,Mgun,Mbar,ke,heat,price,cal:g.cal,std:entStdCal(g.cal,g.n)};}
+function entStdCal(cal,n){if(typeof ORIGIN!=="undefined"&&n&&ORIGIN[n])return ORIGIN[n]==="nato"?"nato":"su";return[120,155,25,105,35,40].includes(cal)?"nato":[125,152,122,100,73,30,14.5,57].includes(cal)?"su":"mix";}
+function entCustUsed(keys){const o=[];keys.forEach(k=>{if(MAT[k]&&MAT[k].custom&&!o.includes(k))o.push(k);});return o;}
+function entItemVeh(d0){const d=JSON.parse(JSON.stringify(d0)),r=wsVehMake(d),c=r.calc,v=r.v,E=c.E,cl=d.cls,tank=cl==="tank",ifv=cl==="ifv",mb={},used=[];let steel=0,turSteel=0;const metalM={};
+  for(const z in v.area)(v.def[z]||[]).forEach(l=>{const m=MAT[l[0]];if(!m||l[0]==="gap")return;const kg=v.area[z]*l[1]*m.dens,metal=["steel","hard","perf","soft","ti"].includes(m.beh)&&m.dens>1.5;
+    entMB(mb,l[0],kg*(ENT_MATP[l[0]]!=null?ENT_MATP[l[0]]:10)*(metal?1.22:1.12));if(metal){metalM[l[0]]=(metalM[l[0]]||0)+kg;if(m.dens>6){steel+=kg;if(z==="turF"||z==="turS")turSteel+=kg;}}used.push(l[0]);});
+  mb.st=(mb.st||0)+c.mStruct*1000*2.6+c.mRun*1000*(d.run==="track"?5.5:7);
+  const gi=entGunInfo(d.gun),comps=[],add=(n,x)=>{if(x>0)comps.push([n,Math.round(x)]);};
+  add("двигатель "+Math.round(E.hp)+" л.с.",(ENT_ENG[d.et]||150)*E.hp);add("трансмиссия",(ENT_TRN[d.tr]||90)*E.hp);if(d.tur!=="none")add("орудие "+gi.g.n,gi.price);
+  if(d.fcs)add("СУО и прицелы",tank?900e3:ifv?500e3:200e3);if(d.stab&&d.tur!=="none"&&d.tur!=="rws")add("стабилизатор и приводы",tank?160e3:ifv?90e3:40e3);
+  if(d.tur==="rws")add("дистанционный модуль",450e3);if(d.tur==="unmanned")add("электроника необитаемой башни",700e3);
+  if(d.aps)add("КАЗ",900e3);if(d.lws)add("предупреждение об облучении",120e3);if(d.smk&&d.smk!=="none")add("дымовые гранатомёты",d.smk==="ir"?50e3:25e3);if(d.apu)add("ВСУ",90e3);if(d.fvu)add("ФВУ",45e3);if(d.ppo)add("противопожарная система",60e3);
+  add("связь и управление боем",tank?150e3:ifv?110e3:90e3);add("электрооборудование, сиденья, люки",tank?220e3:ifv?140e3:90e3);
+  if(tank&&gi.g.cls!=="auto"&&gi.g.cls!=="mg"){const az={car:260e3,car2:320e3,iso:650e3,bus:d.crew<4?380e3:0}[d.stow]||0;add(d.stow==="iso"?"АЗ и бронекапсула":"автомат заряжания",az);}
+  const comp=comps.reduce((s,x)=>s+x[1],0),stT=steel/1000,nW=(v.axles||4)*2,sys=["fcs","stab","aps","lws","apu","fvu","ppo"].filter(k=>d[k]).length;
+  /* свариваемость основного металла корпуса */
+  const main=Object.entries(metalM).sort((a,b)=>b[1]-a[1])[0],mk=main&&main[0],mm=mk&&MAT[mk];let wk=1;
+  if(mm){if(mm.custom&&typeof ALY!=="undefined"&&ALY.res&&ALY.res[mk])wk=[1,1.12,1.25,1.5][ALY.res[mk].weld[1]]||1;else if(mm.beh==="ti")wk=1.6;else if(mm.beh==="soft")wk=1.3;else if(mm.beh==="hard")wk=1.2;}
+  const K=1.8,h={zag:Math.round(K*(stT*28+c.mStruct*10+(d.ts==="cast"?turSteel/1000*14:0)+c.mRun*18)),meh:Math.round(K*(700+nW*55+(d.tur!=="none"?150:0)+(["car","car2","iso"].includes(d.stow)?220:0))),
+    svar:Math.round(K*wk*(stT*52+c.mStruct*22+(mm&&mm.beh==="soft"?c.mArm*30:0))),sbor:Math.round(K*(1300+70*v.mods.length+35*sys+(d.era?160:0)+(d.scr?60:0)+90)),snar:0};
+  const novel=d.proto?.45:1,cx=(d.tur==="unmanned"?.25:0)+(d.stow==="iso"?.35:0)+(d.aps?.2:0)+(d.lws?.1:0)+(["x","gt","op"].includes(d.et)?.15:0)+(d.tr==="el"?.2:0)+(d.susp==="hydro"?.08:0);
+  const rdH=Math.round((tank?1.4e6:ifv?.8e6:.45e6)*Math.sqrt(c.mass/(tank?45:ifv?22:16))*(1+cx)*novel);
+  const ext=((d.aps?15e6:0)+(d.tur==="unmanned"?20e6:0)+(d.stow==="iso"?10e6:0)+(d.et==="x"?40e6:d.et==="gt"?30e6:d.et==="op"?15e6:0)+(d.fcs?6e6:0))*novel;
+  const ef=wsZoneEq(v,"hullF",d.ufp),et=wsZoneEq(v,"turF",15),es=wsZoneEq(v,"hullS",0),MB=c.MB;
+  const sc=entScVeh({ke:gi.ke,atgm:(d.cls!=="tank"&&gi.g.cls==="at")||gi.g.glm?1:0,fcs:d.fcs?1:0,arm:(ef.ke+(d.tur!=="none"?et.ke:ef.ke))/2,side:es.ke,era:d.era,aps:d.aps,pw:c.pw,v:c.vmax,rng:c.fuelL/Math.max(.1,MB.road.lpkm),amph:c.amph?1:0,hydro:d.susp==="hydro",life:E.life,cx:Math.round(cx*20)});
+  return{kind:"veh",cat:tank?"mbt":ifv?"ifv":"apc",std:gi.std,mass:c.mass,h,mb,comp,comps,rdH,ext,proto:tank||ifv?3:2,sc,cx,test$:(tank?6e6:ifv?3.5e6:2e6)*(d.proto?.7:1),tool$:tank?15e6:ifv?8e6:5e6,wk,alloys:entCustUsed(used)};}
+function entItemGun(d0){const d=wsGNorm(JSON.parse(JSON.stringify(d0))),r=wsCalc(d),how=d.cls==="how",auto=d.cls==="auto",towed=d.mount==="towed",sp=d.mount==="spg"||d.mount==="truck",mb={},used=[];
+  const sk=WSP.steel[d.steel]&&WSP.steel[d.steel].custom?d.steel:d.steel==="mar"?"marag":"rha",sp$={std:6,esr:9,mar:28}[d.steel]||(ENT_MATP[d.steel]?ENT_MATP[d.steel]*1.6:8);
+  entMB(mb,sk,r.Mbar*sp$*1.6);mb.st=(mb.st||0)+(r.Mgun-r.Mbar)*5;if(WSP.steel[d.steel]&&WSP.steel[d.steel].custom)used.push(d.steel);
+  const comps=[],add=(n,x)=>{if(x>0)comps.push([n,Math.round(x)]);};
+  add("покрытие канала",{chrome:8e3,nitr:4e3,liner:12e3}[d.lining]||0);add("противооткатные устройства",auto?6e3:40e3);if(d.brake!=="none")add("дульный тормоз",5e3);if(d.sleeve)add("термокожух",6e3);if(d.mrs)add("контроль изгиба ствола",25e3);
+  if(towed){entMB(mb,d.carrMat==="ti"?"ti":"rha",r.carr.mc*1000*(d.carrMat==="ti"?45:4.5));add("колёсный ход",d.carrWh*8e3);if(d.shield)add("щит",6e3);if(d.apu)add("вспомогательный двигатель и гидропривод",60e3);add("прицелы",auto?15e3:45e3);}
+  if(how&&sp){add(d.mount==="spg"?"гусеничное шасси":"колёсное шасси",d.mount==="spg"?1.6e6:.35e6);add("СУО артиллерийская",250e3);if(d.load==="aut")add("автомат заряжания",300e3);}
+  const comp=comps.reduce((s,x)=>s+x[1],0),mc=towed?r.carr.mc:0;
+  const h={zag:Math.round(r.Mbar*.45+mc*30),meh:Math.round(350+r.Mbar*1.5+(r.Mgun-r.Mbar)*.4+(d.bore==="rifled"?120:0)),svar:Math.round(towed?mc*150:40),sbor:Math.round(180+(towed?260:0)+(how&&sp?1600:0)+40),snar:0};
+  const novel=d.proto?.4:1,cx=(d.steel==="mar"?.2:0)+(d.af==="swage"?.1:0)+(d.k_core==="du"?.15:0)+(d.gl?.1:0)+(d.k_seg&&d.k_seg!=="mono"?.1:0)+(d.load==="aut"?.15:0);
+  const rdH=Math.round(((auto?125e3:how?215e3:290e3)+(towed?90e3:0))*Math.sqrt(d.P/(auto?380:how?315:520))*Math.pow(d.L/50,.3)*(1+cx)*novel);
+  const cat=auto?"auto":how?(sp?"how_sp":"how_t"):(towed?"at":"tgun");let g=null;try{g=guns.find(x=>x.custom&&x.cid===d.id);}catch(e){}
+  const rng=g&&g.rmax?g.rmax/1000:(how?(r.v.he||800)/33:0),rate=d.cls==="auto"?r.rpm:60/r.tLoad;
+  const sc=how?entScArt({rng,rate,mass:towed?r.carr.mt:0,ch:sp?(d.mount==="spg"?"tr":"wh"):null,fcs:sp?1:0,al:d.load==="aut"}):{f:Math.round(entCl(auto?30+(r.pen.apds||0)*.4:(r.pen.bops||0)/8.6,0,100)),p:towed?(d.shield?34:28):50,m:Math.round(towed?entCl(100-r.carr.mt*6,0,100):50),r:Math.round(entCl(60+Math.min(25,r.life/(auto?400:40)),0,100))};
+  return{kind:"gun",cat,std:entStdCal(d.cal),mass:r.Mgun/1000+(mc||0),h,mb,comp,comps,rdH,ext:(d.gl?8e6:0)*novel,proto:3,sc,cx,test$:(auto?1e6:how?2e6:2.5e6)+(towed?.5e6:0),tool$:auto?1.5e6:how?2.5e6:3e6,alloys:used};}
+/* выстрелы к своему орудию: сердечник, поддон, ВВ, облицовка, порох, гильза, взрыватель */
+const ENT_AMT={bops:"am_ke",apds:"am_auto",apbc:"am_auto",heat:"am_heat",hesh:"am_heat",he:"am_he",rap:"am_he",bb:"am_he"};
+function entItemAmmo(d0,t){const d=wsGNorm(JSON.parse(JSON.stringify(d0))),r=wsCalc(d),s=r.sh[t],auto=d.cls==="auto",mb={},used=[];if(!s)return null;const comps=[],add=(n,x)=>{if(x>0)comps.push([n,+x.toFixed(2)]);};
+  entMB(mb,"pr",0);mb.pr=(mb.pr||0)+s.w*25;const caseK={comb:["pr",350],metal:["cu",(r.mCase||1)*9],bag:["fib",60],mod:["pr",120]}[d.case]||["st",100];mb[caseK[0]]=(mb[caseK[0]]||0)+caseK[1]*(auto?.02:1);
+  if(t==="bops"||t==="apds"){const ck=d.k_core,cc=WSP.core[ck]&&WSP.core[ck].custom,cp=cc?WSP.core[ck].p:{w90:160,w93:175,w97:195,du:85,wc:150,st:6}[ck]||175;
+    entMB(mb,cc?ck:ck==="du"?"du":ck==="wc"?"wc":ck==="st"?"rha":"wha",(s.mr||0)*cp*1.15);if(cc)used.push(ck);
+    const ms=s.ms||s.m*.4;entMB(mb,{al:"al",st:"rha",comp:"cfrp"}[d.k_sabot]||"al",ms*({al:12,st:5,comp:45}[d.k_sabot]||12));if(ck==="du")add("обращение с обеднённым ураном",600);add("стабилизатор и трассер",auto?3:120);}
+  else if(t==="heat"||t==="hesh"){const hx=s.m*(t==="hesh"?d.s_fill/100:.2);mb.st=(mb.st||0)+s.m*3;mb.he=(mb.he||0)+hx*({tnt:12,tg:25,okfol:60,lx:80,a1x1:30,pe4:45}[t==="hesh"?d.s_hx:d.h_hx]||30);
+    if(t==="heat"){const lk={cu:"cu",mo:"mo",ta:"w",st:"st"}[d.h_liner]||"cu";mb[lk]=(mb[lk]||0)+s.m*.08*({cu:12,mo:60,ta:400,st:3}[d.h_liner]||12);}add("пьезовзрыватель",auto?20:250);if(d.h_tandem&&t==="heat")add("лидирующий заряд",450);}
+  else{const W=s.m*d.e_fill/100,bk=d.e_body,bc=WSP.body[bk]&&WSP.body[bk].custom;if(bc){entMB(mb,bk,(s.m-W)*(ENT_MATP[bk]||3)*1.1);used.push(bk);}else mb.st=(mb.st||0)+(s.m-W)*({c60:2.2,hf:3.5,pfe:6,abm:7}[bk]||3);
+    mb.he=(mb.he||0)+W*({tnt:12,aix2:28,compb:22,pbx:45,tbx:40}[d.e_hx]||15)+(auto?.6:0);add("взрыватель",auto?{pd:4,multi:35,prog:60}[d.e_fuze]||4:{pd:60,multi:450,prog:900}[d.e_fuze]||60);if(t==="rap")add("реактивный двигатель",900);if(t==="bb")add("донный газогенератор",350);}
+  add("капсюльная втулка",auto?.6:40);
+  const k2=Math.pow(d.cal/152,2),h=auto?{zag:0,meh:.15,svar:0,sbor:.02,snar:.08}:t==="bops"||t==="apds"?{zag:.4,meh:7,svar:0,sbor:.3,snar:2.5}:t==="heat"||t==="hesh"?{zag:.5,meh:4,svar:0,sbor:.3,snar:3}:{zag:.8*k2,meh:2.6*k2,svar:0,sbor:.2,snar:1.6*k2};
+  const comp=comps.reduce((a,x)=>a+x[1],0),cat=auto?"am_auto":ENT_AMT[t]||"am_he";
+  const f=t==="bops"||t==="apds"?entCl((r.pen[t]||0)/(auto?1.1:9),0,100):t==="heat"?entCl((r.pen.heat||0)/9,0,100):entCl(35+12*Math.cbrt(r.heTNT||1)+(d.e_fuze==="prog"?8:d.e_fuze==="multi"?4:0),0,100);
+  const rdK={bops:90e3,apds:30e3,apbc:25e3,heat:70e3,hesh:45e3,he:auto?20e3:35e3,rap:60e3,bb:45e3}[t]||35e3,tst={bops:1.5e6,apds:.4e6,apbc:.3e6,heat:1e6,hesh:.6e6,he:auto?.3e6:.8e6,rap:1.2e6,bb:.9e6}[t]||.6e6;
+  return{kind:"ammo",t,cat,std:entStdCal(d.cal),mass:s.mR||s.m,h,mb,comp,comps,rdH:Math.round(rdK*(d.proto?.6:1)),ext:0,proto:60,sc:{f:Math.round(f),p:0,m:0,r:72},cx:0,test$:tst,tool$:auto?.4e6:t==="bops"?1e6:t==="he"||t==="rap"||t==="bb"?1.5e6:.8e6,alloys:used};}
+/* квалификация своего сплава: опытные плавки, листы, обстрел */
+function entItemAlloy(a){const r=alCalc(a),kg=3000,mb={};entMB(mb,a.key,kg*r.price);return{kind:"alloy",cat:null,std:"mix",mass:0,h:{zag:400,meh:150,svar:0,sbor:0,snar:0},mb,comp:0,comps:[],
+  rdH:{st:30e3,w:45e3,al:30e3,ti:40e3}[a.fam]||30e3,ext:0,proto:1,sc:{f:0,p:0,m:0,r:0},cx:0,test$:350e3,tool$:0,akey:a.key,alloys:[]};}
+/* ---------- создание предприятия ---------- */
+function entNew(o){const C=ENT_CTRY[o.c]||ENT_CTRY.ru,S0=ENT_START[o.start]||ENT_START.pr,E={v:2,c:ENT_CTRY[o.c]?o.c:"ru",start:ENT_START[o.start]?o.start:"pr",
+    kbN:String(o.kbN||"ОКБ «Гром»").slice(0,32),plN:String(o.plN||"Завод «Гром»").slice(0,32),m:0,m0:10,fx:C.fx,key:C.key,wi:1,ix:{},emb:Object.assign({},C.emb||{}),ixH:{},rep:S0.rep,admK:S0.admK||1,
+    kb:{des:S0.kb.des,eng:S0.kb.eng,tst:S0.kb.tst,skill:1,tgt:Object.assign({},S0.kb)},shops:{},capex:[],B:{},B0:{},J:[],mo:{},last:null,P:[],T:[],K:[],O:[],L:[],od:0,recv:[],
+    hist:[],log:[],lossCF:0,yr:{pbt:0,tax:0},id:1,over:false,crisis:0,stop:false,qual:{},ovk:.7,share:{},mRes:null};
+  ENT_CMDS.forEach(c=>{E.ix[c]=1;E.ixH[c]=[1];});
+  ENT_SHOPS.forEach(k=>{E.shops[k]={pos:S0.pos[k],wrk:0,tgt:0,shift:1,eff:S0.eff,load:0,cap:0,use:0};});
+  const tp=ENT_SHOPS.reduce((s,k)=>s+S0.pos[k],0);
+  ENT_SHOPS.forEach(k=>{const s=E.shops[k],n=tp?Math.round(S0.wrk*S0.pos[k]/tp):0;s.wrk=s.tgt=n;s.shift=s.pos?entCl(Math.ceil(n/(s.pos*ENT_WPP)-.05),1,3):1;});
+  const cash=S0.cash*C.fx,fixed=tp?ENT_SHOPS.reduce((s,k)=>s+S0.pos[k]*ENT_SHOP[k].pos,0)*C.fx:0;
+  entPost(E,"51","80",cash,"Уставный капитал внесён деньгами");if(fixed)entPost(E,"01.1","80",fixed,"Уставный капитал: цеха и оборудование");
+  E.cust=ENT_CUST.map((c,i)=>({i,n:c.n,std:c.std,bud:c.bud,spent:0,need:Object.assign({},c.need),need0:Object.assign({},c.need),w:c.w,maxMass:c.maxMass||0,pol:Object.assign({},c.pol),rel:50}));
+  const hk={ru:1.5,de:.5,us:1}[E.c]||1,hn={mbt:120,ifv:200,apc:150,how_t:40,how_sp:40,at:20,tgun:60,auto:300,am_ke:30000,am_heat:20000,am_he:400000,am_auto:900000};
+  E.home={n:C.home,std:C.homeStd,need:{}};for(const k in hn)E.home.need[k]=Math.round(hn[k]*hk);
+  E.comp=ENT_COMP.map(x=>({n:x.n,mk:x.mk,co:x.co,cat:x.cat,std:x.std,pr:x.pr,cap:x.cap,sc:entCompSc(x),up:0,rep:70,load:entR(.4,.8),win:0,war:0}));
+  const hs={ru:"Минобороны",de:"Бундесвера",us:"Армии США"}[E.c];
+  E.svc=E.start==="kb"?{n:`НИР и ОКР по заказу ${hs}`,kb:{des:.35,eng:.35,tst:.2},shop:0,mk:.35,decay:.012,k:1,share:1,cost:0,rev:0}:
+    {n:`Ремонт и модернизация техники ${hs}`,kb:E.start==="gc"?{des:.2,eng:.25,tst:.15}:{des:.1,eng:.15,tst:.1},shop:E.start==="gc"?.65:.45,mk:.4,decay:.012,k:1,share:1,cost:0,rev:0};
+  for(let i=0;i<4;i++)entGenTender(E,true);E.B0=Object.assign({},E.B);E.mo={};
+  entLog(E,`Основаны ${E.kbN} и ${E.plN} (${C.n}). Капитал ${entMoney(cash+fixed,E)}.`,"i");return E;}
+/* ---------- двойная запись ---------- */
+function entPost(E,dt,ct,amt,memo){if(!(amt>0)||!isFinite(amt))return;E.B[dt]=(E.B[dt]||0)+amt;E.B[ct]=(E.B[ct]||0)-amt;E.J.push({m:E.m,dt,ct,a:Math.round(amt),t:memo});if(E.J.length>800)E.J.splice(0,E.J.length-800);
+  const Q=E.mo||(E.mo={});Q[dt+">"]=(Q[dt+">"]||0)+amt;Q[">"+ct]=(Q[">"+ct]||0)+amt;Q[dt+">"+ct]=(Q[dt+">"+ct]||0)+amt;}
+/* покупка у поставщика с НДС (оплата — в следующем месяце) */
+function entBuy(E,dt,net,memo,noVat){if(!(net>0))return;entPost(E,dt,"60",net,memo);const v=noVat?0:net*entC(E).vat;if(v>0)entPost(E,"19","60",v,"НДС: "+memo);}
+const entBal=(E,a)=>E.B[a]||0;
+const entEquity=E=>-((E.B["80"]||0)+(E.B["84"]||0)+(E.B["99"]||0)+(E.B["90.9"]||0)+(E.B["90.1"]||0)+(E.B["90.2"]||0)+(E.B["90.3"]||0)+(E.B["90.7"]||0)+(E.B["90.8"]||0)+(E.B["91.1"]||0)+(E.B["91.2"]||0)+(E.B["91.9"]||0)+(E.B["25"]||0)+(E.B["26"]||0)+(E.B["44"]||0));
+const entDebt=E=>-((E.B["66"]||0)+(E.B["66.2"]||0));
+function entBacklog(E){return E.K.filter(k=>k.st==="act").reduce((s,k)=>s+(k.qty-k.dlv)*(k.dom?k.price:k.pu*E.fx),0);}
+const entBuffer=E=>Math.max(0,(E.hist.length?Math.abs(E.hist[E.hist.length-1].out||0):0)*.1);
+function entODLimit(E){const inv=Math.max(0,(E.B["10"]||0)+(E.B["20"]||0)+(E.B["43"]||0)),rc=Math.max(0,E.B["62"]||0),fa=Math.max(0,(E.B["01.1"]||0)+(E.B["01.2"]||0)+(E.B["02.1"]||0)+(E.B["02.2"]||0));
+  return Math.max(0,.3*inv+.6*rc+.25*fa+.25*entBacklog(E)+.15*Math.max(0,entEquity(E)));}
+function entLimit(E){return Math.max(0,.5*Math.max(0,entEquity(E))+.3*entBacklog(E)+.6*Math.max(0,E.B["62"]||0)+.4*Math.max(0,(E.B["10"]||0)+(E.B["20"]||0)+(E.B["43"]||0))-entDebt(E));}
+const entRate=E=>E.key+entC(E).spread;
+/* ---------- рынок: оценка заявки ---------- */
+function entScore(sc,w,price,maxPrice,std,cstd,rate,need,rep){const base=(w.f*sc.f+w.p*sc.p+w.m*sc.m+w.r*sc.r)/100/((w.f+w.p+w.m+w.r)||1)*4;
+  const ps=price>maxPrice?-9:2*(maxPrice-price)/maxPrice*w.c,ds=need>0?w.d*Math.min(1,rate/need):0,st=cstd==="mix"||std===cstd||std==="mix"?0:-.45,rp=((rep||50)-50)/250;return base+ps+ds+st+rp;}
+function entMed(a){const s=a.slice().sort((x,y)=>x-y);return s.length?s[Math.floor(s.length/2)]:0;}
+function entGenTender(E,init,big){const cs=E.cust.filter(c=>c.bud-c.spent>2e7);if(!cs.length)return null;const c=cs[Math.floor(Math.random()*cs.length)],cats=Object.keys(c.need).filter(k=>c.need[k]>0);if(!cats.length)return null;
+  const cat=cats[Math.floor(Math.random()*cats.length)],comps=E.comp.filter(x=>x.cat===cat);if(!comps.length)return null;const am=cat.startsWith("am_"),infl=Math.pow(1.03,E.m/12);
+  const med=entMed(comps.map(x=>x.pr))*infl,q0=c.need[cat]*(big||1);let qty=Math.max(am?2000:4,Math.round(q0*entR(.25,.55)/(am?1000:2))*(am?1000:2));
+  const maxP=Math.max(am?10:1e4,Math.round(med*entR(1.0,1.45)/(am?10:1e4))*(am?10:1e4)),room=c.bud-c.spent;if(qty*maxP>room)qty=Math.max(am?1000:2,Math.floor(room/maxP/(am?1000:2))*(am?1000:2));
+  const dl=E.m+(init?Math.round(entR(1,3)):Math.round(entR(2,4))),t={id:E.id++,cu:c.i,cat,qty,maxP,dl,start:dl+Math.round(entR(3,8)),need:Math.max(am?500:1,Math.round(qty/entR(10,20))),std:c.std,st:"open",big:big>1};
+  E.T.push(t);if(!init&&E.P.some(p=>p.cat===cat&&p.st!=="stop")){E.stop=true;entLog(E,`Новый тендер по вашей категории: ${c.n} — ${ENT_CAT[cat]}, ${t.qty} шт., до ${entUsd(maxP)} за единицу, заявки до ${entDate(E,dl)}`,"g");}return t;}
+function entBidCheck(E,t,p){if(!p)return"нет изделия";if(p.cat!==t.cat)return"другая категория изделий";if(p.st==="stop")return"изделие закрыто";if(p.st==="rd"&&p.stg<3)return"нужны хотя бы опытные образцы";
+  const c=E.cust[t.cu];if((c.pol[E.c]||0)<-.6)return"заказчик не допускает поставщиков из вашей страны";if(c.maxMass&&p.it.mass>c.maxMass)return`масса ${p.it.mass.toFixed(1).replace(".",",")} т больше допустимой ${c.maxMass} т`;return"";}
+function entBid(E,tid,pid,price,rate){const t=E.T.find(x=>x.id===tid),p=E.P.find(x=>x.id===pid);if(!t||(t.st!=="open"&&t.st!=="bid"))return"тендер закрыт";const why=entBidCheck(E,t,p);if(why)return why;
+  price=Math.round(+price);rate=Math.max(1,Math.round(+rate));if(!(price>0))return"укажите цену";
+  if(t.st==="open"){const fee=(p.kind==="veh"?120e3:p.cat.startsWith("how")?60e3:p.kind==="gun"?30e3:40e3)*E.fx;entBuy(E,"44",fee,`Тендерная заявка: ${E.cust[t.cu].n} (документация, переводы, показ образца)`);}
+  t.bid={pid,price,rate};t.st="bid";return"";}
+function entUnbid(E,tid){const t=E.T.find(x=>x.id===tid);if(t&&t.st==="bid"){t.st="open";t.bid=null;}}
+/* оценка тендера: заявки конкурентов (цена зависит от загрузки их заводов и ценовой войны) и своя */
+function entJudge(E,t){const c=E.cust[t.cu],infl=Math.pow(1.03,E.m/12),bids=[];
+  const pool=E.comp.filter(x=>x.cat===t.cat).sort(()=>Math.random()-.5).slice(0,2+Math.floor(Math.random()*3));
+  for(const x of pool){if((c.pol[x.co]||0)<-.6)continue;const disc=x.load<.5?entR(.85,.95):x.load>.85?entR(1,1.1):entR(.92,1.03);let price=x.pr*infl*disc*(1-(x.war||0));
+    if(price>t.maxP){if(price>t.maxP*1.15)continue;price=t.maxP*entR(.97,1);}const rate=Math.min(t.need*1.2,x.cap/12*entR(.25,.7)*(1.2-x.load));
+    bids.push({n:x.n,mk:x.mk,price,rate,s:entScore(entCompScore(E,x),c.w,price,t.maxP,x.std,c.std,rate,t.need,x.rep)+(c.pol[x.co]||0)+entR(-.15,.15),x});}
+  let me=null;if(t.st==="bid"&&t.bid){const p=E.P.find(y=>y.id===t.bid.pid),why=entBidCheck(E,t,p);
+    if(!why){me={me:true,n:p.n,price:t.bid.price,rate:t.bid.rate,p,s:entScore(entPSc(E,p),c.w,t.bid.price,t.maxP,p.std,c.std,t.bid.rate,t.need,(E.rep+(c.rel||50))/2)+(c.pol[E.c]||0)+(p.st==="rd"?-.3:0)+entR(-.15,.15)};bids.push(me);}
+    else entLog(E,`Заявка на тендер ${c.n} отклонена: ${why}`,"w");}
+  bids.sort((a,b)=>b.s-a.s);t.res=bids.slice(0,5).map(b=>({n:b.n,me:!!b.me,price:Math.round(b.price),s:+b.s.toFixed(2)}));
+  if(!bids.length){t.st="cancel";return;}const w=bids[0];
+  if(w.me){if(E.c==="de"&&(c.pol.de||0)<0&&Math.random()<.35){t.st="deny";entLog(E,`Правительство не выдало экспортную лицензию на поставку в ${c.n}: контракт не заключён`,"w");E.stop=true;return;}
+    t.st="won";const k=entContract(E,{cu:t.cu,cuN:c.n,pid:w.p.id,qty:t.qty,pu:w.price,rate:w.rate,start:t.start+(entC(E).lic||0),dom:false,adv:.25});c.rel=Math.min(100,(c.rel||50)+3);
+    E.comp.filter(x=>x.cat===t.cat).forEach(x=>{x.war=Math.min(.2,(x.war||0)+.04);});E.stop=true;
+    entLog(E,`Победа в тендере: ${c.n} — ${t.qty} шт. «${w.p.n}» по ${entUsd(w.price)}; аванс ${entMoney(k.advLoc,E)}`,"g");}
+  else{t.st=me?"lost":"closed";w.x.win++;w.x.load=Math.min(1,w.x.load+.15);
+    if(me){E.stop=true;const why=w.price<me.price*.95?`дешевле (${entUsd(w.price)} против ${entUsd(me.price)})`:"выше оценка изделия и доверие заказчика";entLog(E,`Тендер ${c.n} проигран: победил ${w.n} (${w.mk}) — ${why}`,"w");}}
+  const sh=E.share[t.cat]||(E.share[t.cat]={}),wn=w.me?"_me":w.n;sh[wn]=(sh[wn]||0)+t.qty;c.spent+=t.qty*w.price;c.need[t.cat]=Math.max(0,(c.need[t.cat]||0)-t.qty);}
+/* ---------- договоры ---------- */
+function entContract(E,o){const k={id:E.id++,cu:o.cu,cuN:o.cuN,pid:o.pid,qty:o.qty,rate:Math.max(1,o.rate),start:o.start,dlv:0,st:"act",dom:!!o.dom,pen:0,m0:E.m,y:entYear(E)};
+  k.end=k.start+Math.ceil(k.qty/k.rate)+2;
+  if(k.dom){k.price=o.price;k.adv=o.price*o.qty*o.adv;k.advL=k.adv;if(k.adv>0)entPost(E,"51","62.2",k.adv,`Аванс по госконтракту №${k.id}`);k.val=k.price*k.qty;}
+  else{k.pu=o.pu;k.advU=o.pu*o.qty*o.adv;k.advLU=k.advU;k.advLoc=k.advU*E.fx;if(k.advLoc>0)entPost(E,"51","62.2",k.advLoc,`Аванс по экспортному контракту №${k.id} (${entUsd(k.advU)})`);k.val=k.pu*k.qty*E.fx;}
+  E.K.push(k);return k;}
+function entHomeOffer(E,p,part){const C=entC(E),H=E.home;if(!(H.need[p.cat]>0)||!(p.std===H.std||p.std==="mix"))return null;
+  if(E.O.some(o=>o.pid===p.id)||E.K.some(k=>k.pid===p.id&&k.cu<0&&k.y===entYear(E)))return null;
+  const q=s=>(s.f+s.p+s.m+s.r)/4,rivals=E.comp.filter(x=>x.cat===p.cat&&x.co===E.c),my=q(entPSc(E,p))+(E.rep-50)/10;let den=Math.exp(.12*my);rivals.forEach(x=>{den+=Math.exp(.12*(q(entCompScore(E,x))+(x.rep-50)/10));});
+  const share=Math.exp(.12*my)/den,am=p.kind==="ammo",busy=E.K.filter(k=>k.st==="act"&&k.pid===p.id).reduce((s,k)=>s+k.rate,0),capY=Math.max(0,(entCapM(E,p)+(p.plan||0))*.85-busy)*11*part;
+  const q0=Math.min(H.need[p.cat]*share*part*entR(.75,1),capY),qty=am?Math.round(q0/100)*100:Math.round(q0);if(qty<(am?500:1))return null;
+  const uc=entUnitCost(E,p,Math.max(1,qty/12));let price;
+  const ga=1+(E.gaK||.12);/* общехозяйственные расходы включаются в калькуляцию цены */
+  if(C.homeCP)price=(uc.tot-uc.comp)*ga*(1+C.homeMarg)+uc.comp*(1+(E.c==="ru"?.01:C.homeMarg));
+  else{const md=entMed(rivals.map(x=>x.pr))*Math.pow(1.03,E.m/12)*E.fx||uc.tot*ga*1.25;price=Math.max(uc.tot*ga*1.05,Math.min(uc.tot*ga*1.3,md*.95));}
+  const o={id:E.id++,pid:p.id,qty,price:Math.round(price),rate:Math.max(am?100:1,Math.ceil(qty/11)),start:E.m+2,exp:E.m+2,share:+share.toFixed(2)};E.O.push(o);E.stop=true;
+  entLog(E,`${H.n} предлагает контракт: «${p.n}» — ${qty} шт. по ${entMoney(o.price,E)} без НДС (${C.homeCP?"цена «затраты плюс»":"твёрдая цена по конкурсу"}); ответить до ${entDate(E,o.exp)}`,"g");return o;}
+function entAccept(E,oid){const o=E.O.find(x=>x.id===oid);if(!o)return"";const C=entC(E),p=E.P.find(x=>x.id===o.pid);E.O=E.O.filter(x=>x!==o);if(!p)return"";
+  const k=entContract(E,{cu:-1,cuN:E.home.n,pid:o.pid,qty:o.qty,price:o.price,rate:o.rate,start:Math.max(E.m+1,o.start),dom:true,adv:C.homeAdv});E.home.need[p.cat]=Math.max(0,E.home.need[p.cat]-o.qty);
+  entLog(E,`Подписан госконтракт №${k.id}: «${p.n}», ${o.qty} шт.; аванс ${entMoney(k.adv,E)}`,"g");return"";}
+function entDecline(E,oid){E.O=E.O.filter(x=>x.id!==oid);}
+/* ---------- себестоимость: материалы и комплектующие по текущим ценам, труд с кривой освоения, накладные ---------- */
+const ENT_LB=k=>Math.log2((ENT_LRN[k]||ENT_LRN.veh).lr);
+function entLC(n,q,kind){const L=ENT_LRN[kind]||ENT_LRN.veh;if(L.lr>=1)return 1;const b=Math.log2(L.lr),e=1+b,a=(n||0)+.5,c=a+Math.max(q,1e-3);return Math.max(.5,(Math.pow(c,e)-Math.pow(a,e))/(e*Math.max(q,1e-3))*Math.pow(L.ref,-b));}
+function entKit(E,it){const C=entC(E);let s=0;for(const c in it.mb)s+=it.mb[c]*entIx(E,c);return{mat:s*C.matK*E.fx,comp:it.comp*entIx(E,"el")*C.cmpK*E.fx};}
+function entHrRate(E,k){const C=entC(E),s=E.shops[k],shK=s.shift===1?1:s.shift===2?1.1:1.2;return entWage(E,"wrk")*shK*(1+C.social)/(ENT_HPM*Math.max(.3,s.eff));}
+/* мощность по изделию, шт./мес: узкое место среди цехов при нынешних рабочих и сменах (доля мощности, свободная от сервиса) */
+function entShopFree(E,skip){const SV=E.svc,sv=SV&&SV.shop?SV.shop*SV.k*SV.share:0,o={};
+  ENT_SHOPS.forEach(k=>{const s=E.shops[k];o[k]=Math.min(s.wrk,s.pos*s.shift*ENT_WPP)*ENT_HPM*s.eff*(1-sv);});
+  E.P.forEach(q=>{if(q===skip||q.st!=="ser"||q.pause||!(q.plan>0))return;const LC=entLC(q.wu||0,q.plan,q.kind);ENT_SHOPS.forEach(k=>{o[k]-=(q.it.h[k]||0)*LC*q.plan;});});
+  E.P.forEach(q=>{if(q.st==="rd"&&q.stg===3&&q.proto&&!q.pause){const mm=(ENT_MINM[q.kind]||ENT_MINM.veh)[3]||1;ENT_SHOPS.forEach(k=>{if(q.proto[k]>0)o[k]-=Math.min(q.proto[k],q.proto0[k]/mm);});}});
+  ENT_SHOPS.forEach(k=>{o[k]=Math.max(0,o[k]);});return o;}
+function entCapM(E,p,all){const LC=entLC(p.wu||0,1,p.kind),F=all?null:entShopFree(E,p);let m=Infinity;
+  ENT_SHOPS.forEach(k=>{const h=(p.it.h[k]||0)*LC;if(h>0){const s=E.shops[k],c=F?F[k]:Math.min(s.wrk,s.pos*s.shift*ENT_WPP)*ENT_HPM*s.eff;m=Math.min(m,c/h);}});return isFinite(m)?m:0;}
+function entUnitCost(E,p,q){const it=p.it,LC=entLC(p.wu||0,Math.max(q||1,1e-3),p.kind),kit=entKit(E,it);let lab=0;
+  for(const k of ENT_SHOPS){const h=(it.h[k]||0)*LC;if(h>0)lab+=h*entHrRate(E,k);}const ovh=lab*E.ovk,am=p.am>0&&p.r04>0&&q>0?p.am/Math.max(1,q):0;
+  return{mat:kit.mat,comp:kit.comp,lab,ovh,am,tot:kit.mat+kit.comp+lab+ovh+am,LC};}
+/* ---------- проекты ---------- */
+function entStH0(p,s){return p.it.rdH*ENT_STG[s].sh*(s===4&&p.fast?.5:1);}
+function entStH(p,s){return entStH0(p,s)+(s===p.stg?(p.add||0):0);}
+function entProjNew(E,src){let it=null;try{it=src.kind==="veh"?entItemVeh(src.d):src.kind==="gun"?entItemGun(src.d):src.kind==="alloy"?entItemAlloy(src.d):entItemAmmo(src.d,src.t);}catch(e){console.warn(e);return null;}if(!it)return null;
+  let qH=0;(it.alloys||[]).forEach(k=>{if(!E.qual[k]){const r=typeof ALY!=="undefined"&&ALY.res&&ALY.res[k];qH+=r&&r.fam!=="st"?35e3:25e3;}});it.rdH+=qH;it.qH=qH;
+  const lam=(src.kind==="veh"?4:src.kind==="gun"?2.5:src.kind==="alloy"?1:1.2)+10*it.cx+qH/25e3*.8,
+    p={id:E.id++,n:String(src.n||"Изделие").slice(0,40),kind:src.kind,t:src.t||null,did:src.d&&src.d.id!=null?src.d.id:null,d:JSON.parse(JSON.stringify(src.d)),it,cat:it.cat,std:it.std,
+      st:"rd",stg:0,sh:0,add:0,mStg:0,out:0,fast:false,pause:false,hid:entPois(lam),found:0,fixH:0,proto:null,proto0:null,protoT:0,c08:0,c08t:0,cert:false,mCert:null,am:0,r04:0,
+      tppN:0,tppH:0,tppM:0,toolC:0,toolPaid:0,tooled:false,plan:0,wu:0,done:0,wipC:0,stock:0,pend:0,fg:0,ms:0,mc:0,stockM:1,list:0,sold:0,rev:0,cogs:0,dlv:[],shotH:0,shotN:0,shotM:-1,m0:E.m,lic:null};
+  E.P.push(p);entLog(E,`Открыта ОКР «${p.n}»: ${p.kind==="alloy"?"квалификация сплава":ENT_CAT[p.cat]}, ≈${Math.round(it.rdH/1000)} тыс. нормо-часов${qH?` (из них ${Math.round(qH/1000)} тыс. — квалификация своих сплавов)`:""}`,"i");return p;}
+/* оценка ОКР до открытия: месяцы и деньги при нынешнем штате */
+function entProjEst(E,it){const C=entC(E),cap={};["des","eng","tst"].forEach(k=>cap[k]=E.kb[k]*ENT_HPM*.85*E.kb.skill);const eff=pool=>ENT_HELP[pool].reduce((s,[k,e])=>s+cap[k]*e,0)||1;
+  const mm=ENT_MINM[it.kind]||ENT_MINM.veh;let mo=0;ENT_STG.forEach((s,i)=>{mo+=Math.max(mm[i],it.rdH*s.sh/eff(s.who));});
+  const rate=["des","eng","tst"].reduce((s,k)=>s+E.kb[k]*entWage(E,k),0)*(1+C.social)/Math.max(1,cap.des+cap.eng+cap.tst);
+  const kit=entKit(E,it),money=it.rdH*rate+(kit.mat+kit.comp)*it.proto*1.3+it.test$*E.fx*C.toolK+it.ext*E.fx;return{mo:Math.round(mo),money};}
+/* сколько месяцев осталось до приёмки при нынешнем КБ */
+function entProjLeft(E,p){if(p.st!=="rd")return 0;const cap={};["des","eng","tst"].forEach(k=>cap[k]=E.kb[k]*ENT_HPM*.85*E.kb.skill);const eff=pool=>ENT_HELP[pool].reduce((s,[k,e])=>s+cap[k]*e,0)||1;
+  const mm=ENT_MINM[p.kind]||ENT_MINM.veh;let mo=0;for(let s=p.stg;s<5;s++){const H=s===p.stg?Math.max(0,entStH(p,s)-p.sh):entStH0(p,s),left=s===p.stg?Math.max(0,mm[s]-p.mStg):mm[s];mo+=Math.max(left,H/eff(ENT_STG[s].who));}
+  return Math.ceil(mo+(p.fixH>0?p.fixH/eff("des"):0));}
+function entProtoStart(E,p){p.proto={};p.proto0={};let t=0;ENT_SHOPS.forEach(k=>{const v=(p.it.h[k]||0)*3*p.it.proto*(p.it.hk&&p.it.hk[k]||1);p.proto[k]=v;p.proto0[k]=v;t+=v;});p.protoT=t;}
+const entProtoLeft=p=>p.proto?ENT_SHOPS.reduce((s,k)=>s+(p.proto[k]||0),0):0;
+function entCertify(E,p){const C=entC(E),v=p.c08;if(v>0)entPost(E,"04","08.8",v,`Приняты результаты ОКР «${p.n}» (литера О1)`);p.r04=v;p.am=v/60;p.c08=0;p.cert=true;p.mCert=E.m;
+  if(p.kind==="alloy"){E.qual[p.it.akey]=true;p.st="done";entLog(E,`Сплав «${p.n}» квалифицирован: изделия из него больше не требуют отдельной квалификации`,"g");return;}
+  const shops=ENT_SHOPS.some(k=>E.shops[k].pos>0);if(shops)entTppStart(E,p);else p.st="cert";
+  entLog(E,`«${p.n}» принят: литера О1, затраты ОКР ${entMoney(v,E)} — нематериальный актив (амортизация 5 лет)${shops?"; началась подготовка производства":"; своих цехов нет — можно продать лицензию или купить оборудование"}`,"g");}
+function entTppStart(E,p){const C=entC(E);p.st="tpp";p.tppN=p.it.rdH*.08;p.tppH=0;p.tppM=0;p.toolC=p.it.tool$*E.fx*C.toolK*entIx(E,"st");p.toolPaid=0;p.c08t=0;}
+/* ---------- месяц ---------- */
+function entMonth(E){if(!E||E.over)return;E.stop=false;E.mo=E.mo||{};
+  entSettle(E);entStaff(E);entKB(E);entProd(E);entAdvance(E);entMarket(E);entDeliver(E);entAdmin(E);entPayroll(E);entClose(E);entCash(E);entDrift(E);entSnap(E);}
+function entRun(E,n){for(let i=0;i<n;i++){entMonth(E);if(E.over||E.stop)break;}}
+/* 1. расчёты за прошлый месяц: поставщики, налоги, взносы; оплаты покупателей с курсовой разницей; погашение овердрафта */
+function entSettle(E){const pay=(a,memo)=>{const v=-(E.B[a]||0);if(v>.5)entPost(E,a,"51",v,memo);};
+  pay("60","Оплата поставщикам и подрядчикам");pay("68.1","Перечислен НДФЛ");pay("69","Перечислены страховые взносы");pay("68.8","Уплачен налог на имущество");pay("68.4","Уплачен авансовый платёж по налогу на прибыль");
+  const vat=E.B["68.2"]||0;if(vat<-.5)entPost(E,"68.2","51",-vat,"Уплачен НДС");else if(vat>.5)entPost(E,"51","68.2",vat,"Возмещён НДС из бюджета");
+  const due=E.recv.filter(r=>r.m<=E.m);E.recv=E.recv.filter(r=>r.m>E.m);
+  due.forEach(r=>{entPost(E,"51","62",r.loc,`Оплата покупателя по договору №${r.kid}`);if(r.usd>0){const d=r.usd*E.fx-r.loc;if(d>0)entPost(E,"51","91.1",d,"Положительная курсовая разница по оплате");else if(d<0)entPost(E,"91.2","51",-d,"Отрицательная курсовая разница по оплате");}});
+  if(E.od>0){const free=(E.B["51"]||0)-entBuffer(E);if(free>0){const x=Math.min(E.od,free);entPost(E,"66.2","51",x,"Погашение овердрафта");E.od-=x;}}}
+/* 2. набор и сокращение, ввод оборудования */
+function entSev(E,amt,who){const v=amt*entC(E).sev;if(v>0)entPost(E,"91.2","70",v,`Выходные пособия: ${who}`);}
+function entStaff(E){const C=entC(E),kb=E.kb;
+  ["des","eng","tst"].forEach(k=>{const cur=kb[k],tgt=Math.max(0,Math.round(kb.tgt[k]||0));
+    if(tgt>cur){const h=Math.min(tgt-cur,Math.max(3,Math.round(cur*.1))),n0=kb.des+kb.eng+kb.tst;kb.skill=(kb.skill*n0+.7*h)/(n0+h);kb[k]+=h;entBuy(E,"26",h*entWage(E,k)*.8,`Набор: ${h} ${ENT_POOLN[k]} (подбор, допуск, обучение)`,true);}
+    else if(tgt<cur){kb[k]=tgt;entSev(E,(cur-tgt)*entWage(E,k),`сокращено ${cur-tgt} ${ENT_POOLN[k]}`);}});
+  const n=kb.des+kb.eng+kb.tst;if(n>0)kb.skill=Math.min(1.3,kb.skill+.004*(1.3-kb.skill));
+  ENT_SHOPS.forEach(k=>{const s=E.shops[k],tgt=Math.max(0,Math.round(s.tgt||0));
+    if(tgt>s.wrk){const h=Math.min(tgt-s.wrk,Math.max(5,Math.round(s.wrk*C.hire)));s.eff=(s.eff*s.wrk+.6*h)/(s.wrk+h);s.wrk+=h;entBuy(E,"26",h*entWage(E,"wrk")*.6,`Набор рабочих: ${h} чел. (${ENT_SHOP[k].s.toLowerCase()})`,true);}
+    else if(tgt<s.wrk){const f=s.wrk-tgt;s.wrk=tgt;entSev(E,f*entWage(E,"wrk"),`сокращено ${f} рабочих`);}});
+  E.capex=E.capex.filter(x=>{if(x.m>E.m)return true;E.shops[x.k].pos+=x.n;entPost(E,"01.1","08.1",x.cost,`Введено оборудование: ${x.n} поз. (${ENT_SHOP[x.k].s.toLowerCase()})`);
+    entLog(E,`Смонтировано оборудование: +${x.n} поз. — ${ENT_SHOP[x.k].n.toLowerCase()} цех`,"i");E.P.forEach(p=>{if(p.st==="cert"&&!p.lic)entTppStart(E,p);});return false;});}
+/* 3. работа КБ: доработка дефектов, стадии ОКР, ТПП; зарплата КБ — на проекты (08) или в управленческие (простой) */
+function entKB(E){const C=entC(E),cap={},left={},used={des:0,eng:0,tst:0},tag={};["des","eng","tst"].forEach(k=>{cap[k]=E.kb[k]*ENT_HPM*.85*E.kb.skill;left[k]=cap[k];});
+  const work=(p,pool,need)=>{let got=0;for(const [k,ef] of ENT_HELP[pool]){if(need-got<=1e-6)break;if(left[k]<=1e-9)continue;const take=Math.min(left[k],(need-got)/ef);left[k]-=take;used[k]+=take;got+=take*ef;
+      const key=p.id+"|"+k;tag[key]=tag[key]||{p,k,h:0};tag[key].h+=take;}return got;};
+  E.P.forEach(p=>{if(!p.pause&&p.fixH>0&&p.st!=="stop"){const g=work(p,"des",p.fixH);p.fixH=Math.max(0,p.fixH-g);}});
+  const SV=E.svc;if(SV&&SV.k>0&&SV.share>0){const sp={id:-1,n:SV.n,svc:true};["des","eng","tst"].forEach(k=>{const d=cap[k]*(SV.kb[k]||0)*SV.k*SV.share;if(d>0)work(sp,k,d);});}
+  E.P.forEach(p=>{if(p.pause)return;
+    if(p.st==="tpp"){const need=Math.max(0,p.tppN-p.tppH),mm=ENT_TPPM[p.kind]||2;if(need>0){const g=work(p,"eng",Math.min(need,p.tppN/mm*1.05));p.tppH+=g;
+        const v=Math.min(p.toolC-p.toolPaid,p.toolC*g/Math.max(1,p.tppN));if(v>0){entBuy(E,"08.8",v,`Оснастка и приспособления «${p.n}»`);p.toolPaid+=v;p.c08t+=v;}}p.tppM++;return;}
+    if(p.st!=="rd")return;const s=p.stg,pool=ENT_STG[s].who,H=entStH(p,s),need=Math.max(0,H-p.sh),minM=(ENT_MINM[p.kind]||ENT_MINM.veh)[s]||1,lim=H/minM*1.05,shot=s===4?Math.min(p.shotH||0,need):0;
+    let g=need>0?work(p,pool,Math.max(0,Math.min(need,lim)-shot))+shot:0;
+    if(p.out>0&&s<=2&&g>0){const ext=Math.min(need-g,g*p.out/(1-p.out),lim);if(ext>0){const v=ext*C.ext*E.wi*1.3;entBuy(E,"08.8",v,`Соисполнители ОКР «${p.n}»: ${Math.round(ext)} нормо-ч`);p.c08+=v;g+=ext;}}
+    p.sh+=g;p.mStg++;
+    if((s===1||s===2)&&p.it.ext>0&&g>0){const v=p.it.ext*E.fx*g/(entStH0(p,1)+entStH0(p,2));entBuy(E,"08.8",v,`Опытно-конструкторские работы смежников «${p.n}»`);p.c08+=v;}
+    if(s===4&&g>0){const v=p.it.test$*E.fx*C.toolK*g/Math.max(1,entStH0(p,4)*(p.fast?2:1));entBuy(E,"08.8",v,`Испытания «${p.n}»: полигон, боеприпасы, топливо, измерения`);p.c08+=v;}
+    if(s>=3&&p.hid>0&&g>0){const frac=g/Math.max(1,entStH0(p,s)),pd=1-Math.exp(-(s===4?3:1)*frac);let f=0;for(let i=0;i<p.hid;i++)if(Math.random()<pd)f++;
+      if(f){p.hid-=f;p.found+=f;p.fixH+=f*p.it.rdH*.012;p.add+=f*entStH0(p,s)*.06;entLog(E,`«${p.n}»: ${s===4?"на испытаниях":"при изготовлении образцов"} выявлено дефектов — ${f}; конструкторы дорабатывают`,"w");}}});
+  E.P.forEach(p=>{p.shotH=0;});
+  ["des","eng","tst"].forEach(k=>{const n=E.kb[k];if(!n)return;const W=n*entWage(E,k),S=W*C.social,T=cap[k]||1;
+    Object.values(tag).filter(o=>o.k===k).forEach(o=>{const f=o.h/T,w=W*f,s2=S*f;if(o.p.svc){entPost(E,"20","70",w,`Зарплата КБ: ${o.p.n}`);entPost(E,"20","69",s2,"Взносы: работы по заказу");E.svc.cost+=w+s2;return;}
+      entPost(E,"08.8","70",w,`Зарплата КБ: «${o.p.n}»`);entPost(E,"08.8","69",s2,`Взносы: «${o.p.n}»`);if(o.p.st==="tpp")o.p.c08t+=w+s2;else o.p.c08+=w+s2;});
+    const idle=Math.max(0,1-used[k]/T);if(idle>1e-6){entPost(E,"26","70",W*idle,`Зарплата КБ без загрузки (${ENT_POOLN[k]})`);entPost(E,"26","69",S*idle,"Взносы: КБ без загрузки");}});
+  E.kbUse={des:used.des/(cap.des||1),eng:used.eng/(cap.eng||1),tst:used.tst/(cap.tst||1)};}
+/* 4. цеха: опытные образцы, серийный выпуск, зарплата рабочих, накладные, выпуск готовой продукции, закупка материалов */
+function entProd(E){const C=entC(E),cap={},use={},tagS={};let capTot=0;
+  ENT_SHOPS.forEach(k=>{const s=E.shops[k],w=Math.min(s.wrk,s.pos*s.shift*ENT_WPP);cap[k]=w*ENT_HPM*s.eff;use[k]=0;capTot+=cap[k];});
+  const tagAdd=(p,k,h,kd)=>{const key=p.id+"|"+kd;tagS[key]=tagS[key]||{p,kd,h:0,v:0,byK:{}};tagS[key].h+=h;tagS[key].byK[k]=(tagS[key].byK[k]||0)+h;};
+  const SV=E.svc,svP={id:-1,n:SV?SV.n:"",svc:true};if(SV&&SV.shop>0&&SV.k>0&&SV.share>0){let hh=0;ENT_SHOPS.forEach(k=>{const h=cap[k]*SV.shop*SV.k*SV.share;if(h>0){use[k]+=h;tagAdd(svP,k,h,"svc");hh+=h;}});
+    if(hh>0){const v=hh*entWage(E,"wrk")*.45*(1+C.social)/ENT_HPM*entIx(E,"st");entBuy(E,"20",v,`Запчасти и материалы: ${SV.n}`);SV.cost+=v;}}
+  E.P.forEach(p=>{if(p.pause||p.st!=="rd"||p.stg!==3||!p.proto)return;const minM=(ENT_MINM[p.kind]||ENT_MINM.veh)[3]||1;let doneH=0;
+    ENT_SHOPS.forEach(k=>{const rem=p.proto[k]||0;if(rem<=1e-9)return;const tgt=Math.min(rem,p.proto0[k]/minM*1.05),own=Math.min(tgt,Math.max(0,(cap[k]-use[k])*.6));
+      if(own>0){use[k]+=own;tagAdd(p,k,own,"proto");}const ext=tgt-own;if(ext>1e-9){const v=ext*C.ext*E.wi;entBuy(E,"08.8",v,`Опытные образцы «${p.n}»: работы на стороне (${ENT_SHOP[k].s.toLowerCase()})`);p.c08+=v;}
+      p.proto[k]=rem-tgt;doneH+=tgt;});
+    if(doneH>0){const kit=entKit(E,p.it),v=(kit.mat+kit.comp)*p.it.proto*1.3*doneH/Math.max(1,p.protoT);entBuy(E,"08.8",v,`Материалы и комплектующие опытных образцов «${p.n}»`);p.c08+=v;}});
+  E.P.forEach(p=>{p.hrs=null;p.bott="";if(p.pause||p.st!=="ser"||!(p.plan>0))return;const q=p.plan,LC=entLC(p.wu,q,p.kind);let f=1,bott="";const req={};
+    ENT_SHOPS.forEach(k=>{req[k]=(p.it.h[k]||0)*LC*q;if(req[k]>0){const fr=Math.max(0,cap[k]-use[k])/req[k];if(fr<f){f=fr;bott=k;}}});f=entCl(f,0,1);const W=q*f;p.bott=f<.995?bott:"";p.fW=f;if(W<1e-6)return;
+    p.hrs={};ENT_SHOPS.forEach(k=>{const h=req[k]*f;if(h>0){use[k]+=h;tagAdd(p,k,h,"ser");p.hrs[k]=h;}});
+    const kit=entKit(E,p.it),kv=kit.mat+kit.comp,fromS=Math.min(p.ms,W);let cost=fromS>0?p.mc*fromS/p.ms:0;p.ms-=fromS;p.mc-=cost;if(p.ms<1e-9){p.ms=0;p.mc=0;}
+    const lack=W-fromS;if(lack>1e-9){const v=lack*kv*1.12;entBuy(E,"10",v,`Срочная закупка материалов «${p.n}» (+12 %)`);cost+=v;}
+    if(cost>0){entPost(E,"20","10",cost,`Материалы в производство «${p.n}»`);p.wipC+=cost;}p.wu+=W;});
+  /* зарплата рабочих: занятое время — на изделия и образцы, простой — в общепроизводственные */
+  let usedTot=0,dlSer=0;ENT_SHOPS.forEach(k=>{const s=E.shops[k];s.cap=cap[k];s.use=use[k];s.load=cap[k]>0?use[k]/cap[k]:0;usedTot+=use[k];if(!s.wrk)return;
+    const shK=s.shift===1?1:s.shift===2?1.1:1.2,W=s.wrk*entWage(E,"wrk")*shK,T=W*(1+C.social),rate=T/(s.wrk*ENT_HPM*Math.max(.3,s.eff));let uc=0;
+    Object.values(tagS).forEach(o=>{const h=o.byK[k]||0;if(h>0){const v=Math.min(h*rate,T-uc);uc+=v;o.v+=v;}});const idle=T-uc;
+    if(idle>1){entPost(E,"25","70",idle/(1+C.social),`Простой рабочих (${ENT_SHOP[k].s.toLowerCase()})`);entPost(E,"25","69",idle-idle/(1+C.social),"Взносы: простой рабочих");}
+    const effMax=E.start==="gc"?.88:.95;if(s.load>.3)s.eff=Math.min(effMax,s.eff+.02*(effMax-s.eff)+.002);else s.eff=Math.max(.5,s.eff-.002);});
+  Object.values(tagS).forEach(o=>{if(!(o.v>0))return;const w=o.v/(1+C.social),so=o.v-w;if(o.kd==="svc"){entPost(E,"20","70",w,`Зарплата рабочих: ${o.p.n}`);entPost(E,"20","69",so,"Взносы: ремонтные работы");E.svc.cost+=o.v;return;}if(o.kd==="ser"){entPost(E,"20","70",w,`Зарплата рабочих: «${o.p.n}»`);entPost(E,"20","69",so,`Взносы: «${o.p.n}»`);o.p.wipC+=o.v;dlSer+=o.v;}
+    else{entPost(E,"08.8","70",w,`Зарплата рабочих: опытные образцы «${o.p.n}»`);entPost(E,"08.8","69",so,`Взносы: опытные образцы «${o.p.n}»`);o.p.c08+=o.v;}});
+  /* накладные */
+  const eq=E.B["01.1"]||0,a1=-(E.B["02.1"]||0),d1=Math.min(eq/144,Math.max(0,eq-a1));if(d1>0)entPost(E,"25","02.1",d1,"Амортизация оборудования цехов");
+  const tl=E.B["01.2"]||0,a2=-(E.B["02.2"]||0),d2=Math.min(tl/60,Math.max(0,tl-a2));if(d2>0)entPost(E,"25","02.2",d2,"Амортизация оснастки");
+  let en=0;ENT_SHOPS.forEach(k=>{const s=E.shops[k];en+=s.pos*s.shift*C.en*entIx(E,"st")*(.4+.6*Math.min(1,s.load||0));});if(en>0)entBuy(E,"25",en*E.fx,"Энергия, ремонт и обслуживание оборудования");
+  const wrkT=ENT_SHOPS.reduce((a,k)=>a+E.shops[k].wrk,0),aux=Math.round(wrkT*.22);if(aux>0){const W=aux*entWage(E,"wrk")*1.05;entPost(E,"25","70",W,`Вспомогательный персонал и ОТК: ${aux} чел.`);entPost(E,"25","69",W*C.social,"Взносы: вспомогательный персонал");}
+  const B25=E.B["25"]||0;let allocSer=0;if(B25>0){const share=capTot>0?Math.min(1,usedTot/(.85*capTot)):0,alloc=B25*share;
+    if(alloc>0&&usedTot>0)Object.values(tagS).forEach(o=>{const v=alloc*o.h/usedTot;if(v<=0)return;if(o.kd==="svc"){entPost(E,"20","25",v,`Общепроизводственные расходы: ${o.p.n}`);E.svc.cost+=v;return;}if(o.kd==="ser"){entPost(E,"20","25",v,`Общепроизводственные расходы на «${o.p.n}»`);o.p.wipC+=v;allocSer+=v;}
+      else{entPost(E,"08.8","25",v,`Общепроизводственные расходы: опытные образцы «${o.p.n}»`);o.p.c08+=v;}});
+    const rest=E.B["25"]||0;if(rest>1)entPost(E,"91.2","25",rest,"Расходы недогруженных мощностей (не включаются в себестоимость)");}
+  if(dlSer>0)E.ovk=entCl(allocSer/dlSer,.2,4);E.util=capTot>0?usedTot/capTot:0;
+  if(SV&&SV.cost>0){const C2=entC(E),cg=SV.cost,net=cg*(1+SV.mk),vat=net*C2.vat;entPost(E,"90.2","20",cg,`Себестоимость: ${SV.n}`);entPost(E,"62","90.1",net+vat,`Выручка: ${SV.n}`);if(vat>0)entPost(E,"90.3","68.2",vat,`НДС: ${SV.n}`);
+    E.recv.push({m:E.m+1,loc:net+vat,usd:0,kid:"сервис"});SV.rev=net;SV.costM=cg;SV.cost=0;}else if(SV){SV.rev=0;SV.costM=0;}
+  /* выпуск: бронемашины проходят приёмо-сдаточные испытания и военную приёмку месяц */
+  E.P.forEach(p=>{if(p.st!=="ser")return;if(p.pend>0){p.stock+=p.pend;p.pend=0;}const nd=Math.floor(p.wu+1e-6)-p.done;
+    if(nd>0){const inP=p.wu-p.done,v=p.wipC*Math.min(1,nd/inP);entPost(E,"43","20",v,`Выпуск: «${p.n}», ${nd} шт.`);p.wipC-=v;p.fg+=v;p.done+=nd;if(p.kind==="veh")p.pend+=nd;else p.stock+=nd;p.ucLast=v/nd;p.madeM=nd;}else p.madeM=0;});
+  /* закупка материалов на следующий месяц: запас в месяцах выпуска */
+  E.P.forEach(p=>{if(p.st!=="ser"||p.pause||!(p.plan>0))return;const tgt=p.plan*(p.stockM!=null?p.stockM:1),need=tgt-p.ms;if(need<=1e-6)return;const kit=entKit(E,p.it),v=need*(kit.mat+kit.comp);
+    entBuy(E,"10",v,`Закупка материалов и комплектующих «${p.n}»`);p.ms+=need;p.mc+=v;});}
+/* стадии ОКР и ТПП: переход дальше, приёмка, ввод оснастки */
+function entAdvance(E){const C=entC(E);E.P.forEach(p=>{if(p.pause)return;
+  if(p.st==="rd"){const s=p.stg,minM=(ENT_MINM[p.kind]||ENT_MINM.veh)[s]||1;
+    const ok=p.sh>=entStH(p,s)-1e-6&&(s!==3||entProtoLeft(p)<=1e-6)&&(s!==4||p.fixH<=1e-6)&&p.mStg>=minM;
+    if(ok){E.stop=true;p.sh=0;p.add=0;p.mStg=0;if(s<4){p.stg++;if(p.stg===3)entProtoStart(E,p);entLog(E,`«${p.n}»: завершена стадия «${ENT_STG[s].n}», начата «${ENT_STG[s+1].n}»`,"g");}else entCertify(E,p);}}
+  else if(p.st==="tpp"&&p.tppH>=p.tppN-1e-6&&p.tppM>=(ENT_TPPM[p.kind]||2)){if(p.toolPaid<p.toolC){const v=p.toolC-p.toolPaid;entBuy(E,"08.8",v,`Оснастка «${p.n}»: окончательный расчёт`);p.toolPaid+=v;p.c08t+=v;}
+    if(p.c08t>0)entPost(E,"01.2","08.8",p.c08t,`Оснастка «${p.n}» введена в эксплуатацию`);p.c08t=0;p.tooled=true;p.st="ser";E.stop=true;
+    entLog(E,`«${p.n}»: подготовка производства закончена — можно планировать серийный выпуск`,"g");const mon=entMon(E);entHomeOffer(E,p,(12-mon)/12);}});}
+/* 5. рынок: годовые бюджеты, конкуренты, тендеры, прямые продажи, роялти */
+function entMarket(E){const mon=entMon(E);
+  if(mon===0&&E.m>0){E.cust.forEach(c=>{c.spent=0;c.bud*=entR(.97,1.08);for(const k in c.need0)c.need[k]=Math.round(c.need0[k]*entR(.8,1.2));});
+    const C=entC(E),hk={ru:1.5,de:.5,us:1}[E.c]||1,hn={mbt:120,ifv:200,apc:150,how_t:40,how_sp:40,at:20,tgun:60,auto:300,am_ke:30000,am_heat:20000,am_he:400000,am_auto:900000};for(const k in hn)E.home.need[k]=Math.round(hn[k]*hk*entR(.85,1.15));
+    E.P.forEach(p=>{if(p.st==="ser")entHomeOffer(E,p,1);});}
+  E.O=E.O.filter(o=>{if(o.exp<E.m){entLog(E,`Предложение госзаказчика по «${entPN(E,o.pid)}» истекло`,"w");return false;}return true;});
+  E.comp.forEach(x=>{x.load=entCl(x.load+(.65-x.load)*.1+entR(-.05,.05),.2,1);x.war=(x.war||0)*.95;x.rep=Math.min(80,(x.rep||70)+.5);});
+  E.T.forEach(t=>{if((t.st==="open"||t.st==="bid")&&t.dl<=E.m)entJudge(E,t);});E.T=E.T.filter(t=>t.st==="open"||t.st==="bid"||E.m-t.dl<3);
+  if(Math.random()<.6)entGenTender(E,false);if(Math.random()<.3)entGenTender(E,false);
+  E.P.forEach(p=>{if(p.list>0&&p.stock>0&&p.st==="ser")entSpot(E,p);});
+  E.P.forEach(p=>{if(p.lic&&p.lic.until>=E.m){const v=p.lic.roy*E.fx*entR(.6,1.4);entPost(E,"62","90.1",v,`Роялти по лицензии «${p.n}»`);entPost(E,"51","62",v,`Получены роялти «${p.n}»`);}});}
+function entSpot(E,p){const base=ENT_SPOT[p.cat]||0,comps=E.comp.filter(x=>x.cat===p.cat);if(!base||!comps.length)return;const infl=Math.pow(1.03,E.m/12),med=entMed(comps.map(x=>x.pr))*infl,w={f:1,p:1,m:1,r:1,c:1,d:0};
+  const my=entScore(entPSc(E,p),w,p.list,med*1.3,p.std,"mix",1,0,E.rep),avg=comps.reduce((s,x)=>s+entScore(entCompScore(E,x),w,x.pr*infl,med*1.3,x.std,"mix",1,0,x.rep),0)/comps.length;
+  /* склад под договоры не продаётся: резерв на поставки этого и следующего месяца */
+  const res=E.K.filter(k=>k.st==="act"&&k.pid===p.id).reduce((a2,k)=>a2+Math.max(0,Math.min(k.qty,k.rate*(E.m-k.start+2))-k.dlv),0),free=Math.max(0,p.stock-res);
+  let q=Math.min(free,entPois(base*Math.exp(1.6*(my-avg))*(E.rep/50)));if(p.kind==="ammo")q=Math.min(free,Math.round(q/50)*50);if(q<=0)return;
+  const rev=q*p.list*E.fx,cg=p.fg*q/Math.max(1,p.stock+p.pend);p.stock-=q;p.fg-=cg;entPost(E,"90.2","43",cg,`Себестоимость: прямая продажа «${p.n}», ${q} шт.`);
+  entPost(E,"62","90.1",rev,`Прямая экспортная продажа «${p.n}», ${q} шт. по ${entUsd(p.list)}`);entPost(E,"51","62",rev,`Предоплата по прямой продаже «${p.n}»`);entBuy(E,"44",rev*(.015+entC(E).exc),`Доставка и экспортное сопровождение «${p.n}»`,true);
+  p.sold+=q;p.rev+=rev;p.cogs+=cg;p.dlv.push([E.m,q]);const sh=E.share[p.cat]||(E.share[p.cat]={});sh._me=(sh._me||0)+q;entLog(E,`Прямая продажа: «${p.n}» — ${q} шт. на ${entMoney(rev,E)}`,"g");}
+/* 6. поставки по договорам: выручка, НДС, зачёт аванса, неустойки, расторжение */
+function entShip(E,k,p,q){const C=entC(E),cg=p.fg*q/Math.max(1,p.stock+p.pend);p.stock-=q;p.fg-=cg;entPost(E,"90.2","43",cg,`Себестоимость отгрузки «${p.n}», ${q} шт. (договор №${k.id})`);let rev=0;
+  if(k.dom){const net=q*k.price,vat=net*C.vat;rev=net;entPost(E,"62","90.1",net+vat,`Отгрузка по госконтракту №${k.id}: «${p.n}», ${q} шт.`);if(vat>0)entPost(E,"90.3","68.2",vat,`НДС с отгрузки по договору №${k.id}`);
+    const off=Math.min(k.advL,k.adv*q/k.qty);if(off>0){entPost(E,"62.2","62",off,`Зачёт аванса по договору №${k.id}`);k.advL-=off;}E.recv.push({m:E.m+1,loc:net+vat-off,usd:0,kid:k.id});}
+  else{const usd=q*k.pu,offU=Math.min(k.advLU,k.advU*q/k.qty),offL=k.advU>0?offU*k.advLoc/k.advU:0,restU=usd-offU;rev=offL+restU*E.fx;
+    entPost(E,"62","90.1",rev,`Экспортная отгрузка по договору №${k.id}: «${p.n}», ${q} шт. (НДС 0 %)`);if(offL>0){entPost(E,"62.2","62",offL,`Зачёт аванса по договору №${k.id}`);k.advLU-=offU;}
+    E.recv.push({m:E.m+1,loc:restU*E.fx,usd:restU,kid:k.id});entBuy(E,"44",rev*(.015+C.exc),`Доставка и экспортное сопровождение по договору №${k.id}`,true);}
+  k.dlv+=q;p.sold+=q;p.rev+=rev;p.cogs+=cg;p.dlv.push([E.m,q]);if(p.dlv.length>60)p.dlv.splice(0,p.dlv.length-60);}
+function entDeliver(E){const C=entC(E);E.K.forEach(k=>{if(k.st!=="act"||E.m<k.start)return;const p=E.P.find(x=>x.id===k.pid);if(!p)return;
+    const due=Math.min(k.qty,k.rate*(E.m-k.start+1)),q=Math.min(p.stock,Math.max(0,due-k.dlv));if(q>0)entShip(E,k,p,q);
+    const late=Math.max(0,due-k.dlv),val=k.dom?k.price:k.pu*E.fx;
+    if(late>0){const pen=Math.min(late*val*(k.dom?C.penM:.02),Math.max(0,k.qty*val*.1-k.pen));if(pen>1){entPost(E,"91.2","51",pen,`Неустойка за просрочку поставки по договору №${k.id}`);k.pen+=pen;}
+      if(!k.lateW){k.lateW=1;E.stop=true;entLog(E,`Срыв графика по договору №${k.id} (${k.cuN}): не отгружено ${late} шт. — начисляется неустойка`,"w");}E.rep=Math.max(0,E.rep-.3);}
+    if(k.dlv>=k.qty){k.st="done";const g=k.pen>0?1:3;E.rep=Math.min(100,E.rep+g);if(k.cu>=0)E.cust[k.cu].rel=Math.min(100,(E.cust[k.cu].rel||50)+g*2);entLog(E,`Договор №${k.id} (${k.cuN}) исполнен${k.pen>0?" с просрочкой":" в срок"}`,"g");}
+    else if(E.m>k.end+6){k.st="fail";let ref=k.dom?k.advL:k.advLU*k.advLoc/Math.max(1,k.advU);if(ref>0)entPost(E,"62.2","51",ref,`Возврат неотработанного аванса по договору №${k.id}`);
+      if(!k.dom&&k.advLU>0){const d=k.advLU*E.fx-ref;if(d>0)entPost(E,"91.2","51",d,"Курсовая разница при возврате аванса");else if(d<0)entPost(E,"51","91.1",-d,"Курсовая разница при возврате аванса");}
+      const fine=(k.qty-k.dlv)*val*.1;entPost(E,"91.2","51",fine,`Штраф за расторжение договора №${k.id}`);E.rep=Math.max(0,E.rep-15);if(k.cu>=0)E.cust[k.cu].rel=Math.max(0,(E.cust[k.cu].rel||50)-25);
+      E.stop=true;entLog(E,`Договор №${k.id} (${k.cuN}) расторгнут заказчиком: аванс возвращён, штраф ${entMoney(fine,E)}, репутация −15`,"w");}});}
+/* 7. управление, амортизация НИОКР, налог на имущество, гарантия, кредиты */
+function entAdmin(E){const C=entC(E),staff=E.kb.des+E.kb.eng+E.kb.tst+ENT_SHOPS.reduce((a,k)=>a+E.shops[k].wrk,0),adm=Math.round((3+.07*staff)*(E.admK||1));
+  if(adm>0){const W=adm*entWage(E,"adm");entPost(E,"26","70",W,`Зарплата управления, бухгалтерии, снабжения: ${adm} чел.`);entPost(E,"26","69",W*C.social,"Взносы: управление");}E.adm=adm;
+  entBuy(E,"26",(25e3+350*staff)*C.offK*E.fx*entIx(E,"st"),"Аренда, охрана, режим секретности, связь, лицензии");
+  E.P.forEach(p=>{if(p.am>0&&p.r04>0){const v=Math.min(p.am,p.r04);entPost(E,"26","05",v,`Амортизация НИОКР «${p.n}»`);p.r04-=v;}});
+  const nb=(E.B["01.1"]||0)+(E.B["01.2"]||0)+(E.B["02.1"]||0)+(E.B["02.2"]||0);if(nb>0&&C.prop>0)entPost(E,"91.2","68.8",nb*C.prop/12,"Налог на имущество");
+  E.P.forEach(p=>{if(!p.dlv||!p.dlv.length)return;const recent=p.dlv.filter(x=>E.m-x[0]<24).reduce((a,x)=>a+x[1],0);if(recent<=0)return;
+    const v=recent*(p.ucLast||0)*(.002+.004*(p.hid||0))/(p.kind==="ammo"?20:1);if(v>1)entBuy(E,"91.2",v,`Гарантийный ремонт и рекламации «${p.n}»`);
+    if(p.hid>0&&Math.random()<.05*p.hid){p.hid--;p.found++;E.rep=Math.max(0,E.rep-3);p.fixH+=p.it.rdH*.008;entLog(E,`Рекламация: в войсках выявлен дефект «${p.n}» — репутация −3, нужна доработка`,"w");}});
+  E.L=E.L.filter(L=>{const i=L.left*L.r/12;if(i>0)entPost(E,"91.2","51",i,`Проценты по кредиту №${L.id}`);const pr=Math.min(L.left,L.pay);if(pr>0){entPost(E,"66","51",pr,`Погашение кредита №${L.id}`);L.left-=pr;}return L.left>1;});
+  if(E.od>0)entPost(E,"91.2","51",E.od*(entRate(E)+.05)/12,"Проценты по овердрафту");}
+/* 8. выплата зарплаты: НДФЛ удерживается и перечисляется в следующем месяце */
+function entPayroll(E){const C=entC(E),gross=Math.max(0,(E.mo[">70"]||0)-(E.mo["70>"]||0));if(gross<=0)return;const nd=gross*C.ndfl;if(nd>0)entPost(E,"70","68.1",nd,"Удержан НДФЛ");entPost(E,"70","51",gross-nd,"Выплачена зарплата");}
+/* 9. закрытие месяца: управленческие и коммерческие расходы, вычет НДС, финансовый результат, налог на прибыль; реформация в декабре */
+function entClose(E){const C=entC(E),Q=E.mo;const v26=E.B["26"]||0;if(v26>0)entPost(E,"90.8","26",v26,"Управленческие расходы списаны на продажи");
+  const v44=E.B["44"]||0;if(v44>0)entPost(E,"90.7","44",v44,"Расходы на продажу списаны");
+  const v19=E.B["19"]||0;if(v19>0)entPost(E,"68.2","19",v19,"НДС по приобретённому принят к вычету");
+  const rev=Q[">90.1"]||0,cg=Q["90.2>"]||0,vat=Q["90.3>"]||0,sel=Q["90.7>"]||0,adm=Q["90.8>"]||0,sales=rev-cg-vat-sel-adm;
+  if(sales>0)entPost(E,"90.9","99",sales,"Прибыль от продаж за месяц");else if(sales<0)entPost(E,"99","90.9",-sales,"Убыток от продаж за месяц");
+  const oi=Q[">91.1"]||0,oe=Q["91.2>"]||0,oth=oi-oe;if(oth>0)entPost(E,"91.9","99",oth,"Сальдо прочих доходов и расходов");else if(oth<0)entPost(E,"99","91.9",-oth,"Сальдо прочих доходов и расходов");
+  const pbt=sales+oth;E.yr.pbt+=pbt;const base=Math.max(0,E.yr.pbt),use=Math.min(E.lossCF,base*C.lossLim),due=(base-use)*C.profit,d=due-E.yr.tax;
+  if(d>.5)entPost(E,"99","68.4",d,"Налог на прибыль (нарастающим итогом с начала года)");else if(d<-.5)entPost(E,"68.4","99",-d,"Уменьшение налога на прибыль: убыток с начала года");E.yr.tax=due;
+  E.mRes={rev,vat,net:rev-vat,cg,sel,adm,sales,oi,oe,oth,pbt,tax:d,np:pbt-d};if(cg>0)E.gaK=.8*(E.gaK||.12)+.2*entCl(adm/cg,.03,.6);
+  if(entMon(E)===11){const y=entYear(E),yp=E.yr.pbt;if(yp<0)E.lossCF+=-yp;else E.lossCF-=Math.min(E.lossCF,yp*C.lossLim);
+    ["90.1","90.2","90.3","90.7","90.8"].forEach(a=>{const b=E.B[a]||0;if(b>.5)entPost(E,"90.9",a,b,"Реформация: закрытие субсчетов счёта 90");else if(b<-.5)entPost(E,a,"90.9",-b,"Реформация: закрытие субсчетов счёта 90");});
+    ["91.1","91.2"].forEach(a=>{const b=E.B[a]||0;if(b>.5)entPost(E,"91.9",a,b,"Реформация: закрытие субсчетов счёта 91");else if(b<-.5)entPost(E,a,"91.9",-b,"Реформация: закрытие субсчетов счёта 91");});
+    const p99=E.B["99"]||0;if(p99<-.5)entPost(E,"99","84",-p99,`Чистая прибыль ${y} года — в нераспределённую прибыль`);else if(p99>.5)entPost(E,"84","99",p99,`Убыток ${y} года — в непокрытый убыток`);
+    entLog(E,`Итоги ${y} года: прибыль до налога ${entMoney(yp,E)}, налог на прибыль ${entMoney(E.yr.tax,E)}${E.lossCF>0?`, убыток к переносу ${entMoney(E.lossCF,E)}`:""}`,"i");E.yr={pbt:0,tax:0};}}
+/* 10. касса: овердрафт банка, кассовые разрывы, банкротство */
+function entCash(E){const c=E.B["51"]||0;
+  if(c<0){const lim=entODLimit(E),x=Math.min(-c+entBuffer(E)*.5,Math.max(0,lim-E.od));if(x>0){entPost(E,"51","66.2",x,"Овердрафт: банк покрыл кассовый разрыв");E.od+=x;}
+    if((E.B["51"]||0)<-1){E.crisis++;E.stop=true;entLog(E,`Кассовый разрыв: не хватает ${entMoney(-(E.B["51"]||0),E)}, лимит овердрафта исчерпан`,"w");}else E.crisis=Math.max(0,E.crisis-1);}
+  else E.crisis=Math.max(0,E.crisis-1);
+  if(E.crisis>=3){E.over=true;E.stop=true;entLog(E,"Банкротство: три месяца подряд нечем платить. Фирма передана арбитражному управляющему.","w");}}
+/* 11. сырьё, курс, зарплаты, ставка, события */
+function entDrift(E){const C=entC(E);
+  ENT_CMDS.forEach(c=>{const d=ENT_CMD[c];let x=E.ix[c]*Math.exp((d.d||0)+d.v*entGauss());if(d.mr)x*=Math.exp(d.mr*Math.log((d.ref||1)/x));E.ix[c]=entCl(x,.3,5);const H=E.ixH[c]||(E.ixH[c]=[]);H.push(+E.ix[c].toFixed(4));if(H.length>36)H.shift();});
+  if(C.fxv)E.fx*=Math.exp(C.fxd+C.fxv*entGauss());E.wi*=Math.exp(C.winf/12+.002*entGauss());E.key=entCl(E.key+.0015*entGauss(),.005,.3);
+  if(Math.random()<.045){const L=ENT_EVT.filter(e=>!e.c||e.c(E)),tot=L.reduce((a,e)=>a+e.w,0);let r=Math.random()*tot;const e=L.find(x=>(r-=x.w)<0)||L[0];let t=e.t;
+    if(e.cu){const c=E.cust[Math.floor(Math.random()*E.cust.length)];e.f(E,c);t=t.replace("{cu}",c.n);}else if(e.comp){const x=E.comp[Math.floor(Math.random()*E.comp.length)];e.f(E,x);t=t.replace("{comp}",`${x.n} (${x.mk})`);}else e.f(E);
+    entLog(E,t,"e");}
+  E.rep=entCl(E.rep+(50-E.rep)*.004,0,100);
+  if(E.svc){E.svc.k*=1-E.svc.decay;if(entMon(E)===11&&E.rep>=45)E.svc.k=Math.min(1,E.svc.k+.12);}}
+/* 12. снимок месяца и переход к следующему */
+function entSnap(E){const r=E.mRes||{},Q=E.mo,inC=Object.keys(Q).filter(k=>k.startsWith("51>")&&k.length>3).reduce((s,k)=>s+Q[k],0),outC=Object.keys(Q).filter(k=>k.endsWith(">51")&&k.length>3).reduce((s,k)=>s+Q[k],0);
+  E.hist.push({m:E.m,net:r.net||0,cg:r.cg||0,sel:r.sel||0,adm:r.adm||0,oth:r.oth||0,oi:r.oi||0,oe:r.oe||0,pbt:r.pbt||0,tax:r.tax||0,np:r.np||0,cash:E.B["51"]||0,eq:entEquity(E),debt:entDebt(E),bk:entBacklog(E),
+    rep:Math.round(E.rep),fx:E.fx,inC,out:outC,util:E.util||0});if(E.hist.length>240)E.hist.shift();
+  E.last={m:E.m,mo:E.mo,B0:E.B0,B1:Object.assign({},E.B),res:E.mRes};E.m++;E.B0=Object.assign({},E.B);E.mo={};}
+/* ---------- действия игрока ---------- */
+function entBuyPos(E,k,n){n=Math.max(1,Math.round(n));const cost=n*ENT_SHOP[k].pos*E.fx*(E.c==="ru"?1.25:1)*(.6+.4*entIx(E,"st"));entBuy(E,"08.1",cost,`Заказано оборудование: ${n} поз. (${ENT_SHOP[k].s.toLowerCase()})`);
+  E.capex.push({k,n,m:E.m+3,cost});entLog(E,`Заказано оборудование: ${n} поз. — ${ENT_SHOP[k].n.toLowerCase()} цех, монтаж к ${entDate(E,E.m+3)}`,"i");return cost;}
+function entSellPos(E,k,n){const s=E.shops[k];n=Math.min(s.pos,Math.max(1,Math.round(n)));if(!n)return 0;const tot=ENT_SHOPS.reduce((a,q)=>a+E.shops[q].pos,0)||1,f=n/tot,cost=(E.B["01.1"]||0)*f,ad=-(E.B["02.1"]||0)*f,nbv=cost-ad;
+  if(ad>0)entPost(E,"02.1","01.1",ad,"Списана амортизация проданного оборудования");if(nbv>0)entPost(E,"91.2","01.1",nbv,"Остаточная стоимость проданного оборудования");
+  const pr=nbv*.35;if(pr>0)entPost(E,"51","91.1",pr,`Продано оборудование: ${n} поз. (${ENT_SHOP[k].s.toLowerCase()})`);s.pos-=n;const w=s.pos*s.shift*ENT_WPP;if(s.tgt>w)s.tgt=w;return pr;}
+function entLoan(E,amt,term){amt=Math.round(+amt);term=Math.max(6,Math.round(+term||24));if(!(amt>0))return"укажите сумму";if(amt>entLimit(E)+1)return`банк одобряет не больше ${entMoney(entLimit(E),E)}`;
+  const L={id:E.id++,amt,left:amt,r:entRate(E),term,m0:E.m,pay:amt/term};E.L.push(L);entPost(E,"51","66",amt,`Кредит №${L.id} на ${term} мес под ${(L.r*100).toFixed(1).replace(".",",")} %`);entLog(E,`Получен кредит ${entMoney(amt,E)} на ${term} мес под ${(L.r*100).toFixed(1).replace(".",",")} % годовых`,"i");return"";}
+function entRepay(E,id){const L=E.L.find(x=>x.id===id);if(!L)return"";const v=Math.min(L.left,Math.max(0,E.B["51"]||0));if(v<=0)return"нет свободных денег";entPost(E,"66","51",v,`Досрочное погашение кредита №${L.id}`);L.left-=v;if(L.left<=1)E.L=E.L.filter(x=>x!==L);return"";}
+function entCancel(E,id){const p=E.P.find(x=>x.id===id);if(!p||p.st==="stop")return;const v=p.c08+p.c08t;if(v>0)entPost(E,"91.2","08.8",v,`Списаны затраты прекращённой работы «${p.n}»`);p.c08=0;p.c08t=0;
+  if(p.mc>0){entPost(E,"91.2","10",p.mc,`Списаны материалы прекращённого изделия «${p.n}»`);p.mc=0;p.ms=0;}if(p.wipC>0){entPost(E,"91.2","20",p.wipC,`Списано незавершённое производство «${p.n}»`);p.wipC=0;}
+  p.st="stop";p.plan=0;entLog(E,`Работа «${p.n}» прекращена, затраты ${entMoney(v,E)} списаны в убыток`,"w");}
+function entLicense(E,id){const p=E.P.find(x=>x.id===id);if(!p||!p.cert||p.lic||p.kind==="alloy")return"лицензию продать нельзя";const comps=E.comp.filter(x=>x.cat===p.cat);if(!comps.length)return"нет покупателей";
+  const q=s=>(s.f+s.p+s.m+s.r)/4,my=q(entPSc(E,p)),avg=comps.reduce((s,x)=>s+q(entCompScore(E,x)),0)/comps.length,k=entCl(1+(my-avg)/40,.3,1.6),med=entMed(comps.map(x=>x.pr));
+  const lump=(p.r04+p.am*(E.m-(p.mCert||E.m)))*(.4+.5*k)*entR(.85,1.15),roy=.03*med*(ENT_SPOT[p.cat]||1)*2*k,buyer=comps[Math.floor(Math.random()*comps.length)].mk;
+  entPost(E,"62","90.1",lump,`Продана лицензия на «${p.n}» (${buyer}): паушальный платёж`);entPost(E,"51","62",lump,`Получен паушальный платёж по лицензии «${p.n}»`);p.lic={buyer,roy,until:E.m+60};
+  entLog(E,`Лицензия на «${p.n}» продана: ${buyer} платит ${entMoney(lump,E)} сразу и роялти ≈${entUsd(roy)} в месяц 5 лет`,"g");return"";}
+/* испытания на полигоне игры: выстрелы своей пушкой или по своей машине засчитываются в стадию «Испытания» */
+function entRangeShot(g,ak,vt){const E=ENT;if(!E||E.over)return null;let hit=null;
+  for(const p of E.P){if(p.st!=="rd"||p.stg!==4||p.pause)continue;
+    if(p.kind==="gun"&&g&&g.custom&&g.cid===p.did){hit=[p,30];break;}if(p.kind==="ammo"&&g&&g.custom&&g.cid===p.did&&ak===p.t){hit=[p,25];break;}if(p.kind==="veh"&&vt&&vt==="u"+p.did){hit=[p,40];break;}}
+  if(!hit)return null;const [p,h]=hit,cap=entStH0(p,4)*.25;if(p.shotM!==E.m){p.shotM=E.m;p.shotH=0;}if(p.shotH+h>cap)return null;p.shotH+=h;p.shotN=(p.shotN||0)+1;return p;}
+/* ---------- отчёты ---------- */
+const entD=(B,a)=>Math.max(0,B[a]||0),entK=(B,a)=>Math.max(0,-(B[a]||0));
+function entBS(E,B){B=B||E.B;const s=a=>B[a]||0,eq=-(s("80")+s("84")+s("99")+s("90.1")+s("90.2")+s("90.3")+s("90.7")+s("90.8")+s("90.9")+s("91.1")+s("91.2")+s("91.9")+s("25")+s("26")+s("44"));
+  const tax=["68.1","68.2","68.4","68.8"];
+  const A=[["Основные средства (остаточная стоимость)",s("01.1")+s("01.2")+s("02.1")+s("02.2")],["Нематериальные активы: результаты НИОКР",s("04")+s("05")],["Незавершённые НИОКР, ТПП и оборудование",s("08.1")+s("08.8")],
+    ["Запасы: материалы, незавершённое производство, готовая продукция",s("10")+s("20")+s("43")],["НДС по приобретённым ценностям",s("19")],["Дебиторская задолженность",entD(B,"62")+entD(B,"60")+tax.reduce((x,a)=>x+entD(B,a),0)+entD(B,"69")+entD(B,"70")],["Денежные средства",entD(B,"51")]];
+  const P=[["Уставный капитал",-s("80")],["Нераспределённая прибыль (убыток)",eq+s("80")],["Кредиты и займы",entK(B,"66")+entK(B,"66.2")],["Авансы полученные",entK(B,"62.2")],
+    ["Задолженность поставщикам",entK(B,"60")],["Задолженность по налогам и взносам",tax.reduce((x,a)=>x+entK(B,a),0)+entK(B,"69")],["Задолженность по зарплате",entK(B,"70")],["Прочая кредиторская (покупатели, перерасход счёта)",entK(B,"62")+entK(B,"51")]];
+  const tA=A.reduce((x,r)=>x+r[1],0),tP=P.reduce((x,r)=>x+r[1],0);return{A,P,tA,tP,eq};}
+/* проверка учёта: сумма всех остатков = 0, аналитика сходится с синтетикой */
+function entCheck(E){const err=[],sum=Object.values(E.B).reduce((a,b)=>a+b,0),sc=Math.max(1,...Object.values(E.B).map(Math.abs));if(Math.abs(sum)>sc*1e-9+1)err.push("сумма остатков ≠ 0: "+sum);
+  const bs=entBS(E);if(Math.abs(bs.tA-bs.tP)>Math.max(1,bs.tA*1e-9))err.push(`актив ${bs.tA} ≠ пассив ${bs.tP}`);
+  const s08=E.P.reduce((a,p)=>a+(p.c08||0)+(p.c08t||0),0)+E.capex.reduce((a,x)=>a+x.cost,0),b08=(E.B["08.8"]||0)+(E.B["08.1"]||0);if(Math.abs(s08-b08)>Math.max(1,Math.abs(b08)*1e-6))err.push(`08: аналитика ${s08} ≠ ${b08}`);
+  const s20=E.P.reduce((a,p)=>a+(p.wipC||0),0)+((E.svc&&E.svc.cost)||0),b20=E.B["20"]||0;if(Math.abs(s20-b20)>Math.max(1,Math.abs(b20)*1e-6))err.push(`20: ${s20} ≠ ${b20}`);
+  const s43=E.P.reduce((a,p)=>a+(p.fg||0),0),b43=E.B["43"]||0;if(Math.abs(s43-b43)>Math.max(1,Math.abs(b43)*1e-6))err.push(`43: ${s43} ≠ ${b43}`);
+  const s10=E.P.reduce((a,p)=>a+(p.mc||0),0),b10=E.B["10"]||0;if(Math.abs(s10-b10)>Math.max(1,Math.abs(b10)*1e-6))err.push(`10: ${s10} ≠ ${b10}`);
+  const s04=E.P.reduce((a,p)=>a+(p.r04||0),0),b04=(E.B["04"]||0)+(E.B["05"]||0);if(Math.abs(s04-b04)>Math.max(1,Math.abs(b04)*1e-6))err.push(`04−05: ${s04} ≠ ${b04}`);
+  const sL=E.L.reduce((a,L)=>a+L.left,0),b66=-(E.B["66"]||0);if(Math.abs(sL-b66)>1)err.push(`66: ${sL} ≠ ${b66}`);if(Math.abs(E.od+(E.B["66.2"]||0))>1)err.push(`66.2: ${E.od} ≠ ${-(E.B["66.2"]||0)}`);
+  for(const k in E.B)if(!isFinite(E.B[k]))err.push("не число на счёте "+k);return err;}
+/* ---------- сохранение ---------- */
+function entSave(){try{if(ENT)localStorage.setItem("grom.ent",JSON.stringify(ENT));else localStorage.removeItem("grom.ent");}catch(e){}}
+function entLoad(){try{const s=JSON.parse(localStorage.getItem("grom.ent")||"null");if(s&&s.v===2&&s.B&&s.P){ENT=s;ENT_CMDS.forEach(c=>{if(ENT.ix[c]==null)ENT.ix[c]=1;});return ENT;}}catch(e){}return null;}
+
+/* ===== Фирма: интерфейс (вкладка «Фирма») ===== */
+var ENTUI={seg:"ov",cc:"",open:{},bid:null,conf:"",msg:"",new:{c:"ru",start:"pr",kbN:"ОКБ «Гром»",plN:"Завод «Гром»"},np:"",jn:30};
+const ENT_SEGS=[["ov","Обзор"],["kb","КБ"],["pl","Завод"],["mk","Рынок"],["ac","Учёт"]];
+const eE=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ePct=x=>Math.round((x||0)*100)+" %",eN=x=>Math.round(x||0).toLocaleString("ru-RU").replace(/,/g," ");
+function entSpark(v,w,h,col){if(!v||v.length<2)return"";const mn=Math.min(0,...v),mx=Math.max(0,...v),r=(mx-mn)||1,X=i=>(i/(v.length-1)*w).toFixed(1),Y=x=>(h-2-(x-mn)/r*(h-4)).toFixed(1);
+  return`<svg class="entsp" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="${w}" y1="${Y(0)}" y2="${Y(0)}" stroke="rgba(255,255,255,.18)" stroke-dasharray="3 3"/><polyline fill="none" stroke="${col||"#f0c24f"}" stroke-width="1.8" points="${v.map((x,i)=>X(i)+","+Y(x)).join(" ")}"/></svg>`;}
+function entBar(f,cls){return`<div class="entbar${cls?" "+cls:""}"><i style="width:${Math.round(entCl(f,0,1)*100)}%"></i></div>`;}
+function entNumI(f,val,min,max,step,w){return`<span class="entnum"><button data-a="dec" data-f="${f}" aria-label="меньше">−</button><input type="number" inputmode="numeric" data-f="${f}" value="${val}" min="${min}" max="${max}" step="${step||1}"${w?` style="width:${w}"`:""}><button data-a="inc" data-f="${f}" aria-label="больше">+</button></span>`;}
+function entSel(f,o,cur){return`<select data-f="${f}">${Object.entries(o).map(([k,t])=>`<option value="${k}"${String(k)===String(cur)?" selected":""}>${t}</option>`).join("")}</select>`;}
+function entSec(id,title,sum,inner,def){const op=ENTUI.open[id]!=null?ENTUI.open[id]:!!def;return`<details class="wssec" data-sec="${id}"${op?" open":""}><summary><b>${title}</b><span>${sum||""}</span></summary><div class="ctrl entin">${inner}</div></details>`;}
+/* ---------- вход: создание фирмы или панель ---------- */
+function entUI(){const sec=$("t-ent");if(!sec)return;const st=sec.scrollTop;
+  if(!ENT){sec.innerHTML=entUINew();entBind(sec);return;}
+  const E=ENT;sec.innerHTML=`<div class="wssum entsum" id="entSum">${entSumH(E)}</div>
+    ${E.over?`<div class="entover">Фирма обанкротилась. Учёт и история доступны для просмотра; можно основать новую.</div>`:""}
+    <div class="seg wsseg entseg" role="group" aria-label="Раздел фирмы">${ENT_SEGS.map(([k,t])=>`<button data-a="seg" data-v="${k}" aria-pressed="${ENTUI.seg===k}">${t}</button>`).join("")}</div>
+    ${ENTUI.msg?`<div class="entmsg">${ENTUI.msg}</div>`:""}<div id="entBody">${entBody(E)}</div>`;ENTUI.msg="";entBind(sec);sec.scrollTop=st;}
+function entSumH(E){const C=entC(E),h=E.hist[E.hist.length-1]||{},bs=entBS(E),cash=E.B["51"]||0,burn=entBurn(E);
+  return`<div class="entsr"><b>${eE(E.kbN)}</b><span>${entDate(E)}</span></div>
+  <div class="entkp"><span>Деньги<b class="${cash<0?"neg":""}">${entMoney(cash,E)}</b></span><span>Капитал<b class="${bs.eq<0?"neg":""}">${entMoney(bs.eq,E)}</b></span><span>Заказы<b>${entMoney(entBacklog(E),E)}</b></span>
+  <span>Прибыль, мес<b class="${(h.np||0)<0?"neg":"pos"}">${E.hist.length?entMoney(h.np,E):"—"}</b></span><span>Репутация<b>${Math.round(E.rep)}</b></span><span>${burn>0?"Хватит на":"Курс $"}<b>${burn>0?Math.max(0,Math.floor(cash/burn))+" мес":(E.c==="us"?"1":E.fx.toFixed(E.fx<10?3:1).replace(".",","))}</b></span></div>
+  <div class="entgo"><button data-a="run" data-v="1"${E.over?" disabled":""}>Месяц ▸</button><button data-a="run" data-v="3"${E.over?" disabled":""}>3 мес ▸▸</button><button data-a="run" data-v="12"${E.over?" disabled":""} title="до важного события, не больше года">До события</button></div>`;}
+/* средний отток денег в месяц за последние 3 месяца (если отрицательный поток) */
+function entBurn(E){const H=E.hist.slice(-3);if(!H.length)return 0;const f=H.reduce((s,h)=>s+(h.inC-h.out),0)/H.length;return f<0?-f:0;}
+function entUINew(){const n=ENTUI.new,C=ENT_CTRY[n.c],S0=ENT_START[n.start];
+  return`<p class="tag" style="margin:0">Своё оборонное предприятие: конструкторское бюро разрабатывает изделия из вашего цеха (пушки, выстрелы, бронемашины, сплавы), завод их выпускает, вы продаёте армиям через тендеры, госзаказ и прямые продажи, ведёте учёт и платите налоги. Один ход — месяц.</p>
+  <span class="lbl">Страна</span><div class="seg wsseg">${Object.entries(ENT_CTRY).map(([k,c])=>`<button data-a="nc" data-v="${k}" aria-pressed="${n.c===k}">${c.n}</button>`).join("")}</div>
+  <p class="tag entnote">${C.note}. Курс: ${C.fx===1?"доллар":`${C.fx.toFixed(C.fx<10?3:2).replace(".",",")} ${C.cur} за $`}. Зарплата конструктора ${eN(C.wage.des)} ${C.cur}, рабочего ${eN(C.wage.wrk)} ${C.cur} в месяц.</p>
+  <span class="lbl">С чего начать</span>${Object.entries(ENT_START).map(([k,s])=>`<button class="entpick" data-a="ns" data-v="${k}" aria-pressed="${n.start===k}"><b>${s.n}</b><span>${s.d}. Капитал ${entUsd(s.cash)}, КБ ${s.kb.des+s.kb.eng+s.kb.tst} чел., рабочих ${s.wrk}</span></button>`).join("")}
+  <label class="lbl" for="entKbN">Конструкторское бюро</label><input id="entKbN" class="wsin" maxlength="32" data-f="kbN" value="${eE(n.kbN)}">
+  ${n.start!=="kb"?`<label class="lbl" for="entPlN">Завод</label><input id="entPlN" class="wsin" maxlength="32" data-f="plN" value="${eE(n.plN)}">`:""}
+  <button class="wsgo entbig" data-a="found">Основать: ${eE(S0.n.toLowerCase())}, ${C.n}</button>`;}
+/* ---------- разделы ---------- */
+function entBody(E){return ENTUI.seg==="kb"?entKBH(E):ENTUI.seg==="pl"?entPlH(E):ENTUI.seg==="mk"?entMkH(E):ENTUI.seg==="ac"?entAcH(E):entOvH(E);}
+function entHints(E){const C=entC(E),o=[],cash=E.B["51"]||0,burn=entBurn(E);
+  if(burn>0&&cash/burn<9)o.push(["w",`Деньги уходят: в среднем ${entMoney(burn,E)} в месяц — хватит примерно на ${Math.max(0,Math.floor(cash/burn))} мес. Банк одобрит кредит до ${entMoney(entLimit(E),E)} («Учёт» → «Кредиты»).`]);
+  const ku=E.kbUse;if(ku&&E.kb.des+E.kb.eng+E.kb.tst>0){const id=["des","eng","tst"].filter(k=>E.kb[k]>0&&ku[k]<.5);if(id.length)o.push(["w",`КБ загружено слабо (${id.map(k=>({des:"конструкторы",eng:"технологи",tst:"испытатели"})[k]+" "+ePct(ku[k])).join(", ")}): простой идёт в управленческие расходы. Откройте ОКР или сократите штат.`]);}
+  if(E.util!=null&&ENT_SHOPS.some(k=>E.shops[k].pos)&&E.util<.5)o.push(["w",`Цеха загружены на ${ePct(E.util)}: накладные расходы простаивающих мощностей списываются в убыток.`]);
+  E.K.filter(k=>k.st==="act").forEach(k=>{const p=E.P.find(x=>x.id===k.pid);if(!p)return;const due=Math.min(k.qty,k.rate*Math.max(0,E.m-k.start+1));if(k.dlv<due)o.push(["w",`Договор №${k.id} (${eE(k.cuN)}): отставание ${due-k.dlv} шт. — неустойка каждый месяц.`]);
+    else if(E.m>=k.start-2&&p.st==="ser"&&p.plan<k.rate)o.push(["i",`«${eE(p.n)}»: план выпуска ${p.plan}/мес меньше темпа поставок по договору №${k.id} (${k.rate}/мес).`]);});
+  E.P.filter(p=>p.st==="ser"&&!p.plan&&!p.pause).forEach(p=>o.push(["i",`«${eE(p.n)}» готов к серии, но план выпуска 0 — задайте его во вкладке «Завод».`]));
+  E.P.filter(p=>p.st==="cert"&&!p.lic).forEach(p=>o.push(["i",`«${eE(p.n)}» принят, но своих цехов нет: продайте лицензию («КБ») или купите оборудование («Завод»).`]));
+  if(E.O.length)o.push(["g",`Госзаказчик ждёт ответа по ${E.O.length} предложени${E.O.length===1?"ю":"ям"} — «Рынок».`]);
+  const tn=E.T.filter(t=>t.st==="open"&&E.P.some(p=>p.cat===t.cat&&p.st!=="stop"&&(p.st!=="rd"||p.stg>=3)));if(tn.length)o.push(["g",`Открыто тендеров по вашим изделиям: ${tn.length} — «Рынок».`]);
+  if(!E.P.length)o.push(["i","Начните с ОКР: «КБ» → «Новая разработка». Изделия берутся из цеха (пушки, выстрелы, машины, сплавы) или по образцам реальных."]);
+  return o;}
+function entOvH(E){const H=E.hist.slice(-36),sp=(k,c)=>entSpark(H.map(h=>h[k]),300,42,c),last=E.hist[E.hist.length-1]||{},sv=E.svc;
+  const hints=entHints(E).map(([k,t])=>`<div class="entl ${k}">${t}</div>`).join("");
+  const ev=E.log.slice(0,14).map(l=>`<div class="entl ${l.k}"><i>${entDate(E,l.m)}</i>${eE(l.t)}</div>`).join("");
+  return`${hints?`<div class="entbox">${hints}</div>`:""}
+  ${H.length>1?`<div class="entcharts"><div><span>Деньги <b>${entMoney(E.B["51"]||0,E)}</b></span>${sp("cash","#7fd1ff")}</div><div><span>Выручка за месяц <b>${entMoney(last.net,E)}</b></span>${sp("net","#f0c24f")}</div>
+    <div><span>Чистая прибыль <b>${entMoney(last.np,E)}</b></span>${sp("np","#8be08b")}</div><div><span>Портфель заказов <b>${entMoney(entBacklog(E),E)}</b></span>${sp("bk","#d9a3ff")}</div></div>`:""}
+  ${sv?entSec("svc","Текущие работы по заказу",`${ePct(sv.k*sv.share)} объёма`,`<p class="tag">${eE(sv.n)} — постоянная работа фирмы по договору «затраты плюс ${Math.round(sv.mk*100)} %»: занимает ${sv.shop?`до ${ePct(sv.shop*sv.k*sv.share)} мощности цехов и `:""}часть КБ, покрывает постоянные расходы. Объём сокращается ≈${Math.round(sv.decay*1200)/10} % в месяц; при хорошей репутации в декабре заказчик продлевает договор.</p>
+    <div class="row1"><label class="lbl">Брать работ</label>${entSel("svshare",{1:"100 %",.75:"75 %",.5:"50 %",.25:"25 %",0:"не брать"},sv.share)}</div>${sv.rev?`<p class="tag">В прошлом месяце: выручка ${entMoney(sv.rev,E)}, себестоимость ${entMoney(sv.costM,E)}.</p>`:""}`,false):""}
+  ${entSec("log","События",E.log.length+"",ev||"<p class='tag'>Пока событий нет.</p>",true)}
+  ${entSec("reset","Новая игра",ENTUI.conf==="reset"?"подтвердите":"",`<p class="tag">Закрыть фирму и основать новую. Сохранение текущей будет удалено.</p><button data-a="reset">${ENTUI.conf==="reset"?"Точно закрыть — нажмите ещё раз":"Закрыть фирму"}</button>`,false)}`;}
+/* ---------- КБ ---------- */
+function entProg(p){if(p.st!=="rd")return 1;let f=0;for(let i=0;i<p.stg;i++)f+=ENT_STG[i].sh;f+=ENT_STG[p.stg].sh*Math.min(1,p.sh/Math.max(1,entStH(p,p.stg)));return f;}
+function entKBH(E){const C=entC(E),kb=E.kb,cap=k=>kb[k]*ENT_HPM*.85*kb.skill,pay=["des","eng","tst"].reduce((s,k)=>s+kb[k]*entWage(E,k),0)*(1+C.social);
+  const staff=`<div class="enttab3">${["des","eng","tst"].map(k=>`<div><span>${{des:"Конструкторы",eng:"Инженеры-технологи",tst:"Испытатели"}[k]}</span><b>${kb[k]}${kb.tgt[k]!==kb[k]?` → ${kb.tgt[k]}`:""}</b>${entNumI("kbt:"+k,kb.tgt[k],0,3000,1,"64px")}<i>${E.kbUse?ePct(E.kbUse[k]):""} загрузка</i></div>`).join("")}</div>
+    <p class="tag">Фонд оплаты КБ с взносами ${entMoney(pay,E)} в месяц, квалификация ×${kb.skill.toFixed(2).replace(".",",")}. Набор — не больше 10 % штата в месяц (подбор и допуск стоят ≈0,8 оклада); сокращение — выходное пособие ${C.sev} оклад${C.sev===1?"":"а"}.</p>`;
+  const act=E.P.filter(p=>p.st!=="stop"&&p.st!=="done").map(p=>entPCard(E,p)).join("")||"<p class='tag'>Нет разработок.</p>",done=E.P.filter(p=>p.st==="stop"||p.st==="done");
+  return`${entSec("kbst","Штат КБ",`${kb.des+kb.eng+kb.tst} чел. · ${entMoney(pay,E)}/мес`,staff,true)}
+  <span class="lbl">Разработки (сверху — приоритетнее)</span>${act}
+  ${entSec("np","Новая разработка","",entNewPH(E),!E.P.length)}
+  ${done.length?entSec("pd","Закрытые",done.length+"",done.map(p=>`<div class="entl i">${eE(p.n)} — ${p.st==="done"?"квалифицирован":"прекращена"}</div>`).join(""),false):""}`;}
+function entPCard(E,p){const C=entC(E),A=(a,t,x)=>`<button data-a="${a}" data-v="${p.id}"${x||""}>${t}</button>`,kindN={veh:"машина",gun:"орудие",ammo:"выстрел",alloy:"сплав"}[p.kind];
+  let stage="",bar=0,extra="";
+  if(p.st==="rd"){const s=p.stg,H=entStH(p,s);bar=entProg(p);stage=`${ENT_STG[s].n}: ${ePct(Math.min(1,p.sh/Math.max(1,H)))}`+(s===3?` · образцы: ${ePct(1-entProtoLeft(p)/Math.max(1,p.protoT))}`:"")+(p.fixH>0?` · доработка ${Math.round(p.fixH/1000)} тыс. ч`:"");
+    extra=`<div class="entrow">${p.stg<=2?`<label>Соисполнители ${entSel("pout:"+p.id,{0:"нет",.25:"25 % работ",.5:"50 % работ"},p.out)}</label>`:""}${p.stg===4?`<label>Испытания ${entSel("pfast:"+p.id,{0:"полные",1:"ускоренные (½ объёма)"},p.fast?1:0)}</label>`:""}</div>`;
+    if(p.stg===4&&p.kind!=="alloy")extra+=`<p class="tag">Можно провести стрельбы на полигоне игры: каждый выстрел ${p.kind==="veh"?"по машине":"из орудия"} засчитывается в испытания (до четверти объёма в месяц).${p.shotN?` Засчитано выстрелов: ${p.shotN}.`:""}</p>${A("prange","На полигон")}`;}
+  else if(p.st==="tpp"){bar=Math.min(1,p.tppH/Math.max(1,p.tppN));stage=`Подготовка производства: ${ePct(bar)} · оснастка ${entMoney(p.toolPaid,E)} из ${entMoney(p.toolC,E)}`;}
+  else if(p.st==="ser"){bar=1;stage=`Серийное производство · выпущено ${p.done}, продано ${p.sold}`;}
+  else if(p.st==="cert"){bar=1;stage="Принят (литера О1), производства нет"+(p.lic?` · лицензия продана: ${eE(p.lic.buyer)}`:"");}
+  const sc=entPSc(E,p),cost=p.c08+p.c08t+(p.r04||0),est=p.st==="rd"?{mo:entProjLeft(E,p)}:null;
+  return`<div class="entcard${p.pause?" paused":""}"><div class="enth"><b>${eE(p.n)}</b><span>${kindN}${p.cat?` · ${ENT_CAT[p.cat]}`:""}</span></div>${entBar(bar,p.st==="ser"?"ok":"")}
+  <div class="entsub">${stage}${p.pause?" · <b>пауза</b>":""}</div>
+  <div class="entkv"><span>Затраты ОКР</span><b>${entMoney(cost,E)}</b>${est&&est.mo?`<span>Осталось ≈</span><b>${est.mo} мес</b>`:""}<span>Дефекты: выявлено</span><b>${p.found}${p.fixH>0?" (дорабатываются)":""}</b>
+   ${p.kind!=="alloy"?`<span>Оценка: огонь / защита / подвижность / надёжность</span><b>${sc.f} / ${sc.p} / ${sc.m} / ${sc.r}</b>`:""}${p.it.qH?`<span>Квалификация своих сплавов</span><b>${Math.round(p.it.qH/1000)} тыс. ч</b>`:""}</div>${extra}
+  <div class="row1 entbtns">${A("pup","▲ Выше")}${p.st!=="ser"&&p.st!=="cert"?A("ppause",p.pause?"Продолжить":"Пауза"):""}${(p.st==="cert"||p.st==="ser")&&!p.lic&&p.kind!=="alloy"?A("plic","Продать лицензию"):""}${p.st==="cert"&&ENT_SHOPS.some(k=>E.shops[k].pos)?A("ptpp","Начать ТПП"):""}${A("pcancel",ENTUI.conf==="pc"+p.id?"Точно прекратить?":"Прекратить")}</div></div>`;}
+/* источники для новых ОКР: проекты цеха, их выстрелы, свои сплавы, образцы реальных */
+function entSrcList(){const L=[];const nm=d=>d.name||"Проект";
+  (WS.guns||[]).forEach(d=>{L.push({id:"g:"+d.id,kind:"gun",d,n:nm(d),g:"Орудия цеха"});let r=null;try{r=wsCalc(wsGNorm(JSON.parse(JSON.stringify(d))));}catch(e){}if(r)Object.keys(r.sh||{}).filter(t=>ENT_AMT[t]).forEach(t=>L.push({id:"a:"+d.id+":"+t,kind:"ammo",d,t,n:`${nm(d)}: ${(WS_AN[t]||t)}`,g:"Выстрелы к орудиям цеха"}));});
+  (WS.veh||[]).forEach(d=>L.push({id:"v:"+d.id,kind:"veh",d,n:nm(d),g:"Машины цеха"}));
+  (typeof ALY!=="undefined"?ALY.list:[]).forEach(a=>L.push({id:"x:"+a.id,kind:"alloy",d:a,n:a.n,g:"Свои сплавы (квалификация)"}));
+  Object.entries(WSG_PRESETS).forEach(([k,p])=>{const d=Object.assign({id:"pg_"+k,name:p.n.split(" (")[0],proto:k},JSON.parse(JSON.stringify(p.d)));L.push({id:"pg:"+k,kind:"gun",d,n:p.n,g:"По образцу: орудия"});
+    ["bops","he"].forEach(t=>{if((t==="bops"&&p.d.cls==="tank")||(t==="he"&&p.d.cls==="how"))L.push({id:"pa:"+k+":"+t,kind:"ammo",d,t,n:`${p.n.split(" (")[0]}: ${WS_AN[t]}`,g:"По образцу: выстрелы"});});});
+  if(typeof WSV_PRESETS!=="undefined")Object.entries(WSV_PRESETS).forEach(([k,p])=>{const d=Object.assign(JSON.parse(JSON.stringify(p.d)),{id:"pv_"+k,name:p.n,proto:k});L.push({id:"pv:"+k,kind:"veh",d,n:p.n,g:"По образцу: машины"});});
+  return L;}
+function entNewPH(E){const L=entSrcList(),cur=L.find(x=>x.id===ENTUI.np)||null,grp=[...new Set(L.map(x=>x.g))];
+  const sel=`<select data-f="np"><option value="">— выберите изделие —</option>${grp.map(g=>`<optgroup label="${g}">`+L.filter(x=>x.g===g).map(x=>`<option value="${eE(x.id)}"${x.id===ENTUI.np?" selected":""}>${eE(x.n)}</option>`).join("")+"</optgroup>").join("")}</select>`;
+  let info="";if(cur){let it=null;try{it=cur.kind==="veh"?entItemVeh(cur.d):cur.kind==="gun"?entItemGun(cur.d):cur.kind==="alloy"?entItemAlloy(cur.d):entItemAmmo(cur.d,cur.t);}catch(e){info=`<p class="tag">Не удалось рассчитать: ${eE(e.message)}</p>`;}
+    if(it){let qH=0;(it.alloys||[]).forEach(k=>{if(!E.qual[k])qH+=25e3;});const it2=Object.assign({},it,{rdH:it.rdH+qH}),est=entProjEst(E,it2),kit=entKit(E,it),C=entC(E);
+      const comps=E.comp.filter(x=>x.cat===it.cat),cm=comps.length?entMed(comps.map(x=>x.pr)):0,sc=it.sc;
+      const lab=ENT_SHOPS.reduce((s,k)=>s+(it.h[k]||0),0);
+      info=`<div class="entkv"><span>Объём ОКР</span><b>${Math.round(it2.rdH/1000)} тыс. нормо-часов${qH?` (с квалификацией сплавов)`:""}</b><span>Срок при нынешнем КБ</span><b>≈${est.mo} мес</b><span>Стоимость ОКР</span><b>≈${entMoney(est.money,E)}</b>
+        ${it.kind!=="alloy"?`<span>Материалы и комплектующие на ед.</span><b>${entMoney(kit.mat+kit.comp,E)}</b><span>Трудоёмкость зрелой серии</span><b>${it.kind==="ammo"?lab.toFixed(1).replace(".",","):eN(lab)} нормо-ч на ед.</b>
+        <span>Оснастка (ТПП)</span><b>${entMoney(it.tool$*E.fx*C.toolK,E)}</b><span>Оценка (огонь / защита / подвижность / надёжность)</span><b>${sc.f} / ${sc.p} / ${sc.m} / ${sc.r}</b>
+        ${comps.length?`<span>Конкуренты (${comps.length}), средняя цена</span><b>${entUsd(cm)}</b>`:""}<span>Калибры</span><b>${it.std==="nato"?"НАТО":it.std==="su"?"советские":"смешанные"}</b>`:""}</div>`;}}
+  return`${sel}${info}<button class="wsgo" data-a="npgo"${cur?"":" disabled"}>Открыть ОКР</button><p class="tag">Свои изделия создаются во вкладке «Цех» (пушка, машина, сплав) и появляются здесь. «По образцу» — модернизация реального изделия: ОКР в 2–2,5 раза меньше.</p>`;}
+/* ---------- Завод ---------- */
+function entPlH(E){const C=entC(E),sv=E.svc;
+  const shops=ENT_SHOPS.map(k=>{const s=E.shops[k],mx=s.pos*s.shift*ENT_WPP,pend=E.capex.filter(x=>x.k===k).reduce((a,x)=>a+x.n,0);
+    return`<div class="entshop"><div class="enth"><b>${ENT_SHOP[k].s}</b><span>${ENT_SHOP[k].d}</span></div>
+    <div class="entrow"><label>Позиции: ${s.pos}${pend?` (+${pend} в пути)`:""}<span class="entmini"><button data-a="pb" data-v="${k}">+ купить</button><button data-a="ps" data-v="${k}"${s.pos?"":" disabled"}>− продать</button></span></label>
+     <label>Смены ${entSel("sh:"+k,{1:"1",2:"2",3:"3"},s.shift)}</label></div>
+    <div class="entrow"><label>Рабочие: ${s.wrk}${s.tgt!==s.wrk?` → ${s.tgt}`:""} из ${mx} мест ${entNumI("wt:"+k,s.tgt,0,20000,5,"64px")}</label>
+     <label class="entld">Загрузка ${ePct(s.load)} · эффективность ${ePct(s.eff)}${entBar(s.load,s.load>.95?"hot":"")}</label></div></div>`;}).join("")+`
+    <p class="tag">Позиция — участок на ${ENT_WPP} рабочих в смену; новая стоит ≈${entMoney(ENT_SHOP.meh.pos*E.fx*(E.c==="ru"?1.25:1),E)} в мехобработке (монтаж 3 мес), продажа — по 35 % остаточной стоимости. Вторая смена +10 % к оплате, третья +20 %. Новички снижают эффективность, опыт её поднимает.</p>`;
+  const prods=E.P.filter(p=>p.st==="ser"||(p.st==="tpp")).map(p=>entProdCard(E,p)).join("")||"<p class='tag'>Серийных изделий пока нет: после ОКР и подготовки производства изделие появится здесь.</p>";
+  const cm=ENT_CMDS.map(c=>{const d=ENT_CMD[c],H=E.ixH[c]||[1],v=E.ix[c],v1=H.length>1?H[H.length-2]:v,v12=H.length>12?H[H.length-13]:H[0],emb=(E.emb&&E.emb[c])||1,pr=d.p===1?`индекс ${v.toFixed(2).replace(".",",")}`:`${(d.p*v*emb).toFixed(d.p*v<10?2:0).replace(".",",")} $/кг`;
+    const ch=x=>{const q=(v/x-1)*100;return`<b class="${q>2?"neg":q<-2?"pos":""}">${q>0?"+":""}${q.toFixed(0)} %</b>`;};return`<div class="enttr cm"><span>${d.n}${emb>1.01?` <i>санкции ×${emb.toFixed(2).replace(".",",")}</i>`:""}</span><span>${pr}</span><span>${ch(v1)} мес</span><span>${ch(v12)} год</span><span>${entSpark(H.slice(-24),80,22,"#f0c24f")}</span></div>`;}).join("");
+  return`${entSec("shops","Цеха и рабочие",`${ENT_SHOPS.reduce((a,k)=>a+E.shops[k].wrk,0)} раб. · загрузка ${ePct(E.util)}`,shops,true)}
+  <span class="lbl">Изделия в производстве</span>${prods}
+  ${entSec("cmd","Сырьё и материалы",`запасы ${entMoney(E.B["10"]||0,E)}`,`<div class="enttab">${cm}</div><p class="tag">Цены сырья меняются каждый месяц (вольфрам и кобальт особенно резко). Запас материалов изделия задаётся в месяцах выпуска: купленное раньше списывается по цене закупки. Нехватку на месяц закупают срочно, на 12 % дороже.</p>`,false)}`;}
+function entProdCard(E,p){const C=entC(E);if(p.st==="tpp")return`<div class="entcard"><div class="enth"><b>${eE(p.n)}</b><span>подготовка производства</span></div>${entBar(p.tppH/Math.max(1,p.tppN))}<div class="entsub">Оснастка, приспособления, технологии — ${ePct(p.tppH/Math.max(1,p.tppN))}</div></div>`;
+  const cap=entCapM(E,p)+(p.plan||0),uc=entUnitCost(E,p,Math.max(1,p.plan||1)),am=p.kind==="ammo",step=am?50:1,comps=E.comp.filter(x=>x.cat===p.cat),med=comps.length?entMed(comps.map(x=>x.pr))*Math.pow(1.03,E.m/12):0;
+  const need=E.K.filter(k=>k.st==="act"&&k.pid===p.id&&k.start<=E.m+2).reduce((s,k)=>s+k.rate,0);
+  return`<div class="entcard"><div class="enth"><b>${eE(p.n)}</b><span>${ENT_CAT[p.cat]}</span></div>
+  <div class="entrow"><label>План выпуска в месяц ${entNumI("pl:"+p.id,p.plan,0,999999,step,"80px")}</label><label>Запас материалов ${entSel("pm:"+p.id,{0:"нет",1:"1 мес",2:"2 мес",3:"3 мес",6:"6 мес"},p.stockM)}</label></div>
+  <div class="entkv"><span>Мощность при нынешних цехах</span><b>≈${am?eN(Math.floor(cap/50)*50):cap.toFixed(cap<10?1:0).replace(".",",")} шт./мес${p.bott?` · узкое место: ${ENT_SHOP[p.bott].s.toLowerCase()}`:""}</b>
+   ${need?`<span>Нужно по договорам</span><b class="${need>p.plan?"neg":""}">${eN(need)} шт./мес</b>`:""}<span>Выпущено / освоение</span><b>${eN(p.done)} шт. · трудоёмкость ×${uc.LC.toFixed(2).replace(".",",")} к зрелой</b>
+   <span>Склад</span><b>${eN(p.stock)}${p.pend?` + ${p.pend} на приёмке`:""} · материалы на ${p.plan?(p.ms/p.plan).toFixed(1).replace(".",","):"—"} мес</b>
+   <span>Себестоимость ед.</span><b>${entMoney(uc.tot,E)}</b><span>— материалы / комплектующие</span><b>${entMoney(uc.mat,E)} / ${entMoney(uc.comp,E)}</b><span>— труд / накладные / НИОКР</span><b>${entMoney(uc.lab,E)} / ${entMoney(uc.ovh,E)} / ${entMoney(uc.am,E)}</b>
+   ${p.ucLast?`<span>Фактическая в прошлом выпуске</span><b>${entMoney(p.ucLast,E)}</b>`:""}${med?`<span>Цены конкурентов (медиана)</span><b>${entUsd(med)} ≈ ${entMoney(med*E.fx,E)}</b>`:""}
+   <span>Продано / выручка</span><b>${eN(p.sold)} шт. · ${entMoney(p.rev,E)}${p.rev?` · маржа ${ePct(1-p.cogs/p.rev)}`:""}</b></div>
+  <div class="entrow"><label>Прямые продажи по цене, $ ${entNumI("lp:"+p.id,Math.round(p.list||0),0,1e9,am?10:10000,"96px")}</label></div><p class="tag">0 — не продавать со склада; спрос зависит от цены и оценки изделия относительно конкурентов.</p></div>`;}
+/* ---------- Рынок ---------- */
+function entPolT(v){return v>.15?"дружественное":v<-.6?"не допускает":v<-.15?"настороженное":"нейтральное";}
+function entMkH(E){const C=entC(E);
+  const offers=E.O.map(o=>{const p=E.P.find(x=>x.id===o.pid);return`<div class="entcard hl"><div class="enth"><b>${eE(E.home.n)}</b><span>госзаказ</span></div><div class="entkv"><span>Изделие</span><b>${eE(p?p.n:"?")}</b><span>Количество, темп</span><b>${eN(o.qty)} шт., ${eN(o.rate)}/мес с ${entDate(E,Math.max(E.m+1,o.start))}</b>
+    <span>Цена за единицу без НДС</span><b>${entMoney(o.price,E)}</b><span>Аванс</span><b>${ePct(C.homeAdv)} — ${entMoney(o.price*o.qty*C.homeAdv,E)}</b><span>Доля в закупках</span><b>${ePct(o.share)}</b></div>
+    <div class="row1"><button class="wsgo" data-a="oa" data-v="${o.id}">Подписать</button><button data-a="od" data-v="${o.id}">Отказаться</button></div><p class="tag">Ответ до ${entDate(E,o.exp)}. Неустойка за просрочку ≈${(C.penM*100).toFixed(1).replace(".",",")} % стоимости недопоставки в месяц.</p></div>`;}).join("");
+  const mine=E.P.filter(p=>p.st!=="stop"&&p.st!=="done"&&p.kind!=="alloy");
+  const tend=E.T.filter(t=>t.st==="open"||t.st==="bid").sort((a,b)=>(E.P.some(p=>p.cat===b.cat)?1:0)-(E.P.some(p=>p.cat===a.cat)?1:0)||a.dl-b.dl).map(t=>entTCard(E,t,mine)).join("")||"<p class='tag'>Открытых тендеров нет.</p>";
+  const closed=E.T.filter(t=>t.res&&t.st!=="open"&&t.st!=="bid").slice(-6).reverse().map(t=>`<div class="entl ${t.st==="won"?"g":t.st==="lost"?"w":"i"}"><i>${entDate(E,t.dl)}</i>${eE(E.cust[t.cu].n)}: ${ENT_CAT[t.cat]}, ${eN(t.qty)} шт. — ${t.res.slice(0,3).map(r=>`${r.me?"<b>":""}${eE(r.n)} ${entUsd(r.price)} (${String(r.s).replace(".",",")})${r.me?"</b>":""}`).join(", ")}</div>`).join("");
+  const ks=E.K.slice().reverse().map(k=>{const p=E.P.find(x=>x.id===k.pid),due=Math.min(k.qty,k.rate*Math.max(0,E.m-k.start+1)),val=k.dom?k.price:k.pu*E.fx;
+    return`<div class="entcard${k.st!=="act"?" dim":""}"><div class="enth"><b>№${k.id} · ${eE(k.cuN)}</b><span>${{act:"исполняется",done:"исполнен",fail:"расторгнут"}[k.st]}</span></div>${entBar(k.dlv/k.qty,k.dlv<due?"hot":"ok")}
+    <div class="entkv"><span>${eE(p?p.n:"?")}</span><b>${eN(k.dlv)} из ${eN(k.qty)} · ${eN(k.rate)}/мес с ${entDate(E,k.start)}</b><span>Цена ед.</span><b>${k.dom?entMoney(k.price,E)+" + НДС":entUsd(k.pu)}</b>
+    ${k.st==="act"?`<span>По графику к этому месяцу</span><b class="${k.dlv<due?"neg":""}">${eN(due)} шт.</b><span>Остаток аванса</span><b>${k.dom?entMoney(k.advL,E):entUsd(k.advLU)}</b>`:""}${k.pen?`<span>Неустойки</span><b class="neg">${entMoney(k.pen,E)}</b>`:""}<span>Стоимость</span><b>${entMoney(k.qty*val,E)}</b></div></div>`;}).join("")||"<p class='tag'>Договоров нет.</p>";
+  const cats=[...new Set(E.comp.map(x=>x.cat))],cc=ENTUI.cc&&cats.includes(ENTUI.cc)?ENTUI.cc:(mine[0]&&mine[0].cat)||cats[0],infl=Math.pow(1.03,E.m/12);
+  const comp=E.comp.filter(x=>x.cat===cc).map(x=>{const s=entCompScore(E,x);return`<div class="enttr"><span><b>${eE(x.n)}</b><i>${eE(x.mk)}, ${ENT_CO[x.co]||x.co}</i></span><span>${Math.round(s.f)}/${Math.round(s.p)}/${Math.round(s.m)}/${Math.round(s.r)}</span><span>${entUsd(x.pr*infl*(1-(x.war||0)))}</span><span>${ePct(x.load)}</span></div>`;}).join("");
+  const sh=E.share[cc]||{},tot=Object.values(sh).reduce((a,b)=>a+b,0),shH=tot?Object.entries(sh).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([n,q])=>`<div class="entsh"><span>${n==="_me"?"<b>Вы</b>":eE(n)}</span>${entBar(q/tot,n==="_me"?"ok":"")}<i>${ePct(q/tot)}</i></div>`).join(""):"<p class='tag'>Контрактов в этой категории ещё не было.</p>";
+  const cust=E.cust.map(c=>`<div class="enttr"><span><b>${eE(c.n)}</b><i>${c.std==="nato"?"НАТО":c.std==="su"?"советские калибры":"смешанное вооружение"}</i></span><span>${entUsd(c.bud-c.spent)}</span><span>${entPolT(c.pol[E.c]||0)}</span><span>${Math.round(c.rel||50)}</span></div>`).join("");
+  return`${offers?`<span class="lbl">Предложения госзаказчика</span>${offers}`:""}<span class="lbl">Тендеры</span>${tend}
+  ${closed?entSec("tclosed","Итоги тендеров","",closed,false):""}${entSec("kk","Договоры",E.K.filter(k=>k.st==="act").length+" активных",ks,!!E.K.length)}
+  ${entSec("comp","Конкуренты и доли рынка",ENT_CAT[cc],`${entSel("cc",Object.fromEntries(cats.map(c=>[c,ENT_CAT[c]])),cc)}<div class="enttab"><div class="entth"><span>Изделие</span><span>О/З/П/Н</span><span>Цена</span><span>Загрузка</span></div>${comp}</div><span class="lbl">Доли по контрактам</span>${shH}<p class="tag">Конкуренты с недогруженными заводами сбивают цену; после ваших побед в категории начинается ценовая война. О/З/П/Н — огонь, защита, подвижность, надёжность.</p>`,false)}
+  ${entSec("cust","Заказчики",E.cust.length+"",`<div class="enttab"><div class="entth"><span>Армия</span><span>Остаток бюджета</span><span>К вашей стране</span><span>Доверие</span></div>${cust}</div>`,false)}`;}
+function entTCard(E,t,mine){const c=E.cust[t.cu],pol=c.pol[E.c]||0,ps=mine.filter(p=>p.cat===t.cat),b=t.bid,open=ENTUI.bid===t.id||!!b;let form="";
+  if(ps.length){const bf=ENTUI.bf||{},bv=k=>bf[k+":"+t.id],pid=+(bv("bp")||(b&&b.pid)||ps[0].id),p=E.P.find(x=>x.id===pid)||ps[0],why=entBidCheck(E,t,p),
+      price=+(bv("bpr")||(b?b.price:Math.round(t.maxP*.9/(t.cat.startsWith("am_")?10:1000))*(t.cat.startsWith("am_")?10:1000))),rate=+(bv("brt")||(b?b.rate:Math.max(1,Math.min(t.need,Math.floor(entCapM(E,p)+(p.plan||0))||1))));
+    let ch="";if(!why){const sc=entPSc(E,p),my=entScore(sc,c.w,price,t.maxP,p.std,c.std,rate,t.need,(E.rep+(c.rel||50))/2)+pol,co=E.comp.filter(x=>x.cat===t.cat&&(c.pol[x.co]||0)>=-.6).map(x=>entScore(entCompScore(E,x),c.w,Math.min(x.pr*Math.pow(1.03,E.m/12),t.maxP),t.maxP,x.std,c.std,Math.min(t.need,x.cap/12*.5),t.need,x.rep)+(c.pol[x.co]||0)).sort((a,b)=>b-a);
+      const best=co[0]==null?-9:co[0];ch=my>best+.25?"высокие":my>best-.15?"равные с лидером":my>best-.5?"ниже лидера":"низкие";}
+    form=`<div class="entbid">${entSel("bp:"+t.id,Object.fromEntries(ps.map(x=>[x.id,x.n])),pid)}<div class="entrow"><label>Цена за единицу, $ ${entNumI("bpr:"+t.id,price,1,1e10,t.cat.startsWith("am_")?10:10000,"104px")}</label><label>Темп, шт./мес ${entNumI("brt:"+t.id,rate,1,1e7,t.cat.startsWith("am_")?50:1,"70px")}</label></div>
+      ${why?`<p class="tag neg">Нельзя: ${why}</p>`:`<p class="tag">Шансы: <b>${ch}</b>. Мощность по изделию ≈${Math.round(entCapM(E,p)+(p.plan||0))} шт./мес. Подготовка заявки ≈${entMoney((p.kind==="veh"?120e3:p.cat.startsWith("how")?60e3:p.kind==="gun"?30e3:40e3)*E.fx,E)}.</p>`}
+      <div class="row1">${b?`<button class="wsgo" data-a="bgo" data-v="${t.id}">Изменить заявку</button><button data-a="bun" data-v="${t.id}">Отозвать</button>`:`<button class="wsgo" data-a="bgo" data-v="${t.id}"${why?" disabled":""}>Подать заявку</button>`}</div></div>`;}
+  return`<div class="entcard${b?" hl":""}"><div class="enth"><b>${eE(c.n)}${t.big?" · крупный":""}</b><span>${ENT_CAT[t.cat]}</span></div>
+  <div class="entkv"><span>Количество</span><b>${eN(t.qty)} шт. · темп от ${eN(t.need)}/мес</b><span>Предельная цена</span><b>${entUsd(t.maxP)} за ед.</b><span>Заявки до · поставки с</span><b>${entDate(E,t.dl)} · ${entDate(E,t.start)}</b>
+  <span>Калибры · отношение к вашей стране</span><b>${t.std==="nato"?"НАТО":t.std==="su"?"советские":"любые"} · ${entPolT(pol)}</b>${b?`<span>Ваша заявка</span><b>${eE((E.P.find(x=>x.id===b.pid)||{}).n)} · ${entUsd(b.price)} · ${b.rate}/мес</b>`:""}</div>
+  ${ps.length?(open?form:`<button data-a="tb" data-v="${t.id}">Подготовить заявку</button>`):`<p class="tag">Своего изделия этой категории нет.</p>`}</div>`;}
+/* ---------- Учёт ---------- */
+function entPLrows(E){const H=E.hist,last=H[H.length-1],y=entYear(E,E.m-1),ytd=H.filter(h=>entYear(E,h.m)===y),py=H.filter(h=>entYear(E,h.m)===y-1),S=(a,k)=>a.reduce((s,h)=>s+(h[k]||0),0);
+  const col=a=>a&&a.length?{net:S(a,"net"),cg:S(a,"cg"),adm:S(a,"adm"),sel:S(a,"sel"),oi:S(a,"oi"),oe:S(a,"oe"),pbt:S(a,"pbt"),tax:S(a,"tax"),np:S(a,"np")}:null;return{cols:[col(last?[last]:null),col(ytd),col(py)],y};}
+function entAcH(E){const C=entC(E),{cols,y}=entPLrows(E),f=v=>v==null?"—":entMoney(v,E);
+  const rows=[["Выручка без НДС","net"],["Себестоимость продаж","cg",-1],["Валовая прибыль",c=>c.net-c.cg],["Управленческие расходы","adm",-1],["Коммерческие расходы","sel",-1],["Прибыль от продаж",c=>c.net-c.cg-c.adm-c.sel],
+    ["Прочие доходы","oi"],["Прочие расходы","oe",-1],["Прибыль до налога","pbt"],["Налог на прибыль","tax",-1],["Чистая прибыль","np"]];
+  const pl=`<div class="enttab pl"><div class="entth"><span></span><span>${E.hist.length?entDate(E,E.m-1):"—"}</span><span>${y} с начала года</span><span>${y-1}</span></div>${rows.map(([n,k,sg])=>`<div class="enttr${typeof k==="function"||k==="np"||k==="pbt"?" sum":""}"><span>${n}</span>${cols.map(c=>`<span>${c?f((typeof k==="function"?k(c):c[k])*(sg||1)):"—"}</span>`).join("")}</div>`).join("")}</div>`;
+  const bs=entBS(E),bsh=`<div class="enttab bs"><div class="entth"><span>Актив</span><span>${entDate(E,E.m-1)}</span></div>${bs.A.map(([n,v])=>`<div class="enttr"><span>${n}</span><span>${entMoney(v,E)}</span></div>`).join("")}<div class="enttr sum"><span>Баланс</span><span>${entMoney(bs.tA,E)}</span></div>
+    <div class="entth"><span>Пассив</span><span></span></div>${bs.P.map(([n,v])=>`<div class="enttr"><span>${n}</span><span>${entMoney(v,E)}</span></div>`).join("")}<div class="enttr sum"><span>Баланс</span><span>${entMoney(bs.tP,E)}</span></div></div>
+    <p class="tag">${Math.abs(bs.tA-bs.tP)<1?"Актив равен пассиву: двойная запись сходится.":"Расхождение актива и пассива!"} Расходы на НИОКР капитализируются (счёт 08 → 04) и списываются 5 лет после приёмки.</p>`;
+  const L=E.last,Q=L?L.mo:{},q=k=>Q[k]||0,cin=[["От покупателей",q("51>62")],["Авансы покупателей",q("51>62.2")],["Кредиты и овердрафт",q("51>66")+q("51>66.2")],["Возмещение НДС",q("51>68.2")],["Прочие (продажа ОС, курсовые)",q("51>91.1")]],
+    cout=[["Поставщикам и подрядчикам",q("60>51")],["Зарплата",q("70>51")],["Налоги и взносы",q("68.1>51")+q("68.2>51")+q("68.4>51")+q("68.8>51")+q("69>51")],["Погашение кредитов",q("66>51")+q("66.2>51")],["Проценты, неустойки, штрафы",q("91.2>51")],["Возврат авансов",q("62.2>51")]];
+  const cf=`<div class="enttab"><div class="entth"><span>Поступления</span><span>${L?entDate(E,L.m):"—"}</span></div>${cin.map(([n,v])=>`<div class="enttr"><span>${n}</span><span>${entMoney(v,E)}</span></div>`).join("")}
+    <div class="entth"><span>Платежи</span><span></span></div>${cout.map(([n,v])=>`<div class="enttr"><span>${n}</span><span>${entMoney(v,E)}</span></div>`).join("")}<div class="enttr sum"><span>Изменение денег</span><span>${entMoney(cin.reduce((s,x)=>s+x[1],0)-cout.reduce((s,x)=>s+x[1],0),E)}</span></div></div>`;
+  const tx=`<div class="entkv"><span>НДС ${Math.round(C.vat*100)} %: начислено с выручки за месяц</span><b>${entMoney(q("90.3>68.2"),E)}</b><span>Принят к вычету входной НДС</span><b>${entMoney(q("68.2>19"),E)}</b>
+    <span>Налог на прибыль ${Math.round(C.profit*100)} % с начала года</span><b>${entMoney(E.yr.tax,E)}</b><span>Прибыль до налога с начала года</span><b>${entMoney(E.yr.pbt,E)}</b><span>Убыток прошлых лет к переносу</span><b>${entMoney(E.lossCF,E)} (зачёт до ${Math.round(C.lossLim*100)} % базы)</b>
+    <span>Страховые взносы ${Math.round(C.social*100)} %${C.ndfl?`, НДФЛ ${Math.round(C.ndfl*100)} %`:""} за месяц</span><b>${entMoney(q(">69"),E)}${C.ndfl?" · "+entMoney(q("70>68.1"),E):""}</b><span>Налог на имущество за месяц</span><b>${entMoney(q("91.2>68.8"),E)}</b></div>`;
+  const lim=entLimit(E),loans=E.L.map(l=>`<div class="enttr"><span>№${l.id} · ${(l.r*100).toFixed(1).replace(".",",")} %</span><span>${entMoney(l.left,E)}</span><span>${entMoney(l.pay,E)}/мес</span><span><button data-a="lr" data-v="${l.id}">Погасить</button></span></div>`).join("");
+  const ln=`<p class="tag">Ставка банка: ключевая ${(E.key*100).toFixed(1).replace(".",",")} % + ${(C.spread*100).toFixed(1).replace(".",",")} п.п. = ${(entRate(E)*100).toFixed(1).replace(".",",")} %. Банк одобрит ещё ${entMoney(lim,E)} (под капитал, портфель заказов, дебиторку и запасы). Овердрафт ${entMoney(E.od,E)}: включается сам при нехватке денег, ставка +5 п.п.</p>
+    ${loans?`<div class="enttab">${loans}</div>`:""}<div class="entrow"><label>Сумма ${entNumI("ln",Math.round((ENTUI.ln||lim/2)/1e3)*1e3,0,1e13,Math.max(1e3,Math.round(lim/20/1e3)*1e3),"120px")}</label><label>Срок ${entSel("lt",{12:"12 мес",24:"24 мес",36:"36 мес",60:"60 мес"},ENTUI.lt||36)}</label></div><button class="wsgo" data-a="lgo"${lim>0?"":" disabled"}>Взять кредит</button>`;
+  const osv=L?Object.keys(Object.assign({},L.B0,L.B1)).filter(a=>Math.abs(L.B0[a]||0)>.5||Math.abs(L.B1[a]||0)>.5||(Q[a+">"]||0)>.5||(Q[">"+a]||0)>.5).sort((a,b)=>parseFloat(a)-parseFloat(b)||a.localeCompare(b)).map(a=>{const b0=L.B0[a]||0,b1=L.B1[a]||0;
+    return`<div class="enttr"><span><b>${a}</b><i>${ENT_ACCN[a]||""}</i></span><span>${b0>=0?entMoney(b0,E):"Кт "+entMoney(-b0,E)}</span><span>${entMoney(Q[a+">"]||0,E)}</span><span>${entMoney(Q[">"+a]||0,E)}</span><span>${b1>=0?entMoney(b1,E):"Кт "+entMoney(-b1,E)}</span></div>`;}).join(""):"";
+  const J=E.J.slice(-ENTUI.jn).reverse().map(j=>`<div class="entj"><i>${entDate(E,j.m)}</i><b>Дт ${j.dt} — Кт ${j.ct}</b><span>${entMoney(j.a,E)}</span><em>${eE(j.t)}</em></div>`).join("");
+  return`${entSec("pl","Отчёт о финансовых результатах","",pl,true)}${entSec("bs","Баланс",entMoney(bs.tA,E),bsh,false)}${entSec("cf","Движение денег за месяц","",cf,false)}
+  ${entSec("tx","Налоги",C.n,tx,false)}${entSec("ln","Кредиты",E.L.length?E.L.length+" действ.":"нет",ln,false)}
+  ${entSec("osv","Оборотно-сальдовая ведомость",L?entDate(E,L.m):"",osv?`<div class="enttab osv"><div class="entth"><span>Счёт</span><span>Сальдо нач.</span><span>Оборот Дт</span><span>Оборот Кт</span><span>Сальдо кон.</span></div>${osv}</div>`:"<p class='tag'>Пока нет закрытых месяцев.</p>",false)}
+  ${entSec("jr","Журнал проводок",`последние ${Math.min(ENTUI.jn,E.J.length)}`,J+(E.J.length>ENTUI.jn?`<button data-a="jmore">Показать ещё</button>`:""),false)}`;}
+/* ---------- обработчики ---------- */
+function entBind(sec){
+  if(sec.querySelectorAll)sec.querySelectorAll("details.wssec").forEach(x=>x.ontoggle=()=>{ENTUI.open[x.dataset.sec]=x.open;});
+  sec.onclick=e=>{const b=e.target&&e.target.closest?e.target.closest("[data-a]"):null;if(!b||b.disabled)return;entAct(b.dataset.a,b.dataset.v,b);};
+  sec.onchange=e=>{const i=e.target;if(!i||!i.dataset||!i.dataset.f)return;entField(i.dataset.f,i.value);};
+  sec.oninput=e=>{const i=e.target;if(!i||!i.dataset||!i.dataset.f)return;const f=i.dataset.f;if(f==="kbN"||f==="plN")ENTUI.new[f]=i.value;};}
+function entField(f,v){const E=ENT,[k,id]=f.split(":"),n=+v,P=id&&E?E.P.find(x=>String(x.id)===id):null;
+  if(f==="kbN"||f==="plN"){ENTUI.new[f]=v;return;}if(!E){return;}
+  if(k==="kbt")E.kb.tgt[id]=entCl(Math.round(n)||0,0,3000);
+  else if(k==="wt")E.shops[id].tgt=entCl(Math.round(n)||0,0,E.shops[id].pos*3*ENT_WPP);
+  else if(k==="sh"){E.shops[id].shift=entCl(Math.round(n),1,3);}
+  else if(k==="pl"&&P)P.plan=Math.max(0,P.kind==="ammo"?Math.round(n/50)*50:Math.round(n));
+  else if(k==="pm"&&P)P.stockM=entCl(n,0,12);
+  else if(k==="lp"&&P)P.list=Math.max(0,Math.round(n));
+  else if(k==="pout"&&P)P.out=entCl(n,0,.5);else if(k==="pfast"&&P)P.fast=!!n;
+  else if(k==="np")ENTUI.np=v;else if(k==="cc")ENTUI.cc=v;else if(k==="svshare"&&E.svc)E.svc.share=entCl(n,0,1);
+  else if(k==="ln")ENTUI.ln=Math.max(0,n);else if(k==="lt")ENTUI.lt=n;
+  else if(k==="bp"||k==="bpr"||k==="brt"){ENTUI.bf=ENTUI.bf||{};ENTUI.bf[f]=v;const t=E.T.find(x=>String(x.id)===id);if(t&&t.bid){if(k==="bp")t.bid.pid=+v;if(k==="bpr")t.bid.price=Math.max(1,Math.round(n));if(k==="brt")t.bid.rate=Math.max(1,Math.round(n));}}
+  entSave();entUI();}
+function entAct(a,v,b){const E=ENT;if(a!=="reset"&&!(a==="pcancel"))ENTUI.conf="";
+  if(a==="dec"||a==="inc"){const inp=b.parentNode&&b.parentNode.querySelector("input");if(!inp)return;const st=+inp.step||1;inp.value=Math.max(+inp.min||0,(+inp.value||0)+(a==="inc"?st:-st));entField(b.dataset.f,inp.value);return;}
+  if(a==="nc"){ENTUI.new.c=v;entUI();return;}if(a==="ns"){ENTUI.new.start=v;entUI();return;}
+  if(a==="found"){const n=ENTUI.new;ENT=entNew({c:n.c,start:n.start,kbN:n.kbN,plN:n.start==="kb"?n.kbN:n.plN});ENTUI.seg="ov";entSave();entUI();return;}
+  if(!E)return;
+  if(a==="seg"){ENTUI.seg=v;entUI();return;}
+  if(a==="run"){const n=+v||1;entRun(E,n);entSave();entUI();return;}
+  if(a==="reset"){if(ENTUI.conf!=="reset"){ENTUI.conf="reset";entUI();return;}ENT=null;ENTUI.conf="";entSave();entUI();return;}
+  const P=E.P.find(x=>String(x.id)===String(v));
+  if(a==="pup"&&P){const i=E.P.indexOf(P);if(i>0){E.P.splice(i,1);E.P.splice(i-1,0,P);}}
+  else if(a==="ppause"&&P)P.pause=!P.pause;
+  else if(a==="pcancel"&&P){if(ENTUI.conf!=="pc"+P.id){ENTUI.conf="pc"+P.id;entUI();return;}ENTUI.conf="";entCancel(E,P.id);}
+  else if(a==="plic"&&P){const r=entLicense(E,P.id);if(r)ENTUI.msg=r;}
+  else if(a==="ptpp"&&P&&P.st==="cert")entTppStart(E,P);
+  else if(a==="prange"&&P){entToRange(P);return;}
+  else if(a==="npgo"){const L=entSrcList(),s=L.find(x=>x.id===ENTUI.np);if(s){const p=entProjNew(E,{kind:s.kind,d:s.d,t:s.t,n:s.n});ENTUI.msg=p?`Открыта ОКР «${eE(p.n)}».`:"Не удалось открыть ОКР.";ENTUI.np="";}}
+  else if(a==="pb"){entBuyPos(E,v,1);}else if(a==="ps"){entSellPos(E,v,1);}
+  else if(a==="oa")entAccept(E,+v);else if(a==="od")entDecline(E,+v);
+  else if(a==="tb"){ENTUI.bid=+v;}
+  else if(a==="bgo"){const t=E.T.find(x=>x.id===+v),bf=ENTUI.bf||{},g=k=>bf[k+":"+v],ps=E.P.filter(p=>p.cat===(t&&t.cat)&&p.st!=="stop");if(!t||!ps.length)return;
+    const pid=+(g("bp")||(t.bid&&t.bid.pid)||ps[0].id),pr=+(g("bpr")||(t.bid&&t.bid.price)||t.maxP*.9),rt=+(g("brt")||(t.bid&&t.bid.rate)||t.need);const r=entBid(E,t.id,pid,pr,rt);ENTUI.msg=r?"Заявка не принята: "+r:"Заявка подана — итоги в месяце окончания приёма заявок.";}
+  else if(a==="bun"){entUnbid(E,+v);ENTUI.bid=null;}
+  else if(a==="lgo"){const r=entLoan(E,ENTUI.ln||entLimit(E)/2,ENTUI.lt||36);ENTUI.msg=r?"Кредит не выдан: "+r:"Кредит получен.";}
+  else if(a==="lr"){const r=entRepay(E,+v);if(r)ENTUI.msg=r;}
+  else if(a==="jmore"){ENTUI.jn+=50;}
+  entSave();entUI();}
+/* перейти на полигон: своя пушка или своя машина в стадии испытаний */
+function entToRange(p){try{if(p.kind==="veh"){const key="u"+p.did;if(!VT[key]){ENTUI.msg="Машины нет в игре: постройте её во вкладке «Цех».";entUI();return;}S.vt=key;if(!S.veh){$("tmode").value="veh";vehMode(true);}vehBuild();vehReset();vehEditorRestore();vehUI();}
+  else{const i=guns.findIndex(g=>g.custom&&g.cid===p.did);if(i<0){ENTUI.msg="Орудия нет в игре: установите проект во вкладке «Цех».";entUI();return;}if(S.veh){$("tmode").value="plate";vehMode(false);}setGun(i);$("gunSel").value=String(i);
+    if(p.kind==="ammo"&&ammoFor(G()).includes(p.t)){S.a=p.t;renderAmmo();renderStats();}}
+  closeSheet();$("res").textContent=`Испытания «${p.n}»: стреляйте — выстрелы засчитываются в программу испытаний фирмы.`;}catch(e){console.warn(e);}}
+/* сообщение после выстрела, если он засчитан в испытания */
+function entShotHook(g,ak,vt){try{const p=entRangeShot(g,ak,vt);if(p){entSave();return`\nИспытания фирмы: «${p.n}» — выстрел засчитан (${p.shotN} всего).`;}}catch(e){}return"";}
+/* всплывающая подсказка поверх сцены */
+function entToast(t){try{let el=$("entToast");if(!el||!el.style){const h=document.querySelector(".hud.top")||document.body;el=document.createElement("div");el.id="entToast";el.setAttribute("role","status");h.appendChild(el);}
+  el.textContent=t;el.style.opacity="1";clearTimeout(entToast._t);entToast._t=setTimeout(()=>{el.style.opacity="0";},2600);}catch(e){}}
+
+try{alBoot();}catch(e){console.error(e);}
 try{wsBoot();wsBootVeh();wsUIinit();}catch(e){console.error(e);}
+try{entLoad();entUI();}catch(e){console.error(e);}
 if($("wsGo1"))$("wsGo1").onclick=()=>{WS.tab="g";openSheet("t-ws");wsTab();};if($("wsGo2"))$("wsGo2").onclick=()=>{WS.tab="v";openSheet("t-ws");wsTab();};
 if($("xray"))$("xray").onclick=()=>{if(!S.veh){$("res").textContent="«Насквозь» показывает внутренности бронемашины: выберите цель «Бронемашина» во вкладке «Машина».";return;}xrSet(!XR.on);if(XR.on&&!S.lock)$("res").textContent="Насквозь: корпус полупрозрачный, внутри — экипаж, боекомплект, топливо, двигатель и узлы; после пробития видны путь снаряда и поток осколков. Цвет узла краснеет, когда он выведен из строя.";};
 gatherFar();buildGunList();setGun(0);setLayers(DEF_LAYERS);updBal();updTally();applyRange();resize();setView(0);requestAnimationFrame(tick);
