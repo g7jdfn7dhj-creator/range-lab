@@ -471,7 +471,6 @@ html,body,.hud,.hud *,.sheet,.sheet *{touch-action:manipulation}
       <button role="tab" data-tab="t-fire" aria-selected="false">Стрельба</button>
       <button role="tab" data-tab="t-stat" aria-selected="false">Итоги</button>
       <button role="tab" data-tab="t-ws" aria-selected="false">Цех</button>
-      <button role="tab" data-tab="t-ent" aria-selected="false">Фирма</button>
     </div>
     <section id="t-gun" class="tab">
     <select id="gunSel" aria-label="Выбор орудия" style="width:100%"></select>
@@ -563,7 +562,6 @@ html,body,.hud,.hud *,.sheet,.sheet *{touch-action:manipulation}
       <div class="tag">Наибольший нагрев листа: <b id="plateT">≈ 20 °C</b> (горячие зоны светятся и остывают; в нагретой зоне металл слабее, керамика трескается от термоудара)</div>
     </section>
     <section id="t-ws" class="tab" hidden></section>
-    <section id="t-ent" class="tab" hidden></section>
   </div>
   <div class="card log" id="logCard" title="Нажмите, чтобы развернуть"><div id="taskTxt" class="tag" hidden></div><canvas id="xsec" width="600" height="84" style="width:100%;height:56px;display:block;margin-bottom:4px" hidden></canvas><div id="res">Орудие заряжено. Пробитие — игровая модель.</div></div>
   <div class="dock">
@@ -1781,7 +1779,7 @@ if($("savePack"))$("savePack").onclick=()=>{try{pkFromPlate();}catch(e){}};
 $("newPlate").onclick=()=>{S.aim=null;if(typeof aimMark!=="undefined")aimMark.visible=false;buildPlate();if(typeof wHoles!=="undefined")updTally();$("res").textContent="Новый лист установлен.";};
 document.querySelectorAll&&document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));try{b.scrollIntoView({inline:"nearest",block:"nearest"});}catch(e){}
-  document.querySelectorAll(".tab").forEach(t=>t.hidden=t.id!==b.dataset.tab);if(b.dataset.tab==="t-ent")try{entUI();}catch(e){console.error(e);}});
+  document.querySelectorAll(".tab").forEach(t=>t.hidden=t.id!==b.dataset.tab);});
 $("logCard").onclick=()=>{const c=$("logCard");if(c.classList)c.classList.toggle("open");};
 function openSheet(tab){const m=$("more");m.hidden=false;$("toggle").setAttribute("aria-pressed",true);
   if(tab&&document.querySelectorAll)document.querySelectorAll(".tabs button").forEach(b=>{if(b.dataset.tab===tab)b.click();});}
@@ -1833,7 +1831,7 @@ function fireOne(){
     if(vh&&vh.hit){const m=vehAPS(vh,AMMO[S.a],g,gd,B);if(m)vmsg.push(m);}}
 
   let bh=null;if(S.bld&&typeof BLD!=="undefined"&&BLD&&!fail){try{bh=bldShot(B,lx-ax+lead-reachX,ly-ay);}catch(e){console.error(e);bh=null;}miss=!(bh&&bh.hit);}
-  if(!gd)S.wear=Math.min(100,(S.wear||0)+(auto?.03:a.type==="ke"?.35:.12)*(1+S.heat/100)*(g.wearK||1));S.balCache=null;try{if(typeof ENT!=="undefined"&&ENT&&typeof entShotHook==="function"){const t=entShotHook(g,S.a,S.veh?S.vt:null);if(t)entToast(t.trim());}}catch(e){}
+  if(!gd)S.wear=Math.min(100,(S.wear||0)+(auto?.03:a.type==="ke"?.35:.12)*(1+S.heat/100)*(g.wearK||1));S.balCache=null;
   if(S.wear>=100&&!S.wornMsg){S.wornMsg=true;$("res").textContent="Ствол расстрелян: рассеивание резко выросло. Замените ствол в настройках.";}
   const ke=a.type==="ke";a.vimp=B.vx;if(ke){const v0r=B.v0-(B.dvT||0);if(a.key==="bops"&&B.vx>250&&v0r>250){const K=loK(260),rp=17600;a.pen=Math.round(a.pen*Math.exp(K/(rp*Math.pow(v0r/1000,2))-K/(rp*Math.pow(B.vx/1000,2))));}else a.pen=Math.round(a.pen*Math.pow(B.vx/v0r,1.4));}
   /* калиберные бронебойные и бетонобойные снаряды крупных калибров: пробитие по формуле Жакоб де Марра от скорости встречи и калибра */
@@ -5983,7 +5981,7 @@ function alForm(){const el=$("wsA1")||$("wsA");if(!el)return;if(!ALY.ed)ALY.ed=a
   <div id="alOut" class="wsout"></div><div id="alWarn" class="wswarn"></div>
   <div class="row1"><button id="alSave" class="wsgo">${saved?"Сохранить изменения":"Сохранить сплав"}</button><button id="alNew">Новый</button>${saved?`<button id="alDel">Удалить</button>`:""}</div>
   ${ALY.msg?`<p class="tag" style="color:#ffd970">${ALY.msg}</p>`:""}
-  ${list?`<span class="lbl">Мои сплавы</span>${list}`:`<p class="tag">Сохранённый сплав появится в списках материалов на вкладке «Броня» (группа «Свои сплавы»), в выборе материала корпуса машины, а подходящие стали и вольфрамовые сплавы — в стволах, сердечниках и корпусах снарядов конструктора пушки. Цена сплава считается по биржевым ценам элементов и учитывается в себестоимости изделий фирмы.</p>`}`;
+  ${list?`<span class="lbl">Мои сплавы</span>${list}`:`<p class="tag">Сохранённый сплав появится в списках материалов на вкладке «Броня» (группа «Свои сплавы»), в выборе материала корпуса машины, а подходящие стали и вольфрамовые сплавы — в стволах, сердечниках и корпусах снарядов конструктора пушки. Цена сплава считается по биржевым ценам элементов и учитывается в себестоимости изделий.</p>`}`;
   ALY.msg="";alOut();
   el.querySelectorAll("[data-fam]").forEach(b=>b.onclick=()=>{if(b.dataset.fam===a.fam)return;const id=a.id,key=a.key,n=a.n;ALY.ed=alNew(b.dataset.fam);if(!saved){ALY.ed.n=n;}alForm();});
   $("alPre").onchange=e=>{const P=ALY_PRE[f][e.target.value];if(!P)return;a.c=Object.assign({},P.c);a.p=Object.assign({},P.p);a.t=P.t||a.t;if(!saved||/^Сплав \d+$/.test(a.n))a.n=P.n.slice(0,28);alForm();};
@@ -6860,295 +6858,8 @@ function entAutoPlan(E,p){const am=p.kind==="ammo";let r=0,left=0,due=0;
   const have=(p.stock||0)+(p.pend||0),catch_=Math.max(0,due-have)/2,spot=p.list>0?Math.max(p.spotA||0,(ENT_SPOT[p.cat]||0)*.5):0,free=Math.max(0,have-due),top=Math.max(0,spot*1.5-free);
   let q=Math.min(r+catch_,Math.max(0,left-have))+top;q=Math.min(q,entCapM(E,p)*.98);if(!(q>0))return 0;return am?Math.ceil(q/50)*50:Math.max(1,Math.round(q));}
 
-/* ===== Фирма: интерфейс (вкладка «Фирма») ===== */
-var ENTUI={seg:"ov",cc:"",open:{},bid:null,conf:"",msg:"",new:{c:"ru",start:"pr",kbN:"ОКБ «Гром»",plN:"Завод «Гром»"},np:"",jn:30};
-const ENT_SEGS=[["ov","Обзор"],["kb","КБ"],["th","Технологии"],["pl","Завод"],["mk","Рынок"],["ac","Учёт"]];
+/* экранирование текста для HTML (нужно справочнику материалов и цене в «Цехе») */
 const eE=t=>String(t==null?"":t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const ePct=x=>Math.round((x||0)*100)+" %",eN=x=>Math.round(x||0).toLocaleString("ru-RU").replace(/,/g," ");
-function entSpark(v,w,h,col){if(!v||v.length<2)return"";const mn=Math.min(0,...v),mx=Math.max(0,...v),r=(mx-mn)||1,X=i=>(i/(v.length-1)*w).toFixed(1),Y=x=>(h-2-(x-mn)/r*(h-4)).toFixed(1);
-  return`<svg class="entsp" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="${w}" y1="${Y(0)}" y2="${Y(0)}" stroke="rgba(255,255,255,.18)" stroke-dasharray="3 3"/><polyline fill="none" stroke="${col||"#f0c24f"}" stroke-width="1.8" points="${v.map((x,i)=>X(i)+","+Y(x)).join(" ")}"/></svg>`;}
-function entBar(f,cls){return`<div class="entbar${cls?" "+cls:""}"><i style="width:${Math.round(entCl(f,0,1)*100)}%"></i></div>`;}
-function entNumI(f,val,min,max,step,w){return`<span class="entnum"><button data-a="dec" data-f="${f}" aria-label="меньше">−</button><input type="number" inputmode="numeric" data-f="${f}" value="${val}" min="${min}" max="${max}" step="${step||1}"${w?` style="width:${w}"`:""}><button data-a="inc" data-f="${f}" aria-label="больше">+</button></span>`;}
-function entSel(f,o,cur){return`<select data-f="${f}">${Object.entries(o).map(([k,t])=>`<option value="${k}"${String(k)===String(cur)?" selected":""}>${t}</option>`).join("")}</select>`;}
-function entSec(id,title,sum,inner,def){const op=ENTUI.open[id]!=null?ENTUI.open[id]:!!def;return`<details class="wssec" data-sec="${id}"${op?" open":""}><summary><b>${title}</b><span>${sum||""}</span></summary><div class="ctrl entin">${inner}</div></details>`;}
-/* ---------- вход: создание фирмы или панель ---------- */
-function entUI(){const sec=$("t-ent");if(!sec)return;const st=sec.scrollTop;
-  if(!ENT){sec.innerHTML=entUINew();entBind(sec);return;}
-  const E=ENT;sec.innerHTML=`<div class="wssum entsum" id="entSum">${entSumH(E)}</div>
-    ${E.over?`<div class="entover">Фирма обанкротилась. Учёт и история доступны для просмотра; можно основать новую.</div>`:""}
-    <div class="seg wsseg entseg" role="group" aria-label="Раздел фирмы">${ENT_SEGS.map(([k,t])=>`<button data-a="seg" data-v="${k}" aria-pressed="${ENTUI.seg===k}">${t}</button>`).join("")}</div>
-    ${ENTUI.msg?`<div class="entmsg">${ENTUI.msg}</div>`:""}<div id="entBody">${entBody(E)}</div>`;ENTUI.msg="";entBind(sec);sec.scrollTop=st;}
-function entSumH(E){const C=entC(E),h=E.hist[E.hist.length-1]||{},bs=entBS(E),cash=E.B["51"]||0,burn=entBurn(E);
-  return`<div class="entsr"><b>${eE(E.kbN)}</b><span>${entDate(E)}</span></div>
-  <div class="entkp"><span>Деньги<b class="${cash<0?"neg":""}">${entMoney(cash,E)}</b></span><span>Капитал<b class="${bs.eq<0?"neg":""}">${entMoney(bs.eq,E)}</b></span><span>Заказы<b>${entMoney(entBacklog(E),E)}</b></span>
-  <span>Прибыль, мес<b class="${(h.np||0)<0?"neg":"pos"}">${E.hist.length?entMoney(h.np,E):"—"}</b></span><span>Репутация<b>${Math.round(E.rep)}</b></span><span>${burn>0?"Хватит на":"Курс $"}<b>${burn>0?Math.max(0,Math.floor(cash/burn))+" мес":(E.c==="us"?"1":E.fx.toFixed(E.fx<10?3:1).replace(".",","))}</b></span></div>
-  <div class="entgo"><button data-a="run" data-v="1"${E.over?" disabled":""}>Месяц ▸</button><button data-a="run" data-v="3"${E.over?" disabled":""}>3 мес ▸▸</button><button data-a="run" data-v="12"${E.over?" disabled":""} title="до важного события, не больше года">До события</button></div>`;}
-/* средний отток денег в месяц за последние 3 месяца (если отрицательный поток) */
-function entBurn(E){const H=E.hist.slice(-3);if(!H.length)return 0;const f=H.reduce((s,h)=>s+(h.inC-h.out),0)/H.length;return f<0?-f:0;}
-function entUINew(){const n=ENTUI.new,C=ENT_CTRY[n.c],S0=ENT_START[n.start];
-  return`<p class="tag" style="margin:0">Своё оборонное предприятие: конструкторское бюро разрабатывает изделия из вашего цеха (пушки, выстрелы, бронемашины, сплавы), завод их выпускает, вы продаёте армиям через тендеры, госзаказ и прямые продажи, ведёте учёт и платите налоги. Один ход — месяц.</p>
-  <span class="lbl">Страна</span><div class="seg wsseg">${Object.entries(ENT_CTRY).map(([k,c])=>`<button data-a="nc" data-v="${k}" aria-pressed="${n.c===k}">${c.n}</button>`).join("")}</div>
-  <p class="tag entnote">${C.note}. Курс: ${C.fx===1?"доллар":`${C.fx.toFixed(C.fx<10?3:2).replace(".",",")} ${C.cur} за $`}. Зарплата конструктора ${eN(C.wage.des)} ${C.cur}, рабочего ${eN(C.wage.wrk)} ${C.cur} в месяц.</p>
-  <span class="lbl">С чего начать</span>${Object.entries(ENT_START).map(([k,s])=>`<button class="entpick" data-a="ns" data-v="${k}" aria-pressed="${n.start===k}"><b>${s.n}</b><span>${s.d}. Капитал ${entUsd(s.cash)}, КБ ${s.kb.des+s.kb.eng+s.kb.tst} чел., рабочих ${s.wrk}</span></button>`).join("")}
-  <label class="lbl" for="entKbN">Конструкторское бюро</label><input id="entKbN" class="wsin" maxlength="32" data-f="kbN" value="${eE(n.kbN)}">
-  ${n.start!=="kb"?`<label class="lbl" for="entPlN">Завод</label><input id="entPlN" class="wsin" maxlength="32" data-f="plN" value="${eE(n.plN)}">`:""}
-  <button class="wsgo entbig" data-a="found">Основать: ${eE(S0.n.toLowerCase())}, ${C.n}</button>`;}
-/* ---------- разделы ---------- */
-function entBody(E){return ENTUI.seg==="kb"?entKBH(E):ENTUI.seg==="th"?entThH(E):ENTUI.seg==="pl"?entPlH(E):ENTUI.seg==="mk"?entMkH(E):ENTUI.seg==="ac"?entAcH(E):entOvH(E);}
-/* ---------- Технологии: НИР, лицензии, дерево по ветвям ---------- */
-function entThH(E){const R=E.R||{q:[],h:0,share:.1},T=ENT_TECH,known=Object.keys(E.tech||{}).length,cur=R.q[0]&&T[R.q[0]],kb=E.kb,cap=(kb.des+kb.eng+kb.tst)*ENT_HPM*.85*kb.skill*R.share;
-  const q=R.q.map((k,i)=>`<div class="entl ${i?"i":"g"}">${i?i+1+". ":"▶ "}${eE(T[k].n)} · ${Math.round(T[k].h/1000)} тыс. ч${i?` <button class="entmini2" data-a="tq-" data-v="${k}">убрать</button>`:` — ${ePct(R.h/T[k].h)}, ≈${cap>0?Math.ceil((T[k].h-R.h)/cap):"∞"} мес <button class="entmini2" data-a="tq-" data-v="${k}">отменить</button>`}</div>`).join("");
-  const stN={ok:"✔ освоена",run:"▶ исследуется",q:"в очереди",av:"доступна",lock:"нужны предпосылки"};
-  const br=Object.entries(ENT_TBR).map(([b,bn])=>{const L=Object.values(T).filter(t=>t.br===b).sort((a,c)=>a.tier-c.tier);const ok=L.filter(t=>entHas(E,t.id)).length;
-    return entSec("th_"+b,bn,`${ok} из ${L.length}`,L.map(t=>{const st=entTechSt(E,t.id),lic=entTechLic(E,t.id);
-      return`<div class="entth2 ${st}"><div><b>${eE(t.n)}</b><i>уровень ${t.tier} · ${Math.round(t.h/1000)} тыс. ч НИР · ${stN[st]}${st==="lock"?": "+t.req.filter(r=>!entHas(E,r)).map(r=>eE(T[r].n)).join(", "):""}</i><span>${eE(t.d)}</span></div>
-      ${st==="ok"?"":`<div class="entbtns2">${st==="av"||st==="lock"?`<button data-a="tq+" data-v="${t.id}">В НИР</button>`:""}${lic?`<button data-a="tlic" data-v="${t.id}" title="Лицензия: ${eE(lic.from)}">Лицензия ${entMoney(lic.usd*E.fx,E)}</button>`:""}</div>`}</div>`;}).join(""),false);}).join("");
-  return`<div class="entbox"><div class="entkv"><span>Освоено технологий</span><b>${known} из ${Object.keys(T).length}</b><span>Доля КБ на НИР</span><b>${entSel("rsh",{0:"нет",.05:"5 %",.1:"10 %",.2:"20 %",.3:"30 %",.5:"50 %"},R.share)}</b>
-    <span>Затраты НИР с начала</span><b>${entMoney(R.cost||0,E)} материалы и испытания</b></div>${q?`<span class="lbl">Очередь НИР</span>${q}`:"<p class='tag'>Очередь НИР пуста: добавьте технологии ниже.</p>"}</div>
-  <p class="tag">Изделие с неосвоенной технологией можно разрабатывать сразу — но ОКР станет больше на полуторный объём НИР этой технологии и в нём будет больше скрытых дефектов. После приёмки изделия технология считается освоенной. Лицензию продают держатели вашей страны (дешевле) или союзного блока; уран, газовая турбина и КАЗ против подкалиберных — только свои. Производственные технологии сразу снижают трудоёмкость и накладные всех изделий.</p>${br}`;}
-function entHints(E){const C=entC(E),o=[],cash=E.B["51"]||0,burn=entBurn(E);
-  if(burn>0&&cash/burn<9)o.push(["w",`Деньги уходят: в среднем ${entMoney(burn,E)} в месяц — хватит примерно на ${Math.max(0,Math.floor(cash/burn))} мес. Банк одобрит кредит до ${entMoney(entLimit(E),E)} («Учёт» → «Кредиты»).`]);
-  const ku=E.kbUse;if(ku&&E.kb.des+E.kb.eng+E.kb.tst>0){const id=["des","eng","tst"].filter(k=>E.kb[k]>0&&ku[k]<.5);if(id.length)o.push(["w",`КБ загружено слабо (${id.map(k=>({des:"конструкторы",eng:"технологи",tst:"испытатели"})[k]+" "+ePct(ku[k])).join(", ")}): простой идёт в управленческие расходы. Откройте ОКР или сократите штат.`]);}
-  if(E.util!=null&&ENT_SHOPS.some(k=>E.shops[k].pos)&&E.util<.5)o.push(["w",`Цеха загружены на ${ePct(E.util)}: накладные расходы простаивающих мощностей списываются в убыток.`]);
-  E.K.filter(k=>k.st==="act").forEach(k=>{const p=E.P.find(x=>x.id===k.pid);if(!p)return;const due=Math.min(k.qty,k.rate*Math.max(0,E.m-k.start+1));if(k.dlv<due)o.push(["w",`Договор №${k.id} (${eE(k.cuN)}): отставание ${due-k.dlv} шт. — неустойка каждый месяц.`]);
-    else if(E.m>=k.start-2&&p.st==="ser"&&!p.auto&&p.plan<k.rate)o.push(["i",`«${eE(p.n)}»: план выпуска ${p.plan}/мес меньше темпа поставок по договору №${k.id} (${k.rate}/мес).`]);});
-  E.P.filter(p=>p.st==="ser"&&!p.plan&&!p.pause).forEach(p=>o.push(["i",p.auto?`«${eE(p.n)}»: автоплан 0 — договоров нет. Для прямых продаж задайте экспортную цену или план вручную («Завод»).`:`«${eE(p.n)}» готов к серии, но план выпуска 0 — задайте его во вкладке «Завод».`]));
-  E.P.filter(p=>p.st==="cert"&&!p.lic).forEach(p=>o.push(["i",`«${eE(p.n)}» принят, но своих цехов нет: продайте лицензию («КБ») или купите оборудование («Завод»).`]));
-  (E.G||[]).filter(g=>g.st==="open"&&E.P.some(p=>p.st==="rd"&&p.cat===g.cat&&!entGovCheck(E,g,p))).forEach(g=>o.push(["g",`Конкурс ${eE(g.n)}: ваша ОКР подходит под ТТЗ — заявка до ${entDate(E,g.dlA)} («Рынок»).`]));
-  (E.G||[]).filter(g=>g.st==="act").forEach(g=>{const p=E.P.find(x=>x.id===g.pid);if(p&&p.st==="rd"){const L=entProjLeft(E,p);if(L>g.dl-E.m)o.push(["w",`${eE(g.n)}: работ ≈${L} мес, до срока сдачи ${Math.max(0,g.dl-E.m)} — поднимите приоритет ОКР или наберите людей в КБ.`]);}});
-  E.T.filter(t=>t.st==="trial").forEach(t=>o.push(["g",`Сравнительные испытания у заказчика (${eE(E.cust[t.cu].n)}) до ${entDate(E,t.trM)} — «Рынок».`]));
-  if(E.O.length)o.push(["g",`Госзаказчик ждёт ответа по ${E.O.length} предложени${E.O.length===1?"ю":"ям"} — «Рынок».`]);
-  const tn=E.T.filter(t=>t.st==="open"&&E.P.some(p=>p.cat===t.cat&&p.st!=="stop"&&(p.st!=="rd"||p.stg>=3)));if(tn.length)o.push(["g",`Открыто тендеров по вашим изделиям: ${tn.length} — «Рынок».`]);
-  if(!E.P.length)o.push(["i","Начните с ОКР: «КБ» → «Новая разработка». Изделия берутся из цеха (пушки, выстрелы, машины, сплавы) или по образцам реальных."]);
-  return o;}
-function entOvH(E){const H=E.hist.slice(-36),sp=(k,c)=>entSpark(H.map(h=>h[k]),300,42,c),last=E.hist[E.hist.length-1]||{},sv=E.svc;
-  const hints=entHints(E).map(([k,t])=>`<div class="entl ${k}">${t}</div>`).join("");
-  const ev=E.log.slice(0,14).map(l=>`<div class="entl ${l.k}"><i>${entDate(E,l.m)}</i>${eE(l.t)}</div>`).join("");
-  return`${hints?`<div class="entbox">${hints}</div>`:""}
-  ${H.length>1?`<div class="entcharts"><div><span>Деньги <b>${entMoney(E.B["51"]||0,E)}</b></span>${sp("cash","#7fd1ff")}</div><div><span>Выручка за месяц <b>${entMoney(last.net,E)}</b></span>${sp("net","#f0c24f")}</div>
-    <div><span>Чистая прибыль <b>${entMoney(last.np,E)}</b></span>${sp("np","#8be08b")}</div><div><span>Портфель заказов <b>${entMoney(entBacklog(E),E)}</b></span>${sp("bk","#d9a3ff")}</div></div>`:""}
-  ${sv?entSec("svc","Текущие работы по заказу",`${ePct(sv.k*sv.share)} объёма`,`<p class="tag">${eE(sv.n)} — постоянная работа фирмы по договору «затраты плюс ${Math.round(sv.mk*100)} %»: занимает ${sv.shop?`до ${ePct(sv.shop*sv.k*sv.share)} мощности цехов и `:""}часть КБ, покрывает постоянные расходы. Объём сокращается ≈${Math.round(sv.decay*1200)/10} % в месяц; в декабре заказчик продлевает договор — тем больше, чем выше репутация (на полный год — от 50).</p>
-    <div class="row1"><label class="lbl">Брать работ</label>${entSel("svshare",{1:"100 %",.75:"75 %",.5:"50 %",.25:"25 %",0:"не брать"},sv.share)}</div>${sv.rev?`<p class="tag">В прошлом месяце: выручка ${entMoney(sv.rev,E)}, себестоимость ${entMoney(sv.costM,E)}.</p>`:""}`,false):""}
-  ${E.sup&&(E.sup.fleet>0)?entSec("sup","Сопровождение поставленной техники",`${eN(E.sup.fleet)} ед. в войсках`,`<p class="tag">Армии, получившие вашу технику, покупают запчасти и ремонт: выручка — затраты плюс 35 %. Работы идут свободной мощностью цехов (до половины свободного времени). В прошлом месяце: выручка ${entMoney(E.sup.rev,E)}, себестоимость ${entMoney(E.sup.costM,E)}, выполнено ${ePct(E.sup.f||0)} потребности.</p>`,false):""}
-  ${entSec("log","События",E.log.length+"",ev||"<p class='tag'>Пока событий нет.</p>",true)}
-  ${entSec("reset","Новая игра",ENTUI.conf==="reset"?"подтвердите":"",`<p class="tag">Закрыть фирму и основать новую. Сохранение текущей будет удалено.</p><button data-a="reset">${ENTUI.conf==="reset"?"Точно закрыть — нажмите ещё раз":"Закрыть фирму"}</button>`,false)}`;}
-/* ---------- КБ ---------- */
-function entProg(p){if(p.st!=="rd")return 1;let f=0;for(let i=0;i<p.stg;i++)f+=ENT_STG[i].sh;f+=ENT_STG[p.stg].sh*Math.min(1,p.sh/Math.max(1,entStH(p,p.stg)));return f;}
-function entKBH(E){const C=entC(E),kb=E.kb,cap=k=>kb[k]*ENT_HPM*.85*kb.skill,pay=["des","eng","tst"].reduce((s,k)=>s+kb[k]*entWage(E,k),0)*(1+C.social);
-  const staff=`<div class="enttab3">${["des","eng","tst"].map(k=>`<div><span>${{des:"Конструкторы",eng:"Инженеры-технологи",tst:"Испытатели"}[k]}</span><b>${kb[k]}${kb.tgt[k]!==kb[k]?` → ${kb.tgt[k]}`:""}</b>${entNumI("kbt:"+k,kb.tgt[k],0,3000,1,"64px")}<i>${E.kbUse?ePct(E.kbUse[k]):""} загрузка</i></div>`).join("")}</div>
-    <p class="tag">Фонд оплаты КБ с взносами ${entMoney(pay,E)} в месяц, квалификация ×${kb.skill.toFixed(2).replace(".",",")}. Набор — не больше 10 % штата в месяц (подбор и допуск стоят ≈0,8 оклада); сокращение — выходное пособие ${C.sev} оклад${C.sev===1?"":"а"}.</p>`;
-  const act=E.P.filter(p=>p.st!=="stop"&&p.st!=="done").map(p=>entPCard(E,p)).join("")||"<p class='tag'>Нет разработок.</p>",done=E.P.filter(p=>p.st==="stop"||p.st==="done");
-  return`${entSec("kbst","Штат КБ",`${kb.des+kb.eng+kb.tst} чел. · ${entMoney(pay,E)}/мес`,staff,true)}
-  <span class="lbl">Разработки (сверху — приоритетнее)</span>${act}
-  ${entSec("np","Новая разработка","",entNewPH(E),!E.P.length)}
-  ${done.length?entSec("pd","Закрытые",done.length+"",done.map(p=>`<div class="entl i">${eE(p.n)} — ${p.st==="done"?(p.merged!=null?"модернизация принята, серия перешла на новый вариант":"квалифицирован"):"прекращена"}</div>`).join(""),false):""}`;}
-function entPCard(E,p){const C=entC(E),A=(a,t,x)=>`<button data-a="${a}" data-v="${p.id}"${x||""}>${t}</button>`,kindN={veh:"машина",gun:"орудие",ammo:"выстрел",alloy:"сплав"}[p.kind];
-  let stage="",bar=0,extra="";
-  if(p.st==="rd"){const s=p.stg,H=entStH(p,s);bar=entProg(p);stage=`${ENT_STG[s].n}: ${ePct(Math.min(1,p.sh/Math.max(1,H)))}`+(s===3?` · образцы: ${ePct(1-entProtoLeft(p)/Math.max(1,p.protoT))}`:"")+(p.fixH>0?` · доработка ${Math.round(p.fixH/1000)} тыс. ч`:"");
-    extra=`<div class="entrow">${p.stg<=2?`<label>Соисполнители ${entSel("pout:"+p.id,{0:"нет",.25:"25 % работ",.5:"50 % работ"},p.out)}</label>`:""}${p.stg===4?`<label>Испытания ${entSel("pfast:"+p.id,{0:"полные",1:"ускоренные (½ объёма)"},p.fast?1:0)}</label>`:""}</div>`;
-    if(p.stg===4&&p.kind!=="alloy")extra+=`<p class="tag">Можно провести стрельбы на полигоне игры: каждый выстрел ${p.kind==="veh"?"по машине":"из орудия"} засчитывается в испытания (до четверти объёма в месяц).${p.shotN?` Засчитано выстрелов: ${p.shotN}.`:""}</p>${A("prange","На полигон")}`;}
-  else if(p.st==="tpp"){bar=Math.min(1,p.tppH/Math.max(1,p.tppN));stage=`Подготовка производства: ${ePct(bar)} · оснастка ${entMoney(p.toolPaid,E)} из ${entMoney(p.toolC,E)}`;}
-  else if(p.st==="ser"){bar=1;stage=`Серийное производство · выпущено ${p.done}, продано ${p.sold}`;}
-  else if(p.st==="cert"){bar=1;stage="Принят (литера О1), производства нет"+(p.lic?` · лицензия продана: ${eE(p.lic.buyer)}`:"");}
-  const sc=entPSc(E,p),cost=p.c08+p.c08t+(p.r04||0),est=p.st==="rd"?{mo:entProjLeft(E,p)}:null;
-  return`<div class="entcard${p.pause?" paused":""}"><div class="enth"><b>${eE(p.n)}</b><span>${kindN}${p.cat?` · ${ENT_CAT[p.cat]}`:""}</span></div>${entBar(bar,p.st==="ser"?"ok":"")}
-  <div class="entsub">${stage}${p.pause?" · <b>пауза</b>":""}</div>
-  <div class="entkv"><span>Затраты ОКР</span><b>${entMoney(cost,E)}</b>${est&&est.mo?`<span>Осталось ≈</span><b>${est.mo} мес</b>`:""}<span>Дефекты: выявлено</span><b>${p.found}${p.fixH>0?" (дорабатываются)":""}</b>
-   ${p.kind!=="alloy"?`<span>Оценка: огонь / защита / подвижность / надёжность</span><b>${sc.f} / ${sc.p} / ${sc.m} / ${sc.r}</b>`:""}${p.it.qH?`<span>Квалификация своих сплавов</span><b>${Math.round(p.it.qH/1000)} тыс. ч</b>`:""}${entPCardX(E,p)}</div>${extra}${entUpgH(E,p)}
-  <div class="row1 entbtns">${A("pup","▲ Выше")}${p.st!=="ser"&&p.st!=="cert"?A("ppause",p.pause?"Продолжить":"Пауза"):""}${(p.st==="cert"||p.st==="ser")&&!p.lic&&!p.govIP&&p.kind!=="alloy"?A("plic","Продать лицензию"):""}${p.st==="cert"&&ENT_SHOPS.some(k=>E.shops[k].pos)?A("ptpp","Начать ТПП"):""}${A("pcancel",ENTUI.conf==="pc"+p.id?"Точно прекратить?":"Прекратить")}</div></div>`;}
-/* источники для новых ОКР: проекты цеха, их выстрелы, свои сплавы, образцы реальных */
-function entSrcList(){const L=[];const nm=d=>d.name||"Проект";
-  (WS.guns||[]).forEach(d=>{L.push({id:"g:"+d.id,kind:"gun",d,n:nm(d),g:"Орудия цеха"});let r=null;try{r=wsCalc(wsGNorm(JSON.parse(JSON.stringify(d))));}catch(e){}if(r)Object.keys(r.sh||{}).filter(t=>ENT_AMT[t]).forEach(t=>L.push({id:"a:"+d.id+":"+t,kind:"ammo",d,t,n:`${nm(d)}: ${(WS_AN[t]||t)}`,g:"Выстрелы к орудиям цеха"}));});
-  (WS.veh||[]).forEach(d=>L.push({id:"v:"+d.id,kind:"veh",d,n:nm(d),g:"Машины цеха"}));
-  (typeof ALY!=="undefined"?ALY.list:[]).forEach(a=>L.push({id:"x:"+a.id,kind:"alloy",d:a,n:a.n,g:"Свои сплавы (квалификация)"}));
-  Object.entries(WSG_PRESETS).forEach(([k,p])=>{const d=Object.assign({id:"pg_"+k,name:p.n.split(" (")[0],proto:k},JSON.parse(JSON.stringify(p.d)));L.push({id:"pg:"+k,kind:"gun",d,n:p.n,g:"По образцу: орудия"});
-    ["bops","he"].forEach(t=>{if((t==="bops"&&p.d.cls==="tank")||(t==="he"&&p.d.cls==="how"))L.push({id:"pa:"+k+":"+t,kind:"ammo",d,t,n:`${p.n.split(" (")[0]}: ${WS_AN[t]}`,g:"По образцу: выстрелы"});});});
-  if(typeof WSV_PRESETS!=="undefined")Object.entries(WSV_PRESETS).forEach(([k,p])=>{const d=Object.assign(JSON.parse(JSON.stringify(p.d)),{id:"pv_"+k,name:p.n,proto:k});L.push({id:"pv:"+k,kind:"veh",d,n:p.n,g:"По образцу: машины"});});
-  return L;}
-function entNewPH(E){const L=entSrcList(),cur=L.find(x=>x.id===ENTUI.np)||null,grp=[...new Set(L.map(x=>x.g))];
-  const sel=`<select data-f="np"><option value="">— выберите изделие —</option>${grp.map(g=>`<optgroup label="${g}">`+L.filter(x=>x.g===g).map(x=>`<option value="${eE(x.id)}"${x.id===ENTUI.np?" selected":""}>${eE(x.n)}</option>`).join("")+"</optgroup>").join("")}</select>`;
-  let info="";if(cur){let it=null;try{it=cur.kind==="veh"?entItemVeh(cur.d):cur.kind==="gun"?entItemGun(cur.d):cur.kind==="alloy"?entItemAlloy(cur.d):entItemAmmo(cur.d,cur.t);}catch(e){info=`<p class="tag">Не удалось рассчитать: ${eE(e.message)}</p>`;}
-    if(it){const RP=entRdPrep(E,it),qH=RP.qH,it2=Object.assign({},it,{rdH:RP.rdH}),est=entProjEst(E,it2),kit=entKit(E,it),C=entC(E);
-      const comps=E.comp.filter(x=>x.cat===it.cat),cm=comps.length?entMed(comps.map(x=>x.pr)):0,sc=it.sc;
-      const lab=ENT_SHOPS.reduce((s,k)=>s+(it.h[k]||0),0);
-      info=`<div class="entkv"><span>Объём ОКР</span><b>${Math.round(it2.rdH/1000)} тыс. нормо-часов${qH?` (с квалификацией сплавов)`:""}</b>${RP.need.L.length?`<span>Неосвоенные технологии</span><b class="neg">${RP.need.L.map(t=>eE(t.n)).join(", ")} — +${Math.round(RP.need.h/1000)} тыс. ч (выгоднее НИР или лицензия заранее)</b>`:""}<span>Срок при нынешнем КБ</span><b>≈${est.mo} мес</b><span>Стоимость ОКР</span><b>≈${entMoney(est.money,E)}</b>
-        ${it.kind!=="alloy"?`<span>Материалы и комплектующие на ед.</span><b>${entMoney(kit.mat+kit.comp,E)}</b><span>Трудоёмкость зрелой серии</span><b>${it.kind==="ammo"?lab.toFixed(1).replace(".",","):eN(lab)} нормо-ч на ед.</b>
-        <span>Оснастка (ТПП)</span><b>${entMoney(it.tool$*E.fx*C.toolK,E)}</b><span>Оценка (огонь / защита / подвижность / надёжность)</span><b>${sc.f} / ${sc.p} / ${sc.m} / ${sc.r}</b>
-        ${comps.length?`<span>Конкуренты (${comps.length}), средняя цена</span><b>${entUsd(cm)}</b>`:""}<span>Калибры</span><b>${it.std==="nato"?"НАТО":it.std==="su"?"советские":"смешанные"}</b>`:""}</div>`;}}
-  return`${sel}${info}<button class="wsgo" data-a="npgo"${cur?"":" disabled"}>Открыть ОКР</button><p class="tag">Свои изделия создаются во вкладке «Цех» (пушка, машина, сплав) и появляются здесь. «По образцу» — модернизация реального изделия: ОКР в 2–2,5 раза меньше.</p>`;}
-/* ---------- Завод ---------- */
-function entPlH(E){const C=entC(E),sv=E.svc;
-  const shops=ENT_SHOPS.map(k=>{const s=E.shops[k],mx=s.pos*s.shift*ENT_WPP,pend=E.capex.filter(x=>x.k===k).reduce((a,x)=>a+x.n,0);
-    return`<div class="entshop"><div class="enth"><b>${ENT_SHOP[k].s}</b><span>${ENT_SHOP[k].d}</span></div>
-    <div class="entrow"><label>Позиции: ${s.pos}${pend?` (+${pend} в пути)`:""}<span class="entmini"><button data-a="pb" data-v="${k}">+ купить</button><button data-a="ps" data-v="${k}"${s.pos?"":" disabled"}>− продать</button></span></label>
-     <label>Смены ${entSel("sh:"+k,{1:"1",2:"2",3:"3"},s.shift)}</label></div>
-    <div class="entrow"><label>Рабочие: ${s.wrk}${s.tgt!==s.wrk?` → ${s.tgt}`:""} из ${mx} мест ${entNumI("wt:"+k,s.tgt,0,20000,5,"64px")}</label>
-     <label class="entld">Загрузка ${ePct(s.load)} · эффективность ${ePct(s.eff)}${entBar(s.load,s.load>.95?"hot":"")}</label></div></div>`;}).join("")+`
-    <p class="tag">Позиция — участок на ${ENT_WPP} рабочих в смену; новая стоит ≈${entMoney(ENT_SHOP.meh.pos*E.fx*(E.c==="ru"?1.25:1),E)} в мехобработке (монтаж 3 мес), продажа — по 35 % остаточной стоимости. Вторая смена +10 % к оплате, третья +20 %. Новички снижают эффективность, опыт её поднимает.</p>`;
-  const prods=E.P.filter(p=>p.st==="ser"||(p.st==="tpp")).map(p=>entProdCard(E,p)).join("")||"<p class='tag'>Серийных изделий пока нет: после ОКР и подготовки производства изделие появится здесь.</p>";
-  const cm=ENT_CMDS.map(c=>{const d=ENT_CMD[c],H=E.ixH[c]||[1],v=E.ix[c],v1=H.length>1?H[H.length-2]:v,v12=H.length>12?H[H.length-13]:H[0],emb=(E.emb&&E.emb[c])||1,pr=d.p===1?`индекс ${v.toFixed(2).replace(".",",")}`:`${(d.p*v*emb).toFixed(d.p*v<10?2:0).replace(".",",")} $/кг`;
-    const ch=x=>{const q=(v/x-1)*100;return`<b class="${q>2?"neg":q<-2?"pos":""}">${q>0?"+":""}${q.toFixed(0)} %</b>`;};return`<div class="enttr cm"><span>${d.n}${emb>1.01?` <i>санкции ×${emb.toFixed(2).replace(".",",")}</i>`:""}</span><span>${pr}</span><span>${ch(v1)} мес</span><span>${ch(v12)} год</span><span>${entSpark(H.slice(-24),80,22,"#f0c24f")}</span></div>`;}).join("");
-  return`${entSec("shops","Цеха и рабочие",`${ENT_SHOPS.reduce((a,k)=>a+E.shops[k].wrk,0)} раб. · загрузка ${ePct(E.util)}`,shops,true)}
-  <span class="lbl">Изделия в производстве</span>${prods}
-  ${entSec("cmd","Сырьё и материалы",`запасы ${entMoney(E.B["10"]||0,E)}`,`<div class="enttab">${cm}</div><p class="tag">Цены сырья меняются каждый месяц (вольфрам и кобальт особенно резко). Запас материалов изделия задаётся в месяцах выпуска: купленное раньше списывается по цене закупки. Нехватку на месяц закупают срочно, на 12 % дороже.</p>`,false)}`;}
-function entProdCard(E,p){const C=entC(E);if(p.st==="tpp")return`<div class="entcard"><div class="enth"><b>${eE(p.n)}</b><span>подготовка производства</span></div>${entBar(p.tppH/Math.max(1,p.tppN))}<div class="entsub">Оснастка, приспособления, технологии — ${ePct(p.tppH/Math.max(1,p.tppN))}</div></div>`;
-  const FR=entFreeRate(E,p),cap=FR.cap,uc=entUnitCost(E,p,Math.max(1,p.plan||1)),am=p.kind==="ammo",step=am?50:1,comps=E.comp.filter(x=>x.cat===p.cat),med=comps.length?entMed(comps.map(x=>x.pr))*Math.pow(1.03,E.m/12):0;
-  const need=E.K.filter(k=>k.st==="act"&&k.pid===p.id&&k.start<=E.m+2).reduce((s,k)=>s+k.rate,0);
-  return`<div class="entcard"><div class="enth"><b>${eE(p.n)}</b><span>${ENT_CAT[p.cat]}</span></div>
-  <div class="entrow"><label>План ${entSel("pa:"+p.id,{1:"авто",0:"вручную"},p.auto?1:0)}</label><label>Выпуск в месяц ${entNumI("pl:"+p.id,p.plan,0,999999,step,"80px")}</label><label>Запас материалов ${entSel("pm:"+p.id,{0:"нет",1:"1 мес",2:"2 мес",3:"3 мес",6:"6 мес"},p.stockM)}</label></div>
-  <div class="entrow"><label>Контроль качества ${entSel("qc:"+p.id,{0:ENT_QC[0].n,1:ENT_QC[1].n,2:ENT_QC[2].n},p.qc!=null?p.qc:1)}</label></div><p class="tag">План «авто» — выпуск под график поставок по договорам (с догоном отставания) и под прямые продажи, если задана экспортная цена; ручное изменение выпуска переключает на «вручную». Строже контроль — больше нормо-часов (+4 % / +9 %), зато скрытые дефекты чаще ловят на заводе, а не в войсках: меньше гарантийных расходов и рекламаций.</p>
-  <div class="entkv"><span>Мощность при нынешних цехах</span><b>≈${am?eN(Math.floor(cap/50)*50):cap.toFixed(cap<10?1:0).replace(".",",")} шт./мес${p.bott?` · узкое место: ${ENT_SHOP[p.bott].s.toLowerCase()}`:""}${p.plan>cap*1.02?` · <span class="neg">план больше мощности</span>`:""}</b>
-   ${need?`<span>Нужно по договорам</span><b class="${need>p.plan?"neg":""}">${eN(need)} шт./мес</b>`:""}<span>Выпущено / освоение</span><b>${eN(p.done)} шт. · трудоёмкость ×${uc.LC.toFixed(2).replace(".",",")} к зрелой</b>
-   <span>Склад</span><b>${eN(p.stock)}${p.pend?` + ${p.pend} на приёмке`:""} · материалы на ${p.plan?(p.ms/p.plan).toFixed(1).replace(".",","):"—"} мес</b>
-   <span>Себестоимость ед.</span><b>${entMoney(uc.tot,E)}</b><span>— материалы / комплектующие</span><b>${entMoney(uc.mat,E)} / ${entMoney(uc.comp,E)}</b><span>— труд / накладные / НИОКР</span><b>${entMoney(uc.lab,E)} / ${entMoney(uc.ovh,E)} / ${entMoney(uc.am,E)}</b>
-   ${p.ucLast?`<span>Фактическая в прошлом выпуске</span><b>${entMoney(p.ucLast,E)}</b>`:""}${med?`<span>Цены конкурентов (медиана)</span><b>${entUsd(med)} ≈ ${entMoney(med*E.fx,E)}</b>`:""}
-   <span>Продано / выручка</span><b>${eN(p.sold)} шт. · ${entMoney(p.rev,E)}${p.rev?` · маржа ${ePct(1-p.cogs/p.rev)}`:""}</b>${p.mCert!=null?`<span>Образец</span><b>принят ${entDate(E,p.mCert)}${p.upgN?` · модернизаций ${p.upgN}`:""}${p.cp!=null&&E.m-p.cp<36?" · <span class=\"pos\">проверен в бою</span>":""}${p.cpBad!=null&&E.m-p.cpBad<24?" · <span class=\"neg\">неудачное боевое применение</span>":""}</b>`:""}</div>
-  <div class="entrow"><label>Прямые продажи по цене, $ ${entNumI("lp:"+p.id,Math.round(p.list||0),0,1e9,am?10:10000,"96px")}</label></div><p class="tag">0 — не продавать со склада; спрос зависит от цены и оценки изделия относительно конкурентов.</p></div>`;}
-/* ---------- Рынок ---------- */
-function entPolT(v){return v>.15?"дружественное":v<-.6?"не допускает":v<-.15?"настороженное":"нейтральное";}
-function entMkH(E){const C=entC(E);
-  const offers=E.O.map(o=>{const p=E.P.find(x=>x.id===o.pid);return`<div class="entcard hl"><div class="enth"><b>${eE(E.home.n)}</b><span>госзаказ</span></div><div class="entkv"><span>Изделие</span><b>${eE(p?p.n:"?")}</b><span>Количество, темп</span><b>${eN(o.qty)} шт., ${eN(o.rate)}/мес с ${entDate(E,Math.max(E.m+1,o.start))}</b>
-    <span>Цена за единицу без НДС</span><b>${entMoney(o.price,E)}</b><span>Аванс</span><b>${ePct(C.homeAdv)} — ${entMoney(o.price*o.qty*C.homeAdv,E)}</b><span>Доля в закупках</span><b>${ePct(o.share)}</b></div>
-    <div class="row1"><button class="wsgo" data-a="oa" data-v="${o.id}">Подписать</button><button data-a="od" data-v="${o.id}">Отказаться</button></div><p class="tag">Ответ до ${entDate(E,o.exp)}. Неустойка за просрочку ≈${(C.penM*100).toFixed(1).replace(".",",")} % стоимости недопоставки в месяц.</p></div>`;}).join("");
-  const mine=E.P.filter(p=>p.st!=="stop"&&p.st!=="done"&&p.kind!=="alloy");
-  const tend=E.T.filter(t=>t.st==="open"||t.st==="bid"||t.st==="trial").sort((a,b)=>(b.st==="trial")-(a.st==="trial")).sort((a,b)=>(E.P.some(p=>p.cat===b.cat)?1:0)-(E.P.some(p=>p.cat===a.cat)?1:0)||a.dl-b.dl).map(t=>entTCard(E,t,mine)).join("")||"<p class='tag'>Открытых тендеров нет.</p>";
-  const f2=x=>(x>0?"+":"")+(+x||0).toFixed(2).replace(".",","),dbr=r=>r&&r.q!=null?`<i>качество ${f2(r.q)} · цена ${f2(r.pr)} · сроки ${f2(r.dl)}${r.st?" · калибры "+f2(r.st):""} · доверие ${f2(r.rp)} · политика ${f2(r.pol)}${r.ex?" · офсет, выставки, боевой опыт "+f2(r.ex):""}${r.tr!=null?" · испытания "+f2(r.tr):""}</i>`:"";
-  const closed=E.T.filter(t=>t.res&&t.st!=="open"&&t.st!=="bid").slice(-8).reverse().map(t=>{const me=t.res.find(r=>r.me),w=t.res[0];
-    return`<div class="entl ${t.st==="won"?"g":t.st==="lost"?"w":"i"}"><i>${entDate(E,t.dl)}${t.reg?" · "+eE(ENT_REG[t.reg]||""):""}</i>${eE(E.cust[t.cu].n)}: ${ENT_CAT[t.cat]}, ${eN(t.qty)} шт. — ${t.res.slice(0,3).map(r=>`${r.me?"<b>":""}${eE(r.n)} ${entUsd(r.price)} (${String(r.s).replace(".",",")})${r.me?"</b>":""}`).join(", ")}
-      ${me?`<i>Победитель «${eE(w.n)}»:</i>${dbr(w)}${me!==w?`<i>Ваша заявка:</i>${dbr(me)}`:""}`:""}</div>`;}).join("");
-  const ks=E.K.slice().reverse().map(k=>{const p=E.P.find(x=>x.id===k.pid),due=Math.min(k.qty,k.rate*Math.max(0,E.m-k.start+1)),val=k.dom?k.price:k.pu*E.fx;
-    return`<div class="entcard${k.st!=="act"?" dim":""}"><div class="enth"><b>№${k.id} · ${eE(k.cuN)}</b><span>${{act:"исполняется",done:"исполнен",fail:"расторгнут"}[k.st]}</span></div>${entBar(k.dlv/k.qty,k.dlv<due?"hot":"ok")}
-    <div class="entkv"><span>${eE(p?p.n:"?")}</span><b>${eN(k.dlv)} из ${eN(k.qty)} · ${eN(k.rate)}/мес с ${entDate(E,k.start)}</b><span>Цена ед.</span><b>${k.dom?entMoney(k.price,E)+" + НДС":entUsd(k.pu)}</b>
-    ${k.st==="act"?`<span>По графику к этому месяцу</span><b class="${k.dlv<due?"neg":""}">${eN(due)} шт.</b><span>Остаток аванса</span><b>${k.dom?entMoney(k.advL,E):entUsd(k.advLU)}</b>`:""}${k.pen?`<span>Неустойки</span><b class="neg">${entMoney(k.pen,E)}</b>`:""}<span>Стоимость</span><b>${entMoney(k.qty*val,E)}</b></div></div>`;}).join("")||"<p class='tag'>Договоров нет.</p>";
-  const cats=[...new Set(E.comp.map(x=>x.cat))],cc=ENTUI.cc&&cats.includes(ENTUI.cc)?ENTUI.cc:(mine[0]&&mine[0].cat)||cats[0],infl=Math.pow(1.03,E.m/12);
-  const comp=E.comp.filter(x=>x.cat===cc).sort((a,b)=>(a.on===false)-(b.on===false)).map(x=>{const s=entCompScore(E,x),soon=x.on===false;return`<div class="enttr${soon?" dim":""}"><span><b>${eE(x.n)}${x.y&&!soon?" · новинка":""}</b><i>${eE(x.mk)}, ${ENT_CO[x.co]||x.co}${soon?` · выйдет в ${x.y}`:""}</i></span><span>${Math.round(s.f)}/${Math.round(s.p)}/${Math.round(s.m)}/${Math.round(s.r)}</span><span>${entUsd(x.pr*infl*(soon?1:entCompPK(x)))}</span><span>${soon?"—":ePct(x.load)}</span></div>`;}).join("");
-  const sh=E.share[cc]||{},tot=Object.values(sh).reduce((a,b)=>a+b,0),shH=tot?Object.entries(sh).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([n,q])=>`<div class="entsh"><span>${n==="_me"?"<b>Вы</b>":eE(n)}</span>${entBar(q/tot,n==="_me"?"ok":"")}<i>${ePct(q/tot)}</i></div>`).join(""):"<p class='tag'>Контрактов в этой категории ещё не было.</p>";
-  const cust=E.cust.filter(c=>!c.ret).map(c=>`<div class="enttr"><span><b>${eE(c.n)}</b><i>${eE(ENT_REG[c.reg]||"")} · ${c.std==="nato"?"НАТО":c.std==="su"?"советские калибры":"смешанное вооружение"}${c.off?` · офсет ${Math.round(c.off*100)} %`:""}</i></span><span>${entUsd(c.bud-c.spent)}</span><span>${entPolT(c.pol[E.c]||0)}</span><span>${Math.round(c.rel||50)}</span></div>`).join("");
-  return`${offers?`<span class="lbl">Предложения госзаказчика</span>${offers}`:""}${entGovH(E)}<span class="lbl">Тендеры</span>${tend}
-  ${closed?entSec("tclosed","Итоги тендеров","",closed,false):""}${entSec("kk","Договоры",E.K.filter(k=>k.st==="act").length+" активных",ks,!!E.K.length)}
-  ${entSec("comp","Конкуренты и доли рынка",ENT_CAT[cc],`${entSel("cc",Object.fromEntries(cats.map(c=>[c,ENT_CAT[c]])),cc)}<div class="enttab"><div class="entth"><span>Изделие</span><span>О/З/П/Н</span><span>Цена</span><span>Загрузка</span></div>${comp}</div><span class="lbl">Доли по контрактам</span>${shH}<p class="tag">Конкуренты с недогруженными заводами сбивают цену; после ваших побед в категории начинается ценовая война. О/З/П/Н — огонь, защита, подвижность, надёжность.</p>`,false)}
-  ${entSec("world","Мировой рынок",`${Object.keys(ENT_REG).length} регионов · ${E.cust.filter(c=>!c.ret).length} стран`,entWorldH(E),false)}
-  ${entSec("cust","Заказчики",E.cust.filter(c=>!c.ret).length+"",`<div class="enttab c4"><div class="entth"><span>Страна</span><span>Остаток бюджета</span><span>К вашей стране</span><span>Доверие</span></div>${cust}</div><p class="tag">Бюджеты и потребности — ориентир по открытым данным о закупках последних лет; отношение к странам-поставщикам — по тому, у кого армия покупала технику. Офсет — какую долю производства заказчик требует перенести к себе.</p>`,false)}`;}
-/* мировой рынок: регионы, мировые цены, крупнейшие поставщики, выставки */
-function entWorldH(E){const infl=Math.pow(1.03,E.m/12),A=E.cust.filter(c=>!c.ret);
-  const reg=Object.entries(ENT_REG).map(([r,n])=>{const L=A.filter(c=>c.reg===r);if(!L.length)return"";const wd=(E.wd&&E.wd[r])||1,b=L.reduce((s,c)=>s+Math.max(0,c.bud-c.spent),0),nt=E.T.filter(t=>(t.st==="open"||t.st==="bid")&&t.reg===r).length,
-      rel=L.reduce((s,c)=>s+(c.rel||50),0)/L.length,ok=L.filter(c=>(c.pol[E.c]||0)>=-.6).length;
-    return`<div class="enttr"><span><b>${eE(n)}${E.war&&E.war[r]?' · <span class="neg">конфликт</span>':""}</b><i>${L.map(c=>eE(c.n)).join(", ")}${E.exB&&E.exB[r]>=E.m?" · после выставки":""}</i></span><span>${wd>1.08?"▲":wd<.92?"▼":"●"} ${Math.round(wd*100)} %</span><span>${entUsd(b)}</span><span>${nt} · ${ok}/${L.length}</span></div>`;}).join("");
-  const pr=Object.keys(ENT_CAT).map(cat=>{const H=(E.wpH&&E.wpH[cat])||[];const L=E.comp.filter(x=>x.cat===cat&&x.on!==false);if(!L.length)return"";const med=entMed(L.map(x=>x.pr*infl*entCompPK(x))),ld=L.reduce((s,x)=>s+x.load,0)/L.length,y0=H.length>12?H[H.length-13]:H[0]||med,ch=(med/y0-1)*100;
-    return`<div class="enttr"><span><b>${ENT_CAT[cat]}</b><i>${L.length} образцов</i></span><span>${entUsd(med)}</span><span class="${ch>2?"neg":ch<-2?"pos":""}">${ch>0?"+":""}${ch.toFixed(0)} %</span><span>${ePct(ld)}</span></div>`;}).join("");
-  const mk=Object.entries(E.mks||{}).sort((a,b)=>b[1]-a[1]),tot=mk.reduce((s,x)=>s+x[1],0),mkH=tot?mk.slice(0,8).map(([n,v])=>`<div class="entsh"><span>${n==="_me"?"<b>"+eE(E.kbN)+"</b>":eE(n)}</span>${entBar(v/tot,n==="_me"?"ok":"")}<i>${ePct(v/tot)}</i></div>`).join(""):"<p class='tag'>Контрактов на мировом рынке пока не было.</p>";
-  const ex=entExpoList(E,12).map(o=>`<div class="entl ${o.st===2?"g":o.st?"g":o.ban?"w":"i"}"><i>${entDate(E,o.m)} · ${eE(ENT_REG[o.x.reg])}</i>${eE(o.x.n)} — ${o.ban?"фирмы вашей страны не допускаются":o.st===2?"участие состоялось":o.st?"вы участвуете":`участие ≈${entMoney(o.x.c*E.fx,E)}`}${!o.ban&&!o.st&&o.m>E.m?` <button class="entmini2" data-a="expo" data-v="${o.key}">Участвовать</button>`:""}</div>`).join("");
-  return`<span class="lbl">Регионы: спрос, свободные бюджеты, открытые тендеры, допускают вас</span><div class="enttab c4"><div class="entth"><span>Регион</span><span>Спрос</span><span>Бюджеты</span><span>Тендеры · доступ</span></div>${reg}</div>
-  <span class="lbl">Мировые цены по категориям</span><div class="enttab c4"><div class="entth"><span>Категория</span><span>Медиана</span><span>За год</span><span>Загрузка заводов</span></div>${pr}</div>
-  <p class="tag">В регионе с вооружённым конфликтом армии закупают больше (особенно боеприпасы), а поставленные туда изделия получают отчёты о боевом применении: удачные поднимают репутацию и оценку заявок, неудачные — снижают. Цены конкурентов зависят от загрузки их заводов: собственные армии дают базовый заказ, крупные экспортные победы перегружают завод — тогда он поднимает цену и растягивает сроки. После трёх проигрышей подряд конкурент снижает цену.</p>
-  <span class="lbl">Крупнейшие поставщики по сумме контрактов</span>${mkH}
-  <span class="lbl">Выставки вооружений на год вперёд</span>${ex||"<p class='tag'>Ближайших выставок нет.</p>"}<p class="tag">Участие поднимает доверие армий региона (+6) и репутацию; полгода после выставки ваши заявки в регионе оцениваются выше, а тендеры объявляются раньше.</p>`;}
-function entTCard(E,t,mine){if(t.st==="trial")return entTrialCard(E,t);const c=E.cust[t.cu],pol=c.pol[E.c]||0,ps=mine.filter(p=>p.cat===t.cat),b=t.bid,open=ENTUI.bid===t.id||!!b;let form="";
-  if(ps.length){const bf=ENTUI.bf||{},bv=k=>bf[k+":"+t.id],pid=+(bv("bp")||(b&&b.pid)||ps[0].id),p=E.P.find(x=>x.id===pid)||ps[0],why=entBidCheck(E,t,p),
-      price=+(bv("bpr")||(b?b.price:Math.round(t.maxP*.9/(t.cat.startsWith("am_")?10:1000))*(t.cat.startsWith("am_")?10:1000))),FR=entFreeRate(E,p,t.id),rate=+(bv("brt")||(b?b.rate:Math.max(1,Math.min(t.need,(p.kind==="ammo"?Math.floor(FR.free/50)*50:Math.floor(FR.free))||1))));
-    let ch="";if(!why){const sc=entPSc(E,p),ofx=+(bv("boff")||(b?b.off:0)||0),my=entScore(sc,c.w,price,t.maxP,p.std,c.std,rate,t.need,(E.rep+(c.rel||50))/2)+pol+ofx*1.5+(E.exB&&E.exB[c.reg]>=E.m?.12:0)-(p.st==="rd"?.3:0),co=E.comp.filter(x=>x.cat===t.cat&&x.on!==false&&(c.pol[x.co]||0)>=-.6&&(!t.cat.startsWith("am_")||entStdOk(x.std,c.std))).map(x=>entScore(entCompScore(E,x),c.w,Math.min(x.pr*Math.pow(1.03,E.m/12)*entCompPK(x),t.maxP),t.maxP,x.std,c.std,Math.min(t.need,x.cap/12*.5),t.need,x.rep)+(c.pol[x.co]||0)).sort((a,b)=>b-a);
-      const best=co[0]==null?-9:co[0];ch=my>best+.25?"высокие":my>best-.15?"равные с лидером":my>best-.5?"ниже лидера":"низкие";}
-    form=`<div class="entbid">${entSel("bp:"+t.id,Object.fromEntries(ps.map(x=>[x.id,x.n])),pid)}<div class="entrow"><label>Цена за единицу, $ ${entNumI("bpr:"+t.id,price,1,1e10,t.cat.startsWith("am_")?10:10000,"104px")}</label><label>Темп, шт./мес ${entNumI("brt:"+t.id,rate,1,1e7,t.cat.startsWith("am_")?50:1,"70px")}</label></div>
-      <div class="entrow"><label>Офсет сверх требований ${entSel("boff:"+t.id,{0:"нет",.1:"+10 %",.2:"+20 %",.3:"+30 %"},bv("boff")||(b?b.off:0)||0)}</label></div>
-      ${why?`<p class="tag neg">Нельзя: ${why}</p>`:price>t.maxP?`<p class="tag neg">Цена выше предельной ${entUsd(t.maxP)} — заявку не рассмотрят.</p>`:`<p class="tag">Шансы: <b>${ch}</b>. Мощность по изделию ≈${Math.round(FR.cap)} шт./мес, свободно ≈${Math.round(FR.free)}${rate>FR.free*1.05?` — <span class="neg">темп больше свободной мощности: возможны просрочки</span>`:""}. Подготовка заявки ≈${entMoney((p.kind==="veh"?120e3:p.cat.startsWith("how")?60e3:p.kind==="gun"?30e3:40e3)*E.fx,E)}.</p>`}
-      <div class="row1">${b?`<button class="wsgo" data-a="bgo" data-v="${t.id}">Изменить заявку</button><button data-a="bun" data-v="${t.id}">Отозвать</button>`:`<button class="wsgo" data-a="bgo" data-v="${t.id}"${why||price>t.maxP?" disabled":""}>Подать заявку</button>`}</div></div>`;}
-  return`<div class="entcard${b?" hl":""}"><div class="enth"><b>${eE(c.n)}${t.big?" · крупный":""}</b><span>${ENT_CAT[t.cat]}</span></div>
-  <div class="entkv"><span>Количество</span><b>${eN(t.qty)} шт. · темп от ${eN(t.need)}/мес</b><span>Предельная цена</span><b>${entUsd(t.maxP)} за ед.</b><span>Заявки до · поставки с</span><b>${entDate(E,t.dl)} · ${entDate(E,t.start)}</b>
-  <span>Калибры · отношение к вашей стране</span><b>${t.std==="nato"?"НАТО":t.std==="su"?"советские":"любые"} · ${entPolT(pol)}</b>${t.reg?`<span>Регион</span><b>${eE(ENT_REG[t.reg]||"")}${t.inv?" · вы приглашены после выставки":""}</b>`:""}${entTrialNeed(E,t)?`<span>Испытания</span><b>крупный контракт: перед решением шорт-лист проходит сравнительные испытания у заказчика</b>`:""}${t.off?`<span>Офсет</span><b>${Math.round(t.off*100)} % локализации (≈${Math.round(t.off*22)} % стоимости поставки уйдёт на обязательства)</b>`:""}${b?`<span>Ваша заявка</span><b>${eE((E.P.find(x=>x.id===b.pid)||{}).n)} · ${entUsd(b.price)} · ${b.rate}/мес</b>`:""}</div>
-  ${ps.length?(open?form:`<button data-a="tb" data-v="${t.id}">Подготовить заявку</button>`):`<p class="tag">Своего изделия этой категории нет.</p>`}</div>`;}
-/* ---------- Учёт ---------- */
-function entPLrows(E){const H=E.hist,last=H[H.length-1],y=entYear(E,E.m-1),ytd=H.filter(h=>entYear(E,h.m)===y),py=H.filter(h=>entYear(E,h.m)===y-1),S=(a,k)=>a.reduce((s,h)=>s+(h[k]||0),0);
-  const col=a=>a&&a.length?{net:S(a,"net"),cg:S(a,"cg"),adm:S(a,"adm"),sel:S(a,"sel"),oi:S(a,"oi"),oe:S(a,"oe"),pbt:S(a,"pbt"),tax:S(a,"tax"),np:S(a,"np")}:null;return{cols:[col(last?[last]:null),col(ytd),col(py)],y};}
-function entAcH(E){const C=entC(E),{cols,y}=entPLrows(E),f=v=>v==null?"—":entMoney(v,E);
-  const rows=[["Выручка без НДС","net"],["Себестоимость продаж","cg",-1],["Валовая прибыль",c=>c.net-c.cg],["Управленческие расходы","adm",-1],["Коммерческие расходы","sel",-1],["Прибыль от продаж",c=>c.net-c.cg-c.adm-c.sel],
-    ["Прочие доходы","oi"],["Прочие расходы","oe",-1],["Прибыль до налога","pbt"],["Налог на прибыль","tax",-1],["Чистая прибыль","np"]];
-  const pl=`<div class="enttab pl"><div class="entth"><span></span><span>${E.hist.length?entDate(E,E.m-1):"—"}</span><span>${y} с начала года</span><span>${y-1}</span></div>${rows.map(([n,k,sg])=>`<div class="enttr${typeof k==="function"||k==="np"||k==="pbt"?" sum":""}"><span>${n}</span>${cols.map(c=>`<span>${c?f((typeof k==="function"?k(c):c[k])*(sg||1)):"—"}</span>`).join("")}</div>`).join("")}</div>`;
-  const bs=entBS(E),bsh=`<div class="enttab bs"><div class="entth"><span>Актив</span><span>${entDate(E,E.m-1)}</span></div>${bs.A.map(([n,v])=>`<div class="enttr"><span>${n}</span><span>${entMoney(v,E)}</span></div>`).join("")}<div class="enttr sum"><span>Баланс</span><span>${entMoney(bs.tA,E)}</span></div>
-    <div class="entth"><span>Пассив</span><span></span></div>${bs.P.map(([n,v])=>`<div class="enttr"><span>${n}</span><span>${entMoney(v,E)}</span></div>`).join("")}<div class="enttr sum"><span>Баланс</span><span>${entMoney(bs.tP,E)}</span></div></div>
-    <p class="tag">${Math.abs(bs.tA-bs.tP)<1?"Актив равен пассиву: двойная запись сходится.":"Расхождение актива и пассива!"} Расходы на НИОКР капитализируются (счёт 08 → 04) и списываются 5 лет после приёмки.</p>`;
-  const L=E.last,Q=L?L.mo:{},q=k=>Q[k]||0,cin=[["От покупателей",q("51>62")],["Авансы покупателей",q("51>62.2")],["Кредиты и овердрафт",q("51>66")+q("51>66.2")],["Возмещение НДС",q("51>68.2")],["Прочие (продажа ОС, курсовые)",q("51>91.1")]],
-    cout=[["Поставщикам и подрядчикам",q("60>51")],["Зарплата",q("70>51")],["Налоги и взносы",q("68.1>51")+q("68.2>51")+q("68.4>51")+q("68.8>51")+q("69>51")],["Погашение кредитов",q("66>51")+q("66.2>51")],["Проценты, неустойки, штрафы",q("91.2>51")],["Возврат авансов",q("62.2>51")]];
-  const cf=`<div class="enttab"><div class="entth"><span>Поступления</span><span>${L?entDate(E,L.m):"—"}</span></div>${cin.map(([n,v])=>`<div class="enttr"><span>${n}</span><span>${entMoney(v,E)}</span></div>`).join("")}
-    <div class="entth"><span>Платежи</span><span></span></div>${cout.map(([n,v])=>`<div class="enttr"><span>${n}</span><span>${entMoney(v,E)}</span></div>`).join("")}<div class="enttr sum"><span>Изменение денег</span><span>${entMoney(cin.reduce((s,x)=>s+x[1],0)-cout.reduce((s,x)=>s+x[1],0),E)}</span></div></div>`;
-  const tx=`<div class="entkv"><span>НДС ${Math.round(C.vat*100)} %: начислено с выручки за месяц</span><b>${entMoney(q("90.3>68.2"),E)}</b><span>Принят к вычету входной НДС</span><b>${entMoney(q("68.2>19"),E)}</b>
-    <span>Налог на прибыль ${Math.round(C.profit*100)} % с начала года</span><b>${entMoney(E.yr.tax,E)}</b><span>Прибыль до налога с начала года</span><b>${entMoney(E.yr.pbt,E)}</b><span>Убыток прошлых лет к переносу</span><b>${entMoney(E.lossCF,E)} (зачёт до ${Math.round(C.lossLim*100)} % базы)</b>
-    <span>Страховые взносы ${Math.round(C.social*100)} %${C.ndfl?`, НДФЛ ${Math.round(C.ndfl*100)} %`:""} за месяц</span><b>${entMoney(q(">69"),E)}${C.ndfl?" · "+entMoney(q("70>68.1"),E):""}</b><span>Налог на имущество за месяц</span><b>${entMoney(q("91.2>68.8"),E)}</b></div>`;
-  const lim=entLimit(E),loans=E.L.map(l=>`<div class="enttr"><span>№${l.id} · ${(l.r*100).toFixed(1).replace(".",",")} %</span><span>${entMoney(l.left,E)}</span><span>${entMoney(l.pay,E)}/мес</span><span><button data-a="lr" data-v="${l.id}">Погасить</button></span></div>`).join("");
-  const ln=`<p class="tag">Ставка банка: ключевая ${(E.key*100).toFixed(1).replace(".",",")} % + ${(C.spread*100).toFixed(1).replace(".",",")} п.п. = ${(entRate(E)*100).toFixed(1).replace(".",",")} %. Банк одобрит ещё ${entMoney(lim,E)} (под капитал, портфель заказов, дебиторку и запасы). Овердрафт ${entMoney(E.od,E)}: включается сам при нехватке денег, ставка +5 п.п.</p>
-    ${loans?`<div class="enttab">${loans}</div>`:""}<div class="entrow"><label>Сумма ${entNumI("ln",Math.round((ENTUI.ln||lim/2)/1e3)*1e3,0,1e13,Math.max(1e3,Math.round(lim/20/1e3)*1e3),"120px")}</label><label>Срок ${entSel("lt",{12:"12 мес",24:"24 мес",36:"36 мес",60:"60 мес"},ENTUI.lt||36)}</label></div><button class="wsgo" data-a="lgo"${lim>0?"":" disabled"}>Взять кредит</button>`;
-  const osv=L?Object.keys(Object.assign({},L.B0,L.B1)).filter(a=>Math.abs(L.B0[a]||0)>.5||Math.abs(L.B1[a]||0)>.5||(Q[a+">"]||0)>.5||(Q[">"+a]||0)>.5).sort((a,b)=>parseFloat(a)-parseFloat(b)||a.localeCompare(b)).map(a=>{const b0=L.B0[a]||0,b1=L.B1[a]||0;
-    return`<div class="enttr"><span><b>${a}</b><i>${ENT_ACCN[a]||""}</i></span><span>${b0>=0?entMoney(b0,E):"Кт "+entMoney(-b0,E)}</span><span>${entMoney(Q[a+">"]||0,E)}</span><span>${entMoney(Q[">"+a]||0,E)}</span><span>${b1>=0?entMoney(b1,E):"Кт "+entMoney(-b1,E)}</span></div>`;}).join(""):"";
-  const J=E.J.slice(-ENTUI.jn).reverse().map(j=>`<div class="entj"><i>${entDate(E,j.m)}</i><b>Дт ${j.dt} — Кт ${j.ct}</b><span>${entMoney(j.a,E)}</span><em>${eE(j.t)}</em></div>`).join("");
-  return`${entSec("pl","Отчёт о финансовых результатах","",pl,true)}${entSec("bs","Баланс",entMoney(bs.tA,E),bsh,false)}${entSec("cf","Движение денег за месяц","",cf,false)}
-  ${entSec("tx","Налоги",C.n,tx,false)}${entSec("ln","Кредиты",E.L.length?E.L.length+" действ.":"нет",ln,false)}
-  ${entSec("osv","Оборотно-сальдовая ведомость",L?entDate(E,L.m):"",osv?`<div class="enttab osv"><div class="entth"><span>Счёт</span><span>Сальдо нач.</span><span>Оборот Дт</span><span>Оборот Кт</span><span>Сальдо кон.</span></div>${osv}</div>`:"<p class='tag'>Пока нет закрытых месяцев.</p>",false)}
-  ${entSec("jr","Журнал проводок",`последние ${Math.min(ENTUI.jn,E.J.length)}`,J+(E.J.length>ENTUI.jn?`<button data-a="jmore">Показать ещё</button>`:""),false)}`;}
-/* ---------- обработчики ---------- */
-function entBind(sec){
-  if(sec.querySelectorAll)sec.querySelectorAll("details.wssec").forEach(x=>x.ontoggle=()=>{ENTUI.open[x.dataset.sec]=x.open;});
-  sec.onclick=e=>{const b=e.target&&e.target.closest?e.target.closest("[data-a]"):null;if(!b||b.disabled)return;entAct(b.dataset.a,b.dataset.v,b);};
-  sec.onchange=e=>{const i=e.target;if(!i||!i.dataset||!i.dataset.f)return;entField(i.dataset.f,i.value);};
-  sec.oninput=e=>{const i=e.target;if(!i||!i.dataset||!i.dataset.f)return;const f=i.dataset.f;if(f==="kbN"||f==="plN")ENTUI.new[f]=i.value;};}
-function entField(f,v){const E=ENT,[k,id]=f.split(":"),n=+v,P=id&&E?E.P.find(x=>String(x.id)===id):null;
-  if(f==="kbN"||f==="plN"){ENTUI.new[f]=v;return;}if(!E){return;}
-  if(k==="kbt")E.kb.tgt[id]=entCl(Math.round(n)||0,0,3000);
-  else if(k==="wt")E.shops[id].tgt=entCl(Math.round(n)||0,0,E.shops[id].pos*3*ENT_WPP);
-  else if(k==="sh"){E.shops[id].shift=entCl(Math.round(n),1,3);}
-  else if(k==="pl"&&P){P.plan=Math.max(0,P.kind==="ammo"?Math.round(n/50)*50:Math.round(n));P.auto=false;}else if(k==="pa"&&P){P.auto=!!n;if(P.auto&&P.st==="ser")P.plan=entAutoPlan(E,P);}
-  else if(k==="pm"&&P)P.stockM=entCl(n,0,12);
-  else if(k==="lp"&&P)P.list=Math.max(0,Math.round(n));
-  else if(k==="pout"&&P)P.out=entCl(n,0,.5);else if(k==="pfast"&&P)P.fast=!!n;
-  else if(k==="gp"){ENTUI.gp=ENTUI.gp||{};ENTUI.gp[id]=v;}else if(k==="up"){ENTUI.up=ENTUI.up||{};ENTUI.up[id]=v;}
-  else if(k==="np")ENTUI.np=v;else if(k==="cc")ENTUI.cc=v;else if(k==="svshare"&&E.svc)E.svc.share=entCl(n,0,1);
-  else if(k==="ln")ENTUI.ln=Math.max(0,n);else if(k==="lt")ENTUI.lt=n;
-  else if(k==="rsh"){E.R=E.R||{q:[],h:0,share:.1,cost:0};E.R.share=entCl(n,0,.5);}else if(k==="qc"&&P)P.qc=entCl(Math.round(n),0,2);
-  else if(k==="boff"){ENTUI.bf=ENTUI.bf||{};ENTUI.bf[f]=v;const t=E.T.find(x=>String(x.id)===id);if(t&&t.bid)t.bid.off=entCl(n,0,.3);}
-  else if(k==="bp"||k==="bpr"||k==="brt"){ENTUI.bf=ENTUI.bf||{};ENTUI.bf[f]=v;const t=E.T.find(x=>String(x.id)===id);if(t&&t.bid){if(k==="bp")t.bid.pid=+v;if(k==="bpr")t.bid.price=Math.max(1,Math.round(n));if(k==="brt")t.bid.rate=Math.max(1,Math.round(n));}}
-  entSave();entUI();}
-function entAct(a,v,b){const E=ENT;if(a!=="reset"&&!(a==="pcancel"))ENTUI.conf="";
-  if(a==="dec"||a==="inc"){const inp=b.parentNode&&b.parentNode.querySelector("input");if(!inp)return;const st=+inp.step||1;inp.value=Math.max(+inp.min||0,(+inp.value||0)+(a==="inc"?st:-st));entField(b.dataset.f,inp.value);return;}
-  if(a==="nc"){ENTUI.new.c=v;entUI();return;}if(a==="ns"){ENTUI.new.start=v;entUI();return;}
-  if(a==="found"){const n=ENTUI.new;ENT=entNew({c:n.c,start:n.start,kbN:n.kbN,plN:n.start==="kb"?n.kbN:n.plN});ENTUI.seg="ov";entSave();entUI();return;}
-  if(!E)return;
-  if(a==="seg"){ENTUI.seg=v;entUI();return;}
-  if(a==="run"){const n=+v||1;entRun(E,n);entSave();entUI();return;}
-  if(a==="reset"){if(ENTUI.conf!=="reset"){ENTUI.conf="reset";entUI();return;}ENT=null;ENTUI.conf="";entSave();entUI();return;}
-  const P=E.P.find(x=>String(x.id)===String(v));
-  if(a==="pup"&&P){const i=E.P.indexOf(P);if(i>0){E.P.splice(i,1);E.P.splice(i-1,0,P);}}
-  else if(a==="ppause"&&P)P.pause=!P.pause;
-  else if(a==="pcancel"&&P){if(ENTUI.conf!=="pc"+P.id){ENTUI.conf="pc"+P.id;entUI();return;}ENTUI.conf="";entCancel(E,P.id);}
-  else if(a==="plic"&&P){const r=entLicense(E,P.id);if(r)ENTUI.msg=r;}
-  else if(a==="ptpp"&&P&&P.st==="cert")entTppStart(E,P);
-  else if(a==="prange"&&P){entToRange(P);return;}
-  else if(a==="npgo"){const L=entSrcList(),s=L.find(x=>x.id===ENTUI.np);if(s){const p=entProjNew(E,{kind:s.kind,d:s.d,t:s.t,n:s.n});ENTUI.msg=p?`Открыта ОКР «${eE(p.n)}».`:"Не удалось открыть ОКР.";ENTUI.np="";}}
-  else if(a==="pb"){entBuyPos(E,v,1);}else if(a==="ps"){entSellPos(E,v,1);}
-  else if(a==="oa")entAccept(E,+v);else if(a==="od")entDecline(E,+v);
-  else if(a==="tb"){ENTUI.bid=+v;}
-  else if(a==="bgo"){const t=E.T.find(x=>x.id===+v),bf=ENTUI.bf||{},g=k=>bf[k+":"+v],ps=E.P.filter(p=>p.cat===(t&&t.cat)&&p.st!=="stop");if(!t||!ps.length)return;
-    const pid=+(g("bp")||(t.bid&&t.bid.pid)||ps[0].id),pr=+(g("bpr")||(t.bid&&t.bid.price)||t.maxP*.9),rt=+(g("brt")||(t.bid&&t.bid.rate)||t.need),of=+(g("boff")||(t.bid&&t.bid.off)||0);const r=entBid(E,t.id,pid,pr,rt,of);ENTUI.msg=r?"Заявка не принята: "+r:"Заявка подана — итоги в месяце окончания приёма заявок.";}
-  else if(a==="bun"){entUnbid(E,+v);ENTUI.bid=null;}
-  else if(a==="lgo"){const r=entLoan(E,ENTUI.ln||entLimit(E)/2,ENTUI.lt||36);ENTUI.msg=r?"Кредит не выдан: "+r:"Кредит получен.";}
-  else if(a==="lr"){const r=entRepay(E,+v);if(r)ENTUI.msg=r;}
-  else if(a==="jmore"){ENTUI.jn+=50;}
-  else if(a==="tq+"){entTechQ(E,v,true);ENTUI.msg=`Технология «${eE(ENT_TECH[v].n)}» добавлена в очередь НИР${E.R.share>0?"":" — задайте долю КБ на НИР"}.`;}else if(a==="tq-"){entTechQ(E,v,false);}
-  else if(a==="tlic"){const r=entTechBuy(E,v);ENTUI.msg=r?"Лицензию купить нельзя: "+r:`Куплена лицензия: «${eE(ENT_TECH[v].n)}».`;}
-  else if(a==="gapp"){const g=(E.G||[]).find(x=>x.id===+v),P2=E.P.filter(p=>g&&p.st==="rd"&&p.cat===g.cat),sv=ENTUI.gp&&ENTUI.gp[v]!=null?+ENTUI.gp[v]:(g&&g.pid!=null?g.pid:(P2[0]&&P2[0].id));const r=entGovApply(E,+v,sv);ENTUI.msg=r?"Заявка не принята: "+eE(r):"Заявка на конкурс ОКР подана — итоги в месяце окончания приёма заявок.";}
-  else if(a==="gwd"){entGovWithdraw(E,+v);}
-  else if(a==="trp"){const r=entTrialPrep(E,+v);ENTUI.msg=r?"Не получилось: "+eE(r):"Подготовка образцов к испытаниям усилена.";}
-  else if(a==="upgo"&&P){const id=ENTUI.up&&ENTUI.up[P.id],s=id?entSrcList().find(x=>x.id===id):null,r=entUpgNew(E,P.id,s);ENTUI.msg=r?"Модернизацию открыть нельзя: "+eE(r):`Открыта ОКР модернизации «${eE(P.n)}».`;if(!r&&ENTUI.up)delete ENTUI.up[P.id];}
-  else if(a==="expo"){const r=entExpoJoin(E,v);ENTUI.msg=r?"Не получилось: "+r:"Участие в выставке оплачено.";}
-  entSave();entUI();}
-/* перейти на полигон: своя пушка или своя машина в стадии испытаний */
-function entToRange(p){try{if(p.kind==="veh"){const key="u"+p.did;if(!VT[key]){ENTUI.msg="Машины нет в игре: постройте её во вкладке «Цех».";entUI();return;}S.vt=key;if(!S.veh){$("tmode").value="veh";vehMode(true);}vehBuild();vehReset();vehEditorRestore();vehUI();}
-  else{const i=guns.findIndex(g=>g.custom&&g.cid===p.did);if(i<0){ENTUI.msg="Орудия нет в игре: установите проект во вкладке «Цех».";entUI();return;}if(S.veh){$("tmode").value="plate";vehMode(false);}setGun(i);$("gunSel").value=String(i);
-    if(p.kind==="ammo"&&ammoFor(G()).includes(p.t)){S.a=p.t;renderAmmo();renderStats();}}
-  closeSheet();$("res").textContent=`Испытания «${p.n}»: стреляйте — выстрелы засчитываются в программу испытаний фирмы.`;}catch(e){console.warn(e);}}
-/* сообщение после выстрела, если он засчитан в испытания */
-function entShotHook(g,ak,vt){try{const p=entRangeShot(g,ak,vt);if(p){entSave();return`\nИспытания фирмы: «${p.n}» — выстрел засчитан (${p.shotN} всего).`;}}catch(e){}return"";}
-/* всплывающая подсказка поверх сцены */
-function entToast(t){try{let el=$("entToast");if(!el||!el.style){const h=document.querySelector(".hud.top")||document.body;el=document.createElement("div");el.id="entToast";el.setAttribute("role","status");h.appendChild(el);}
-  el.textContent=t;el.style.opacity="1";clearTimeout(entToast._t);entToast._t=setTimeout(()=>{el.style.opacity="0";},2600);}catch(e){}}
-
 /* ===== Цех: цена и конкуренты прямо в конструкторах — себестоимость первой и зрелой серии, ОКР, рекомендованная цена, аналоги на рынке,
    шансы в тендерах у разных заказчиков. Считается теми же формулами, что и в режиме «Фирма»; без фирмы — для условного частного завода выбранной страны. ===== */
 var WSPR={c:"ru",E:null,open:{}};
@@ -7184,7 +6895,7 @@ function wsPriceBlock(it,title,extra){const id0=it.kind+(it.t||"");if(!WSPR.open
   const sc=it.sc,cmp=m.rows.slice(0,8).map(r=>`<div class="enttr${r.me?" me":""}"><span><b>${r.me?"★ "+eE(title||r.n):eE(r.n)}</b><i>${r.me?"оценка по проекту":eE(r.mk)+", "+(ENT_CO[r.co]||r.co)}</i></span><span>${Math.round(r.sc.f)}/${Math.round(r.sc.p)}/${Math.round(r.sc.m)}/${Math.round(r.sc.r)}</span><span>${entUsd(r.pr)}</span><span>${r.s.toFixed(2).replace(".",",")}</span></div>`).join("");
   const ch=wsChances(E,it,m).slice(0,8).map(c=>{if(c.ban)return`<div class="entl w">${eE(c.n)}${c.reg?" · "+eE(c.reg):""}: не допускает поставщиков из страны «${ENT_CTRY[E.c].n}»</div>`;const t=wsChT(c.d);return`<div class="entl ${t[1]==="pos"?"g":t[1]==="neg"?"w":"i"}">${eE(c.n)}${c.reg?" · "+eE(c.reg):""}: шансы <b>${t[0]}</b>${c.bn?` (главный соперник — ${eE(c.bn)})`:""}</div>`;}).join("");
   const need=m.need&&m.need.L.length?`<span>Технологии, которых нет${E.pseudo?" у типичного завода":" у фирмы"}</span><b>${m.need.L.map(t=>eE(t.n)).join(", ")} — +${Math.round(m.need.h/1000)} тыс. нормо-ч к ОКР</b>`:"";
-  const ctry=E.pseudo?`<div class="row1"><label class="lbl" for="wsPrC" style="flex:1">Страна производства (без своей фирмы — типичный частный завод)</label><select id="wsPrC">${Object.entries(ENT_CTRY).map(([k,c])=>`<option value="${k}"${k===E.c?" selected":""}>${c.n}</option>`).join("")}</select></div>`:`<p class="tag">По данным вашей фирмы (${ENT_CTRY[E.c].n}): цены сырья, зарплаты, загрузка цехов, технологии.</p>`;
+  const ctry=E.pseudo?`<div class="row1"><label class="lbl" for="wsPrC" style="flex:1">Страна производства (типичный частный завод)</label><select id="wsPrC">${Object.entries(ENT_CTRY).map(([k,c])=>`<option value="${k}"${k===E.c?" selected":""}>${c.n}</option>`).join("")}</select></div>`:`<p class="tag">По данным вашей фирмы (${ENT_CTRY[E.c].n}): цены сырья, зарплаты, загрузка цехов, технологии.</p>`;
   const hrs=ENT_SHOPS.reduce((s,k)=>s+(it.h[k]||0),0);
   const inner=`${ctry}<div class="wsk"><span>Материалы и броня</span><b>${mon(m.uM.mat)}</b><span>Комплектующие</span><b>${mon(m.uM.comp)}</b><span>Труд и накладные (зрелая серия)</span><b>${mon(m.uM.lab+m.uM.ovh)} · ${am?wfx(hrs,2):Math.round(hrs)} нормо-ч</b>
     <span>Себестоимость: первая серийная / зрелая</span><b>${mon(m.u0.tot)} / ${mon(m.uM.tot)}</b><span>С общехозяйственными расходами</span><b>${entUsd(m.costU)}</b>
@@ -7243,7 +6954,7 @@ function matRefRender(){const el=$("matRef");if(!el)return;const det=el.closest?
 try{alBoot();}catch(e){console.error(e);}
 try{hxBoot();}catch(e){console.error(e);}
 try{wsBoot();wsBootVeh();wsUIinit();}catch(e){console.error(e);}
-try{entLoad();entUI();}catch(e){console.error(e);}
+
 if($("wsGo1"))$("wsGo1").onclick=()=>{WS.tab="g";openSheet("t-ws");wsTab();};if($("wsGo2"))$("wsGo2").onclick=()=>{WS.tab="v";openSheet("t-ws");wsTab();};
 if($("xray"))$("xray").onclick=()=>{if(!S.veh){$("res").textContent="«Насквозь» показывает внутренности бронемашины: выберите цель «Бронемашина» во вкладке «Цель».";return;}xrSet(!XR.on);if(XR.on&&!S.lock)$("res").textContent="Насквозь: корпус полупрозрачный, внутри — экипаж, боекомплект, топливо, двигатель и узлы; после пробития видны путь снаряда и поток осколков. Цвет узла краснеет, когда он выведен из строя.";};
 try{matRefRender();}catch(e){}
