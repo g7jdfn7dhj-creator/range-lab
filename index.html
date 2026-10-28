@@ -440,6 +440,8 @@ html,body,.hud,.hud *,.sheet,.sheet *{touch-action:manipulation}
 #t-veh.bldm>*:not(.ctrl):not(#bldBox){display:none!important}
 #t-veh.bldm .ctrl>div:not(:first-child){display:none!important}
 #t-veh.bldm .ctrl{grid-template-columns:minmax(0,1fr)}
+.bldtest{display:flex;flex-direction:column;gap:6px;margin-top:6px}.bldt{font-size:11.5px;line-height:1.45;color:var(--ink);border-left:2px solid rgba(240,194,79,.5);padding:2px 0 2px 8px}.bldt .n{color:var(--dim)}
+.bldbox .wst td,.bldbox .wst th{font-size:10.5px}
 
 </style>
 
@@ -525,6 +527,9 @@ html,body,.hud,.hud *,.sheet,.sheet *{touch-action:manipulation}
         <details><summary class="lbl" style="cursor:pointer">Материалы и как считается разрушение</summary>
           <div class="tag">Попадание ищется лучом по геометрии здания, направление — по настоящей дальности стрельбы. Сердечник и кумулятивная струя расходуют запас пробития на каждую конструкцию на пути (кирпич ≈ 0,12 мм брони на 1 мм, бетон ≈ 0,22, газобетон ≈ 0,035). Пролом фугасом — по формуле подрывного заряда R³·K·C: радиус растёт как корень кубический из массы ВВ; если стена толще — воронка, следующее попадание рядом проломит. Стёкла выбивает избыточное давление 2–7 кПа (радиус ≈ 15 м на кубический корень из килограммов тротила). Кладка без опоры осыпается; колонна, потерявшая сечение, перестаёт держать; плита, потерявшая две опоры, падает, а две упавшие плиты продавливают нижнюю.</div>
           <div id="bldMat" style="overflow-x:auto;margin-top:6px"></div></details>
+        <details><summary class="lbl" style="cursor:pointer">Тест материалов: что делает одно попадание</summary>
+          <div class="tag">Расчёт по тем же формулам, что в бою: жёсткие снаряды и пули — по формуле NDRC (по ней проектируют защиту от снарядов), стержни и струи — по броневому эквиваленту, фугас — по формуле подрывного заряда, стёкла — по давлению ударной волны. Сверка с открытыми данными: пуля 7,62 мм входит в бетон на ≈5 см; РПГ-26 (440 мм брони) пробивает 1 м железобетона или 1,5 м кирпича; 155-мм ОФ снаряд — до 0,97 м кирпича и 0,71 м железобетона.</div>
+          <div id="bldTest" class="bldtest"></div></details>
       </div>
       <div class="row1"><button id="vedit">Собрать пакет зоны</button><button id="vdef">Типовая броня</button><button id="vnew">Новая машина</button></div>
       <button id="wsGo2" class="wslink">Цех: спроектировать свою машину</button>
@@ -1008,7 +1013,7 @@ const MAT={
     i:["1,54","—","≈ 5800 МПа (волокно)","противоосколочные подбои, баллистические панели"]},
   sand:{g:"Композиты и прослойки",n:"Кварцевый наполнитель («песчаные стержни», Т-72)",ap:.22,he:.6,heat:.55,br:0,rico:0,liner:.2,dens:1.6,col:0xcbbb8f,beh:"frp",txt:"sand",tx:"conc",burn:0,def:1.4,
     i:["≈ 1,6 (засыпка)","—","—","наполнитель лобовой брони башни Т-72"]},
-  rconc:{g:"Конструктивные элементы",n:"Железобетон (укрытия, ДОТы)",ap:.22,he:.32,heat:.3,br:.9,rico:0,liner:0,dens:2.4,col:0x9a978d,beh:"cer",txt:"conc",tx:"conc",burn:0,def:.1,
+  rconc:{g:"Конструктивные элементы",n:"Железобетон (укрытия, ДОТы)",ap:.22,he:.32,heat:.38,br:.9,rico:0,liner:0,dens:2.4,col:0x9a978d,beh:"cer",txt:"conc",tx:"conc",burn:0,def:.1,
     i:["2,4","—","≈ 30–50 МПа (сжатие)","фортификация; эталон для бетонобойных снарядов"]},
   frp:{g:"Композиты и прослойки",n:"Стеклопластик (S-стекло)",ap:.25,he:.35,br:0,rico:0,liner:.5,dens:1.95,col:0xc4ad55,beh:"frp",burn:.4,def:1.2,
     i:["≈ 1,9–2,0","—","≈ 500–700 МПа","противоосколочный подбой, лёгкие корпуса"]},
@@ -1062,12 +1067,12 @@ const MAT={
     i:["1,1–1,25","—","—","покрытия против откола, прослойки пакетов"]},
   net:{g:"Конструктивные элементы",n:"Сетчатый экран (класса Tarian)",ap:.01,he:.15,heat:.02,br:0,rico:0,liner:0,dens:.25,col:0x4a4d3c,beh:"slat",tx:"net",burn:.1,def:0,
     i:["≈ 0,2–0,3 (по объёму)","—","—","сетка против гранат РПГ: легче решётки"]},
-  wood:{g:"Конструктивные элементы",n:"Древесина (сосна, брёвна, шпалы)",ap:.08,he:.35,heat:.25,br:.15,rico:0,liner:.1,dens:.5,col:0x8a6a3e,beh:"frp",tx:"wood",burn:.7,def:1.5,
+  wood:{g:"Конструктивные элементы",n:"Древесина (сосна, брёвна, шпалы)",ap:.08,he:.35,heat:.2,br:.15,rico:0,liner:.1,dens:.5,col:0x8a6a3e,beh:"frp",tx:"wood",burn:.7,def:1.5,
     i:["0,45–0,55","—","≈ 40–50 МПа (вдоль волокон)","перекрытия блиндажей, кустарные экраны"]},
-  soil:{g:"Конструктивные элементы",n:"Грунт, мешки с песком",ap:.1,he:.75,heat:.5,br:0,rico:0,liner:.2,dens:1.6,col:0x7a6646,beh:"frp",txt:"sand",tx:"soil",burn:0,def:1.6,
+  soil:{g:"Конструктивные элементы",n:"Грунт, мешки с песком",ap:.1,he:.75,heat:.18,br:0,rico:0,liner:.2,dens:1.6,col:0x7a6646,beh:"frp",txt:"sand",tx:"soil",burn:0,def:1.6,
     i:["1,5–1,8","—","—","брустверы, засыпка, обваловка"]},
-  brick:{g:"Конструктивные элементы",n:"Кирпичная кладка",ap:.12,he:.25,heat:.25,br:.9,rico:0,liner:0,dens:1.8,col:0x8a4a32,beh:"cer",txt:"conc",tx:"brick",burn:0,def:.1,
-    i:["1,7–1,9","—","≈ 10–20 МПа (сжатие)","стены зданий, городской бой"]},
+  brick:{g:"Конструктивные элементы",n:"Кирпичная кладка",ap:.12,he:.25,heat:.3,br:.9,rico:0,liner:0,dens:1.8,col:0x8a4a32,beh:"cer",txt:"conc",tx:"brick",burn:0,def:.1,
+    i:["1,7–1,9","—","кирпич 10–20 МПа, кладка 4–5 МПа (сжатие)","стены зданий, городской бой"]},
   slat:{g:"Конструктивные элементы",n:"Решётка (стальные планки)",ap:.04,he:.3,br:0,rico:0,liner:0,dens:.8,col:0x55583f,beh:"slat",burn:0,def:0,
     i:["≈ 0,8 (по объёму)","—","—","противокумулятивные экраны"]},
   rbsic:{g:"Керамика",n:"Реакционно-спечённый карбид кремния (RB-SiC)",ap:1.5,he:.55,heat:1.45,br:.93,rico:0,liner:0,dens:3.05,col:0x35373a,beh:"cer",tx:"sic",burn:0,def:.2,
@@ -7251,19 +7256,27 @@ try{matRefRender();}catch(e){}
    (эквиваленты по броне, как во вкладке «Броня»), пролом фугасом — по формуле подрывных зарядов R³·K·C (армейские наставления по
    разрушению), стёкла выбивает избыточное давление, кладка без опоры осыпается, плита перекрытия падает, потеряв опоры. ===== */
 var BLD=null,B_MATS=null;
-/* материалы: плотность, кг/м³; ke — мм брони на мм материала против подкалиберных и бронебойных, jet — против кумулятивной струи;
-   K — коэффициент материала в формуле подрывного заряда (кладка 0,35, железобетон 0,70 — без перебивания арматуры, газобетон 0,23) */
+/* материалы здания — реальные свойства (справочник «Материалы и как считается разрушение»):
+   ρ — плотность; fc — прочность на сжатие для расчёта проникания жёстких снарядов и пуль по формуле NDRC (для кладки — эффективная, с учётом прочности кирпича);
+   rod — мм брони на 1 мм материала против подкалиберного стержня (гидродинамическое проникание: глубина ∝ √(ρ стержня/ρ преграды));
+   jet — то же против кумулятивной струи: паспорт РПГ-26 — 440 мм брони = 1 м железобетона = 1,5 м кирпича, ПГ-7ВР — 1,5 м железобетона и 2 м кирпича,
+   TOW и «Дракон» — 1,3 м железобетона (FM 90-10-1);
+   K — коэффициент материала в формуле подрывного заряда P = R³·K·C; вместе с коэффициентом сцепления C сверено с данными армии США (FM 3-06.11):
+   155-мм ОФ снаряд пробивает до 0,97 м кирпича и 0,71 м железобетона, 105-мм бронебойно-фугасный оставляет пролом ≈ 0,5 м;
+   pf — давление, при котором разрушается элемент (медиана, кПа; разброс прочности ±35 %): незакалённое стекло 3–7 кПа, перегородки 7–14 кПа (таблица повреждений Lees) */
 const BM={
-  brick:{n:"кирпичная кладка",d:"полнотелый керамический кирпич М150 на цементно-песчаном растворе М100, ρ 1,8 т/м³, прочность кладки на сжатие ≈ 2,5–4 МПа",rho:1800,ke:.12,jet:.25,K:.35,deb:[.6,.36,.3],cell:.46},
-  rc:{n:"железобетон",d:"бетон B25 (≈ 33 МПа), рабочая арматура А500 Ø25, хомуты Ø10, ρ 2,5 т/м³",rho:2500,ke:.22,jet:.32,K:.7,deb:[.58,.57,.54],cell:.75},
-  aer:{n:"газобетон с облицовкой",d:"блок из автоклавного газобетона D500 300 мм (≈ 3,5 МПа), минвата 150 мм, кассеты из алюминиевого композита 4 мм",rho:600,ke:.035,jet:.07,K:.23,deb:[.82,.82,.8],cell:.7},
-  glass:{n:"стеклопакет",d:"4–16–4 мм, флоат-стекло в стальной раме; бьётся при избыточном давлении ≈ 2–7 кПа",rho:2500,ke:.02,jet:.02,K:0},
-  tglass:{n:"витринное стекло",d:"закалённое 10 мм, при разрушении рассыпается на мелкие кубики",rho:2500,ke:.04,jet:.04,K:0},
-  sky:{n:"светопрозрачная кровля",d:"триплекс 6.6.2 и стеклопакет на стальных прогонах; триплекс держит осколки на плёнке",rho:2500,ke:.05,jet:.05,K:0},
-  gkl:{n:"перегородка из гипсокартона",d:"2 × 12,5 мм ГКЛ на стальном профиле, минвата 50 мм",rho:300,ke:.015,jet:.03,K:.07},
-  gpart:{n:"стеклянная перегородка",d:"закалённое стекло 10 мм в алюминиевом профиле",rho:2500,ke:.04,jet:.04,K:0},
-  steel:{n:"сталь",d:"С345, прокатные профили",rho:7850,ke:1,jet:1,K:0}
+  brick:{n:"кирпичная кладка",a:"кирпичную кладку",l:"кирпичной кладке",gn:"кирпичной кладки",g:"f",d:"полнотелый керамический кирпич М150 на цементно-песчаном растворе М100: прочность кладки на сжатие ≈ 4–5 МПа, кирпича — 15 МПа",rho:1800,fc:9,rod:.28,jet:.3,K:.35,deb:[.6,.36,.3],cell:.46},
+  rc:{n:"железобетон",a:"железобетон",l:"железобетоне",gn:"железобетона",g:"m",d:"бетон B25 (33 МПа на кубах, 25 МПа на цилиндрах), рабочая арматура А500 Ø25 с шагом 150 мм, хомуты Ø10",rho:2500,fc:30,rod:.35,jet:.38,K:.7,deb:[.58,.57,.54],cell:.75},
+  aer:{n:"газобетон с облицовкой",a:"газобетон с облицовкой",l:"газобетоне",gn:"газобетона",g:"m",d:"автоклавный газобетон D500 300 мм (≈ 3,5 МПа), минвата 150 мм, кассеты из алюминиевого композита 4 мм",rho:600,fc:3.5,rod:.12,jet:.12,K:.23,deb:[.82,.82,.8],cell:.7},
+  glass:{n:"стеклопакет",a:"стеклопакет",l:"стеклопакете",gn:"стеклопакета",g:"m",d:"4–16–4 мм, незакалённое флоат-стекло в стальной раме: лопается при отражённом давлении ≈ 3–7 кПа",rho:2500,rod:.4,jet:.45,pf:4.5,gt:.008},
+  tglass:{n:"витринное стекло",a:"витринное стекло",l:"витринном стекле",gn:"витринного стекла",g:"n",d:"закалённое 10 мм: в 4 раза прочнее обычного, разрушается при ≈ 20–30 кПа и рассыпается на мелкие кубики",rho:2500,rod:.45,jet:.45,pf:25,gt:.01},
+  sky:{n:"светопрозрачная кровля",a:"светопрозрачную кровлю",l:"светопрозрачной кровле",gn:"светопрозрачной кровли",g:"f",d:"триплекс 6.6.2 и стеклопакет на стальных прогонах: трескается при ≈ 10 кПа, но держит осколки на плёнке; выпадает при ≈ 30 кПа",rho:2500,rod:.4,jet:.45,pf:30,gt:.02},
+  gkl:{n:"перегородка из гипсокартона",a:"перегородку из гипсокартона",l:"перегородке",gn:"перегородки",g:"f",d:"2 × 12,5 мм ГКЛ на стальном профиле, минвата 50 мм: сносится давлением ≈ 7–14 кПа",rho:300,rod:.03,jet:.05,K:.07,pf:10},
+  gpart:{n:"стеклянная перегородка",a:"стеклянную перегородку",l:"стеклянной перегородке",gn:"стеклянной перегородки",g:"f",d:"закалённое стекло 10 мм в алюминиевом профиле: разрушается при ≈ 25–35 кПа",rho:2500,rod:.45,jet:.45,pf:30,gt:.01},
+  steel:{n:"сталь",a:"сталь",l:"стали",gn:"стали",g:"f",d:"С345, прокатные профили: ≈ 0,8 стойкости броневой стали",rho:7850,rod:.8,jet:.9}
 };
+/* прочие разрушаемые давлением: светильники подвесного потолка, машины на улице (стёкла / кузов с возгоранием) */
+const B_PF={light:5,carGlass:6,carWreck:70};
 /* сетка каркаса и этажи: шаг колонн 6 м, 27 × 11 пролётов, отметки чистого пола; ротонда в торце */
 const BLC={bay:6,nx:27,nz:11,L:162,W:66,wt:.64,sl:.25,par:1.1,lv:[.45,5.85,10.05,14.25,18.45,22.65],
   atA:{x0:30,x1:150,z0:18,z1:30},atB:{x0:72,x1:150,z0:42,z1:54},hall:{x0:6,x1:30,z0:12,z1:36},gal:2,rot:{cx:177,cz:34,r:21,n:40,t:.4}};
@@ -7388,7 +7401,7 @@ function bBuild(){bStatic();const C=BLC,g=new THREE.Group();g.name="bld";
   const M=BLD.M,box=new THREE.BoxGeometry(1,1,1),plane=new THREE.PlaneGeometry(1,1),q=WQ<.6;
   bPool("brick",box,M.brick,1650,{cast:true});bPool("cBrick",box,M.brick,q?5000:7000,{cast:true});
   bPool("colP",box,M.conc,430);bPool("colW",box,M.wood,470);bPool("col",box,M.col,780);bPool("cRc",box,M.conc,2600);
-  bPool("slab",box,M.slab,1520);bPool("roof",box,M.roof,330,{cast:true});bPool("plinth",box,M.conc,80);
+  bPool("slab",box,M.slab,1520);bPool("roof",box,M.roof,330,{cast:true});bPool("cSlab",box,M.slab,q?1400:2200);bPool("cRoof",box,M.roof,q?520:900,{cast:true});bPool("plinth",box,M.conc,80);
   bPool("glass",box,M.glass,580,{order:2,recv:false});bPool("frame",box,M.frame,3100);bPool("gkl",box,M.gkl,820);bPool("gpart",box,M.gpart,1750,{order:3,recv:false});
   bPool("rail",box,M.steel,1050);bPool("steel",box,M.steel,700);bPool("sky",box,M.sky,260,{order:4,recv:false});
   bPool("light",plane.clone().rotateX(Math.PI/2),M.light,q?3000:4900,{recv:false});bPool("acm",box,M.acm,380,{cast:true});bPool("cAcm",box,M.acm,1300,{cast:true});
@@ -7513,9 +7526,11 @@ function bRoofDecor(){const P=BLD.P,top=BLC.lv[5],R=BLC.rot,add=(b,pk,c)=>bPut(P
   add([R.cx-9,top+2,R.cz-.15,R.cx+9,top+2.2,R.cz+.15],"frame");add([R.cx-.15,top+2,R.cz-9,R.cx+.15,top+2.2,R.cz+9],"frame");}
 
 /* ---------- луч по конструкциям (координаты корпуса): коробки, повёрнутые коробки ротонды, наклонные панели, грани пирамиды, секторы перекрытий ---------- */
-function bRayBox(b,o,d){let t0=-1e9,t1=1e9,ax=-1,sg=0;for(let a=0;a<3;a++){const oa=o[a],da=d[a],lo=b[a],hi=b[a+3];
+/* вход в ребро или угол коробки (стык соседних участков стены): засчитывается грань, на которую луч идёт прямее */
+function bRayBox(b,o,d){let t0=-1e9,t1=1e9;const ta3=[-1e9,-1e9,-1e9],sg3=[0,0,0];for(let a=0;a<3;a++){const oa=o[a],da=d[a],lo=b[a],hi=b[a+3];
     if(Math.abs(da)<1e-9){if(oa<lo||oa>hi)return null;continue;}let ta=(lo-oa)/da,tb=(hi-oa)/da,s=-1;if(ta>tb){const q=ta;ta=tb;tb=q;s=1;}
-    if(ta>t0){t0=ta;ax=a;sg=s;}if(tb<t1)t1=tb;if(t0>t1)return null;}if(t1<0)return null;const n=[0,0,0];if(ax>=0)n[ax]=sg;return{t0,t1,n};}
+    ta3[a]=ta;sg3[a]=s;if(ta>t0)t0=ta;if(tb<t1)t1=tb;if(t0>t1)return null;}if(t1<0)return null;
+  let ax=-1,best=-1;for(let a=0;a<3;a++)if(ta3[a]>=t0-2e-3&&Math.abs(d[a])>best){best=Math.abs(d[a]);ax=a;}const n=[0,0,0];if(ax>=0)n[ax]=sg3[ax];return{t0,t1,n};}
 function bLoc(e,p){const c=Math.cos(e.ay),s=Math.sin(e.ay),x=p[0]-e.c[0],z=p[2]-e.c[2];return[x*c-z*s,p[1]-e.c[1],x*s+z*c];}
 function bLocD(e,d){const c=Math.cos(e.ay),s=Math.sin(e.ay);return[d[0]*c-d[2]*s,d[1],d[0]*s+d[2]*c];}
 function bWorldN(e,n){const c=Math.cos(-e.ay),s=Math.sin(-e.ay);return[n[0]*c-n[2]*s,n[1],n[0]*s+n[2]*c];}
@@ -7537,12 +7552,16 @@ const bPt=(o,d,t)=>[o[0]+d[0]*t,o[1]+d[1]*t,o[2]+d[2]*t];
 /* ячейка разрушенного элемента под точкой: u — вдоль стены (или x у плиты), v — по высоте (или z у плиты) */
 function bUV(e,p){if(e.g===1){const l=bLoc(e,p);return[l[0]+e.hx,l[1]+e.hy];}const b=e.b;if(e.ax===1)return[p[0]-b[0],p[2]-b[2]];if(e.ax===2)return[p[0]-b[0],p[1]-b[1]];return[p[2]-b[2],p[1]-b[1]];}
 function bCellAt(e,p){const C=e.cl;if(!C)return -1;const[u,v]=bUV(e,p),iu=Math.floor(u/C.cu),iv=Math.floor(v/C.cv);if(iu<0||iv<0||iu>=C.nu||iv>=C.nv)return -1;return iv*C.nu+iu;}
-function bTrace(o,d,maxT){const hits=[];for(const e of BLD.E){if(e.st===2||e.dead)continue;const r=bHit(e,o,d);if(!r||r.t1<0||r.t0>maxT)continue;
+function bTrace(o,d,maxT){const hits=[];for(const e of BLD.E){if(e.st===2||e.dead)continue;const r=bHit(e,o,d);if(!r||r.t1<0||r.t0>maxT||r.t1-Math.max(0,r.t0)<.003)continue;
     if(e.st===1&&e.cl){const c0=bCellAt(e,bPt(o,d,Math.max(0,r.t0)+1e-3)),c1=bCellAt(e,bPt(o,d,r.t1-1e-3)),a0=c0>=0&&e.cl.ix[c0]>=0,a1=c1>=0&&e.cl.ix[c1]>=0;if(!a0&&!a1)continue;r.cell=a0?c0:c1;}
     r.e=e;hits.push(r);}
   hits.sort((a,b)=>a.t0-b.t0);
-  for(let i=0;i<hits.length;i++){const A=hits[i];A.len=Math.max(0,A.t1-Math.max(0,A.t0));for(let j=i+1;j<hits.length;j++){const B=hits[j];if(B.t0>A.t1)break;if(B.e.k==="c"&&B.t0>=A.t0-1e-6&&B.t1<=A.t1+1e-6)A.len=Math.max(.02,A.len-(B.t1-B.t0));}}
-  return hits;}
+  /* колонна внутри простенка: кладка до колонны, колонна, кладка после — по порядку хода снаряда */
+  const out=[];for(let i=0;i<hits.length;i++){const A=hits[i];A.len=Math.max(0,A.t1-Math.max(0,A.t0));if(A.e.k!=="c"){const B=hits.find((B,j)=>j!==i&&B.e.k==="c"&&B.t0>=A.t0-1e-6&&B.t1<=A.t1+1e-6);
+      if(B){const f=B.t0-Math.max(0,A.t0),k=A.t1-B.t1;if(f>.003)out.push(Object.assign({},A,{t1:B.t0,len:f}));if(k>.003)out.push(Object.assign({},A,{t0:B.t1,len:k,back:1}));continue;}}out.push(A);}
+  out.sort((a,b)=>a.t0-b.t0);
+  /* луч точно по стыку двух соседних панелей одного материала (одинаковые вход и выход) — это одна преграда, а не две */
+  return out.filter((A,i)=>!out.some((B,j)=>j<i&&B.e.m===A.e.m&&B.e.k===A.e.k&&Math.abs(B.t0-A.t0)<2e-3&&Math.abs(B.t1-A.t1)<2e-3));}
 /* ---------- описание конструкции для отчёта ---------- */
 const B_SIDE={S:"уличный фасад",N:"дворовый фасад",W:"торец у зала",E:"торец у ротонды",R:"ротонда",core:"ядро ротонды (лифты и лестницы)"};
 function bDesc(e){const fl=f=>f===5?"парапет":`${f+1}-й этаж`,mm=x=>Math.round(x*1000);
@@ -7555,10 +7574,11 @@ function bDesc(e){const fl=f=>f===5?"парапет":`${f+1}-й этаж`,mm=x=>
   if(e.k==="y")return e.g===3?(e.gab?"стеклянный фронтон кровли атриума":"стеклянная пирамида над залом (стеклопакеты на стальных рёбрах)"):"светопрозрачная кровля атриума (триплекс на стальных прогонах)";return"конструкция";}
 /* ---------- разрушение на ячейки: стена или плита превращается в сетку блоков; текстура та же, по координатам корпуса ---------- */
 const B_CP={brick:"cBrick",aer:"cAcm",rc:"cRc"};
-function bFract(e){if(e.st!==0||!(e.k==="w"||(e.k==="s"&&e.g===0)))return e.st===1;const pk=B_CP[e.m],P=BLD.P[pk];if(!P)return false;const cs=BM[e.m].cell||.5;let lu,lv;
+/* ячейки плиты — с тем же покрытием пола и потолком, что у целой плиты; ячейки без зазоров (свет не просвечивает) */
+function bFract(e){if(e.st!==0||!(e.k==="w"||(e.k==="s"&&e.g===0&&!e.gnd)))return e.st===1;const pk=e.k==="s"?(e.P==="roof"?"cRoof":"cSlab"):B_CP[e.m],P=BLD.P[pk];if(!P)return false;const cs=BM[e.m].cell||.5;let lu,lv;
   if(e.g===1){lu=e.hx*2;lv=e.hy*2;}else{const b=e.b;lu=e.ax===0?b[5]-b[2]:b[3]-b[0];lv=e.ax===1?b[5]-b[2]:b[4]-b[1];}
   const nu=Math.max(1,Math.round(lu/cs)),nv=Math.max(1,Math.round(lv/cs)),N=nu*nv;if(P.cap-P.n+P.free.length<N)return false;
-  const cl={nu,nv,cu:lu/nu,cv:lv/nv,ix:new Int32Array(N),dm:new Float32Array(N)},g=.006;
+  const cl={nu,nv,cu:lu/nu,cv:lv/nv,ix:new Int32Array(N),dm:new Float32Array(N)},g=0;
   for(let iv=0;iv<nv;iv++)for(let iu=0;iu<nu;iu++){const k=iv*nu+iu,u0=iu*cl.cu+g,u1=(iu+1)*cl.cu-g,v0=iv*cl.cv+g,v1=(iv+1)*cl.cv-g;let M;
     if(e.g===1){const lx=(u0+u1)/2-e.hx,ly=(v0+v1)/2-e.hy,c=Math.cos(e.ay),s=Math.sin(e.ay),wx=e.c[0]+lx*c,wz=e.c[2]-lx*s;M=bMR(wx,e.c[1]+ly,wz,u1-u0,v1-v0,e.hz*2,e.ay);}
     else{const b=e.b;let bb;if(e.ax===2)bb=[b[0]+u0,b[1]+v0,b[2],b[0]+u1,b[1]+v1,b[5]];else if(e.ax===0)bb=[b[0],b[1]+v0,b[2]+u0,b[3],b[1]+v1,b[2]+u1];else bb=[b[0]+u0,b[1],b[2]+v0,b[0]+u1,b[4],b[2]+v1];M=bMB(bb);}
@@ -7568,10 +7588,18 @@ function bFract(e){if(e.st!==0||!(e.k==="w"||(e.k==="s"&&e.g===0)))return e.st==
 function bCellC(e,k){const C=e.cl,iu=k%C.nu,iv=Math.floor(k/C.nu),u=(iu+.5)*C.cu,v=(iv+.5)*C.cv;
   if(e.g===1){const lx=u-e.hx,ly=v-e.hy,c=Math.cos(e.ay),s=Math.sin(e.ay);return[e.c[0]+lx*c,e.c[1]+ly,e.c[2]-lx*s];}
   const b=e.b;if(e.ax===2)return[b[0]+u,b[1]+v,(b[2]+b[5])/2];if(e.ax===0)return[(b[0]+b[3])/2,b[1]+v,b[2]+u];return[b[0]+u,(b[1]+b[4])/2,b[2]+v];}
-/* повреждение ячеек в круге: кладка темнеет и выкрашивается; при накопленном повреждении ≥ 1 блок выпадает обломками */
-function bDmgCells(e,p,r,amt,dir,opt){if(r<=0||amt<=0)return 0;if(!bFract(e))return 0;const C=e.cl;let n=0;opt=opt||{};
-  const hc=Math.min(C.cu,C.cv)*.5;for(let k=0;k<C.ix.length;k++){if(C.ix[k]<0)continue;const c=bCellC(e,k),dd=Math.hypot(c[0]-p[0],c[1]-p[1],c[2]-p[2]),rr=r+Math.max(C.cu,C.cv)*.35;if(dd>rr)continue;
-    const a=amt*(opt.flat?1:Math.max(.25,1-Math.max(0,dd-hc)/rr));C.dm[k]+=a;if(C.dm[k]>=1){bKillCell(e,k,dir,opt.v||5,p);n++;}else bTint(BLD.P[e.cpk],C.ix[k],_bc.setRGB(1-.42*C.dm[k],1-.45*C.dm[k],1-.47*C.dm[k]));}
+/* расстояние от точки до центра ячейки в плоскости стены или плиты (глубина ячейки не в счёт) */
+function bCellD(e,k,uv){const C=e.cl,iu=k%C.nu,iv=Math.floor(k/C.nu);return Math.hypot((iu+.5)*C.cu-uv[0],(iv+.5)*C.cv-uv[1]);}
+function bCellHit(e,k,a,dir,v,p){const C=e.cl;C.dm[k]+=a;if(C.dm[k]>=.999){bKillCell(e,k,dir,v,p);return 1;}const q=Math.min(1,C.dm[k]);bTint(BLD.P[e.cpk],C.ix[k],_bc.setRGB(1-.42*q,1-.45*q,1-.47*q));return 0;}
+/* повреждение ячеек в круге (сквозной пролом, сколы): кладка темнеет и выкрашивается; при накопленном повреждении ≥ 1 блок выпадает обломками */
+function bDmgCells(e,p,r,amt,dir,opt){if(r<=0||amt<=0)return 0;if(!bFract(e))return 0;const C=e.cl,uv=bUV(e,p);let n=0;opt=opt||{};
+  const hc=Math.min(C.cu,C.cv)*.5,rr=r+Math.max(C.cu,C.cv)*.35;for(let k=0;k<C.ix.length;k++){if(C.ix[k]<0)continue;const dd=bCellD(e,k,uv);if(dd>rr)continue;
+    n+=bCellHit(e,k,amt*(opt.flat?1:Math.max(.25,1-Math.max(0,dd-hc)/rr)),dir,opt.v||5,p);}
+  if(n)bSupport(e,dir);return n;}
+/* воронка от разрыва: параболоид глубиной Df с лица и откол глубиной Ds с тыла; каждой ячейке — доля толщины, выбитая над ней
+   (не больше объёма всей воронки: малая воронка выкрашивает блок понемногу). Блок выпадает, когда выбита вся толщина */
+function bCrater(e,p,rc,Df,Ds,dir,opt){if(rc<=0||(Df<=0&&Ds<=0))return 0;if(!bFract(e))return 0;const C=e.cl,T=e.th||.3,A=C.cu*C.cv,rs=rc*1.3,Vc=Math.PI/2*(rc*rc*Df+rs*rs*Ds),uv=bUV(e,p),q=x=>Math.max(0,1-x*x);let n=0;
+  for(let k=0;k<C.ix.length;k++){if(C.ix[k]<0)continue;const dd=bCellD(e,k,uv),dep=Math.min(T,Df*q(dd/rc)+Ds*q(dd/rs));if(dep<=0)continue;n+=bCellHit(e,k,Math.min(dep*A,Vc)/(A*T),dir,(opt&&opt.v)||4,p);}
   if(n)bSupport(e,dir);return n;}
 function bKillCell(e,k,dir,spd,from){const C=e.cl,P=BLD.P[e.cpk],c=bCellC(e,k);bHide(P,C.ix[k],true);C.ix[k]=-1;C.dm[k]=1;
   const vol=C.cu*C.cv*(e.th||.3),st=BLD.stat;st.cells++;st.vol+=vol;st.mass+=vol*BM[e.m].rho/1000;
@@ -7598,10 +7626,13 @@ function bCtr(e){if(e.g===0){const b=e.b;return[(b[0]+b[3])/2,(b[1]+b[4])/2,(b[2
 /* ---------- колонна: несущая способность падает с потерей сечения; разрушенная оголяет и гнёт арматуру ---------- */
 function bColDmg(e,f,dir,why){if(e.st===2||f<=0)return false;const hp0=e.hp;e.hp=Math.max(0,e.hp-f);const P=BLD.P[e.P];
   if(e.hp<=0){e.st=2;bHide(P,e.ii);BLD.stat.cols++;const c=bCtr(e),h=e.b[4]-e.b[1];for(let i=0;i<10;i++)bDeb([c[0]+R(-.3,.3),e.b[1]+R(0,h),c[2]+R(-.3,.3)],[(dir?dir[0]*3:0)+R(-2,2),R(0,2),(dir?dir[2]*3:0)+R(-2,2)],R(.12,.3),BM.rc.deb,"rc");
-    bRebar(e);bDust(c,BM.rc.deb,2.2);return true;}
+    bRebar(e,dir);bDust(c,BM.rc.deb,2.2);return true;}
   if(hp0>.5&&e.hp<=.5){/* скол защитного слоя, сечение ослаблено */bTint(P,e.ii,_bc.setRGB(.62,.6,.58));}return false;}
-function bRebar(e){const b=e.b,cx=(b[0]+b[3])/2,cz=(b[2]+b[5])/2,h=b[4]-b[1],g=new THREE.Group();[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.0125,.0125,h,5),BLD.M.steel);
-    m.position.set(cx+sx*.19,b[1]+h/2,cz+sz*.19);m.rotation.set(R(-.25,.25),0,R(-.25,.25));g.add(m);});g.userData.decor=true;BLD.g.add(g);BLD.anim.push({kind:"static",o:g});}
+/* оголённая арматура разрушенной колонны: четыре стержня Ø25 выгнуты по направлению взрыва, концы остаются в узлах */
+function bRebar(e,dir){const b=e.b,cx=(b[0]+b[3])/2,cz=(b[2]+b[5])/2,h=b[4]-b[1],y0=b[1],g=new THREE.Group(),geo=new THREE.CylinderGeometry(.0125,.0125,1,5),dl=dir?Math.hypot(dir[0],dir[2])||1:1,dx=dir?dir[0]/dl:0,dz=dir?dir[2]/dl:0;
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx,sz])=>{const x=cx+sx*.19,z=cz+sz*.19,k=R(.06,.16),bx=x+dx*k+R(-.03,.03),bz=z+dz*k+R(-.03,.03),ym=y0+h*R(.4,.6);
+    [[x,y0,z,bx,ym,bz],[bx,ym,bz,x,y0+h,z]].forEach(([x0,y1,z0,x1,y2,z1])=>{const v=new THREE.Vector3(x1-x0,y2-y1,z1-z0),l=v.length(),m=new THREE.Mesh(geo,BLD.M.steel);m.position.set((x0+x1)/2,(y1+y2)/2,(z0+z1)/2);m.scale.set(1,l,1);m.quaternion.setFromUnitVectors(_bUp,v.normalize());m.raycast=()=>{};g.add(m);});});
+  g.userData.decor=true;BLD.g.add(g);BLD.anim.push({kind:"static",o:g});}
 /* ---------- пробоины от сердечника и струи: маленькие — накладкой, крупные выбивают блоки ---------- */
 function bDecal(p,n,r){const P=BLD.P.dec;if(r<.02)return;const o=new THREE.Object3D();o.position.set(p[0]+n[0]*.015,p[1]+n[1]*.015,p[2]+n[2]*.015);o.lookAt(o.position.x+n[0],o.position.y+n[1],o.position.z+n[2]);o.rotateZ(R(0,6.28));o.scale.set(r*2,r*2,1);o.updateMatrix();
   if(P.n>=P.cap&&!P.free.length){P.rr=((P.rr||0)+1)%P.cap;P.m.setMatrixAt(P.rr,o.matrix);P.dirty=1;return;}bPut(P,o.matrix);}
@@ -7629,9 +7660,22 @@ function bldShot(B,ex,ey){const aim=BLD.aimL||bldAimDef();farG.updateMatrixWorld
   const tm=Math.min(tg,650),p=bPt(o,d,tm);if(tg<=650)p[1]=bFloorY(p[0],p[2],p[1]+.5);return{hit:false,o,d,mp:bW(p),ground:tg<=650};}
 /* заряд: масса ВВ, тротиловый эквивалент по бризантности (для пролома) и по импульсу (для ударной волны) */
 function bWx(sh){const g=G(),a=sh.a;let W=0,fk="tnt";try{const h=heW(g,a.key);W=h.W;fk=h.fk;}catch(e){W=1.6*Math.pow(g.cal/100,3);}const F=FILL[fk]||FILL.tnt;return{W,Wb:W*F.br,We:W*(F.im||1),fk,F};}
-/* радиус пролома, м: P(фунт ТНТ) = R³(фут)·K·C — формула подрывного заряда; C — сцепление заряда с преградой (3 — разрыв снаряда на поверхности, 1,8 — расплющенный заряд, 2,2 — разрыв в толще) */
+/* радиус пролома, м: P(фунт ТНТ) = R³(фут)·K·C — формула подрывного заряда; C — сцепление заряда с преградой:
+   3 — разрыв снаряда на поверхности, 2,2 — расплющенный заряд бронебойно-фугасного, 1,25 — снаряд застрял в толще, 3,6 — кумулятивная БЧ */
 const bBR=(Wb,K,C)=>K>0&&Wb>0?.3048*Math.cbrt(Wb*2.2046/(K*C)):0;
 const bF1=(x,n)=>(+x).toFixed(n==null?1:n).replace(".",",");
+/* падежи и род для отчёта: n — что, a — что (пробил), l — в чём (застрял), gn — от чего (рикошет); род — для «пробит / пробита / пробито» */
+function bNm(x,c){if(x&&x.gnd)return{n:"пол на грунте",a:"пол на грунте",l:"полу на грунте",gn:"пола на грунте"}[c];const m=BM[typeof x==="string"?x:x.m];return m[c]||m.n;}
+function bPP(x,stem){const g=x&&x.gnd?"m":BM[typeof x==="string"?x:x.m].g;return stem+(g==="m"?"":g==="n"?"о":"а");}
+/* путь снаряда для отчёта: одинаковые преграды подряд — числом («4 стеклянные перегородки», «3 железобетонные преграды по 250 мм») */
+const B_PL={brick:["кирпичные стены","кирпичных стен"],rc:["железобетонные преграды","железобетонных преград"],aer:["стены из газобетона","стен из газобетона"],glass:["стеклопакета","стеклопакетов"],tglass:["витринных стекла","витринных стёкол"],
+  sky:["ската светопрозрачной кровли","скатов светопрозрачной кровли"],gkl:["перегородки из гипсокартона","перегородок из гипсокартона"],gpart:["стеклянные перегородки","стеклянных перегородок"],steel:["стальные детали","стальных деталей"]};
+function bTrJ(tr,sep){const out=[];for(let i=0;i<tr.length;){let j=i;while(j<tr.length&&tr[j]===tr[i])j++;const n=j-i,s=tr[i];
+    if(n<2)out.push(s);else{const k=Object.keys(B_PL).find(q=>s===BM[q].a||s.startsWith(BM[q].a+" ")),mm=k?s.slice(BM[k].a.length).trim():"",f=n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?0:1;
+      out.push(k?`${n} ${B_PL[k][f]}${mm?" по "+mm:""}`:`${s} ×${n}`);}
+    i=j;}
+  return out.join(sep);}
+const bObl=(d,n)=>Math.acos(Math.min(1,Math.abs(d[0]*n[0]+d[1]*n[1]+d[2]*n[2])))*180/Math.PI;
 function bIsGl(e){return e.k==="g"||e.k==="b"||e.k==="y"||e.m==="gpart";}
 function bInside(p){const C=BLC;if(p[0]>.6&&p[0]<C.L-.6&&p[2]>.6&&p[2]<C.W-.6&&p[1]>C.lv[0]-.1&&(p[1]<C.lv[5]||(p[1]<C.lv[5]+9.5&&bInVoid(p[0],p[2],0))))return true;const r=Math.hypot(p[0]-C.rot.cx,p[2]-C.rot.cz);return r<C.rot.r-.45&&p[1]>C.lv[0]-.1&&p[1]<C.lv[5];}
 function bSideOf(p){const C=BLC;if(p[2]<.3)return"S";if(p[2]>C.W-.3&&p[0]<C.L)return"N";if(p[0]<.3)return"W";if(Math.hypot(p[0]-C.rot.cx,p[2]-C.rot.cz)>C.rot.r-.5&&p[0]>C.L)return"R";if(p[0]>C.L-.3)return"E";return"in";}
@@ -7645,6 +7689,40 @@ function bSecDist(e,p){const x=p[0]-e.c[0],z=p[2]-e.c[2],r=Math.hypot(x,z);let a
 const bSecArea=e=>(e.a1-e.a0)/2*(e.r1*e.r1-e.r0*e.r0);
 /* пролом в секторе ротонды: несущая способность сектора убывает с площадью пробоин; при потере — сектор падает */
 function bSecHit(e,rh){if(e.st===2||e.gnd)return false;e.hp=(e.hp==null?1:e.hp)-Math.PI*rh*rh/bSecArea(e)*3;if(e.hp<=0){bSlabFall(e);return true;}return false;}
+/* ---------- проникание: стержень подкалиберного — по запасу пробития брони (мм брони на 1 мм материала);
+   жёсткие снаряды (бронебойные калиберные, бетонобойные, корпус фугасного с замедлением) и пули — по модифицированной формуле NDRC,
+   по которой рассчитывают защиту от снарядов: глубина проникания x, предельная толщина пробития e и откола s зависят от массы, калибра,
+   скорости встречи, формы головной части и прочности бетона (кладки). Сверка: пуля 7,62 мм входит в бетон на 5 см, 155-мм снаряд
+   с бетонобойным взрывателем — на 1,2 м (данные армии США) ---------- */
+function bProj(sh){const a=sh.a,g=G(),cal=g.cal,key=a.key,V=Math.max(120,a.vimp||600),bul=g.cls==="mg"||cal<20;
+  if(key==="bops"||key==="apds")return{kind:"rod",P:a.pen*R(.95,1.05),dc:(key==="bops"?.21:.33)*cal/1000,V,key,bul,cal};
+  const m=bul?(cal<9?.0096:cal<13.5?.048:.064):12.7*Math.pow(cal/100,3)*(key==="apbc"?.95:1);
+  return{kind:"rigid",m,d:cal/1000,V,N:(key==="he"||key==="hesh")?1:1.14,key,bul,cal,Prha:Math.max(1,a.pen||188*Math.pow(V/1000,1.43)*Math.pow(cal/100,1.07))};}
+function bNdrc(pr,mat,V){const fc=(BM[mat]&&BM[mat].fc)||30,W=pr.m*2.2046,din=pr.d/.0254,v=V*3.2808,G=180/Math.sqrt(fc*145.04)*pr.N*W/din*Math.pow(v/(1000*din),1.8),xd=G>=1?2*Math.sqrt(G):G+1;
+  return{x:xd*pr.d,e:(xd<1.35?3.19*xd-.718*xd*xd:1.32+1.24*xd)*pr.d,s:(xd<.65?7.91*xd-5.06*xd*xd:2.12+1.36*xd)*pr.d};}
+/* проход по конструкциям вдоль луча: жёсткий снаряд теряет скорость, стержень — запас пробития; рикошет при скользящем ударе по твёрдой
+   преграде; снаряд с замедлением рвётся через 1–2 м пути после первого удара (в толще — если не успел выйти) */
+function bPen(H,o,d,pr,opt){opt=opt||{};const r={tr:[],stop:null,det:null,ric:null,gl:false,v:1,P:pr.P||0};let t1=null;const sDet=opt.delay?R(1,2):0,dd=pr.kind==="rod"?pr.dc:pr.d;
+  for(const h of H){const e=h.e;if(e.st===2)continue;const m=BM[e.m],L=h.len*(e.kf||1),t0=Math.max(0,h.t0),pin=bPt(o,d,t0),pout=bPt(o,d,h.t1);
+    if(t1!=null&&opt.delay&&t0-t1>=sDet){r.det={p:bPt(o,d,t1+sDet),inside:true,dir:d};return r;}
+    if(bIsGl(e)){if(e.m==="tglass"||e.m==="gpart"||e.k==="y"||Math.random()<(pr.bul?.35:.85)){bGlass(e,d,pr.bul?2:6,"ke");r.gl=true;}else bDecal(pin,h.n,.02+dd);r.tr.push(bNm(e,"a"));
+      /* стекло тормозит импульсом выбитой «пробки» — массы стекла под сечением снаряда: пуля теряет 5–10 % скорости на листе, тяжёлый снаряд — меньше процента;
+         стержню лист стоит нескольких миллиметров запаса по броне */
+      const tg=(m.gt||L)/Math.max(.3,Math.cos(bObl(d,h.n)*Math.PI/180));if(pr.kind==="rod")r.P-=tg*1000*m.rod;else{const mp=(m.rho||2500)*Math.PI*pr.d*pr.d/4*tg;r.v*=pr.m/(pr.m+mp);}
+      if(r.v<.15||(pr.kind==="rod"&&r.P<=0)){r.stop={e,dep:L,th:0,nd:L};return r;}continue;}
+    const th=bObl(d,h.n);
+    if(e.m!=="gkl"&&t1==null){const crit=(opt.crit||60)+(e.m==="brick"||e.m==="aer"?4:0);
+      if(th>crit){r.ric={e,th,crit,p:pin,n:h.n};bDecal(pin,h.n,Math.max(.04,dd*1.3));bDust(pin,m.deb||[.6,.6,.6],.5);return r;}t1=t0;}
+    let f,dep=null;
+    if(pr.kind==="rigid"&&m.fc){const q=bNdrc(pr,e.m,pr.V*r.v);f=L/q.e;if(f>=1)dep=Math.min(L,q.x);h.scab=L<q.s;}
+    else{const need=L*1000*(m.rod||.05),P=pr.kind==="rod"?r.P:pr.Prha*Math.pow(r.v,1.43);f=need/Math.max(1,P);if(f>=1)dep=L/f;}
+    if(dep==null){if(pr.kind==="rod")r.P-=L*1000*(m.rod||.05);else r.v*=Math.sqrt(Math.max(0,1-f));
+      bKEHole(e,h,pin,pout,pr,L,true,d);r.tr.push(`${bNm(e,"a")} ${Math.round(L*1000)} мм`);
+      if(opt.delay&&t1!=null&&h.t1-t1>=sDet){const td=t1+sDet;r.det=td<h.t1-.05?{p:bPt(o,d,td),e,n:h.n,dir:d,C:1.25,emb:1}:{p:bPt(o,d,td),inside:true,dir:d};return r;}}
+    else{bKEHole(e,h,pin,pout,pr,dep,false,d);r.stop={e,dep,th,nd:dep*Math.cos(th*Math.PI/180)};if(opt.delay)r.det={p:bPt(o,d,t0+dep*.85),e,n:h.n,dir:d,C:1.25,emb:1};return r;}}
+  if(opt.delay&&t1!=null)r.det={p:bPt(o,d,t1+sDet),inside:true,dir:d};return r;}
+/* после рикошета снаряд с замедлением рвётся в воздухе над преградой (рикошетный разрыв) */
+function bRicBurst(ric,d){const n=ric.n,k=2*(d[0]*n[0]+d[1]*n[1]+d[2]*n[2]),dr=[d[0]-k*n[0],d[1]-k*n[1],d[2]-k*n[2]],s=R(1,2.2);return{p:[ric.p[0]+dr[0]*s,ric.p[1]+dr[1]*s+.15,ric.p[2]+dr[2]*s],air:true,dir:dr,ric:1};}
 /* ---------- попадание ---------- */
 function bldArrive(sh){if(!BLD)return;const bh=sh.bh,g=G(),a=sh.a;if(a.type==="illum"){try{illumAt(sh);}catch(e){}return;}BLD.stat.shots++;
   const H=bh.hit?bTrace(bh.o,bh.d,900).filter(h=>h.t1>=0):[];
@@ -7659,115 +7737,142 @@ function bldArrive(sh){if(!BLD)return;const bh=sh.bh,g=G(),a=sh.a;if(a.type==="i
     if(det){const X=bBlast(sh,det,out);snd="boom";sk=Math.cbrt(Math.max(.05,X.We))/1.4;}
     bStructure(out);}catch(e){console.error(e);out.push("(ошибка расчёта: "+e.message+")");}
   bFlush();if(snd)bSnd(snd,bPt(bh.o,bh.d,H[0].t0),sk);if(!S.lock)$("res").textContent=out.join("\n");try{updTally();}catch(e){}bldUI();}
-/* ---------- кинетические: сердечник проходит конструкции по очереди, расходуя запас пробития; кирпич и бетон хрупкие — вход маленький, с тыльной стороны откол ---------- */
-function bKE(sh,H,out){const a=sh.a,g=G(),cal=g.cal,key=a.key,bul=g.cls==="mg"||cal<20,dc=(key==="bops"?.21:key==="apds"?.33:1)*cal/1000,o=sh.bh.o,d=sh.bh.d,cp=key==="cp";
-  let P=a.pen*R(.95,1.05),yaw=1,stop=null,det=null,gl=false;const P0=P,tr=[];
-  for(const h of H){const e=h.e;if(e.st===2)continue;const m=BM[e.m],L=h.len*(e.kf||1),need=L*1000*m.ke*yaw,pin=bPt(o,d,Math.max(0,h.t0)),pout=bPt(o,d,h.t1);
-    if(bIsGl(e)){if(e.m==="tglass"||e.m==="gpart"||e.k==="y"||Math.random()<(bul?.35:.8)){bGlass(e,d,bul?2:6,"ke");gl=true;}else bDecal(pin,h.n,.03+dc);P-=need;tr.push(BM[e.m].n);continue;}
-    if(P>=need){P-=need;bKEHole(e,h,pin,pout,dc,L,true,sh);tr.push(`${e.gnd?"пол":BM[e.m].n} ${Math.round(L*1000)} мм`);if(m.ke>=.1)yaw*=key==="bops"?1.06:1.12;
-      if(cp&&m.ke>=.1){det={p:bPt(o,d,h.t1+R(.8,1.8)),inside:true,dir:d,cp:1};break;}}
-    else{const dep=P/(1000*m.ke*yaw);bKEHole(e,h,pin,pout,dc,dep,false,sh);stop={e,dep};if(cp)det={p:bPt(o,d,Math.max(0,h.t0)+dep*.8),e,n:h.n,dir:d,C:2.2,cp:1};P=0;break;}}
-  const kn=key==="bops"?"Подкалиберный оперённый":key==="apds"?"Подкалиберный":cp?"Бетонобойный":bul?"Бронебойная пуля":"Бронебойный калиберный",z=`(запас ≈${Math.round(P0)} мм по броне)`;
-  if(cp&&det&&det.inside)out.push(`${kn} ${z}: пробил ${tr.join(" → ")} и разорвался за преградой — донный взрыватель с замедлением`);
-  else if(stop)out.push(`${kn} ${z}: ${tr.length?"прошёл "+tr.join(", ")+"; ":""}застрял: ${stop.e.gnd?"пол на грунте":BM[stop.e.m].n}, глубина ≈${Math.round(stop.dep*1000)} мм${cp?" — разрыв в толще":""}`);
-  else out.push(`${kn} ${z}: навылет — ${tr.join(" → ")}; вышел из здания с запасом ≈${Math.round(P)} мм`);
-  if(cp&&!det)out.push("Взрыватель не взвёлся: на пути только стёкла и перегородки — снаряд прошёл насквозь");
-  if(!bul&&!cp)out.push("Кирпич и бетон хрупкие: входное отверстие небольшое, с тыльной стороны — конус выкрашивания; один сердечник стену не обрушит");
-  return{det,glass:gl};}
-function bKEHole(e,h,pin,pout,dc,L,through,sh){const m=BM[e.m],brit=e.m==="brick"||e.m==="rc"||e.m==="aer",d=sh.bh.d,nb=h.n.map(x=>-x);
-  if(e.k==="c"){bColDmg(e,Math.min(.35,dc*dc*14/.25+(through?.04:.02)),d);bDecal(pin,h.n,Math.max(.04,dc*2));if(through)bDecal(pout,nb,Math.min(.3,.08+.3*L));bDust(pin,m.deb,.5);return;}
-  if(e.k==="p"){bDecal(pin,h.n,Math.max(.03,dc*1.2));if(through)bDecal(pout,nb,Math.max(.04,dc*1.6));return;}
-  if(e.g===4||e.gnd){bDecal(pin,h.n,Math.max(.04,dc*2));bDust(pin,m.deb||[.6,.6,.6],.5);return;}
-  const rin=brit?Math.max(.05,2.4*dc):1.3*dc,rsp=brit&&through?Math.min(.55,.1+.32*L):rin;
+/* ---------- бронебойные, подкалиберные, бетонобойные, пули ---------- */
+function bKE(sh,H,out){const a=sh.a,pr=bProj(sh),o=sh.bh.o,d=sh.bh.d,cp=a.key==="cp",crit=pr.kind==="rod"?72:pr.bul?60:Math.max(65,a.rico||60),r=bPen(H,o,d,pr,{delay:cp,crit});
+  const kn=a.key==="bops"?"Подкалиберный оперённый":a.key==="apds"?"Подкалиберный":cp?"Бетонобойный":pr.bul?"Бронебойная пуля":"Бронебойный калиберный",
+    z=pr.kind==="rod"?`запас ≈${Math.round(pr.P)} мм по броне`:`${pr.m<1?Math.round(pr.m*1000)+" г":bF1(pr.m,pr.m<10?1:0)+" кг"}, ${Math.round(pr.V)} м/с`;let det=r.det;
+  const fe=pr.bul?"а":"";
+  if(r.ric){out.push(`${kn} (${z}): рикошет от ${bNm(r.ric.e,"gn")} — угол встречи ${Math.round(r.ric.th)}° от нормали больше критического ≈${r.ric.crit}°`);if(cp){det=bRicBurst(r.ric,d);out.push("Донный взрыватель взвёлся от удара: разрыв в воздухе над преградой");}}
+  else if(r.stop){const s=r.stop,deep=s.th>25?`на ${Math.round(s.nd*1000)} мм от поверхности (${Math.round(s.dep*1000)} мм по ходу — удар под углом ${Math.round(s.th)}°)`:`на глубине ≈${Math.round(s.dep*1000)} мм`;
+    out.push(`${kn} (${z}): ${r.tr.length?"пробил"+fe+" "+bTrJ(r.tr," → ")+", ":""}застрял${fe} в ${bNm(s.e,"l")} ${deep}${cp?" — разрыв в толще":""}`);}
+  else if(cp&&det)out.push(`${kn} (${z}): пробил ${bTrJ(r.tr," → ")} и разорвался за преградой — донный взрыватель с замедлением`);
+  else out.push(`${kn} (${z}): навылет — пробил${fe} ${bTrJ(r.tr," → ")}; ${pr.kind==="rod"?`вышел из здания с запасом ≈${Math.round(Math.max(0,r.P))} мм`:`${pr.bul?"вышла":"вышел"} из здания на скорости ≈${Math.round(pr.V*r.v)} м/с`}`);
+  if(cp&&!det&&!r.stop&&!r.ric)out.push("Взрыватель не взвёлся: на пути только стёкла и перегородки — снаряд прошёл насквозь");
+  if(!pr.bul&&!cp&&!r.ric&&r.tr.some(t=>/кладк|железобетон/.test(t)))out.push("Кирпич и бетон хрупкие: вход небольшой, с тыльной стороны — конус откола; одним сердечником стену не обрушить");
+  return{det,glass:r.gl};}
+/* следы: вход — по калибру, выход — откол (у крупных жёстких снарядов выбивает блоки кладки) */
+function bKEHole(e,h,pin,pout,pr,L,through,d){const m=BM[e.m],brit=e.m==="brick"||e.m==="rc"||e.m==="aer",nb=h.n.map(x=>-x),dd=pr.kind==="rod"?pr.dc:pr.d;
+  if(e.k==="c"){bColDmg(e,Math.min(.45,(pr.kind==="rod"?dd*dd*14:dd*dd*28)/.25+(through?.04:.02)),d);bDecal(pin,h.n,Math.max(.04,dd*1.6));if(through)bDecal(pout,nb,Math.min(.35,.08+.4*dd+.1*L));bDust(pin,m.deb,.5);return;}
+  if(e.k==="p"){bDecal(pin,h.n,Math.max(.03,dd*1.2));if(through)bDecal(pout,nb,Math.max(.04,dd*1.6));return;}
+  if(e.g===4||e.gnd){bDecal(pin,h.n,Math.max(.04,dd*1.5));bDust(pin,m.deb||[.6,.6,.6],.5);return;}
+  const rin=pr.kind==="rod"?Math.max(.04,1.6*dd):brit?Math.max(.04,1.1*dd):.6*dd,rsp=brit&&through?(pr.kind==="rod"?Math.min(.4,.05+.2*L):Math.min(.6,1.2*dd+.15*L)):rin;
   bDecal(pin,h.n,rin);if(through)bDecal(pout,nb,rsp);
-  if(brit&&through&&rsp>=.4)bDmgCells(e,pout,rsp*.4,1.2,d,{v:6,flat:1});else if(brit)bDmgCells(e,through?pout:pin,Math.max(.12,rsp*.8),through?.45:.25,d,{v:2});
+  if(brit&&through&&rsp>=.25)bDmgCells(e,pout,rsp*.6,1.2,d,{v:6,flat:1});else if(brit)bDmgCells(e,through?pout:pin,Math.max(.12,rsp*.8),through?.4:.2,d,{v:2});
   if(through&&brit)for(let i=0;i<4;i++)bDeb(pout,[d[0]*R(4,9)+R(-1,1),R(-.5,1.5),d[2]*R(4,9)+R(-1,1)],R(.04,.12),m.deb,e.m);
   bDust(pin,m.deb||[.6,.6,.6],.6);}
-/* ---------- кумулятивные: БЧ рвётся на первой поверхности (пьезовзрыватель срабатывает и на стекле); струя теряет силу в воздушных зазорах;
-   разрыв самой БЧ — как небольшой фугасный заряд ---------- */
+/* ---------- кумулятивные: БЧ рвётся на первой поверхности (пьезовзрыватель срабатывает и на стекле, но не при скользящем касании);
+   струя теряет силу в воздушных зазорах; разрыв самой БЧ — как небольшой фугасный заряд ---------- */
 function bHEAT(sh,H,out){const a=sh.a,g=G(),cal=g.cal,key=a.key,o=sh.bh.o,d=sh.bh.d,Wh=.88*Math.pow(cal/100,3)*((g.cls==="atgm"||/msl|gl|fpv/.test(key))?1.2:1);
-  let J=a.pen*R(.9,1.04),prev=null,stop=null;const J0=J,tr=[],H0=H[0],e0=H0.e,p0=bPt(o,d,Math.max(0,H0.t0));
-  for(const h of H){const e=h.e;if(e.st===2)continue;const m=BM[e.m],L=h.len*(e.kf||1);if(prev!=null){const gap=Math.max(0,h.t0-prev);if(gap>.25)J*=Math.exp(-gap/2.4);}prev=h.t1;
+  let J=a.pen*R(.9,1.04),prev=null,stop=null;const J0=J,tr=[],H0=H[0],e0=H0.e,p0=bPt(o,d,Math.max(0,H0.t0)),th0=bObl(d,H0.n);
+  if(th0>80&&!bIsGl(e0)){out.push(`Кумулятивный: скользящий удар под углом ${Math.round(th0)}° от нормали — пьезодатчик не сработал, граната срикошетировала от ${bNm(e0,"gn")}`);bDecal(p0,H0.n,.06);return null;}
+  for(const h of H){const e=h.e;if(e.st===2)continue;const m=BM[e.m],L=h.len*(e.kf||1);if(prev!=null){const gap=Math.max(0,h.t0-prev);if(gap>.25)J*=Math.exp(-gap/2.4);}
+    if(J<25){stop={e,dep:0,diss:prev!=null};break;}prev=h.t1;
     const need=L*1000*m.jet,pin=bPt(o,d,Math.max(0,h.t0)),pout=bPt(o,d,h.t1);
-    if(bIsGl(e)){bGlass(e,d,7,"heat");J-=need;tr.push(BM[e.m].n);continue;}if(J<25){stop={e,dep:0};break;}
+    if(bIsGl(e)){bGlass(e,d,7,"heat");J-=need;tr.push(bNm(e,"a"));continue;}
     const brit=e.m==="brick"||e.m==="rc"||e.m==="aer",rh=.02+.00035*cal;
-    if(J>=need){J-=need;tr.push(`${e.gnd?"пол":BM[e.m].n} ${Math.round(L*1000)} мм`);bDecal(pin,h.n,rh*1.6);bDecal(pout,h.n.map(x=>-x),brit?.1+.25*L:rh*1.4);
-      if(e.k==="c")bColDmg(e,.12,d);else if(brit&&e.g!==4&&!e.gnd)bDmgCells(e,pout,.08+.25*L,.7,d,{v:7});}
-    else{const dep=J/(1000*m.jet);stop={e,dep};bDecal(pin,h.n,rh*1.6);if(e.k==="c")bColDmg(e,.06,d);else if(brit&&e.g!==4&&!e.gnd)bDmgCells(e,pin,.15,.35,d,{v:2});J=0;break;}}
-  out.push(`Кумулятивный (струя ≈${Math.round(J0)} мм по броне): струя ${stop?"прошла "+(tr.length?tr.join(", "):"—")+" и застряла: "+(stop.e.gnd?"пол на грунте":BM[stop.e.m].n)+(stop.dep?", ≈"+Math.round(stop.dep*1000)+" мм":""):"прошла навылет: "+tr.join(" → ")}`);
+    if(J>=need){J-=need;tr.push(`${bNm(e,"a")} ${Math.round(L*1000)} мм`);bDecal(pin,h.n,rh*1.6);bDecal(pout,h.n.map(x=>-x),brit?.1+.25*L:rh*1.4);
+      if(e.k==="c")bColDmg(e,.12,d);else if(brit&&e.g!==4&&!e.gnd)bDmgCells(e,pout,.08+.25*L,.6,d,{v:7});}
+    else{const dep=J/(1000*m.jet);stop={e,dep};bDecal(pin,h.n,rh*1.6);if(e.k==="c")bColDmg(e,.06,d);else if(brit&&e.g!==4&&!e.gnd)bDmgCells(e,pin,.15,.3,d,{v:2});J=0;break;}}
+  out.push(`Кумулятивный (струя ≈${Math.round(J0)} мм по броне): ${stop?(tr.length?"струя прошла "+bTrJ(tr,", ")+" и ":"струя ")+(stop.diss?"рассеялась в воздухе за преградой: в зазоре больше метра струя распадается на частицы":"застряла в "+bNm(stop.e,"l")+(stop.dep?` на глубине ≈${Math.round(stop.dep*1000)} мм`:"")):"струя прошла навылет: "+bTrJ(tr," → ")}`);
   out.push("Отверстие от струи — несколько сантиметров; стену ломает фугас, а не струя. За преградой летят осколки кладки и металл струи");
   const gl=bIsGl(e0),pg=gl?bPt(o,d,Math.max(0,H0.t0)+.3):p0;return{p:pg,e:gl?null:e0,n:H0.n,dir:d,C:3.6,W:Wh,win:gl&&e0.k==="g"?1:0,inside:gl&&(e0.k==="g"||bInside(pg))};}
-/* ---------- осколочно-фугасные: точка подрыва по взрывателю ---------- */
-function bHEpath(sh,H,out){const a=sh.a,g=G(),cal=g.cal,hesh=a.type==="hesh",H0=H[0],e0=H0.e,o=sh.bh.o,d=sh.bh.d;let fu=hesh?"inst":(S.fuze||"inst");if(g.fuzes&&!g.fuzes.includes(fu))fu="inst";
+/* ---------- осколочно-фугасные и бронебойно-фугасные: точка подрыва по взрывателю ---------- */
+function bHEpath(sh,H,out){const a=sh.a,g=G(),hesh=a.type==="hesh",H0=H[0],e0=H0.e,o=sh.bh.o,d=sh.bh.d;let fu=hesh?"inst":(S.fuze||"inst");if(g.fuzes&&!g.fuzes.includes(fu))fu="inst";
   if(fu==="prox"){out.push(`Взрыватель бесконтактный: подрыв в ≈${g.fuzeProg?"2–3":"4–6"} м перед преградой`);return{p:bPt(o,d,Math.max(0,H0.t0-(g.fuzeProg?R(2,3):R(4,6)))),air:true,dir:d};}
-  if(fu==="delay"){const cap=cal*.5*Math.min(1.2,(a.vimp||600)/600);for(const h of H){const e=h.e;if(e.st===2)continue;const m=BM[e.m];
-      if(bIsGl(e)||e.m==="gkl"){if(bIsGl(e))bGlass(e,d,6,"ke");continue;}
-      if(h.len*1000*m.ke*(e.kf||1)<cap&&e.k!=="c"&&!e.gnd){bKEHole(e,h,bPt(o,d,Math.max(0,h.t0)),bPt(o,d,h.t1),cal/1000,h.len,true,sh);out.push(`Взрыватель с замедлением: корпус пробил ${BM[e.m].n} ${Math.round(h.len*1000)} мм и разорвался за ней`);
-        return{p:bPt(o,d,h.t1+R(.8,1.6)),inside:true,dir:d};}
-      out.push(`Взрыватель с замедлением: ${e.gnd?"пол на грунте":BM[e.m].n+" слишком толстая"} — корпус застрял и разорвался в толще`);return{p:bPt(o,d,Math.max(0,h.t0)+.08),e,n:h.n,dir:d,C:2.2};}
-    return{p:bPt(o,d,H0.t1+1),inside:true,dir:d};}
+  if(fu==="delay"){const pr=bProj(sh);pr.N=1;const r=bPen(H,o,d,pr,{delay:1,crit:72});
+    if(r.ric){out.push(`Взрыватель с замедлением: снаряд срикошетировал от ${bNm(r.ric.e,"gn")} (угол встречи ${Math.round(r.ric.th)}° от нормали) и разорвался в воздухе — рикошетный разрыв`);return bRicBurst(r.ric,d);}
+    if(r.det&&r.det.emb){out.push(`Взрыватель с замедлением: ${r.tr.length?"корпус пробил "+bTrJ(r.tr," → ")+" и ":"корпус "}застрял в ${bNm(r.det.e,"l")} — разрыв в толще`);return r.det;}
+    if(r.det){out.push(`Взрыватель с замедлением: корпус пробил ${bTrJ(r.tr," → ")} и разорвался за преградой`);return r.det;}
+    out.push("Взрыватель с замедлением не взвёлся: на пути только стёкла и перегородки — снаряд прошёл насквозь");return null;}
   if(bIsGl(e0)){bGlass(e0,d,8,"blast");const win=e0.k==="g",p=bPt(o,d,Math.max(0,H0.t0)+.35);
     out.push(win?(hesh?"Головка ударилась о стекло и расплющилась в проёме":"Взрыватель сработал на стекле — разрыв в оконном проёме"):e0.k==="y"?"Взрыватель сработал на стеклянной кровле — разрыв под ней":"Взрыватель сработал на стеклянной перегородке — разрыв внутри помещения");
     return{p,dir:d,win:win?1:0,n:H0.n,inside:win||bInside(p)};}
-  return{p:bPt(o,d,Math.max(0,H0.t0)),e:e0,n:H0.n,dir:d,C:hesh?1.8:3};}
-/* ---------- взрыв: пролом или воронка в контактной конструкции, кладка вокруг, колонны, плиты, стёкла по избыточному давлению, перегородки, машины ---------- */
-function bBlast(sh,det,out){const X=det.W?{W:det.W,Wb:det.W*1.25,We:det.W*1.15,fk:"compb",F:FILL.compb}:bWx(sh),W3=Math.cbrt(Math.max(.001,X.We)),p=det.p,C0=det.C||3,tbx=X.fk==="tbx",st0={...BLD.stat};let inside=!!det.inside||bInside(p);const in0=inside,msgs=[];
+  return{p:bPt(o,d,Math.max(0,H0.t0)),e:e0,n:H0.n,dir:d,C:hesh?2.2:3};}
+/* ---------- ударная волна: давление во фронте (Кинни–Грэхем, тротил в свободном воздухе), отражение от преграды (Ренкин–Гюгонио),
+   давление газов взрыва в закрытом помещении; прочность каждого стекла и перегородки — своя (разброс ±35 %) ---------- */
+const B_P0=101.325;
+function bPso(Z){const z=Math.max(.06,Z),q=x=>x*x;return B_P0*808*(1+q(z/4.5))/Math.sqrt((1+q(z/.048))*(1+q(z/.32))*(1+q(z/1.35)));}
+function bPref(p,c){const cr=2+6*p/(p+7*B_P0),k=Math.max(0,Math.min(1,c));return p*(1+(cr-1)*k*k);}
+const bPqs=(W,V)=>2410*Math.pow(Math.max(1e-6,W/V),.72);
+function bThr(p50){let u=0;for(let i=0;i<6;i++)u+=Math.random();return p50*Math.exp(.35*Math.max(-2.5,Math.min(2.5,(u-3)/.7071)));}
+/* помещение вокруг разрыва внутри: этаж, клетка перегородок (шаг 12 м), полоса по глубине корпуса; атриум и ротонда — единый объём */
+function bRoom(p){const C=BLC,lv=C.lv;let f=0;for(let k=0;k<5;k++)if(p[1]>=lv[k]-.05)f=k;
+  if(p[0]>C.L-.3&&Math.hypot(p[0]-C.rot.cx,p[2]-C.rot.cz)<C.rot.r)return{f,x0:C.L-6,x1:C.rot.cx+C.rot.r,z0:C.rot.cz-C.rot.r,z1:C.rot.cz+C.rot.r,V:Math.PI*C.rot.r*C.rot.r*3.95,atr:false};
+  if(bInVoid(p[0],p[2],0)||p[1]>lv[5]-.3){const v=B_VOID.find(v=>p[0]>v.x0-1&&p[0]<v.x1+1&&p[2]>v.z0-1&&p[2]<v.z1+1)||B_VOID[0];return{f,x0:v.x0-2,x1:v.x1+2,z0:v.z0-2,z1:v.z1+2,V:(v.x1-v.x0+4)*(v.z1-v.z0+4)*(lv[5]+5),atr:true};}
+  const x0=Math.max(0,Math.floor(p[0]/12)*12),x1=Math.min(C.L,x0+12),bands=[0,17.6,30.4,41.6,54.4,C.W];let z0=0,z1=C.W;for(let i=0;i<bands.length-1;i++)if(p[2]>=bands[i]&&p[2]<bands[i+1]){z0=bands[i];z1=bands[i+1];}
+  return{f,x0,x1,z0,z1,V:(x1-x0)*(z1-z0)*((lv[f+1]||lv[f]+4.2)-lv[f]-.25),atr:false};}
+const bInBox=(c,r)=>c[0]>r.x0-.8&&c[0]<r.x1+.8&&c[2]>r.z0-.8&&c[2]<r.z1+.8;
+function bInRoom(e,c,r){if(!r)return false;if(r.atr)return e.k==="b"||e.k==="y"||(e.f===r.f&&bInBox(c,r));return e.f===r.f&&bInBox(c,r);}
+/* доля давления, дошедшая до элемента: прямая видимость — 1; снаружи за углом — огибание; за стенами и перекрытиями — малая доля */
+function bExpo(e,c,p,room,inR){if(inR)return 1;
+  if(!room){if(e.k==="g"||e.k==="y"){const n=bOutN(e,c);return n[0]*(p[0]-c[0])+n[1]*(p[1]-c[1])+n[2]*(p[2]-c[2])>0?1:.3;}return .12;}
+  if(room.atr&&(e.k==="b"||e.k==="y"))return 1;if(e.f===room.f)return e.k==="g"?.4:.35;return e.k==="g"?.15:.04;}
+/* наружная нормаль стекла (для угла падения волны) */
+function bOutN(e,c){if(e.k==="y")return e.n||[0,1,0];if(e.k==="b"||e.k==="p")return e.ax===0?[1,0,0]:[0,0,1];const s=e.side;if(s==="S")return[0,0,-1];if(s==="N")return[0,0,1];if(s==="W")return[-1,0,0];if(s==="E")return[1,0,0];
+  if(s==="R"){const R0=BLC.rot,x=c[0]-R0.cx,z=c[2]-R0.cz,l=Math.hypot(x,z)||1;return[x/l,0,z/l];}return[0,0,-1];}
+/* ---------- взрыв: пролом или воронка в контактной конструкции, кладка и колонны вокруг, плиты, ударная волна ---------- */
+function bBlast(sh,det,out){const X=det.W?{W:det.W,Wb:det.W*1.25,We:det.W*1.15,fk:"compb",F:FILL.compb}:bWx(sh),p=det.p,C0=det.C||3,tbx=X.fk==="tbx",st0={...BLD.stat};let inside=!!det.inside||bInside(p);const in0=inside,msgs=[];
   out.push(`${det.W?"Разрыв БЧ: ":"Заряд "}${bF1(X.W,X.W<1?2:1)} кг (${X.F.n}): по бризантности ≈${bF1(X.Wb,X.Wb<1?2:1)} кг тротила, по фугасному импульсу ≈${bF1(X.We,X.We<1?2:1)} кг`);
-  const RbC=bBR(X.Wb,BM.rc.K,C0),dir=det.dir||[0,0,1];
+  const RbC=bBR(X.Wb,BM.rc.K,C0),dir=det.dir||[0,0,1];let ncol=0;
   if(det.e&&det.e.st!==2&&!det.air){const e=det.e,m=BM[e.m],Rb=bBR(X.Wb,m.K,C0),T=e.th,n=det.n||[0,0,-1];
-    if(e.k==="c"){const f=Math.pow(RbC/.45,1.6);const k=bColDmg(e,f,dir);msgs.push(k?`колонна 500×500 перебита: бетон выбит на всё сечение (заряд разрушает до ≈${Math.round(RbC*1000)} мм бетона), арматура оголена и изогнута`:`колонна повреждена: выбит защитный слой и часть ядра сечения, несущая способность ≈${Math.round(e.hp*100)} %`);}
+    if(e.k==="c"){const f=Math.pow(RbC/.5,2),k=bColDmg(e,f,dir);msgs.push(k?`колонна 500 × 500 мм перебита: заряд разрушает до ≈${Math.round(RbC*1000)} мм бетона — сечение выбито, арматура оголена и выгнута`:`колонна повреждена: выбито ≈${Math.round(Math.min(.95,f)*100)} % сечения (заряд разрушает до ≈${Math.round(RbC*1000)} мм бетона), осталось ≈${Math.round(e.hp*100)} % несущей способности`);}
     else if(e.gnd){const rc=Math.min(1.8,.9*Rb);bDecal(p,n,rc);msgs.push(`воронка в полу Ø≈${bF1(2*rc)} м: бетонная плита пола на грунте`);}
     else if(e.k==="s"&&e.g===4){if(T<=Rb){const rh=Math.min(2,Math.max(.4,1.1*Rb-.6*T));bDecal(p,n,rh);bDecal(bPt(p,dir,T*1.2),n.map(x=>-x),rh*1.2);msgs.push(`пролом Ø≈${bF1(2*rh)} м в перекрытии ротонды (плита 250 мм, заряд проламывает до ≈${Math.round(Rb*1000)} мм)`);if(bSecHit(e,rh))msgs.push("сектор перекрытия ротонды потерял несущую способность и обрушился");}
       else{bDecal(p,n,.9*Rb);msgs.push(`воронка Ø≈${bF1(1.8*Rb)} м в перекрытии ротонды, плита не пробита`);}}
     else if(e.k==="w"||e.k==="s"){if(T<=Rb){const rh=Math.min(2.6,Math.max(.32,1.1*Rb-.6*T));bBreach(e,p,rh,dir,X);inside=true;
-        msgs.push(`пролом Ø≈${bF1(2*rh)} м: ${m.n} ${Math.round(T*1000)} мм пробита (заряд проламывает до ≈${Math.round(Rb*1000)} мм)`);}
-      else{const rc=Math.min(2,.9*Rb),r=Math.min(.9,Rb/T*.95),v0=BLD.stat.vol;bDecal(p,n,rc*.9);const nk=bDmgCells(e,p,rc,r,dir,{v:4});
+        msgs.push(`пролом Ø≈${bF1(2*rh)} м: ${m.n} ${Math.round(T*1000)} мм ${bPP(e,"пробит")} (заряд проламывает до ≈${Math.round(Rb*1000)} мм)`);}
+      else{const rc=Math.min(2,.9*Rb),Df=.5*Rb,Ds=T<1.6*Rb?.5*Rb*(1.6-T/Rb):0,v0=BLD.stat.vol;bDecal(p,n,rc*.9);const nk=bCrater(e,p,rc,Df,Ds,dir,{v:4});
         if(T<1.6*Rb){const pb=[p[0]+dir[0]*T,p[1]+dir[1]*T,p[2]+dir[2]*T];for(let i=0;i<6;i++)bDeb(pb,[dir[0]*R(4,8)+R(-1,1),R(-.5,1),dir[2]*R(4,8)+R(-1,1)],R(.05,.15),m.deb,e.m);}
-        if(nk){inside=true;msgs.push(`${m.n} ${Math.round(T*1000)} мм проломлена: одним зарядом её не пробить (он проламывает до ≈${Math.round(Rb*1000)} мм), но прошлые попадания рядом уже раздробили кладку — выбито ≈${bF1(BLD.stat.vol-v0,2)} м³`);}
-        else msgs.push(`воронка Ø≈${bF1(2*rc)} м: ${m.n} ${Math.round(T*1000)} мм не пробита (заряд проламывает до ≈${Math.round(Rb*1000)} мм)${T<1.6*Rb?", с тыльной стороны откол":""}; следующее попадание рядом проломит`);}}
+        if(nk){inside=true;msgs.push(`${m.n} ${Math.round(T*1000)} мм ${bPP(e,"проломлен")}: одним зарядом ${m.g==="m"?"его":"её"} не пробить (он проламывает до ≈${Math.round(Rb*1000)} мм), но прошлые попадания рядом уже выбили часть толщины — вынесено ≈${bF1(BLD.stat.vol-v0,2)} м³`);}
+        else{const k=bCellAt(e,p),dm=e.cl&&k>=0?e.cl.dm[k]:0,per=(Df+Ds)/T,left=Math.max(1,Math.ceil((1-dm)/Math.max(.02,per)));
+          msgs.push(`воронка Ø≈${bF1(2*rc)} м глубиной ≈${Math.round(Df*1000)} мм${Ds>0?`, с тыльной стороны откол ≈${Math.round(Ds*1000)} мм`:""}: ${m.n} ${Math.round(T*1000)} мм не ${bPP(e,"пробит")} (заряд проламывает до ≈${Math.round(Rb*1000)} мм); до пролома — ещё ≈${left} ${left===1?"попадание":left<5?"попадания":"попаданий"} в это место`);}}}
     else if(e.k==="p"){bPartKill(e,dir,p);}}
   if(det.win)msgs.push("оконный проём выбит, рама сорвана, разрыв ушёл внутрь помещения");
   /* кладка и колонны вокруг: пролом расползается по соседним участкам стены, воронки от близкого разрыва */
   for(const e of BLD.E){if(e.st===2||e===det.e||(e.k!=="w"&&e.k!=="c"))continue;const dd=bDist(e,p);if(dd>3.2)continue;
-    if(e.k==="w"){const K=BM[e.m].K,Rb=bBR(X.Wb,K,C0)*(det.air?.35:1),reach=Rb*1.5;if(dd>reach)continue;const k=1-dd/reach,T=e.th;
-      if(!det.air&&T<=Rb*k&&dd<.15)bBreach(e,p,Math.max(.3,1.1*Rb*k-.6*T),dir,X);else bDmgCells(e,p,Math.max(.2,Rb*k),Math.min(.85,Rb*k/T),dir,{v:3});}
-    else{const reach=RbC*1.8*(det.air?.4:1);if(dd<reach){const f=Math.pow(RbC*(1-dd/reach)/.45,1.6)*(e.per&&!inside?.6:1);if(f>.02&&bColDmg(e,f,dir))msgs.push(`колонна ${e.f+1}-го этажа у места разрыва разрушена`);}}}
+    if(e.k==="w"){const K=BM[e.m].K,Rb=bBR(X.Wb,K,C0)*(det.air?.35:1),reach=Rb*1.5;if(dd>reach)continue;const k=1-dd/reach,T=e.th,Rk=Rb*k;
+      if(!det.air&&T<=Rk&&dd<.15)bBreach(e,p,Math.max(.3,1.1*Rk-.6*T),dir,X);else bCrater(e,p,Math.max(.2,.9*Rk),.5*Rk,T<1.6*Rk?.5*Rk*(1.6-T/Rk):0,dir,{v:3});}
+    else{const reach=RbC*1.8*(det.air?.4:1);if(dd<reach){const f=Math.pow(RbC*(1-dd/reach)/.5,2)*(e.per&&!inside?.6:1);if(f>.02&&bColDmg(e,f,dir))ncol++;}}}
+  if(ncol)msgs.push(`у места разрыва разрушено колонн: ${ncol}`);
   /* плиты над и под разрывом внутри помещения */
-  if(inside&&!det.air){for(const s of BLD.slabs.concat(BLD.rsec||[])){if(s.st===2||s.falling||s===det.e||(det.e&&det.e.k==="s"&&s.lvl===det.e.lvl))continue;const top=s.b?s.b[4]:s.c[1],bot=top-s.th,dv=p[1]>=top?p[1]-top:p[1]<=bot?bot-p[1]:0;if(dv>2.4)continue;
+  if(inside&&!det.air){const sl={up:0,dn:0};for(const s of BLD.slabs.concat(BLD.rsec||[])){if(s.st===2||s.falling||s===det.e||(det.e&&det.e.k==="s"&&s.lvl===det.e.lvl))continue;const top=s.b?s.b[4]:s.c[1],bot=top-s.th,dv=p[1]>=top?p[1]-top:p[1]<=bot?bot-p[1]:0;if(dv>2.4)continue;
       const dh=s.b?Math.hypot(Math.max(s.b[0]-p[0],0,p[0]-s.b[3]),Math.max(s.b[2]-p[2],0,p[2]-s.b[5])):bSecDist(s,p);if(dh>.6)continue;
-      const reach=RbC*1.6,k=1-dv/reach;if(k<=0)continue;const Rb=RbC*k,up=bot>=p[1]-.01,q=[p[0],(top+bot)/2,p[2]],nn=[0,up?-1:1,0];
-      if(s.g===4){if(Rb>=s.th){const rh=Math.min(2,Math.max(.4,1.1*Rb-.6*s.th));bDecal([p[0],up?bot:top,p[2]],nn,rh);msgs.push(`перекрытие ротонды ${up?"над":"под"} местом разрыва пробито: дыра Ø≈${bF1(2*rh)} м`);if(bSecHit(s,rh))msgs.push("сектор перекрытия ротонды обрушился");}continue;}
-      if(Rb>=s.th){const rh=Math.min(2,Math.max(.4,1.1*Rb-.6*s.th));bBreach(s,q,rh,[0,up?1:-1,0],X);msgs.push(`плита ${up?"над":"под"} местом разрыва пробита: дыра Ø≈${bF1(2*rh)} м`);}
-      else{bDecal([p[0],up?bot:top,p[2]],nn,Math.max(.4,Rb*.8));bDmgCells(s,q,Math.max(.5,Rb),Math.min(.8,Rb/s.th),[0,up?1:-1,0],{v:2});}}}
-  /* стёкла: избыточное давление ≈ 2–7 кПа выбивает стеклопакеты; снаружи — окна того же фасада, внутри — помещения этажа */
-  const side=bSideOf(p),Rg=(inside?(tbx?16:11):15)*W3,Rp=(tbx?5.5:3.2)*W3,fy=p[1],inAt=bInVoid(p[0],p[2],0);let gw=0,gp=0;
-  for(const e of BLD.E){if(e.st===2||!bIsGl(e))continue;const c=bCtr(e),dd=Math.hypot(c[0]-p[0],c[1]-p[1],c[2]-p[2]);
-    if(e.k==="g"){if(dd>Rg)continue;if(!inside&&e.side!==side&&!(dd<Rg*.35))continue;if(inside&&Math.abs(c[1]-fy)>5.5&&dd>Rg*.4)continue;
-      const pr=dd<Rg*.5?1:1-(dd-Rg*.5)/(Rg*.5)*.85;if(Math.random()<pr){const v=[c[0]-p[0],c[1]-p[1]+1,c[2]-p[2]],l=Math.hypot(...v)||1;if(bGlass(e,v.map(x=>x/l),Math.min(18,6+60*W3/Math.max(2,dd)),"blast"))gw++;}}
-    else{const rr=e.k==="y"?Rg*.7:inside?Rg*.6:Rg*.25;if(dd>rr)continue;if(e.k!=="y"&&inside&&!inAt&&Math.abs(c[1]-fy)>3.6)continue;if(Math.random()<(dd<rr*.5?1:.6)){const v=[c[0]-p[0],c[1]-p[1],c[2]-p[2]],l=Math.hypot(...v)||1;if(bGlass(e,v.map(x=>x/l),8,"blast"))gp++;}}}
-  /* перегородки из гипсокартона и светильники в помещении */
-  let np=0,nl=0;if(inside){for(const e of BLD.E){if(e.k!=="p"||e.st===2||e.m!=="gkl")continue;const dd=bDist(e,p);if(dd<Rp){bPartKill(e,null,p);np++;}}
-    const Rl=(tbx?7:4)*W3,mm=new THREE.Matrix4();for(const s of BLD.slabs){if(!s.lights.length)continue;const c=bCtr(s);if(Math.abs(c[1]-fy)>4.6||Math.hypot(c[0]-p[0],c[2]-p[2])>Rl+4)continue;
-      s.lights=s.lights.filter(i=>{const P=BLD.P.light;P.m.getMatrixAt(i,mm);const x=mm.elements[12],z=mm.elements[14];if(Math.hypot(x-p[0],z-p[2])<Rl){bHide(P,i);nl++;return false;}return true;});}}
-  const nc=inside?0:bCarsBlast(p,W3);
-  if(gw)msgs.push(`выбито стекол: ${gw} (радиус ≈${Math.round(Rg)} м)`);if(gp)msgs.push(`разбито стеклянных перегородок и ограждений: ${gp}`);if(np)msgs.push(`разрушено перегородок: ${np}`);if(nl)msgs.push(`разбито светильников: ${nl}`);if(nc)msgs.push(`повреждено машин у здания: ${nc}`);
+      const reach=RbC*1.6,k=1-dv/reach;if(k<=0)continue;const Rb=RbC*k,up=bot>=p[1]-.01,q=[p[0],(top+bot)/2,p[2]],nn=[0,up?-1:1,0],w=up?"up":"dn";
+      if(s.g===4){if(Rb>=s.th){const rh=Math.min(2,Math.max(.4,1.1*Rb-.6*s.th));bDecal([p[0],up?bot:top,p[2]],nn,rh);sl[w]=Math.max(sl[w],2*rh);if(bSecHit(s,rh))msgs.push("сектор перекрытия ротонды обрушился");}continue;}
+      if(Rb>=s.th){const rh=Math.min(2,Math.max(.4,1.1*Rb-.6*s.th));bBreach(s,q,rh,[0,up?1:-1,0],X);sl[w]=Math.max(sl[w],2*rh);}
+      else{bDecal([p[0],up?bot:top,p[2]],nn,Math.max(.4,Rb*.8));bCrater(s,q,Math.max(.4,.9*Rb),.5*Rb,s.th<1.6*Rb?.5*Rb*(1.6-s.th/Rb):0,[0,up?1:-1,0],{v:2});}}
+    if(sl.up)msgs.push(`плита над местом разрыва пробита: дыра Ø≈${bF1(sl.up)} м`);if(sl.dn)msgs.push(`плита под местом разрыва пробита: дыра Ø≈${bF1(sl.dn)} м`);}
+  /* ударная волна: стёкла, перегородки, светильники, машины */
+  const Ws=X.We*(det.air?1:1.8)*(tbx?1.3:1),W3=Math.cbrt(Math.max(.001,Ws)),room=inside?bRoom(p):null,Pq=room&&!det.air?bPqs(X.We*(tbx?1.6:1),room.V)*.6:0,Rmax=48*W3;
+  let gw=0,gp=0,gR=0,pMin=1e9,pMax=0;
+  for(const e of BLD.E){if(e.st===2||!bIsGl(e))continue;const c=bCtr(e),R0=Math.hypot(c[0]-p[0],c[1]-p[1],c[2]-p[2]);if(R0>Rmax)continue;
+    const n=bOutN(e,c),ci=Math.abs(n[0]*(p[0]-c[0])+n[1]*(p[1]-c[1])+n[2]*(p[2]-c[2]))/Math.max(.1,R0),inR=bInRoom(e,c,room);
+    let P=bPref(bPso(Math.max(.25,R0)/W3),ci)*bExpo(e,c,p,room,inR);if(inR)P=Math.max(P,Pq);if(P<bThr(BM[e.m].pf||4.5))continue;
+    const v=[c[0]-p[0],c[1]-p[1]+.4,c[2]-p[2]],l=Math.hypot(...v)||1;if(bGlass(e,v.map(x=>x/l),Math.min(22,3+P/4),"blast")){if(e.k==="g")gw++;else gp++;gR=Math.max(gR,R0);pMin=Math.min(pMin,P);pMax=Math.max(pMax,P);}}
+  let np=0,nl=0,nc=0;
+  for(const e of BLD.E){if(e.k!=="p"||e.st===2||e.m!=="gkl")continue;const c=bCtr(e),R0=bDist(e,p);if(R0>Rmax*.7)continue;const inR=bInRoom(e,c,room);
+    let P=bPref(bPso(Math.max(.25,R0)/W3),1)*bExpo(e,c,p,room,inR);if(inR)P=Math.max(P,Pq);if(P>bThr(BM.gkl.pf)){bPartKill(e,null,p);np++;}}
+  {const mm=new THREE.Matrix4();for(const s of BLD.slabs){if(!s.lights.length)continue;const sc=bCtr(s);if(Math.hypot(sc[0]-p[0],sc[2]-p[2])>Rmax*.7+5)continue;const f=s.lvl-1,pe={k:"l",f};
+    s.lights=s.lights.filter(i=>{const PL0=BLD.P.light;PL0.m.getMatrixAt(i,mm);const c=[mm.elements[12],mm.elements[13],mm.elements[14]],R0=Math.hypot(c[0]-p[0],c[1]-p[1],c[2]-p[2]),inR=!!room&&room.f===f&&bInBox(c,room);
+      let P=bPso(Math.max(.25,R0)/W3)*bExpo(pe,c,p,room,inR);if(inR)P=Math.max(P,Pq);if(P>bThr(B_PF.light)){bHide(PL0,i);nl++;return false;}return true;});}}
+  if(!in0)for(const c of BLD.cars||[]){if(c.burn)continue;const R0=Math.hypot(c.x-p[0],.9-p[1],c.z-p[2]);if(R0>Rmax)continue;const P=bPref(bPso(Math.max(.25,R0)/W3),.7);
+    if(P>bThr(B_PF.carWreck)){c.burn=1;c.gl=1;bTint(BLD.P.carB,c.bi,_bc.setRGB(.14,.12,.11));bHide(BLD.P.carC,c.ci);BLD.anim.push({kind:"fire",p:[c.x,.9,c.z],t:0,d:30,s:.7});nc++;}
+    else if(!c.gl&&P>bThr(B_PF.carGlass)){c.gl=1;bTint(BLD.P.carC,c.ci,_bc.setRGB(2.2,2.3,2.4));nc++;}}
+  if(gw)msgs.push(`выбито стёкол: ${gw} — до ≈${Math.round(gR)} м от разрыва (незакалённому стеклу хватает 3–7 кПа отражённой волны)`);
+  if(gp)msgs.push(`разбито стеклянных перегородок, ограждений и кровли: ${gp}`);if(np)msgs.push(`снесено перегородок из гипсокартона: ${np}`);if(nl)msgs.push(`сорвано светильников: ${nl}`);if(nc)msgs.push(`повреждено машин у здания: ${nc}`);
   if(inside&&!in0)msgs.push("через пролом ударная волна, огонь и обломки кладки ушли в помещение");
-  else if(inside&&!det.air)msgs.push(tbx?"Объёмный взрыв в помещении: огненный шар и долгое давление — разрушена отделка, мебель горит":"Разрыв внутри помещения: ударная волна отражается от стен и плит — давление выше, чем на открытой местности");
-  if(det.air)msgs.push("Осколки секут фасад: кладка выщерблена, стекла выбиты, пролома нет");
+  else if(inside&&!det.air)msgs.push(room&&room.atr?"Разрыв в атриуме: волна свободно расходится по галереям всех этажей":`Разрыв внутри помещения (≈${Math.round(room.V)} м³): волна отражается от стен и плит, газы взрыва держат давление ≈${Math.round(Pq/.6)} кПа${tbx?" — объёмный взрыв, отделка горит":""}`);
+  if(det.air)msgs.push(det.ric?"Рикошетный разрыв: осколки бьют сверху и в стороны, пролома нет":"Осколки секут фасад: кладка выщерблена, стёкла выбиты, пролома нет");
   const dv=BLD.stat.vol-st0.vol;if(dv>.01)msgs.push(`выбито кладки и бетона ≈${bF1(dv,2)} м³ (≈${bF1(BLD.stat.mass-st0.mass,1)} т)`);
   out.push(...msgs.map(x=>"• "+x));
-  try{const n=det.n?bWDir(det.n):new THREE.Vector3(0,1,0);boom(bW(p),Math.min(90,X.We),{surf:!inside,fill:X.fk,n});if(inside&&!reduce){const w=bW(p);for(let i=0;i<8;i++)puff(w.clone().add(new THREE.Vector3(R(-1.5,1.5),R(-.5,1.5),R(-1.5,1.5))),true,1.4*W3,0x2a2622,new THREE.Vector3(R(-1,1),R(.5,1.5),R(-1,1)),R(5,9));}}catch(e){}
-  if(tbx&&inside)bFire(p,8+6*W3);return X;}
+  try{const n=det.n?bWDir(det.n):new THREE.Vector3(0,1,0);boom(bW(p),Math.min(90,X.We),{surf:!inside,fill:X.fk,n});if(inside&&!reduce){const w=bW(p),W1=Math.cbrt(Math.max(.01,X.We));for(let i=0;i<8;i++)puff(w.clone().add(new THREE.Vector3(R(-1.5,1.5),R(-.5,1.5),R(-1.5,1.5))),true,1.4*W1,0x2a2622,new THREE.Vector3(R(-1,1),R(.5,1.5),R(-1,1)),R(5,9));}}catch(e){}
+  if(tbx&&inside)bFire(p,8+6*Math.cbrt(X.We));return X;}
 function bWDir(n){return new THREE.Vector3(n[0],n[1],n[2]);}
 /* пролом: ядро выбрасывается внутрь со скоростью до 10–15 м/с, края трескаются; соседние участки той же стены тоже */
 function bBreach(e,p,rh,dir,X){const v=Math.min(16,5+6*Math.cbrt(X.We));for(const q of BLD.E){if(q.st===2||!(q.k==="w"||(q.k==="s"&&q.g===0&&!q.gnd)))continue;if(q!==e&&(q.k!==e.k||q.side!==e.side||(q.k==="s"&&q.lvl!==e.lvl)))continue;if(bDist(q,p)>rh)continue;
     if(!bFract(q)){if(q.k==="w")bWallFall(q);continue;}
     bDmgCells(q,p,rh,1.3,dir,{v,flat:1});bDmgCells(q,p,rh*1.5,.4,dir,{v:v*.4});if(q.win!=null){const gl=BLD.E[q.win];if(gl&&gl.st!==2)bGlass(gl,dir,v,"blast");}}}
 function bPartKill(e,dir,p){if(e.st===2)return;e.st=2;bHide(BLD.P[e.P],e.ii);const c=bCtr(e);for(let i=0;i<4;i++)bDeb([c[0]+R(-1,1),c[1]+R(-1,1),c[2]+R(-1,1)],[R(-3,3),R(0,2),R(-3,3)],R(.1,.3),[.92,.92,.9],"gkl");bDust(c,[.9,.9,.88],1.2);}
-/* машины у здания: в ближней зоне загораются, дальше — выбиты стёкла */
-function bCarsBlast(p,W3){let n=0;for(const c of BLD.cars||[]){if(c.burn)continue;const d=Math.hypot(c.x-p[0],c.z-p[2]);if(d>9*W3+2)continue;
-    if(d<3.2*W3+1){c.burn=1;c.gl=1;bTint(BLD.P.carB,c.bi,_bc.setRGB(.14,.12,.11));bHide(BLD.P.carC,c.ci);BLD.anim.push({kind:"fire",p:[c.x,.9,c.z],t:0,d:30,s:.7});n++;}
-    else if(!c.gl){c.gl=1;bTint(BLD.P.carC,c.ci,_bc.setRGB(2.2,2.3,2.4));n++;}}return n;}
 /* пожар после объёмного взрыва и горящие машины: дым */
 function bFire(p,dur,s){BLD.anim.push({kind:"fire",p:p.slice(),t:0,d:dur,s:s||1});}
 /* ---------- обрушение: колонна без опоры висит; плита падает, потеряв две опоры (или одну у края галереи); перегрузка обломками ведёт к прогрессирующему обрушению ---------- */
@@ -7976,10 +8081,45 @@ function bldUI(){const box=$("bldBox");if(!box)return;box.hidden=!S.bld;const se
   const st=BLD.stat,cols=BLD.colsAll.filter(c=>c.st===2).length;
   $("bldStat").innerHTML=`Выстрелов по зданию <b>${st.shots}</b>, попаданий <b>${st.hits}</b><br>Выбито стёкол <b>${st.win}</b> · кладки и бетона <b>${bF1(st.vol,1)} м³</b> (≈${bF1(st.mass,1)} т)<br>Разрушено колонн <b>${cols}</b> · обрушилось плит перекрытия <b>${st.slabs}</b>`;
   $("bldAimTxt").textContent=BLD.aimE!=null&&BLD.E[BLD.aimE]?"Прицел: "+bDesc(BLD.E[BLD.aimE]):"Прицел: коснитесь здания на экране или выберите точку в списке";}
+/* ---------- тест материалов: что делает одно попадание в каждую конструкцию — те же формулы, что в бою ---------- */
+const B_TEST=[
+  {n:"Пуля 7,62 мм Б-32 (ПКТ), 760 м/с",k:"r",m:.0096,d:.00762,V:760,N:1.14},
+  {n:"Пуля 12,7 мм Б-32 (Корд), 800 м/с",k:"r",m:.048,d:.0127,V:800,N:1.14},
+  {n:"30-мм бронебойный (2А42), 900 м/с",k:"r",m:.4,d:.03,V:900,N:1.14},
+  {n:"125-мм подкалиберный: запас ≈480 мм брони",k:"rod",P:480},
+  {n:"РПГ / дрон, ПГ-7ВЛ: струя ≈500 мм, ВВ 0,9 кг",k:"jet",J:500,W:.85},
+  {n:"125-мм кумулятивный: струя ≈450 мм, ВВ 1,7 кг",k:"jet",J:450,W:1.72},
+  {n:"ПТУР «Корнет»: струя ≈1100 мм, ВВ 3,7 кг",k:"jet",J:1100,W:3.7},
+  {n:"30-мм осколочно-фугасный, 49 г",k:"he",W:.049,C:3,br:1.15},
+  {n:"125-мм осколочно-фугасный, 3,1 кг тротила, удар",k:"he",W:3.1,C:3},
+  {n:"125-мм бронебойно-фугасный, 3,1 кг пластичного ВВ",k:"he",W:3.1,C:2.2,br:1.2},
+  {n:"152-мм осколочно-фугасный, 5,6 кг, удар",k:"he",W:5.6,C:3},
+  {n:"152-мм осколочно-фугасный, 5,6 кг, замедление",k:"hd",W:5.6,m:44.6,d:.152,V:450,N:1},
+  {n:"152-мм бетонобойный, 500 м/с",k:"hd",W:5.6,m:44.6,d:.152,V:500,N:1.14},
+  {n:"203-мм бетонобойный (Б-4М), 450 м/с",k:"hd",W:13.4,m:106,d:.203,V:450,N:1.14},
+  {n:"240-мм мина «Тюльпана», 32 кг",k:"he",W:32,C:3}];
+const B_TST=[["brick",.64,"кирпич 640 мм"],["rc",.25,"перекрытие 250 мм"],["rc",.5,"колонна 500 × 500"],["aer",.4,"газобетон 400 мм"]];
+function bGlassR(We){const W3=Math.cbrt(We*1.8);let a=.5,b=400;for(let i=0;i<40;i++){const m=(a+b)/2;if(bPso(m/W3)>4.5)a=m;else b=m;}return a;}
+function bMatTest(){const mm=x=>Math.round(x*1000),pct=x=>Math.round(x*100),rows=[];
+  const he=(W,br,C,m,T,col)=>{const Wb=W*(br||1),K=BM[m].K,Rb=bBR(Wb,K,C);if(col){const f=Math.pow(Rb/.5,2);return f>=1?"перебита":`выбито ≈${pct(f)} % сечения`;}
+    if(T<=Rb)return`пролом Ø${bF1(2*Math.min(2.6,Math.max(.32,1.1*Rb-.6*T)))} м`;const Df=.5*Rb,Ds=T<1.6*Rb?.5*Rb*(1.6-T/Rb):0,rc=Math.min(2,.9*Rb),rs=1.3*rc,Vc=Math.PI/2*(rc*rc*Df+rs*rs*Ds),cs=BM[m].cell||.5,A=cs*cs,
+      a=Math.min((Df+Ds)*A,Vc)/(A*T),n=Math.ceil(1/Math.max(.002,a));return`воронка Ø${bF1(2*rc)} м, пролом — за ≈${n} попад. в одно место`;};
+  for(const t of B_TEST){const c=B_TST.map(([m,T,nm],ci)=>{const col=ci===2;let s;
+      if(t.k==="r"){const q=bNdrc(t,m,t.V);s=T<=q.e?`пробивает, выходит на ${pct(Math.sqrt(1-T/q.e))} % скорости`:`застревает на ${mm(q.x)} мм`;}
+      else if(t.k==="rod"){const need=T*1000*BM[m].rod;s=t.P>=need?`пробивает, запас ${Math.round(t.P-need)} мм`:`застревает на ${mm(t.P/(1000*BM[m].rod))} мм`;}
+      else if(t.k==="jet"){const need=T*1000*BM[m].jet;s=(t.J>=need?`струя пробивает (запас ${Math.round(t.J-need)} мм)`:`струя уходит на ${mm(t.J/(1000*BM[m].jet))} мм`)+"; БЧ: "+he(t.W,1.25,3.6,m,T,col);}
+      else if(t.k==="he")s=he(t.W,t.br,t.C,m,T,col);
+      else{const q=bNdrc(t,m,t.V);s=T<=q.e?`корпус пробивает и рвётся в 1–2 м за преградой${col?"; колонна прострелена насквозь":""}`:`входит на ${mm(q.x)} мм и рвётся в толще: ${he(t.W,1,1.25,m,T,col)}`;}
+      return`<span class="n">${nm}:</span> ${s}`;});
+    const W=t.k==="jet"?t.W*1.15:t.W,gl=t.W?` · <span class="n">стёкла:</span> до ≈${Math.round(bGlassR(W))} м`:"";
+    rows.push(`<div class="bldt"><b>${t.n}</b><br>${c.join(" · ")}${gl}</div>`);}
+  return rows.join("");}
 function bldBoot(){const sel=$("bldAim");if(!sel)return;sel.innerHTML='<option value="">— точка прицеливания —</option>'+B_AIMS.map(a=>`<option value="${a[0]}">${a[1]}</option>`).join("");
   sel.onchange=()=>{if(sel.value){bldAimPreset(sel.value);if(S.view!==0)setView(2);}sel.value="";};
   $("bldReset").onclick=()=>bldReset();$("bldVst").onclick=()=>bldCam("str");$("bldVair").onclick=()=>bldCam("air");$("bldVatr").onclick=()=>bldCam("atr");$("bldVrot").onclick=()=>bldCam("rot");
-  $("bldMat").innerHTML=`<table class="wst"><tr><th>Материал</th><th>ρ, т/м³</th><th>мм брони на 1 мм: сердечник / струя</th></tr>${Object.keys(BM).map(k=>{const m=BM[k];return`<tr><td><b>${m.n}</b><br><span class="n">${m.d}</span></td><td>${bF1(m.rho/1000,1)}</td><td>${bF1(m.ke,3)} / ${bF1(m.jet,3)}</td></tr>`;}).join("")}</table>`;
+  $("bldMat").innerHTML=`<table class="wst"><tr><th>Материал</th><th>ρ, т/м³</th><th>прочность в расчёте, МПа</th><th>мм брони на 1 мм: стержень / струя</th><th>K подрыва</th><th>рушится от, кПа</th></tr>${Object.keys(BM).map(k=>{const m=BM[k];
+    return`<tr><td><b>${m.n}</b><br><span class="n">${m.d}</span></td><td>${bF1(m.rho/1000,1)}</td><td>${m.fc?bF1(m.fc,m.fc<10?1:0):"—"}</td><td>${bF1(m.rod,2)} / ${bF1(m.jet,2)}</td><td>${m.K?bF1(m.K,2):"—"}</td><td>${m.pf?bF1(m.pf,m.pf<10?1:0):"—"}</td></tr>`;}).join("")}</table>`;
+  if($("bldTest"))$("bldTest").innerHTML=bMatTest();
   /* касание здания на экране ставит точку прицеливания (короткое касание без сдвига; вращение камеры не мешает) */
   const el=renderer.domElement;let dn=null;if(el.addEventListener){el.addEventListener("pointerdown",e=>{dn={x:e.clientX,y:e.clientY,t:performance.now()};});
     el.addEventListener("pointerup",e=>{if(!dn||!S.bld){dn=null;return;}const mv=Math.hypot(e.clientX-dn.x,e.clientY-dn.y),dtp=performance.now()-dn.t;dn=null;if(mv>8||dtp>400)return;try{bldPick(e.clientX,e.clientY);}catch(er){console.error(er);}});}}
