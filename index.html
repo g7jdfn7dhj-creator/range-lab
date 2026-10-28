@@ -1,7 +1,7 @@
 <!doctype html><html><head><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1f2a1f"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Range Lab"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Стенд танковых пушек</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=PT+Mono&family=PT+Sans:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&family=PT+Mono&family=PT+Sans:wght@400;700&family=PT+Sans+Narrow:wght@400;700&display=swap">
 <style>
 /* layout: 3D-полигон на весь экран, HUD поверх: сверху выбор орудия, снизу огонь и стенд */
 :root{
@@ -236,6 +236,107 @@ button.wsgo{flex:1;background:linear-gradient(180deg,#f0c75a,#d29f22);color:#1b1
 #entToast{position:absolute;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translateX(-50%);max-width:min(92vw,460px);background:var(--glass2);border:1px solid rgba(240,194,79,.55);border-radius:12px;padding:7px 12px;color:#ffd970;font:600 12px var(--body);z-index:30;pointer-events:none;transition:opacity .4s}
 @media (max-width:380px){.entkp{grid-template-columns:repeat(2,minmax(0,1fr))}.enttab3{grid-template-columns:1fr}.entcharts{grid-template-columns:1fr}}
 @media (max-width:420px){.rail button{min-width:52px}.badge{max-width:58%}.dockrow{grid-template-columns:52px minmax(0,1fr) minmax(0,1.2fr)}.sq{width:52px}}
+
+/* ===== интерфейс v4: «пульт испытателя» — стальные панели со срезанными углами, трафаретные надписи, клавиши с индикаторами,
+   папки-вкладки, ползунки-фейдеры, кнопка огня под защитной рамкой ===== */
+:root{--k0:#0e100c;--k1:#181b14;--k2:#20241b;--k3:#2a2f23;--k4:#353b2c;--ln:#394030;--ln2:#4f5842;--hi:rgba(255,250,225,.07);--lo:rgba(0,0,0,.55);
+  --amber:#ffb21e;--amber2:#c98a0c;--phos:#a8ec6c;--alarm:#e5442a;--khaki:#b9ae88;--paper:#ddd6bd;--ink:#ebe7d6;--dim:#9d987f;
+  --glass:#181b14;--glass2:#1d2118;--edge:#394030;--edge2:#4f5842;--accent:#ffb21e;
+  --narrow:"PT Sans Narrow","Arial Narrow","PT Sans",Arial,sans-serif;--body:"PT Sans Narrow","PT Sans",Arial,sans-serif;--c:9px;
+  --cut:polygon(var(--c) 0,100% 0,100% calc(100% - var(--c)),calc(100% - var(--c)) 100%,0 100%,0 var(--c));
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 .9 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+body{font-family:var(--body);font-size:15px;letter-spacing:.005em}
+/* панели: сталь с зерном, срезанные углы, светлая кромка сверху */
+.badge,.rail,.modes,.sq,.ammoq,.card.log,.sheet,.wssum,.wssec,.entcard,.seg,#statsT,.xrleg{background:var(--grain),linear-gradient(180deg,#22261c,#191c15)!important;
+  border:1px solid var(--ln)!important;border-radius:0!important;clip-path:var(--cut);box-shadow:inset 0 1px 0 var(--hi),inset 0 -1px 0 var(--lo)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* трафаретные подписи */
+.lbl,.entth,.ctrl label,.ammoq small,.rail button span,.mode span{font-family:var(--narrow)!important;text-transform:uppercase;letter-spacing:.07em}
+.ctrl label b{text-transform:none;letter-spacing:0;font-family:var(--mono)}
+.lbl{font-size:11px;color:var(--khaki)}
+/* шильдик орудия: заклёпки по углам, надпись «орудие» */
+.badge{position:relative;padding:14px 16px 9px!important;max-width:64%;
+  background:radial-gradient(circle at 7px 7px,#5b604c 1.6px,#14160f 2.4px,transparent 3px),radial-gradient(circle at calc(100% - 7px) 7px,#5b604c 1.6px,#14160f 2.4px,transparent 3px),
+    radial-gradient(circle at 7px calc(100% - 7px),#5b604c 1.6px,#14160f 2.4px,transparent 3px),radial-gradient(circle at calc(100% - 7px) calc(100% - 7px),#5b604c 1.6px,#14160f 2.4px,transparent 3px),var(--grain),linear-gradient(180deg,#262a1f,#1a1d16)!important}
+.badge::before{content:"ОРУДИЕ";position:absolute;top:3px;left:16px;font:700 9px var(--narrow);letter-spacing:.18em;color:var(--khaki);opacity:.85}
+.badge .bmain{color:var(--amber)!important;text-shadow:0 0 12px rgba(255,178,30,.25)}
+.badge .bsub{color:var(--khaki)!important}
+/* клавиши */
+button{font-family:var(--narrow)!important;font-weight:700;letter-spacing:.04em;border-radius:0!important;clip-path:polygon(5px 0,100% 0,100% calc(100% - 5px),calc(100% - 5px) 100%,0 100%,0 5px);
+  background:linear-gradient(180deg,#30352a,#23271e)!important;border:1px solid #444c3a!important;color:var(--ink)!important;box-shadow:inset 0 1px 0 rgba(255,250,225,.09),inset 0 -2px 0 rgba(0,0,0,.35)!important;text-transform:none}
+button:active{transform:translateY(1px)!important;box-shadow:inset 0 2px 4px rgba(0,0,0,.6)!important}
+button[aria-pressed="true"]{background:linear-gradient(180deg,#3d3417,#2b250f)!important;border-color:var(--amber2)!important;color:var(--amber)!important;box-shadow:inset 0 0 0 1px rgba(255,178,30,.25),inset 0 -2px 0 rgba(0,0,0,.35)!important}
+button:disabled{opacity:.45}
+/* панель камер: подсвеченная полоса слева у включённой */
+.rail{padding:5px!important;gap:4px!important}
+.rail button{background:transparent!important;border:1px solid transparent!important;box-shadow:none!important;color:var(--dim)!important;position:relative}
+.rail button[aria-pressed="true"]{background:linear-gradient(90deg,rgba(255,178,30,.22),rgba(255,178,30,.05))!important;color:var(--amber)!important;border-color:rgba(255,178,30,.35)!important}
+.rail button[aria-pressed="true"]::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;background:var(--amber);box-shadow:0 0 8px var(--amber)}
+/* режимы: лампочка-индикатор */
+.modes{padding:4px!important;gap:4px!important}
+.mode{position:relative;background:linear-gradient(180deg,#2b3025,#20241b)!important;color:var(--dim)!important}
+.mode::after{content:"";position:absolute;top:6px;right:7px;width:6px;height:6px;border-radius:50%;background:#2e3127;box-shadow:inset 0 0 0 1px rgba(0,0,0,.7)}
+.mode[aria-pressed="true"]{color:var(--ink)!important;background:linear-gradient(180deg,#2f3527,#232a1c)!important;border-color:#5c6a3f!important}
+.mode[aria-pressed="true"]::after{background:var(--phos);box-shadow:0 0 6px var(--phos),0 0 2px var(--phos)}
+/* окно снаряда — как индикатор прибора */
+.ammoq{background:linear-gradient(180deg,#0c0f0a,#121610)!important;border-color:#2e3527!important;box-shadow:inset 0 2px 6px rgba(0,0,0,.8),inset 0 0 0 1px rgba(168,236,108,.06)!important}
+.ammoq b{color:var(--amber)!important;font-family:var(--display)!important;font-weight:400;letter-spacing:.03em;text-shadow:0 0 10px rgba(255,178,30,.3)}
+.ammoq small{color:#7f8a6a!important}
+.sq{color:var(--khaki)!important}
+/* огонь: красная клавиша в рамке «опасно» */
+.firewrap{padding:4px;background:repeating-linear-gradient(-45deg,#d9a100 0 8px,#17170f 8px 16px);clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.heatline{height:4px!important;background:#0b0c09!important;border-radius:0!important;margin:0 0 3px!important}
+#fire{--p:100%;height:56px!important;min-height:56px!important;clip-path:polygon(9px 0,100% 0,100% calc(100% - 9px),calc(100% - 9px) 100%,0 100%,0 9px);border:0!important;
+  font-family:var(--display)!important;font-weight:400;font-size:21px!important;letter-spacing:.16em!important;color:#fff3e4!important;text-shadow:0 1px 0 rgba(0,0,0,.5);
+  background:linear-gradient(90deg,#d7391e var(--p),#3d1a12 var(--p))!important;box-shadow:inset 0 3px 0 rgba(255,255,255,.16),inset 0 -4px 0 rgba(0,0,0,.35)!important}
+#fire:disabled{color:#d7b9a8!important;opacity:1}
+/* протокол выстрела */
+.card.log{position:relative;padding:16px 12px 8px!important;background:repeating-linear-gradient(180deg,rgba(255,255,255,.012) 0 2px,transparent 2px 4px),linear-gradient(180deg,#14170f,#10130d)!important}
+.card.log::before{content:"ПРОТОКОЛ";position:absolute;top:3px;left:12px;font:700 9px var(--narrow);letter-spacing:.2em;color:var(--khaki);opacity:.8}
+#res{color:var(--paper)!important;font-family:var(--mono)}
+/* планшет-шторка: прорезь-ручка, винты, вкладки-папки */
+.sheet{background:radial-gradient(circle at 14px 12px,#60654f 1.7px,#121410 2.6px,transparent 3.2px),radial-gradient(circle at calc(100% - 14px) 12px,#60654f 1.7px,#121410 2.6px,transparent 3.2px),var(--grain),linear-gradient(180deg,#1c2017,#15180f)!important}
+.grab{width:56px!important;height:7px!important;border-radius:0!important;background:#090a07!important;box-shadow:inset 0 2px 3px rgba(0,0,0,.9),0 1px 0 rgba(255,250,225,.08);margin:9px auto 4px!important}
+.sheet .tabs{gap:2px!important;padding:6px 6px 0!important;border-bottom:2px solid #4a5338!important;background:#11140d}
+.sheet .tabs button{flex:1 0 auto!important;padding:0 8px!important;clip-path:polygon(5px 0,calc(100% - 5px) 0,100% 100%,0 100%)!important;min-height:34px!important;background:linear-gradient(180deg,#262a1f,#1d2018)!important;border:0!important;box-shadow:none!important;
+  color:#a49e82!important;font-size:13.5px!important;text-transform:none;letter-spacing:0}
+.sheet .tabs button[aria-selected="true"]{background:linear-gradient(180deg,#3a4029,#2b3021)!important;color:var(--amber)!important;box-shadow:inset 0 2px 0 var(--amber)!important}
+/* сегменты */
+.seg{padding:3px!important;gap:3px!important}
+.seg button{background:transparent!important;border:1px solid transparent!important;box-shadow:none!important;color:var(--dim)!important}
+.seg button[aria-pressed="true"]{background:linear-gradient(180deg,#ffbe3a,#d18f0b)!important;color:#1c1300!important;border-color:#ffcc66!important;text-shadow:none}
+/* поля */
+select,.sheet select,.wsin,.wspre,.entnum input{border-radius:0!important;background-color:#0e110b!important;border:1px solid #3c4433!important;box-shadow:inset 0 2px 4px rgba(0,0,0,.7)!important;color:var(--ink)!important;font-family:var(--narrow)!important}
+.sheet select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffb21e' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")!important}
+input[type=range]{-webkit-appearance:none;appearance:none;height:30px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:6px;background:linear-gradient(90deg,#090b07,#1a1e15);border:1px solid #3c4433;box-shadow:inset 0 1px 2px rgba(0,0,0,.8)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:26px;margin-top:-11px;background:linear-gradient(180deg,#e7e0c6 0,#b5ae93 45%,#77725f 100%);border:1px solid #11130d;
+  clip-path:polygon(0 0,100% 0,100% 72%,50% 100%,0 72%);box-shadow:inset 0 -9px 0 -6px rgba(0,0,0,.25)}
+input[type=range]::-moz-range-track{height:6px;background:linear-gradient(90deg,#090b07,#1a1e15);border:1px solid #3c4433}
+input[type=range]::-moz-range-thumb{width:16px;height:24px;border:1px solid #11130d;border-radius:0;background:linear-gradient(180deg,#e7e0c6,#77725f)}
+input[type=checkbox]{-webkit-appearance:none;appearance:none;width:34px;height:20px;flex:0 0 34px;margin:0;background:#0d100a;border:1px solid #444c3a;position:relative;cursor:pointer;box-shadow:inset 0 2px 3px rgba(0,0,0,.7)}
+input[type=checkbox]::before{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;background:linear-gradient(180deg,#b8b199,#6f6b5a);transition:left .12s}
+input[type=checkbox]:checked{background:#2f2508;border-color:var(--amber2)}
+input[type=checkbox]:checked::before{left:16px;background:linear-gradient(180deg,#ffd27a,#d3900e);box-shadow:0 0 6px rgba(255,178,30,.5)}
+/* сводки и секции */
+.wssum{background:linear-gradient(180deg,#10130c,#151910)!important;font-family:var(--mono)}
+.wssum b{color:var(--amber)!important}
+.wssec>summary b{font-family:var(--narrow);text-transform:uppercase;letter-spacing:.05em;font-size:13px}
+.wssec>summary::after{border-color:var(--amber)!important}
+.wsk b,.entkv b{color:var(--ink)}
+.ctrl label b,.ctrl label b{color:var(--amber)!important}
+.tag{color:#a39d84}
+/* фирма: акценты в стиле пульта */
+.entgo button:first-child{background:linear-gradient(180deg,#ffbe3a,#d18f0b)!important;color:#1c1300!important}
+.entbar{border-radius:0!important;background:#0b0d09!important;box-shadow:inset 0 1px 2px rgba(0,0,0,.8)}
+.entbar i{background:repeating-linear-gradient(90deg,#ffb21e 0 6px,#d18f0b 6px 8px)!important}
+.entbar.ok i{background:repeating-linear-gradient(90deg,#a8ec6c 0 6px,#6fae3c 6px 8px)!important}
+.entbar.hot i{background:repeating-linear-gradient(90deg,#ff6b4a 0 6px,#c33a20 6px 8px)!important}
+.entsum{background:linear-gradient(180deg,#10130c,#151910)!important}
+.entkp b{color:var(--ink)}.entkp b.neg{color:#ff7a5c}.entkp b.pos{color:var(--phos)}
+.entl{border-left-width:3px}
+/* крестовина вождения */
+#dpad button{border-radius:0!important;clip-path:var(--cut);background:linear-gradient(180deg,#2b3025,#1c2017)!important;color:var(--amber)!important;border:1px solid #4a5338!important}
+
 </style>
 
 <div id="app"></div>
@@ -1537,7 +1638,7 @@ function renderAmmo(){S.balCache=null;setTimeout(()=>{try{updBal();}catch(e){}},
   if($("ammoName"))$("ammoName").textContent=roundName(S.a);}
 $("newPlate").onclick=()=>{S.aim=null;if(typeof aimMark!=="undefined")aimMark.visible=false;buildPlate();if(typeof wHoles!=="undefined")updTally();$("res").textContent="Новый лист установлен.";};
 document.querySelectorAll&&document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
-  document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));try{b.scrollIntoView({inline:"nearest",block:"nearest"});}catch(e){}
   document.querySelectorAll(".tab").forEach(t=>t.hidden=t.id!==b.dataset.tab);if(b.dataset.tab==="t-ent")try{entUI();}catch(e){console.error(e);}});
 $("logCard").onclick=()=>{const c=$("logCard");if(c.classList)c.classList.toggle("open");};
 function openSheet(tab){const m=$("more");m.hidden=false;$("toggle").setAttribute("aria-pressed",true);
@@ -2843,7 +2944,7 @@ function updMove(){const v=+$("move").value;$("moveTxt").textContent=v?v+" м/с
 $("move").oninput=updMove;
 $("fcs").onclick=()=>{S.fcs=!S.fcs;$("fcs").setAttribute("aria-pressed",S.fcs);$("fcsTxt").textContent=S.fcs?"вкл: ветер и упреждение":"выкл";};
 $("night").onclick=()=>{S.night=!S.night;$("night").setAttribute("aria-pressed",S.night);
-  hemi.intensity=S.night?.08:.55;scene.environment=S.night?null:S.env;sun.intensity=S.night?.05:1;scene.background=S.night?new THREE.Color(0x0b0f18):S.dayBg;
+  hemi.intensity=S.night?.08:.55;scene.environment=S.night?null:S.env;sun.intensity=S.night?.05:1;try{if(!S.night&&typeof applyWx==="function")setTimeout(applyWx,0);}catch(e){}scene.background=S.night?new THREE.Color(0x0b0f18):S.dayBg;
   if(scene.fog&&scene.fog.color)scene.fog.color.setHex(S.night?0x0b0f18:0x9fb3b8);};
 ["dist","yaw","wind"].forEach(id=>$(id).oninput=()=>{S.balCache=null;updBal();if(id==="yaw")updPlate();if(id==="dist")applyRange();});
 let ENV=null,LIT=null,RFL=null;S.rfl=false;
@@ -2857,6 +2958,9 @@ var STARS=null;try{if(THREE.Points&&THREE.PointsMaterial&&THREE.Float32BufferAtt
   STARS=new THREE.Points(g,new THREE.PointsMaterial({size:1.6,sizeAttenuation:false,vertexColors:true,transparent:true,opacity:.9,depthWrite:false,fog:false}));STARS.visible=false;STARS.frustumCulled=false;STARS.raycast=()=>{};STARS.renderOrder=-9;scene.add(STARS);}}catch(e){STARS=null;}
 let SKIRT=null;try{if(ENV&&THREE.CylinderGeometry){SKIRT=new THREE.Mesh(new THREE.CylinderGeometry(940,940,400,64,1,true),new THREE.MeshBasicMaterial({color:0xb8c2c2,side:THREE.BackSide,fog:false,depthWrite:false}));SKIRT.position.y=-198;SKIRT.renderOrder=-9;SKIRT.raycast=()=>{};scene.add(SKIRT);}}catch(e){SKIRT=null;}
 try{if(typeof createLighting==="function")LIT=createLighting({scene,renderer,sun,hemi,target:sun.target.position,time:.5});}catch(e){LIT=null;}
+try{if(LIT&&LIT.setTimeOfDay){const st0=LIT.setTimeOfDay,fix=t=>{st0(t);try{if(S.night)return;const tg=sun.target.position,el=Math.sin((t-.25)*Math.PI*2);
+  if(el>.5){const az=(t-.25)*Math.PI*2;sun.position.set(tg.x-Math.cos(az)*60-38,44+el*8,tg.z-34+Math.sin(az)*12);}
+  sun.intensity*=1.4;hemi.intensity*=.6;renderer.toneMappingExposure*=.9;}catch(e){}};LIT.setTimeOfDay=fix;fix(.5);}}catch(e){}
 /* ===== Мир (v58): процедурное небо с движущимися облаками и тенями от них, рельеф до горизонта с полями, грунтом и лесополосами,
    густая трава и деревья трёх пород (берёза, ель, дуб), качающиеся на ветру. Всё — декор: без столкновений и лучей прицеливания. ===== */
 var WORLD=null;
@@ -2885,7 +2989,7 @@ function wSkyMat(){return new THREE.ShaderMaterial({side:THREE.BackSide,depthWri
   vertexShader:`varying vec3 vDir;void main(){vDir=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
   fragmentShader:`uniform vec3 uSun;uniform float uTime,uCov,uNight,uDusk,uGrey,uFogA;uniform vec2 uWind;uniform vec3 uFog;varying vec3 vDir;${W_GLSL_NOISE}
   void main(){vec3 d=normalize(vDir);float el=max(d.y,0.),se=uSun.y,mu=dot(d,normalize(uSun));
-    vec3 zen=mix(vec3(.16,.36,.72),vec3(.22,.3,.42),uGrey),hor=mix(vec3(.66,.78,.88),vec3(.7,.72,.74),uGrey);
+    vec3 zen=mix(vec3(.12,.32,.72),vec3(.22,.3,.42),uGrey),hor=mix(vec3(.6,.73,.87),vec3(.7,.72,.74),uGrey);
     hor=mix(hor,vec3(1.,.62,.38),uDusk*(.45+.55*pow(max(mu,0.),3.)));zen=mix(zen,vec3(.2,.26,.45),uDusk*.5);
     vec3 col=mix(hor,zen,pow(el,.45));
     col+=vec3(1.,.82,.6)*(pow(max(mu,0.),12.)*.35+pow(max(mu,0.),200.)*1.2)*(1.-uGrey*.8);
@@ -2893,7 +2997,7 @@ function wSkyMat(){return new THREE.ShaderMaterial({side:THREE.BackSide,depthWri
     if(d.y>0.){vec2 cp=d.xz/(d.y+.06)*1.1+uWind*uTime*.0004;float c=wcloud(cp*.9,uCov),c2=wcloud(cp*.9+vec2(.05,.03)*normalize(uSun.xz+.001),uCov);
       float lit=clamp(.62+.9*(c-c2),.35,1.15);vec3 cl=mix(vec3(.5,.54,.6),vec3(1.,.98,.95),lit);cl=mix(cl,vec3(1.,.66,.45)*lit,uDusk*.6);cl=mix(cl,vec3(.55,.57,.6)*lit,uGrey*.7);
       cl+=vec3(1.,.85,.6)*pow(max(mu,0.),6.)*(1.-c)*.5;col=mix(col,cl,c*smoothstep(.0,.12,d.y)*.95);}
-    col=mix(col,uFog,clamp(exp(-d.y*9.)*.85+uFogA,0.,1.));
+    col=mix(col,uFog,clamp(exp(-d.y*13.)*.8+uFogA,0.,1.));
     col=mix(col,vec3(.01,.015,.03)+vec3(.02,.03,.06)*pow(el,.3),uNight);
     gl_FragColor=vec4(col,1.);}`});}
 /* ---------- рельеф ---------- */
@@ -2913,7 +3017,7 @@ uniform sampler2D tMud,tGrav;uniform vec2 uCloud;uniform float uCov,uSunW,uWet,u
 float wdry(vec2 p){return .5+.5*(sin(p.x*.011+1.3)*sin(p.y*.008+.7)*.6+sin((p.x+p.y)*.017)*.25+sin(p.x*.031-p.y*.023)*.15);}`)
     .replace("#include <map_fragment>",`{vec2 wp=vWP.xz,tu=wp/6.;float dist=length(vWP-cameraPosition),far=smoothstep(25.,160.,dist);
   vec3 g=mapTexelToLinear(texture2D(map,tu)).rgb,g2=mapTexelToLinear(texture2D(map,tu*.137+.31)).rgb;g=mix(g*.6+g2*.4,g2,far*.7);
-  float dry=wdry(wp),vn=wn(wp/23.),vn2=wn(wp/7.3);g*=mix(vec3(.78,1.,.74),vec3(1.22,1.06,.66),smoothstep(.25,.8,dry+(vn-.5)*.35));g*=.86+.28*vn2;
+  float dry=wdry(wp),vn=wn(wp/23.),vn2=wn(wp/7.3);g*=mix(vec3(.72,.93,.66),vec3(1.08,.98,.68),smoothstep(.25,.8,dry+(vn-.5)*.35))*.9;g*=.8+.34*vn2;g*=.84+.3*wn(wp/97.);
   vec3 mu=mapTexelToLinear(texture2D(tMud,tu*.9)).rgb,mu2=mapTexelToLinear(texture2D(tMud,tu*.15+.7)).rgb;mu=mix(mu*.6+mu2*.4,mu2,far*.6);
   vec3 gr=mapTexelToLinear(texture2D(tGrav,tu*1.3)).rgb;
   float pat=smoothstep(.62,.86,wn(wp/31.)*.65+wn(wp/8.7)*.35);
@@ -2932,10 +3036,10 @@ function wDirt(x,z){const pat=Math.min(1,Math.max(0,(wNoise(x/31,z/31)*.65+wNois
   const fire=(1-sm(9,16,ax))*(1-sm(14,26,Math.abs(z-2))),tgt=(1-sm(12,20,ax))*(1-sm(9,18,Math.abs(z-86))),ruts=(1-sm(.18,.42,Math.abs(ax-4.3)))*(z>-12&&z<95?1:0);
   return Math.min(1,Math.max(pat*.75,Math.max(fire,tgt)*.9+ruts*.8));}
 /* ---------- трава: пучки изогнутых травинок, цвет — от сухости поля, ветер — бегущими порывами ---------- */
-function wGrassGeo(){const blades=5,seg=2,pos=[],col=[],nor=[],idx=[];let vi=0;
-  for(let b=0;b<blades;b++){const a=b/blades*6.283+Math.random()*.9,lean=.18+Math.random()*.5,h=.26+Math.random()*.38,w=.013+Math.random()*.01,dx=Math.cos(a),dz=Math.sin(a),r0=Math.random()*.06;
+function wGrassGeo(){const blades=7,seg=2,pos=[],col=[],nor=[],idx=[];let vi=0;
+  for(let b=0;b<blades;b++){const a=b/blades*6.283+Math.random()*.9,lean=.12+Math.random()*.45,h=.16+Math.random()*.36,w=.022+Math.random()*.018,dx=Math.cos(a),dz=Math.sin(a),r0=Math.random()*.08,dry=Math.random()<.1;
     for(let s2=0;s2<=seg;s2++){const t=s2/seg,y=h*t,off=lean*h*t*t,ww=w*(1-t*.9),cx=dx*(r0+off),cz=dz*(r0+off),px=-dz*ww,pz=dx*ww,k=.38+.62*t;
-      pos.push(cx-px,y,cz-pz,cx+px,y,cz+pz);col.push(k*.93,k,k*.72,k*.93,k,k*.72);const nl=Math.hypot(dx*.3,1,dz*.3);nor.push(dx*.3/nl,1/nl,dz*.3/nl,dx*.3/nl,1/nl,dz*.3/nl);
+      const kr=dry?.5+.38*t:.3+.55*t,cr=dry?[1.3,1.12,.7]:[.9,1,.7];pos.push(cx-px,y,cz-pz,cx+px,y,cz+pz);col.push(kr*cr[0],kr*cr[1],kr*cr[2],kr*cr[0],kr*cr[1],kr*cr[2]);const nl=Math.hypot(dx*.3,1,dz*.3);nor.push(dx*.3/nl,1/nl,dz*.3/nl,dx*.3/nl,1/nl,dz*.3/nl);
       if(s2<seg)idx.push(vi,vi+1,vi+2,vi+1,vi+3,vi+2);vi+=2;}}
   const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));g.setAttribute("normal",new THREE.Float32BufferAttribute(nor,3));g.setAttribute("color",new THREE.Float32BufferAttribute(col,3));g.setIndex(idx);return g;}
 /* ветер в вершинном шейдере: качание растёт к вершине, порывы бегут по полю волной */
@@ -2945,7 +3049,7 @@ function wWindMat(m,W,amp,stiff){m.onBeforeCompile=sh=>{sh.uniforms.uTime=W.U.ti
 {vec2 ip=instanceMatrix[3].xz;float hh=max(0.,position.y)/${stiff.toFixed(2)};float g=wn(ip/28.-uWindD*uTime*.35);float sw=sin(uTime*1.7+ip.x*.37+ip.y*.21)*.35+g*.9;
  vec2 dsp=uWindD*(sw*.5+.35)*uWindS*${amp.toFixed(3)}*hh*hh;transformed.x+=dsp.x;transformed.z+=dsp.y;transformed.y-=length(dsp)*.25*hh;}
 #endif`);};m.customProgramCacheKey=()=>"wwind"+amp+stiff;return m;}
-function wGrass(W){const N=Math.round(15000*WQ),g=wGrassGeo(),m=wWindMat(new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,roughness:1,metalness:0}),W,.08,.6);
+function wGrass(W){const N=Math.round(13000*WQ),g=wGrassGeo(),m=wWindMat(new THREE.MeshStandardMaterial({vertexColors:true,side:THREE.DoubleSide,roughness:1,metalness:0}),W,.08,.6);
   const im=new THREE.InstancedMesh(g,m,N),o=new THREE.Object3D(),c=new THREE.Color();let n=0,guard=0;
   while(n<N&&guard++<N*6){const r=Math.random();let x,z;
     if(r<.42){x=(Math.random()*2-1)*44;z=-28+Math.random()*80;}             /* у огневого рубежа */
@@ -2954,7 +3058,7 @@ function wGrass(W){const N=Math.round(15000*WQ),g=wGrassGeo(),m=wWindMat(new THR
     if(Math.abs(x)<3.4&&z>-14&&z<D+12)continue;if(Math.abs(x)<16&&Math.abs(z-D)<9)continue;
     if(Math.random()<wDirt(x,z)*1.15)continue;
     o.position.set(x,(Math.abs(x)<40&&z>-60&&z<560)?0:wH(x,z),z);o.rotation.set((Math.random()-.5)*.2,Math.random()*6.3,(Math.random()-.5)*.2);const sc=.75+Math.random()*.7;o.scale.set(sc,sc*(.8+Math.random()*.6),sc);o.updateMatrix();im.setMatrixAt(n,o.matrix);
-    const dr=Math.min(1,Math.max(0,wDry(x,z)+(wNoise(x/23,z/23)-.5)*.35)),v=.85+Math.random()*.3;c.setRGB((.17+.27*dr)*v,(.31+.1*dr)*v,(.075+.06*dr)*v);if(im.setColorAt)im.setColorAt(n,c);n++;}
+    const dr=Math.min(1,Math.max(0,wDry(x,z)+(wNoise(x/23,z/23)-.5)*.35)),v=.85+Math.random()*.3;c.setRGB((.19+.17*dr)*v,(.3+.08*dr)*v,(.1+.04*dr)*v);if(im.setColorAt)im.setColorAt(n,c);n++;}
   im.count=n;im.receiveShadow=true;im.frustumCulled=false;im.raycast=()=>{};im.userData.decor=true;return im;}
 /* ---------- деревья: текстуры листвы и хвои рисуются на холсте, кроны — пучки карточек, стволы — конусы с корой ---------- */
 function wLeafTex(kind){const S2=256,cv=document.createElement("canvas");cv.width=cv.height=S2;const c=cv.getContext("2d");if(!c||!c.ellipse)return null;c.clearRect(0,0,S2,S2);
@@ -2995,14 +3099,14 @@ function wTreeGeos(kind){
   return{leaf:wCrown(34,0,.66,0,.36,.24,.3),trunk:wMerge([tr].concat(br))};}
 /* раскладка: лесополосы вдоль полей, рощи, одиночные деревья у полигона и леса на дальних холмах */
 function wTreeSpots(){const S3=[],add=(x,z,k,s)=>{if(Math.abs(x)<52&&z>-90&&z<590)return;if(Math.hypot(x,z)<60)return;S3.push([x,z,k,s]);};
-  const pick=()=>{const r=Math.random();return r<.45?"birch":r<.7?"oak":"spruce";};
+  const pick=()=>{const r=Math.random();return r<.24?"birch":r<.56?"oak":"spruce";};
   /* лесополосы: две-три линии деревьев вдоль полигона и поперёк */
   [[-125,1],[132,1],[-260,.8],[275,.7]].forEach(([x0,dn])=>{for(let z=-260;z<820;z+=4.2/dn/Math.sqrt(WQ)){if(wNoise(x0*.1,z/60)<.32)continue;for(let row=0;row<3;row++)add(x0+row*4.5+(Math.random()-.5)*3,z+(Math.random()-.5)*3,pick(),.85+Math.random()*.4);}});
   [[-330,330,690],[-420,-130,-240],[150,420,-260]].forEach(([x0,x1,z0])=>{for(let x=x0;x<x1;x+=4.4){if(wNoise(x/50,z0*.1)<.3)continue;for(let row=0;row<2;row++)add(x+(Math.random()-.5)*3,z0+row*4.6+(Math.random()-.5)*3,pick(),.8+Math.random()*.45);}});
   /* рощи */
   for(let gI=0;gI<14;gI++){const a=Math.random()*6.283,d=170+Math.random()*520,cx=Math.cos(a)*d,cz=200+Math.sin(a)*d*1.2,n=12+Math.random()*30,rr=14+Math.random()*30;for(let i=0;i<n;i++){const q=Math.random()*6.283,qr=Math.sqrt(Math.random())*rr;add(cx+Math.cos(q)*qr,cz+Math.sin(q)*qr,pick(),.75+Math.random()*.5);}}
   /* одиночные у полигона */
-  for(let i=0;i<26;i++){const sd=Math.random()<.5?-1:1;add(sd*(58+Math.random()*50),-40+Math.random()*560,Math.random()<.6?"birch":"oak",.8+Math.random()*.4);}
+  for(let i=0;i<26;i++){const sd=Math.random()<.5?-1:1;add(sd*(58+Math.random()*50),-40+Math.random()*560,Math.random()<.35?"birch":"oak",.8+Math.random()*.4);}
   /* леса на дальних холмах: где «лесная» маска */
   let tries=0;const NF=Math.round(2600*WQ);let nf=0;while(nf<NF&&tries++<NF*8){const a=Math.random()*6.283,d=650+Math.pow(Math.random(),.8)*2200,x=Math.cos(a)*d,z=250+Math.sin(a)*d;
     if(wFbm(x/700+11,z/700-4,3)<.52)continue;add(x,z,Math.random()<.72?"spruce":"birch",.9+Math.random()*.5);nf++;}
@@ -3012,7 +3116,7 @@ function wTreeSet(W,spots,shadow){kinds={birch:{h:[14,21],leafCol:[.62,.78,.42],
   const out=[];const o=new THREE.Object3D(),c=new THREE.Color();
   for(const k in kinds){const K=kinds[k],L=spots.filter(s=>s[2]===k);if(!L.length)continue;const G=wTreeGeos(k),lt=wLeafTex(k);
     const lm=wWindMat(new THREE.MeshStandardMaterial({map:lt,alphaTest:.42,side:THREE.DoubleSide,roughness:.92,metalness:0}),W,k==="spruce"?.012:.03,1);
-    const tm=new THREE.MeshStandardMaterial({map:wBarkTex(k==="birch"),color:k==="birch"?0xffffff:0x8a7a68,roughness:.95,metalness:0});
+    const tm=new THREE.MeshStandardMaterial({map:wBarkTex(k==="birch"),color:k==="birch"?0xd8d4ca:0x6a5c4e,roughness:.95,metalness:0});
     const li=new THREE.InstancedMesh(G.leaf,lm,L.length),ti=new THREE.InstancedMesh(G.trunk,tm,L.length);
     L.forEach((s,i)=>{const h=(K.h[0]+Math.random()*(K.h[1]-K.h[0]))*s[3],y=wH(s[0],s[1])-.3,wd=k==="spruce"?h*.62:h*(k==="oak"?1.05:.85);
       o.position.set(s[0],y,s[1]);o.rotation.set((Math.random()-.5)*.06,Math.random()*6.283,(Math.random()-.5)*.06);o.scale.set(wd,h,wd);o.updateMatrix();li.setMatrixAt(i,o.matrix);ti.setMatrixAt(i,o.matrix);
@@ -3047,7 +3151,7 @@ function wSync(){const W=WORLD;if(!W)return;const x=W.st.wx,t=W.st.tod,night=!!S
   const grey=Math.min(1,(W.st.sky==="overcast"?.75:0)+x.rain*.85+x.fog*.6+x.snow*.6),U=W.sky.material.uniforms;
   U.uCov.value=W.U.cov.value=Math.min(.97,.42+grey*.5);U.uFogA.value=Math.min(.97,(x.fog||0)*1.1+(x.rain||0)*.25+(x.snow||0)*.35);U.uGrey.value=grey;U.uDusk.value=night?0:dusk;U.uNight.value=night?1:0;
   W.U.sunW.value=night?0:Math.max(0,1-grey*.85);W.U.wet.value=x.wet||0;W.U.snow.value=x.snow||0;
-  if(scene.fog&&scene.fog.isFogExp2)scene.fog.density=night?.0009:(.0004+grey*.0006+x.rain*.0009+x.snow*.0012+x.fog*.02);}
+  if(scene.fog&&scene.fog.isFogExp2)scene.fog.density=night?.0009:(.00055+grey*.0006+x.rain*.0009+x.snow*.0012+x.fog*.02);}
 /* самонастройка под телефон: если кадр долгий, сначала редеет трава, потом гаснут тени дальних деревьев */
 function wPerf(dt){const W=WORLD,P=W.perf||(W.perf={t:0,n:0,acc:0,step:0});if(document.hidden||P.step>=3)return;P.t+=dt;if(P.t<3)return;P.n++;P.acc+=dt;
   if(P.n<90)return;const avg=P.acc/P.n;P.n=0;P.acc=0;if(avg<.036)return;P.step++;
@@ -3121,6 +3225,40 @@ function vfxStreakTick(dt){const L=VFX.streaks;for(let i=L.length-1;i>=0;i--){co
 
 try{worldInit();}catch(e){console.warn("world",e);WORLD=null;}
 try{vfxInit();}catch(e){console.warn("vfx",e);VFX=null;}
+try{gfxDust(hullMat,1.1);}catch(e){}
+/* ===== Графика v60: контактные тени под предметами (затенение у земли), материалы ближе к натуре ===== */
+var GFX={ao:null};
+function gfxAOTex(){const cv=document.createElement("canvas");cv.width=cv.height=128;const c=cv.getContext("2d");if(!c||!c.createRadialGradient)return null;
+  const g=c.createRadialGradient(64,64,6,64,64,63);g.addColorStop(0,"rgba(0,0,0,.6)");g.addColorStop(.5,"rgba(0,0,0,.34)");g.addColorStop(.85,"rgba(0,0,0,.08)");g.addColorStop(1,"rgba(0,0,0,0)");
+  c.fillStyle=g;c.fillRect(0,0,128,128);const t=new THREE.CanvasTexture(cv);return t;}
+/* все неподвижные предметы, стоящие на земле, получают мягкое пятно затенения — предметы «садятся» на грунт, а не висят над ним */
+function gfxAO(){if(GFX.ao||!THREE.BufferGeometry||!THREE.Box3)return;const t=gfxAOTex();if(!t)return;
+  const skip=new Set();const mark=o=>{if(o)o.traverse(x=>skip.add(x));};try{mark(stand);}catch(e){}try{if(VEH&&VEH.g)mark(VEH.g);}catch(e){}try{if(WORLD&&WORLD.root)mark(WORLD.root);}catch(e){}
+  const pos=[],uv=[],idx=[],bb=new THREE.Box3();let n=0;
+  scene.traverse(o=>{if(!o.isMesh||skip.has(o)||!o.visible||!o.castShadow||o.isInstancedMesh||(o.userData&&o.userData.decor))return;if(o.material&&(o.material.transparent||o.material.isMeshBasicMaterial))return;
+    let p=o.parent,vis=true;while(p){if(p.visible===false){vis=false;break;}p=p.parent;}if(!vis)return;
+    try{bb.setFromObject(o);}catch(e){return;}const sx=bb.max.x-bb.min.x,sz=bb.max.z-bb.min.z,sy=bb.max.y-bb.min.y;
+    if(!(bb.min.y<.35&&bb.min.y>-1.5&&sy>.12&&sx<14&&sz<14&&sx>.08&&sz>.08))return;
+    const cx=(bb.min.x+bb.max.x)/2,cz=(bb.min.z+bb.max.z)/2,hx=sx/2+.35+sy*.25,hz=sz/2+.35+sy*.25,y=.035+n%7*.002;
+    pos.push(cx-hx,y,cz-hz,cx+hx,y,cz-hz,cx+hx,y,cz+hz,cx-hx,y,cz+hz);uv.push(0,0,1,0,1,1,0,1);idx.push(n*4,n*4+2,n*4+1,n*4,n*4+3,n*4+2);n++;});
+  if(!n)return;const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));g.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2));g.setIndex(idx);
+  const m=new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2,color:0x000000,alphaTest:0}));
+  m.material.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace("#include <map_fragment>","vec4 aoT=texture2D(map,vUv);diffuseColor=vec4(0.,0.,0.,aoT.a*opacity);");};
+  m.renderOrder=1;m.raycast=()=>{};m.frustumCulled=false;m.userData.decor=true;scene.add(m);GFX.ao=m;}
+/* материалы: бетон темнее (натуральное альбедо ≈0,35), осколки — матовая сталь, а не зеркала на фоне неба */
+function gfxMats(){try{scene.traverse(o=>{if(o.isMesh&&o.geometry&&o.geometry.type==="ExtrudeGeometry"&&o.material&&o.material.color&&o.material.color.getHex()===0xb4b0a6)o.material.color.setHex(0x938e84);});}catch(e){}
+  try{if(typeof debrisMat!=="undefined"){debrisMat.color.setHex(0x44443d);debrisMat.metalness=.35;debrisMat.roughness=.62;}}catch(e){}}
+function gfxInit(){setTimeout(()=>{try{gfxMats();}catch(e){}try{gfxAO();}catch(e){console.warn("ao",e);}},1600);}
+/* пыль и грязь на технике: низ корпуса, катки и гусеницы в дорожной пыли, к верху — чище; пятна по шуму в мировых координатах */
+function gfxDust(m,h){if(!m||m.userData.dust)return m;m.userData.dust=1;const prev=m.onBeforeCompile,H=(h||1.2).toFixed(2);
+  m.onBeforeCompile=(sh,r)=>{if(prev)prev(sh,r);
+    sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nvarying vec3 vDW;").replace("#include <worldpos_vertex>","#include <worldpos_vertex>\nvDW=(modelMatrix*vec4(transformed,1.)).xyz;");
+    sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nvarying vec3 vDW;float dH(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}float dN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(dH(i),dH(i+vec2(1.,0.)),f.x),mix(dH(i+vec2(0.,1.)),dH(i+vec2(1.,1.)),f.x),f.y);}")
+      .replace("#include <map_fragment>","#include <map_fragment>\n{float n=dN(vDW.xz*3.1+vDW.y*1.7)*.6+dN(vDW.xz*11.+vDW.y*5.)*.4;float k=(1.-smoothstep(.12,"+H+",vDW.y+(n-.5)*.35))*(.5+.5*n);diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.40,.34,.26),k*.6);}")
+      .replace("#include <roughnessmap_fragment>","#include <roughnessmap_fragment>\n{float k2=1.-smoothstep(.12,"+H+",vDW.y);roughnessFactor=mix(roughnessFactor,1.,k2*.6);}");};
+  const key=m.customProgramCacheKey?m.customProgramCacheKey.bind(m):null;m.customProgramCacheKey=()=>"dust"+H+(key?key():"");m.needsUpdate=true;return m;}
+
+try{gfxInit();}catch(e){console.warn("gfx",e);}
 function applyWx(){const v=$("wx")?$("wx").value:"clear";const W={rain:0,snow:0,fog:0,wet:0};let tod=S.night?0:.5;
   if(v==="rain")Object.assign(W,{rain:1,wet:1,fog:.25});if(v==="snow")Object.assign(W,{snow:1,fog:.2});if(v==="fog")W.fog=.85;if(v==="overcast")W.fog=.15;if(v==="sunset"&&!S.night)tod=.73;
   try{if(ENV){ENV.setWeather(W);ENV.setTimeOfDay(tod);if(v==="overcast"&&!S.night)ENV.setSky("overcast");}if(LIT)LIT.setTimeOfDay(tod);if(RFL)RFL.setWet(W.wet);}catch(e){}
@@ -3153,7 +3291,7 @@ function visualFix(){try{
     const sh=new THREE.Shape();sh.moveTo(-.33,0);sh.lineTo(.33,0);sh.lineTo(.2,.28);sh.lineTo(.1,.82);sh.lineTo(-.1,.82);sh.lineTo(-.2,.28);sh.closePath();
     const g=new THREE.ExtrudeGeometry(sh,{depth:5.8,bevelEnabled:true,bevelThickness:.02,bevelSize:.02,bevelSegments:1});g.translate(0,0,-2.9);
     const t=ct?ct.clone():null;if(t){t.needsUpdate=true;t.repeat.set(.6,.6);}
-    o.geometry.dispose();o.geometry=g;o.material=new THREE.MeshStandardMaterial({color:0xb4b0a6,map:t,roughness:.95,metalness:0});o.position.y=0;o.castShadow=o.receiveShadow=true;}});
+    o.geometry.dispose();o.geometry=g;o.material=new THREE.MeshStandardMaterial({color:0x8f8a80,map:t,roughness:.95,metalness:0});o.position.y=0;o.castShadow=o.receiveShadow=true;}});
   /* слишком белая гравийная дорога и светлая стойка мишени */
   if(typeof road!=="undefined"&&road.material){road.material.color.copy(linC(0xb8b0a0));road.material.roughness=1;}
   [post,foot].forEach(m=>{m.material.color.copy(linC(0x4a5040));m.material.metalness=.2;m.material.roughness=.75;});
@@ -3189,19 +3327,19 @@ function postInit(){try{if(!renderer.capabilities||!renderer.capabilities.isWebG
   const SM=(u,f)=>new THREE.ShaderMaterial({uniforms:u,vertexShader:V,fragmentShader:f,depthTest:false,depthWrite:false});
   const bright=SM({t:{value:null},th:{value:1.05}},"uniform sampler2D t;uniform float th;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb;float l=dot(c,vec3(.2126,.7152,.0722));gl_FragColor=vec4(c*smoothstep(th,th*2.2,l),1.);}");
   const blur=SM({t:{value:null},d:{value:new THREE.Vector2()}},"uniform sampler2D t;uniform vec2 d;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb*.227;c+=(texture2D(t,vUv+d*1.385).rgb+texture2D(t,vUv-d*1.385).rgb)*.316;c+=(texture2D(t,vUv+d*3.231).rgb+texture2D(t,vUv-d*3.231).rgb)*.07;gl_FragColor=vec4(c,1.);}");
-  const comp=SM({t:{value:null},b1:{value:null},b2:{value:null},s:{value:.55},ex:{value:1},gr:{value:0},asp:{value:1},al:{value:null},key:{value:.2},aeMin:{value:.75},aeMax:{value:2.8},aeOn:{value:0},sw:{value:[new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4()]}},`uniform sampler2D t,b1,b2,al;uniform float s,ex,gr,asp,key,aeMin,aeMax,aeOn;uniform vec4 sw[4];varying vec2 vUv;
+  const comp=SM({t:{value:null},px:{value:new THREE.Vector2(1/sz.x,1/sz.y)},sh:{value:.32},b1:{value:null},b2:{value:null},s:{value:.55},ex:{value:1},gr:{value:0},asp:{value:1},al:{value:null},key:{value:.18},aeMin:{value:.75},aeMax:{value:2.8},aeOn:{value:0},sw:{value:[new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4()]}},`uniform sampler2D t,b1,b2,al;uniform float s,ex,gr,asp,key,aeMin,aeMax,aeOn,sh;uniform vec2 px;uniform vec4 sw[4];varying vec2 vUv;
     vec3 gRrt(vec3 v){vec3 a=v*(v+.0245786)-.000090537;vec3 b=v*(.983729*v+.4329510)+.238081;return a/b;}
     vec3 gAces(vec3 c){const mat3 i=mat3(.59719,.07600,.02840,.35458,.90834,.13383,.04823,.01566,.83777);const mat3 o=mat3(1.60475,-.10208,-.00327,-.53108,1.10813,-.07276,-.07367,-.00605,1.07602);c=i*c;c=gRrt(c);return clamp(o*c,0.,1.);}
     vec3 gSrgb(vec3 c){return mix(c*12.92,1.055*pow(max(c,vec3(0.)),vec3(1./2.4))-.055,step(.0031308,c));}
     float gH(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233))+gr)*43758.5453);}
     void main(){vec2 uv=vUv;for(int i=0;i<4;i++){vec4 q4=sw[i];if(q4.w>0.){vec2 d=(uv-q4.xy)*vec2(asp,1.);float L=length(d);float x=(L-q4.z)/max(.003,q4.z*.12+.004);uv-=d/max(L,1e-4)*vec2(1./asp,1.)*q4.w*x*exp(-x*x);}}
-    vec3 c=texture2D(t,uv).rgb+(texture2D(b1,uv).rgb*.6+texture2D(b2,uv).rgb*.8)*s;float ae=1.;if(aeOn>.5){float Lm=exp(texture2D(al,vec2(.5)).r);ae=clamp(pow(key/max(Lm,1e-4),.55),aeMin,aeMax);}c*=ex/.6*ae;c=gAces(c);vec2 q=vUv-.5;c*=1.-dot(q,q)*.42;c=gSrgb(c);c+=(gH(vUv*913.)-.5)*.012;gl_FragColor=vec4(c,1.);}`);
+    vec3 c0=texture2D(t,uv).rgb,cn=texture2D(t,uv+vec2(px.x,0.)).rgb+texture2D(t,uv-vec2(px.x,0.)).rgb+texture2D(t,uv+vec2(0.,px.y)).rgb+texture2D(t,uv-vec2(0.,px.y)).rgb;vec3 c=max(c0+(c0-cn*.25)*sh,vec3(0.))+(texture2D(b1,uv).rgb*.6+texture2D(b2,uv).rgb*.8)*s;float ae=1.;if(aeOn>.5){float Lm=exp(texture2D(al,vec2(.5)).r);ae=clamp(pow(key/max(Lm,1e-4),.55),aeMin,aeMax);}c*=ex/.6*ae;c=gAces(c);{float lu=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(lu),c,.95);c*=mix(vec3(.965,.99,1.04),vec3(1.045,1.01,.94),smoothstep(.12,.7,lu));c=clamp((c-.45)*1.05+.45,0.,1.);}vec2 q=vUv-.5;c*=1.-dot(q,q)*.42;c=gSrgb(c);c+=(gH(vUv*913.)-.5)*.012;gl_FragColor=vec4(c,1.);}`);
   const cam=new THREE.OrthographicCamera(-1,1,1,-1,0,1),sc=new THREE.Scene(),quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),bright);quad.frustumCulled=false;sc.add(quad);
   const ae=hf===THREE.HalfFloatType,t1=()=>new THREE.WebGLRenderTarget(1,1,{type:hf,depthBuffer:false,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter});
   const lum=SM({t:{value:null},st:{value:new THREE.Vector2()},first:{value:1}},"uniform sampler2D t;uniform vec2 st;uniform float first;varying vec2 vUv;void main(){float s=0.,w=0.;for(int i=0;i<4;i++)for(int j=0;j<4;j++){vec2 u=vUv+(vec2(float(i),float(j))-1.5)*st;vec4 c=texture2D(t,u);if(first>.5){float k=mix(1.,.25,smoothstep(.55,.92,u.y))*(1.-.45*length(u-.5));s+=k*log(max(dot(c.rgb,vec3(.2126,.7152,.0722)),1e-4));w+=k;}else{s+=c.r;w+=c.g;}}gl_FragColor=vec4(s/16.,w/16.,0.,1.);}");
   const adapt=SM({cur:{value:null},prev:{value:null},dt:{value:.016},init:{value:0}},"uniform sampler2D cur,prev;uniform float dt,init;varying vec2 vUv;void main(){vec2 cc=texture2D(cur,vec2(.5)).rg;float c=cc.x/max(cc.y,1e-4),p=texture2D(prev,vec2(.5)).r;float r=c>p?2.2:.9;float k=init>.5?1.-exp(-dt*r):1.;gl_FragColor=vec4(mix(p,c,k),0.,0.,1.);}");
   return{rt,a,b,a2,b2,bright,blur,comp,cam,sc,quad,on:true,slow:0,ft:[],ae,lum,adapt,l64:ae?mk(64,64):null,l16:ae?mk(16,16):null,l4:ae?mk(4,4):null,l1:ae?t1():null,ad0:ae?t1():null,ad1:ae?t1():null,adI:false,adInit:false,lt:0};}catch(e){return null;}}
-function postResize(){if(!POST)return;POST.adInit=false;const sz=new THREE.Vector2();renderer.getDrawingBufferSize(sz);POST.rt.setSize(sz.x,sz.y);POST.a.setSize(Math.max(4,sz.x>>2),Math.max(4,sz.y>>2));POST.b.setSize(Math.max(4,sz.x>>2),Math.max(4,sz.y>>2));POST.a2.setSize(Math.max(4,sz.x>>3),Math.max(4,sz.y>>3));POST.b2.setSize(Math.max(4,sz.x>>3),Math.max(4,sz.y>>3));}
+function postResize(){if(!POST)return;POST.adInit=false;const sz=new THREE.Vector2();renderer.getDrawingBufferSize(sz);try{POST.comp.uniforms.px.value.set(1/sz.x,1/sz.y);}catch(e){}POST.rt.setSize(sz.x,sz.y);POST.a.setSize(Math.max(4,sz.x>>2),Math.max(4,sz.y>>2));POST.b.setSize(Math.max(4,sz.x>>2),Math.max(4,sz.y>>2));POST.a2.setSize(Math.max(4,sz.x>>3),Math.max(4,sz.y>>3));POST.b2.setSize(Math.max(4,sz.x>>3),Math.max(4,sz.y>>3));}
 function postPass(mat,src,dst){POST.quad.material=mat;if(mat.uniforms.t)mat.uniforms.t.value=src&&src.texture;renderer.setRenderTarget(dst);renderer.render(POST.sc,POST.cam);}
 function renderFrame(){const P=POST;if(!P||!P.on){if(P&&P.tm!=null){renderer.toneMapping=P.tm;P.tm=null;}renderer.render(scene,camera);return;}
   if(P.tm==null&&renderer.toneMapping!==THREE.NoToneMapping){P.tm=renderer.toneMapping;renderer.toneMapping=THREE.NoToneMapping;}
@@ -3975,7 +4113,7 @@ function vehTrackTx(){if(VEHTX.trk)return VEHTX.trk;const cv=document.createElem
   c.fillStyle="#2a2926";c.fillRect(0,0,64,64);c.fillStyle="#4a4740";c.fillRect(0,0,64,10);c.fillRect(0,32,64,10);c.fillStyle="#18171500";c.fillStyle="#181715";c.fillRect(28,10,8,22);c.fillRect(28,42,8,22);
   c.fillStyle="rgba(150,120,80,.25)";for(let i=0;i<40;i++)c.fillRect(Math.random()*64,Math.random()*64,2,2);
   const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(1,24);return VEHTX.trk=t;}
-function vehMat(c,o){const m=new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.8,metalness:.2},o||{},{envMapIntensity:Math.min(.3,(o&&o.envMapIntensity)||.3)}));return m;}
+function vehMat(c,o){const m=new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.8,metalness:.2},o||{},{envMapIntensity:Math.min(.3,(o&&o.envMapIntensity)||.3)}));try{if(typeof gfxDust==="function"&&!(o&&(o.metalness>.85||o.emissive)))gfxDust(m,1.3);}catch(e){}return m;}
 function vehTex(rep){const t0=vehCamo(VT[S.vt]&&VT[S.vt].camo||S.vt);if(!t0)return null;const t=t0.clone();t.encoding=t0.encoding;t.needsUpdate=true;t.repeat.set(rep[0],rep[1]);return t;}
 /* плоские участки брони по зонам — по ним рисуются экраны, накладки, ДЗ и подписи */
 /* базис участка брони всегда правый (u×v=n): иначе поворот из отражённого базиса разворачивал экраны, блоки ДЗ, номера и грязь на одном борту поперёк брони */
