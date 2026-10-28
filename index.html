@@ -423,6 +423,14 @@ html,body,.hud,.hud *,.sheet,.sheet *{touch-action:manipulation}
 .mrh{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.mrh b{font:700 13px var(--body);color:var(--ink)}.mrh i{font:10px var(--mono);font-style:normal;color:var(--dim);white-space:nowrap}
 .mrk{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.6fr);gap:2px 10px;margin-top:5px;font-family:var(--mono);font-size:11px;color:var(--dim)}.mrk b{color:var(--ink);font-weight:400;overflow-wrap:anywhere}
 
+/* ===== v62: подсветка внутри строк фирмы (конфликт, «проверен в бою», перегрузка) ===== */
+.entkv .neg,.enttr .neg,.entsub .neg,.tag .neg{color:#ff8d76}
+.entkv .pos,.enttr .pos,.entsub .pos{color:#8be08b}
+/* разделы фирмы — всегда одной колонкой (таблицы и карточки не делятся пополам на широком экране) */
+.ctrl.entin{grid-template-columns:minmax(0,1fr)}
+/* альбомная ориентация телефона: узкая боковая панель — поля цеха одной колонкой, как в портретной */
+@media (min-aspect-ratio:4/3) and (min-width:700px) and (max-width:1056px){.hud.bottom>.sheet .ctrl{grid-template-columns:minmax(0,1fr)}}
+
 </style>
 
 <div id="app"></div>
@@ -5419,7 +5427,7 @@ const ENT_CTRY={
     note:"НДС нет, налог на прибыль ≈25 % (федеральный и штата), налоги на зарплату и страховка ≈29 %; госзаказ — «затраты плюс фиксированное вознаграждение»; экспорт через FMS или по лицензии ITAR"}};
 /* стартовые варианты: деньги в долларах, позиции оборудования по цехам, рабочие, штат КБ, репутация, начальная эффективность */
 const ENT_START={
-  kb:{n:"Частное КБ без завода",d:"мало денег, нет цехов: разработка, опытные образцы на стороне, продажа лицензий",cash:18e6,pos:{zag:0,meh:0,svar:0,sbor:0,snar:0},wrk:0,kb:{des:12,eng:5,tst:4},rep:25,eff:.8,admK:1},
+  kb:{n:"Частное КБ без завода",d:"мало денег, нет цехов: разработка, опытные образцы на стороне, продажа лицензий, конкурсы министерства на ОКР",cash:18e6,pos:{zag:0,meh:0,svar:0,sbor:0,snar:0},wrk:0,kb:{des:12,eng:5,tst:4},rep:25,eff:.8,admK:1},
   pr:{n:"Частное предприятие",d:"КБ и небольшой завод: можно выпускать серийно, но всё впритык",cash:60e6,pos:{zag:3,meh:4,svar:3,sbor:2,snar:1},wrk:140,kb:{des:30,eng:16,tst:14},rep:40,eff:.8,admK:1},
   gc:{n:"Государственная корпорация",d:"большой завод и КБ, госзаказ на родине; эффективность ниже, управленцев больше",cash:420e6,pos:{zag:14,meh:20,svar:16,sbor:10,snar:6},wrk:1500,kb:{des:180,eng:110,tst:90},rep:65,eff:.7,admK:1.5}};
 /* цеха: цена позиции — участок на ≈10 рабочих в смену (станки, ячейки, посты) с долей площади, $ */
@@ -5598,7 +5606,7 @@ function entCustState(c,i){return{i,n:c.n,reg:c.reg||"",std:c.std,bud:c.bud,spen
 function entWorldInit(E){const y0=entYear(E);E.wd=E.wd||{};Object.keys(ENT_REG).forEach(r=>{if(E.wd[r]==null)E.wd[r]=1;});E.mks=E.mks||{};E.expo=E.expo||{};E.exB=E.exB||{};E.wpH=E.wpH||{};
   if(!E.world){E.cust.forEach(c=>{if(!c.reg||!ENT_CUST.some(w=>w.n===c.n))c.ret=true;});ENT_CUST.forEach(c=>{if(!E.cust.some(q=>q.n===c.n&&!q.ret))E.cust.push(entCustState(c,E.cust.length));});
     ENT_COMP.forEach(x=>{const q=E.comp.find(z=>z.n===x.n);if(!q)E.comp.push(entCompState(x,y0));else{if(q.lost==null)q.lost=0;if(q.on==null)q.on=true;}});E.world=1;}
-  entTechInit(E);if(E.licR==null){E.licR=0;E.licAm=0;}if(!E.sup)E.sup={cost:0,rev:0,costM:0};E.v=3;return E;}
+  entTechInit(E);if(E.licR==null){E.licR=0;E.licAm=0;}if(!E.sup)E.sup={cost:0,rev:0,costM:0};E.v=3;entV62Init(E);return E;}
 /* заказчики для оценок без своей фирмы */
 function entWorldCust(){return ENT_CUST.map((c,i)=>Object.assign({i},c));}
 /* ежемесячно: спрос регионов, конкуренты, мировые цены, выставки */
@@ -6271,30 +6279,32 @@ function entScore(sc,w,price,maxPrice,std,cstd,rate,need,rep){const base=entQual
 function entMed(a){const s=a.slice().sort((x,y)=>x-y);return s.length?s[Math.floor(s.length/2)]:0;}
 function entGenTender(E,init,big,ci){const cs=E.cust.filter(c=>!c.ret&&c.bud-c.spent>2e7);if(!cs.length)return null;const c=ci!=null?E.cust[ci]:cs[Math.floor(Math.random()*cs.length)];if(!c||c.ret||c.bud-c.spent<=2e7)return null;
   const cats=Object.keys(c.need).filter(k=>c.need[k]>0&&E.comp.some(x=>x.cat===k&&x.on!==false));if(!cats.length)return null;
-  const cat=cats[Math.floor(Math.random()*cats.length)],comps=E.comp.filter(x=>x.cat===cat&&x.on!==false);if(!comps.length)return null;const am=cat.startsWith("am_"),infl=Math.pow(1.03,E.m/12);
+  const cat=cats[Math.floor(Math.random()*cats.length)],am=cat.startsWith("am_"),comps=E.comp.filter(x=>x.cat===cat&&x.on!==false&&(!am||entStdOk(x.std,c.std)));if(!comps.length)return null;const infl=Math.pow(1.03,E.m/12);
   const med=entMed(comps.map(x=>x.pr))*infl,q0=c.need[cat]*(big||1)*((E.wd&&E.wd[c.reg])||1);let qty=Math.max(am?2000:4,Math.round(q0*entR(.25,.55)/(am?1000:2))*(am?1000:2));
   const maxP=Math.max(am?10:1e4,Math.round(med*entR(1.0,1.45)/(am?10:1e4))*(am?10:1e4)),room=c.bud-c.spent;if(qty*maxP>room)qty=Math.max(am?1000:2,Math.floor(room/maxP/(am?1000:2))*(am?1000:2));
   const exb=!!(E.exB&&E.exB[c.reg]>=E.m),dl=E.m+(init?Math.round(entR(1,3)):Math.round(entR(2,4)))+(exb?2:0),off=c.off?entCl(Math.round((c.off+entR(-.1,.1))*10)/10,0,.6):0,
     t={id:E.id++,cu:c.i,cat,qty,maxP,dl,start:dl+Math.round(entR(3,8)),need:Math.max(am?500:1,Math.round(qty/entR(10,20))),std:c.std,st:"open",big:big>1,reg:c.reg||"",off,inv:exb};
   E.T.push(t);if(!init&&E.P.some(p=>p.cat===cat&&p.st!=="stop")){E.stop=true;entLog(E,`Новый тендер по вашей категории: ${c.n} — ${ENT_CAT[cat]}, ${t.qty} шт., до ${entUsd(maxP)} за единицу, заявки до ${entDate(E,dl)}`,"g");}return t;}
 function entBidCheck(E,t,p){if(!p)return"нет изделия";if(p.cat!==t.cat)return"другая категория изделий";if(p.st==="stop")return"изделие закрыто";if(p.st==="rd"&&p.stg<3)return"нужны хотя бы опытные образцы";
-  const c=E.cust[t.cu];if(c.ret)return"заказчик ушёл с рынка";if((c.pol[E.c]||0)<-.6)return"заказчик не допускает поставщиков из вашей страны";if(c.maxMass&&p.it.mass>c.maxMass)return`масса ${p.it.mass.toFixed(1).replace(".",",")} т больше допустимой ${c.maxMass} т`;return"";}
+  const c=E.cust[t.cu];if(c.ret)return"заказчик ушёл с рынка";if((c.pol[E.c]||0)<-.6)return"заказчик не допускает поставщиков из вашей страны";if(p.kind==="ammo"&&!entStdOk(p.std,c.std))return"у армии заказчика нет орудий под этот калибр";if(c.maxMass&&p.it.mass>c.maxMass)return`масса ${p.it.mass.toFixed(1).replace(".",",")} т больше допустимой ${c.maxMass} т`;return"";}
 function entBid(E,tid,pid,price,rate,off){const t=E.T.find(x=>x.id===tid),p=E.P.find(x=>x.id===pid);if(!t||(t.st!=="open"&&t.st!=="bid"))return"тендер закрыт";const why=entBidCheck(E,t,p);if(why)return why;
-  price=Math.round(+price);rate=Math.max(1,Math.round(+rate));if(!(price>0))return"укажите цену";
+  price=Math.round(+price);rate=Math.max(1,Math.round(+rate));if(!(price>0))return"укажите цену";if(price>t.maxP)return`цена выше предельной (${entUsd(t.maxP)}) — такую заявку не рассмотрят`;
   if(t.st==="open"){const fee=(p.kind==="veh"?120e3:p.cat.startsWith("how")?60e3:p.kind==="gun"?30e3:40e3)*E.fx;entBuy(E,"44",fee,`Тендерная заявка: ${E.cust[t.cu].n} (документация, переводы, показ образца)`);}
   t.bid={pid,price,rate,off:entCl(+off||0,0,.3)};t.st="bid";return"";}
 function entUnbid(E,tid){const t=E.T.find(x=>x.id===tid);if(t&&t.st==="bid"){t.st="open";t.bid=null;}}
 /* оценка тендера: заявки конкурентов (цена зависит от загрузки их заводов и ценовой войны) и своя */
 function entJudge(E,t){const c=E.cust[t.cu],infl=Math.pow(1.03,E.m/12),bids=[];
   const pool=E.comp.filter(x=>x.cat===t.cat&&x.on!==false&&!(x.load>1.7&&Math.random()<.6)).sort(()=>Math.random()-.5).slice(0,2+Math.floor(Math.random()*3));
-  for(const x of pool){if((c.pol[x.co]||0)<-.6)continue;let price=x.pr*infl*entCompPK(x)*entR(.95,1.05);
+  for(const x of pool){if((c.pol[x.co]||0)<-.6)continue;if(String(x.cat).startsWith("am_")&&!entStdOk(x.std,c.std))continue;let price=x.pr*infl*entCompPK(x)*entR(.95,1.05);
     if(price>t.maxP){if(price>t.maxP*1.15)continue;price=t.maxP*entR(.97,1);}const rate=Math.max(t.need*.15,Math.min(t.need*1.2,x.cap/12*entR(.25,.7)*Math.max(.15,1.2-x.load)));
     const P=entScoreP(entCompScore(E,x),c.w,price,t.maxP,x.std,c.std,rate,t.need,x.rep),pol=c.pol[x.co]||0,rnd=entR(-.15,.15);bids.push({n:x.n,mk:x.mk,price,rate,s:P.tot+pol+rnd,P,pol,x});}
   let me=null;if(t.st==="bid"&&t.bid){const p=E.P.find(y=>y.id===t.bid.pid),why=entBidCheck(E,t,p);
-    if(!why){const P=entScoreP(entPSc(E,p),c.w,t.bid.price,t.maxP,p.std,c.std,t.bid.rate,t.need,(E.rep+(c.rel||50))/2),pol=c.pol[E.c]||0,ex=(E.exB&&E.exB[c.reg]>=E.m?.12:0)+(t.bid.off||0)*1.5-(p.st==="rd"?.3:0);
+    if(!why){const P=entScoreP(entPSc(E,p),c.w,t.bid.price,t.maxP,p.std,c.std,t.bid.rate,t.need,(E.rep+(c.rel||50))/2),pol=c.pol[E.c]||0,ex=(E.exB&&E.exB[c.reg]>=E.m?.12:0)+(t.bid.off||0)*1.5-(p.st==="rd"?.3:0)+entCpK(E,p);
       P.ex=ex;me={me:true,n:p.n,price:t.bid.price,rate:t.bid.rate,p,s:P.tot+pol+ex+entR(-.15,.15),P,pol};bids.push(me);}
     else entLog(E,`Заявка на тендер ${c.n} отклонена: ${why}`,"w");}
-  bids.sort((a,b)=>b.s-a.s);const r2=x=>+(+x||0).toFixed(2);t.res=bids.slice(0,5).map(b=>({n:b.n,me:!!b.me,price:Math.round(b.price),s:r2(b.s),q:r2(b.P.q),pr:r2(b.P.pr),dl:r2(b.P.dl),st:r2(b.P.st),rp:r2(b.P.rp),pol:r2(b.pol),ex:r2(b.P.ex||0)}));
+  bids.sort((a,b)=>b.s-a.s);if(entTrialStart(E,t,bids,me))return;entAward(E,t,bids,me);}
+/* решение по тендеру: итоги, контракт, реакция конкурентов */
+function entAward(E,t,bids,me){const c=E.cust[t.cu];const r2=x=>+(+x||0).toFixed(2);t.res=bids.slice(0,5).map(b=>({n:b.n,me:!!b.me,price:Math.round(b.price),s:r2(b.s),q:r2(b.P.q),pr:r2(b.P.pr),dl:r2(b.P.dl),st:r2(b.P.st),rp:r2(b.P.rp),pol:r2(b.pol),ex:r2(b.P.ex||0),tr:b.P.tr!=null?r2(b.P.tr):undefined}));
   bids.forEach(b=>{if(b.x&&b!==bids[0]){b.x.lost=(b.x.lost||0)+1;if(b.x.lost>=3){b.x.war=Math.min(.2,(b.x.war||0)+.03);b.x.lost=0;}}});
   if(!bids.length){t.st="cancel";return;}const w=bids[0];
   if(w.me){const deny=(E.c==="de"&&(c.pol.de||0)<0&&Math.random()<.35)||(E.c==="us"&&(c.pol.us||0)<0&&Math.random()<.25);
@@ -6304,7 +6314,7 @@ function entJudge(E,t){const c=E.cust[t.cu],infl=Math.pow(1.03,E.m/12),bids=[];
     E.comp.filter(x=>x.cat===t.cat).forEach(x=>{x.war=Math.min(.2,(x.war||0)+.04);});E.stop=true;
     entLog(E,`Победа в тендере: ${c.n} — ${t.qty} шт. «${w.p.n}» по ${entUsd(w.price)}; аванс ${entMoney(k.advLoc,E)}`,"g");}
   else{t.st=me?"lost":"closed";w.x.win++;w.x.lost=0;w.x.load=Math.min(2,w.x.load+t.qty/Math.max(1,w.x.cap));E.mks=E.mks||{};E.mks[w.x.mk]=(E.mks[w.x.mk]||0)+t.qty*w.price;
-    if(me){E.stop=true;const d={"качество":w.P.q-me.P.q,"цена":w.P.pr-me.P.pr,"сроки":w.P.dl-me.P.dl,"калибры":w.P.st-me.P.st,"доверие":w.P.rp-me.P.rp,"политика":(w.pol||0)-(me.pol||0)},top=Object.entries(d).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>.05).slice(0,2);
+    if(me){E.stop=true;const d={"качество":w.P.q-me.P.q,"цена":w.P.pr-me.P.pr,"сроки":w.P.dl-me.P.dl,"калибры":w.P.st-me.P.st,"доверие":w.P.rp-me.P.rp,"политика":(w.pol||0)-(me.pol||0),"испытания":(w.P.tr||0)-(me.P.tr||0)},top=Object.entries(d).sort((a,b)=>b[1]-a[1]).filter(x=>x[1]>.05).slice(0,2);
       entLog(E,`Тендер ${c.n} проигран: победил ${w.n} (${w.mk}) за ${entUsd(w.price)} против ваших ${entUsd(me.price)} — ${top.length?"решили "+top.map(x=>x[0]+" (+"+x[1].toFixed(2).replace(".",",")+")").join(" и "):"почти равные заявки, решил случай"}`,"w");}}
   const sh=E.share[t.cat]||(E.share[t.cat]={}),wn=w.me?"_me":w.n;sh[wn]=(sh[wn]||0)+t.qty;c.spent+=t.qty*w.price;c.need[t.cat]=Math.max(0,(c.need[t.cat]||0)-t.qty);}
 /* ---------- договоры ---------- */
@@ -6316,13 +6326,13 @@ function entContract(E,o){const k={id:E.id++,cu:o.cu,cuN:o.cuN,pid:o.pid,qty:o.q
 function entHomeOffer(E,p,part){const C=entC(E),H=E.home;if(!(H.need[p.cat]>0)||!(p.std===H.std||p.std==="mix"))return null;
   if(E.O.some(o=>o.pid===p.id)||E.K.some(k=>k.pid===p.id&&k.cu<0&&k.y===entYear(E)))return null;
   const q=s=>(s.f+s.p+s.m+s.r)/4,rivals=E.comp.filter(x=>x.cat===p.cat&&x.co===E.c&&x.on!==false),my=q(entPSc(E,p))+(E.rep-50)/10;let den=Math.exp(.12*my);rivals.forEach(x=>{den+=Math.exp(.12*(q(entCompScore(E,x))+(x.rep-50)/10));});
-  const share=Math.exp(.12*my)/den,am=p.kind==="ammo",busy=E.K.filter(k=>k.st==="act"&&k.pid===p.id).reduce((s,k)=>s+k.rate,0),capY=Math.max(0,(entCapM(E,p)+(p.plan||0))*.85-busy)*11*part;
+  const share=Math.exp(.12*my)/den,am=p.kind==="ammo",busy=E.K.filter(k=>k.st==="act"&&k.pid===p.id).reduce((s,k)=>s+k.rate,0),capY=Math.max(0,entCapM(E,p)*.85-busy)*11*part;
   const q0=Math.min(H.need[p.cat]*share*part*entR(.75,1),capY),qty=am?Math.round(q0/100)*100:Math.round(q0);if(qty<(am?500:1))return null;
   const uc=entUnitCost(E,p,Math.max(1,qty/12));let price;
   const ga=1+(E.gaK||.12);/* общехозяйственные расходы включаются в калькуляцию цены */
   if(C.homeCP)price=(uc.tot-uc.comp)*ga*(1+C.homeMarg)+uc.comp*(1+(E.c==="ru"?.01:C.homeMarg));
   else{const md=entMed(rivals.map(x=>x.pr))*Math.pow(1.03,E.m/12)*E.fx||uc.tot*ga*1.25;price=Math.max(uc.tot*ga*1.05,Math.min(uc.tot*ga*1.3,md*.95));}
-  const o={id:E.id++,pid:p.id,qty,price:Math.round(price),rate:Math.max(am?100:1,Math.ceil(qty/11)),start:E.m+2,exp:E.m+2,share:+share.toFixed(2)};E.O.push(o);E.stop=true;
+  const o={id:E.id++,pid:p.id,qty,price:Math.round(price),rate:am?Math.max(50,Math.ceil(qty/11/50)*50):Math.max(1,Math.ceil(qty/11)),start:E.m+2,exp:E.m+2,share:+share.toFixed(2)};E.O.push(o);E.stop=true;
   entLog(E,`${H.n} предлагает контракт: «${p.n}» — ${qty} шт. по ${entMoney(o.price,E)} без НДС (${C.homeCP?"цена «затраты плюс»":"твёрдая цена по конкурсу"}); ответить до ${entDate(E,o.exp)}`,"g");return o;}
 function entAccept(E,oid){const o=E.O.find(x=>x.id===oid);if(!o)return"";const C=entC(E),p=E.P.find(x=>x.id===o.pid);E.O=E.O.filter(x=>x!==o);if(!p)return"";
   const k=entContract(E,{cu:-1,cuN:E.home.n,pid:o.pid,qty:o.qty,price:o.price,rate:o.rate,start:Math.max(E.m+1,o.start),dom:true,adv:C.homeAdv});E.home.need[p.cat]=Math.max(0,E.home.need[p.cat]-o.qty);
@@ -6345,6 +6355,13 @@ function entShopFree(E,skip){const SV=E.svc,sv=SV&&SV.shop?SV.shop*SV.k*SV.share
   ENT_SHOPS.forEach(k=>{o[k]=Math.max(0,o[k]);});return o;}
 function entCapM(E,p,all){const LC=entLC(p.wu||0,1,p.kind),F=all?null:entShopFree(E,p);let m=Infinity;
   ENT_SHOPS.forEach(k=>{const h=entPH(E,p,k)*LC;if(h>0){const s=E.shops[k],c=F?F[k]:Math.min(s.wrk,s.pos*s.shift*ENT_WPP)*ENT_HPM*s.eff;m=Math.min(m,c/h);}});return isFinite(m)?m:0;}
+/* v62: калибры совместимы, если у заказчика или изделия «любые» или совпадают */
+function entStdOk(a,b){return!a||!b||a==="mix"||b==="mix"||a===b;}
+/* v62: порядок загрузки цехов — сначала изделия с договорными поставками в этом и следующем месяце, которых не хватает на складе */
+function entProdOrder(E){const pri=p=>{if(p.st!=="ser")return 2;const due=E.K.filter(k=>k.st==="act"&&k.pid===p.id&&k.start<=E.m+1).reduce((a,k)=>a+Math.max(0,Math.min(k.qty,k.rate*(E.m-k.start+2))-k.dlv),0);return due>(p.stock||0)+(p.pend||0)?0:1;};
+  return E.P.map((p,i)=>[pri(p),i,p]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>x[2]);}
+/* v62: свободный темп по изделию — мощность за вычетом договоров и поданных заявок */
+function entFreeRate(E,p,skipT){const cap=entCapM(E,p),busy=E.K.filter(k=>k.st==="act"&&k.pid===p.id).reduce((a,k)=>a+k.rate,0)+E.T.filter(t=>t.st==="bid"&&t.bid&&t.bid.pid===p.id&&t.id!==skipT).reduce((a,t)=>a+t.bid.rate,0);return{cap,busy,free:Math.max(0,cap*.95-busy)};}
 function entUnitCost(E,p,q){const it=p.it,LC=entLC(p.wu||0,Math.max(q||1,1e-3),p.kind),kit=entKit(E,it);let lab=0;
   for(const k of ENT_SHOPS){const h=entPH(E,p,k)*LC;if(h>0)lab+=h*entHrRate(E,k);}const ovh=lab*E.ovk,am=p.am>0&&p.r04>0&&q>0?p.am/Math.max(1,q):0;
   return{mat:kit.mat,comp:kit.comp,lab,ovh,am,tot:kit.mat+kit.comp+lab+ovh+am,LC};}
@@ -6352,12 +6369,12 @@ function entUnitCost(E,p,q){const it=p.it,LC=entLC(p.wu||0,Math.max(q||1,1e-3),p
 function entStH0(p,s){return p.it.rdH*ENT_STG[s].sh*(s===4&&p.fast?.5:1);}
 function entStH(p,s){return entStH0(p,s)+(s===p.stg?(p.add||0):0);}
 function entProjNew(E,src){let it=null;try{it=src.kind==="veh"?entItemVeh(src.d):src.kind==="gun"?entItemGun(src.d):src.kind==="alloy"?entItemAlloy(src.d):entItemAmmo(src.d,src.t);}catch(e){console.warn(e);return null;}if(!it)return null;
-  const RP=entRdPrep(E,it),qH=RP.qH;it.rdH=RP.rdH;it.qH=qH;it.tH=RP.need.h;it.techL=RP.need.L.map(t=>t.id);
-  const lam=((src.kind==="veh"?4:src.kind==="gun"?2.5:src.kind==="alloy"?1:1.2)+10*it.cx+qH/25e3*.8+RP.need.L.length*.6)*entTechK(E).hid,
+  const RP=entRdPrep(E,it),qH=RP.qH,U=src.upg!=null?ENT_UPG:null;it.rdH=RP.rdH;if(U){it.rdH=Math.round((RP.rdH-RP.need.h-qH)*U.h+RP.need.h+qH);it.ext*=U.ext;it.test$*=U.test;it.tool$*=U.tool;it.proto=Math.max(1,Math.round(it.proto*U.proto));}it.qH=qH;it.tH=RP.need.h;it.techL=RP.need.L.map(t=>t.id);
+  const lam=((src.kind==="veh"?4:src.kind==="gun"?2.5:src.kind==="alloy"?1:1.2)+10*it.cx+qH/25e3*.8+RP.need.L.length*.6)*entTechK(E).hid*(U?U.hid:1),
     p={id:E.id++,n:String(src.n||"Изделие").slice(0,40),kind:src.kind,t:src.t||null,did:src.d&&src.d.id!=null?src.d.id:null,d:JSON.parse(JSON.stringify(src.d)),it,cat:it.cat,std:it.std,
-      st:"rd",stg:0,sh:0,add:0,mStg:0,out:0,fast:false,pause:false,hid:entPois(lam),found:0,fixH:0,proto:null,proto0:null,protoT:0,c08:0,c08t:0,cert:false,mCert:null,am:0,r04:0,
+      upg:U?src.upg:null,st:"rd",stg:0,sh:0,add:0,mStg:0,out:0,fast:false,pause:false,hid:entPois(lam),found:0,fixH:0,proto:null,proto0:null,protoT:0,c08:0,c08t:0,cert:false,mCert:null,am:0,r04:0,
       tppN:0,tppH:0,tppM:0,toolC:0,toolPaid:0,tooled:false,plan:0,wu:0,done:0,wipC:0,stock:0,pend:0,fg:0,ms:0,mc:0,stockM:1,list:0,sold:0,rev:0,cogs:0,dlv:[],shotH:0,shotN:0,shotM:-1,m0:E.m,lic:null};
-  E.P.push(p);entLog(E,`Открыта ОКР «${p.n}»: ${p.kind==="alloy"?"квалификация сплава":ENT_CAT[p.cat]}, ≈${Math.round(it.rdH/1000)} тыс. нормо-часов${qH?` (из них ${Math.round(qH/1000)} тыс. — квалификация своих сплавов)`:""}${it.tH?`; отработка новых технологий ${Math.round(it.tH/1000)} тыс. ч: ${RP.need.L.map(t=>t.n).join(", ")}`:""}`,"i");return p;}
+  E.P.push(p);entLog(E,`Открыта ОКР ${U?"модернизации ":""}«${p.n}»: ${p.kind==="alloy"?"квалификация сплава":ENT_CAT[p.cat]}, ≈${Math.round(it.rdH/1000)} тыс. нормо-часов${qH?` (из них ${Math.round(qH/1000)} тыс. — квалификация своих сплавов)`:""}${it.tH?`; отработка новых технологий ${Math.round(it.tH/1000)} тыс. ч: ${RP.need.L.map(t=>t.n).join(", ")}`:""}`,"i");return p;}
 /* объём ОКР с поправками фирмы: САПР, квалификация своих сплавов, неосвоенные технологии */
 function entRdPrep(E,it){let qH=0;(it.alloys||[]).forEach(k=>{if(!E.qual||!E.qual[k]){const r=typeof ALY!=="undefined"&&ALY.res&&ALY.res[k];qH+=r&&r.fam!=="st"?35e3:25e3;}});
   const need=typeof entTechNeed==="function"&&E.tech?entTechNeed(E,it):{L:[],h:0},K=E.tech?entTechK(E):{rd:1};return{rdH:Math.round(it.rdH*K.rd)+qH+need.h,qH,need};}
@@ -6372,15 +6389,15 @@ function entProjLeft(E,p){if(p.st!=="rd")return 0;const cap={};["des","eng","tst
   return Math.ceil(mo+(p.fixH>0?p.fixH/eff("des"):0));}
 function entProtoStart(E,p){p.proto={};p.proto0={};let t=0;const KP=E.tech?entTechK(E).proto:1;ENT_SHOPS.forEach(k=>{const v=(p.it.h[k]||0)*3*p.it.proto*KP*(p.it.hk&&p.it.hk[k]||1);p.proto[k]=v;p.proto0[k]=v;t+=v;});p.protoT=t;}
 const entProtoLeft=p=>p.proto?ENT_SHOPS.reduce((s,k)=>s+(p.proto[k]||0),0):0;
-function entCertify(E,p){const C=entC(E),v=p.c08;if(v>0)entPost(E,"04","08.8",v,`Приняты результаты ОКР «${p.n}» (литера О1)`);p.r04=v;p.am=v/60;p.c08=0;p.cert=true;p.mCert=E.m;
+function entCertify(E,p){if(p.upg!=null&&entUpgCert(E,p))return;const C=entC(E),v=p.c08;if(v>0)entPost(E,"04","08.8",v,`Приняты результаты ОКР «${p.n}» (литера О1)`);p.r04=v;p.am=v/60;p.c08=0;p.cert=true;p.mCert=E.m;
   if(p.it.techL&&p.it.techL.length&&typeof entTechLearn==="function")entTechLearn(E,p.it.techL,`ОКР «${p.n}»`);
   if(p.kind==="alloy"){E.qual[p.it.akey]=true;p.st="done";entLog(E,`Сплав «${p.n}» квалифицирован: изделия из него больше не требуют отдельной квалификации`,"g");return;}
   const shops=ENT_SHOPS.some(k=>E.shops[k].pos>0);if(shops)entTppStart(E,p);else p.st="cert";
-  entLog(E,`«${p.n}» принят: литера О1, затраты ОКР ${entMoney(v,E)} — нематериальный актив (амортизация 5 лет)${shops?"; началась подготовка производства":"; своих цехов нет — можно продать лицензию или купить оборудование"}`,"g");}
+  entLog(E,`«${p.n}» принят: литера О1, затраты ОКР ${entMoney(v,E)} — нематериальный актив (амортизация 5 лет)${shops?"; началась подготовка производства":p.gov!=null?"":"; своих цехов нет — можно продать лицензию или купить оборудование"}`,"g");if(p.gov!=null)entGovCert(E,p);}
 function entTppStart(E,p){const C=entC(E);p.st="tpp";p.tppN=p.it.rdH*.08;p.tppH=0;p.tppM=0;p.toolC=p.it.tool$*E.fx*C.toolK*entIx(E,"st")*(E.tech?entTechK(E).tool:1);p.toolPaid=0;p.c08t=0;}
 /* ---------- месяц ---------- */
 function entMonth(E){if(!E||E.over)return;E.stop=false;E.mo=E.mo||{};
-  entSettle(E);entStaff(E);entKB(E);entProd(E);entAdvance(E);entMarket(E);entDeliver(E);entAdmin(E);entPayroll(E);entClose(E);entCash(E);entDrift(E);entSnap(E);}
+  entSettle(E);entStaff(E);entKB(E);entProd(E);entGovRD(E);entAdvance(E);entMarket(E);entV62Month(E);entDeliver(E);entAdmin(E);entPayroll(E);entClose(E);entCash(E);entDrift(E);entSnap(E);}
 function entRun(E,n){for(let i=0;i<n;i++){entMonth(E);if(E.over||E.stop)break;}}
 /* 1. расчёты за прошлый месяц: поставщики, налоги, взносы; оплаты покупателей с курсовой разницей; погашение овердрафта */
 function entSettle(E){const pay=(a,memo)=>{const v=-(E.B[a]||0);if(v>.5)entPost(E,a,"51",v,memo);};
@@ -6427,11 +6444,12 @@ function entKB(E){const C=entC(E),cap={},left={},used={des:0,eng:0,tst:0},tag={}
   E.P.forEach(p=>{p.shotH=0;});
   ["des","eng","tst"].forEach(k=>{const n=E.kb[k];if(!n)return;const W=n*entWage(E,k),S=W*C.social,T=cap[k]||1;
     Object.values(tag).filter(o=>o.k===k).forEach(o=>{const f=o.h/T,w=W*f,s2=S*f;if(o.p.res){entPost(E,"26","70",w,`Зарплата КБ: ${o.p.n}`);entPost(E,"26","69",s2,"Взносы: НИР");return;}if(o.p.svc){entPost(E,"20","70",w,`Зарплата КБ: ${o.p.n}`);entPost(E,"20","69",s2,"Взносы: работы по заказу");E.svc.cost+=w+s2;return;}
+      if(o.p.st==="ser"||o.p.st==="cert"||o.p.st==="done"){entPost(E,"26","70",w,`Зарплата КБ: доработка конструкции «${o.p.n}» по выявленным дефектам`);entPost(E,"26","69",s2,`Взносы: доработка «${o.p.n}»`);return;}
       entPost(E,"08.8","70",w,`Зарплата КБ: «${o.p.n}»`);entPost(E,"08.8","69",s2,`Взносы: «${o.p.n}»`);if(o.p.st==="tpp")o.p.c08t+=w+s2;else o.p.c08+=w+s2;});
     const idle=Math.max(0,1-used[k]/T);if(idle>1e-6){entPost(E,"26","70",W*idle,`Зарплата КБ без загрузки (${ENT_POOLN[k]})`);entPost(E,"26","69",S*idle,"Взносы: КБ без загрузки");}});
   E.kbUse={des:used.des/(cap.des||1),eng:used.eng/(cap.eng||1),tst:used.tst/(cap.tst||1)};}
 /* 4. цеха: опытные образцы, серийный выпуск, зарплата рабочих, накладные, выпуск готовой продукции, закупка материалов */
-function entProd(E){const C=entC(E),cap={},use={},tagS={};let capTot=0;
+function entProd(E){E.P.forEach(p=>{if(p.auto&&p.st==="ser"&&!p.pause)p.plan=entAutoPlan(E,p);});const C=entC(E),cap={},use={},tagS={};let capTot=0;
   ENT_SHOPS.forEach(k=>{const s=E.shops[k],w=Math.min(s.wrk,s.pos*s.shift*ENT_WPP);cap[k]=w*ENT_HPM*s.eff;use[k]=0;capTot+=cap[k];});
   const tagAdd=(p,k,h,kd)=>{const key=p.id+"|"+kd;tagS[key]=tagS[key]||{p,kd,h:0,v:0,byK:{}};tagS[key].h+=h;tagS[key].byK[k]=(tagS[key].byK[k]||0)+h;};
   const SV=E.svc,svP={id:-1,n:SV?SV.n:"",svc:true};if(SV&&SV.shop>0&&SV.k>0&&SV.share>0){let hh=0;ENT_SHOPS.forEach(k=>{const h=cap[k]*SV.shop*SV.k*SV.share;if(h>0){use[k]+=h;tagAdd(svP,k,h,"svc");hh+=h;}});
@@ -6441,7 +6459,7 @@ function entProd(E){const C=entC(E),cap={},use={},tagS={};let capTot=0;
       if(own>0){use[k]+=own;tagAdd(p,k,own,"proto");}const ext=tgt-own;if(ext>1e-9){const v=ext*C.ext*E.wi;entBuy(E,"08.8",v,`Опытные образцы «${p.n}»: работы на стороне (${ENT_SHOP[k].s.toLowerCase()})`);p.c08+=v;}
       p.proto[k]=rem-tgt;doneH+=tgt;});
     if(doneH>0){const kit=entKit(E,p.it),v=(kit.mat+kit.comp)*p.it.proto*1.3*doneH/Math.max(1,p.protoT);entBuy(E,"08.8",v,`Материалы и комплектующие опытных образцов «${p.n}»`);p.c08+=v;}});
-  E.P.forEach(p=>{p.hrs=null;p.bott="";if(p.pause||p.st!=="ser"||!(p.plan>0))return;const q=p.plan,LC=entLC(p.wu,q,p.kind);let f=1,bott="";const req={};
+  entProdOrder(E).forEach(p=>{p.hrs=null;p.bott="";if(p.pause||p.st!=="ser"||!(p.plan>0))return;const q=p.plan,LC=entLC(p.wu,q,p.kind);let f=1,bott="";const req={};
     ENT_SHOPS.forEach(k=>{req[k]=entPH(E,p,k)*LC*q;if(req[k]>0){const fr=Math.max(0,cap[k]-use[k])/req[k];if(fr<f){f=fr;bott=k;}}});f=entCl(f,0,1);const W=q*f;p.bott=f<.995?bott:"";p.fW=f;if(W<1e-6)return;
     p.hrs={};ENT_SHOPS.forEach(k=>{const h=req[k]*f;if(h>0){use[k]+=h;tagAdd(p,k,h,"ser");p.hrs[k]=h;}});
     const kit=entKit(E,p.it),kv=kit.mat+kit.comp,fromS=Math.min(p.ms,W);let cost=fromS>0?p.mc*fromS/p.ms:0;p.ms-=fromS;p.mc-=cost;if(p.ms<1e-9){p.ms=0;p.mc=0;}
@@ -6487,8 +6505,8 @@ function entAdvance(E){const C=entC(E);E.P.forEach(p=>{if(p.pause)return;
     const ok=p.sh>=entStH(p,s)-1e-6&&(s!==3||entProtoLeft(p)<=1e-6)&&(s!==4||p.fixH<=1e-6)&&p.mStg>=minM;
     if(ok){E.stop=true;p.sh=0;p.add=0;p.mStg=0;if(s<4){p.stg++;if(p.stg===3)entProtoStart(E,p);entLog(E,`«${p.n}»: завершена стадия «${ENT_STG[s].n}», начата «${ENT_STG[s+1].n}»`,"g");}else entCertify(E,p);}}
   else if(p.st==="tpp"&&p.tppH>=p.tppN-1e-6&&p.tppM>=(ENT_TPPM[p.kind]||2)){if(p.toolPaid<p.toolC){const v=p.toolC-p.toolPaid;entBuy(E,"08.8",v,`Оснастка «${p.n}»: окончательный расчёт`);p.toolPaid+=v;p.c08t+=v;}
-    if(p.c08t>0)entPost(E,"01.2","08.8",p.c08t,`Оснастка «${p.n}» введена в эксплуатацию`);p.c08t=0;p.tooled=true;p.st="ser";E.stop=true;
-    entLog(E,`«${p.n}»: подготовка производства закончена — можно планировать серийный выпуск`,"g");const mon=entMon(E);entHomeOffer(E,p,(12-mon)/12);}});}
+    if(p.c08t>0)entPost(E,"01.2","08.8",p.c08t,`Оснастка «${p.n}» введена в эксплуатацию`);p.c08t=0;p.tooled=true;p.st="ser";if(p.auto==null)p.auto=true;E.stop=true;
+    entLog(E,`«${p.n}»: подготовка производства закончена — можно планировать серийный выпуск`,"g");const mon=entMon(E);if(p.govB>0)entGovBatch(E,p);else entHomeOffer(E,p,(12-mon)/12);}});}
 /* 5. рынок: годовые бюджеты, конкуренты, тендеры, прямые продажи, роялти */
 function entMarket(E){const mon=entMon(E);
   if(mon===0&&E.m>0){E.cust.forEach(c=>{c.spent=0;if(c.ret)return;c.bud*=entR(.97,1.08);const wd=(E.wd&&E.wd[c.reg])||1;for(const k in c.need0)c.need[k]=Math.round(c.need0[k]*entR(.8,1.2)*wd);});
@@ -6496,18 +6514,18 @@ function entMarket(E){const mon=entMon(E);
     E.P.forEach(p=>{if(p.st==="ser")entHomeOffer(E,p,1);});}
   E.O=E.O.filter(o=>{if(o.exp<E.m){entLog(E,`Предложение госзаказчика по «${entPN(E,o.pid)}» истекло`,"w");return false;}return true;});
   entWorldMonth(E);
-  E.T.forEach(t=>{if((t.st==="open"||t.st==="bid")&&t.dl<=E.m)entJudge(E,t);});E.T=E.T.filter(t=>t.st==="open"||t.st==="bid"||E.m-t.dl<3);
+  E.T.forEach(t=>{if((t.st==="open"||t.st==="bid")&&t.dl<=E.m)entJudge(E,t);else if(t.st==="trial"&&t.trM<=E.m)entTrial(E,t);});E.T=E.T.filter(t=>t.st==="open"||t.st==="bid"||t.st==="trial"||E.m-(t.trM||t.dl)<3);
   E.cust.forEach((c,i)=>{if(c.ret)return;const p=.055*Math.sqrt(Math.max(0,c.bud)/1e9)*((E.wd&&E.wd[c.reg])||1);if(Math.random()<p)entGenTender(E,false,1,i);});
   E.P.forEach(p=>{if(p.list>0&&p.stock>0&&p.st==="ser")entSpot(E,p);});
   E.P.forEach(p=>{if(p.lic&&p.lic.until>=E.m){const v=p.lic.roy*E.fx*entR(.6,1.4);entPost(E,"62","90.1",v,`Роялти по лицензии «${p.n}»`);entPost(E,"51","62",v,`Получены роялти «${p.n}»`);}});}
 function entSpot(E,p){const base=ENT_SPOT[p.cat]||0,comps=E.comp.filter(x=>x.cat===p.cat&&x.on!==false);if(!base||!comps.length)return;const infl=Math.pow(1.03,E.m/12),med=entMed(comps.map(x=>x.pr))*infl,w={f:1,p:1,m:1,r:1,c:1,d:0};
-  const my=entScore(entPSc(E,p),w,p.list,med*1.3,p.std,"mix",1,0,E.rep),avg=comps.reduce((s,x)=>s+entScore(entCompScore(E,x),w,x.pr*infl,med*1.3,x.std,"mix",1,0,x.rep),0)/comps.length;
+  const my=entScore(entPSc(E,p),w,p.list,med*1.3,p.std,"mix",1,0,E.rep)+entCpK(E,p),avg=comps.reduce((s,x)=>s+entScore(entCompScore(E,x),w,x.pr*infl,med*1.3,x.std,"mix",1,0,x.rep),0)/comps.length;
   /* склад под договоры не продаётся: резерв на поставки этого и следующего месяца */
   const res=E.K.filter(k=>k.st==="act"&&k.pid===p.id).reduce((a2,k)=>a2+Math.max(0,Math.min(k.qty,k.rate*(E.m-k.start+2))-k.dlv),0),free=Math.max(0,p.stock-res);
   let q=Math.min(free,entPois(base*Math.exp(1.6*(my-avg))*(E.rep/50)));if(p.kind==="ammo")q=Math.min(free,Math.round(q/50)*50);if(q<=0)return;
   const rev=q*p.list*E.fx,cg=p.fg*q/Math.max(1,p.stock+p.pend);p.stock-=q;p.fg-=cg;entPost(E,"90.2","43",cg,`Себестоимость: прямая продажа «${p.n}», ${q} шт.`);
   entPost(E,"62","90.1",rev,`Прямая экспортная продажа «${p.n}», ${q} шт. по ${entUsd(p.list)}`);entPost(E,"51","62",rev,`Предоплата по прямой продаже «${p.n}»`);entBuy(E,"44",rev*(.015+entC(E).exc),`Доставка и экспортное сопровождение «${p.n}»`,true);
-  p.sold+=q;p.rev+=rev;p.cogs+=cg;p.dlv.push([E.m,q]);const sh=E.share[p.cat]||(E.share[p.cat]={});sh._me=(sh._me||0)+q;E.mks=E.mks||{};E.mks._me=(E.mks._me||0)+q*p.list;entLog(E,`Прямая продажа: «${p.n}» — ${q} шт. на ${entMoney(rev,E)}`,"g");}
+  p.spotA=(p.spotA||0)*.8+q*.2;p.sold+=q;p.rev+=rev;p.cogs+=cg;p.dlv.push([E.m,q]);const sh=E.share[p.cat]||(E.share[p.cat]={});sh._me=(sh._me||0)+q;E.mks=E.mks||{};E.mks._me=(E.mks._me||0)+q*p.list;entLog(E,`Прямая продажа: «${p.n}» — ${q} шт. на ${entMoney(rev,E)}`,"g");}
 /* 6. поставки по договорам: выручка, НДС, зачёт аванса, неустойки, расторжение */
 function entShip(E,k,p,q){const C=entC(E),cg=p.fg*q/Math.max(1,p.stock+p.pend);p.stock-=q;p.fg-=cg;entPost(E,"90.2","43",cg,`Себестоимость отгрузки «${p.n}», ${q} шт. (договор №${k.id})`);let rev=0;
   if(k.dom){const net=q*k.price,vat=net*C.vat;rev=net;entPost(E,"62","90.1",net+vat,`Отгрузка по госконтракту №${k.id}: «${p.n}», ${q} шт.`);if(vat>0)entPost(E,"90.3","68.2",vat,`НДС с отгрузки по договору №${k.id}`);
@@ -6572,7 +6590,7 @@ function entDrift(E){const C=entC(E);
     else if(e.reg){const R=Object.keys(ENT_REG),r=R[Math.floor(Math.random()*R.length)];E.wd=E.wd||{};e.f(E,r);t=t.replace("{reg}",ENT_REG[r]);}else e.f(E);
     if(t)entLog(E,t,"e");}
   E.rep=entCl(E.rep+(50-E.rep)*.004,0,100);
-  if(E.svc){E.svc.k*=1-E.svc.decay;if(entMon(E)===11&&E.rep>=45)E.svc.k=Math.min(1,E.svc.k+.12);}}
+  if(E.svc){E.svc.k*=1-E.svc.decay;if(entMon(E)===11){const g=.12*entCl((E.rep-15)/35,0,1);if(g>0)E.svc.k=Math.min(1,E.svc.k+g);}}}
 /* 12. снимок месяца и переход к следующему */
 function entSnap(E){const r=E.mRes||{},Q=E.mo,inC=Object.keys(Q).filter(k=>k.startsWith("51>")&&k.length>3).reduce((s,k)=>s+Q[k],0),outC=Object.keys(Q).filter(k=>k.endsWith(">51")&&k.length>3).reduce((s,k)=>s+Q[k],0);
   E.hist.push({m:E.m,net:r.net||0,cg:r.cg||0,sel:r.sel||0,adm:r.adm||0,oth:r.oth||0,oi:r.oi||0,oe:r.oe||0,pbt:r.pbt||0,tax:r.tax||0,np:r.np||0,cash:E.B["51"]||0,eq:entEquity(E),debt:entDebt(E),bk:entBacklog(E),
@@ -6587,10 +6605,10 @@ function entSellPos(E,k,n){const s=E.shops[k];n=Math.min(s.pos,Math.max(1,Math.r
 function entLoan(E,amt,term){amt=Math.round(+amt);term=Math.max(6,Math.round(+term||24));if(!(amt>0))return"укажите сумму";if(amt>entLimit(E)+1)return`банк одобряет не больше ${entMoney(entLimit(E),E)}`;
   const L={id:E.id++,amt,left:amt,r:entRate(E),term,m0:E.m,pay:amt/term};E.L.push(L);entPost(E,"51","66",amt,`Кредит №${L.id} на ${term} мес под ${(L.r*100).toFixed(1).replace(".",",")} %`);entLog(E,`Получен кредит ${entMoney(amt,E)} на ${term} мес под ${(L.r*100).toFixed(1).replace(".",",")} % годовых`,"i");return"";}
 function entRepay(E,id){const L=E.L.find(x=>x.id===id);if(!L)return"";const v=Math.min(L.left,Math.max(0,E.B["51"]||0));if(v<=0)return"нет свободных денег";entPost(E,"66","51",v,`Досрочное погашение кредита №${L.id}`);L.left-=v;if(L.left<=1)E.L=E.L.filter(x=>x!==L);return"";}
-function entCancel(E,id){const p=E.P.find(x=>x.id===id);if(!p||p.st==="stop")return;const v=p.c08+p.c08t;if(v>0)entPost(E,"91.2","08.8",v,`Списаны затраты прекращённой работы «${p.n}»`);p.c08=0;p.c08t=0;
+function entCancel(E,id){const p=E.P.find(x=>x.id===id);if(!p||p.st==="stop")return;if(p.gov!=null){const g=(E.G||[]).find(x=>x.id===p.gov);if(g&&g.st==="act")entGovFail(E,g,p,"работа прекращена исполнителем",.1);}const v=p.c08+p.c08t;if(v>0)entPost(E,"91.2","08.8",v,`Списаны затраты прекращённой работы «${p.n}»`);p.c08=0;p.c08t=0;
   if(p.mc>0){entPost(E,"91.2","10",p.mc,`Списаны материалы прекращённого изделия «${p.n}»`);p.mc=0;p.ms=0;}if(p.wipC>0){entPost(E,"91.2","20",p.wipC,`Списано незавершённое производство «${p.n}»`);p.wipC=0;}
   p.st="stop";p.plan=0;entLog(E,`Работа «${p.n}» прекращена, затраты ${entMoney(v,E)} списаны в убыток`,"w");}
-function entLicense(E,id){const p=E.P.find(x=>x.id===id);if(!p||!p.cert||p.lic||p.kind==="alloy")return"лицензию продать нельзя";const comps=E.comp.filter(x=>x.cat===p.cat&&x.on!==false);if(!comps.length)return"нет покупателей";
+function entLicense(E,id){const p=E.P.find(x=>x.id===id);if(p&&p.govIP)return"права на результаты ОКР по госконтракту принадлежат заказчику";if(!p||!p.cert||p.lic||p.kind==="alloy")return"лицензию продать нельзя";const comps=E.comp.filter(x=>x.cat===p.cat&&x.on!==false);if(!comps.length)return"нет покупателей";
   const q=s=>(s.f+s.p+s.m+s.r)/4,my=q(entPSc(E,p)),avg=comps.reduce((s,x)=>s+q(entCompScore(E,x)),0)/comps.length,k=entCl(1+(my-avg)/40,.3,1.6),med=entMed(comps.map(x=>x.pr));
   const lump=(p.r04+p.am*(E.m-(p.mCert||E.m)))*(.4+.5*k)*entR(.85,1.15),roy=.03*med*(ENT_SPOT[p.cat]||1)*2*k,buyer=comps[Math.floor(Math.random()*comps.length)].mk;
   entPost(E,"62","90.1",lump,`Продана лицензия на «${p.n}» (${buyer}): паушальный платёж`);entPost(E,"51","62",lump,`Получен паушальный платёж по лицензии «${p.n}»`);p.lic={buyer,roy,until:E.m+60};
@@ -6621,7 +6639,196 @@ function entCheck(E){const err=[],sum=Object.values(E.B).reduce((a,b)=>a+b,0),sc
   for(const k in E.B)if(!isFinite(E.B[k]))err.push("не число на счёте "+k);return err;}
 /* ---------- сохранение ---------- */
 function entSave(){try{if(ENT)localStorage.setItem("grom.ent",JSON.stringify(ENT));else localStorage.removeItem("grom.ent");}catch(e){}}
-function entLoad(){if(typeof localStorage==="undefined")return null;try{const s=JSON.parse(localStorage.getItem("grom.ent")||"null");if(s&&(s.v===2||s.v===3)&&s.B&&s.P){ENT=s;ENT_CMDS.forEach(c=>{if(ENT.ix[c]==null)ENT.ix[c]=1;});entWorldInit(ENT);return ENT;}}catch(e){console.warn(e);}return null;}
+function entLoad(){if(typeof localStorage==="undefined")return null;try{const s=JSON.parse(localStorage.getItem("grom.ent")||"null");if(s&&s.v>=2&&s.v<=4&&s.B&&s.P){ENT=s;ENT_CMDS.forEach(c=>{if(ENT.ix[c]==null)ENT.ix[c]=1;});entWorldInit(ENT);return ENT;}}catch(e){console.warn(e);}return null;}
+
+/* ===== Фирма v62: госзаказ на ОКР, модернизация серийных изделий, сравнительные испытания у заказчика, боевое применение =====
+   Госзаказ на ОКР — конкурс по тактико-техническому заданию: победитель получает возмещение фактических затрат с нормой прибыли
+   («затраты плюс», как в гособоронзаказе и контрактах cost-plus-fixed-fee), права на результат остаются у заказчика, после приёмки —
+   установочная партия; у КБ без завода серию выпускает завод заказчика, КБ получает плату за авторский надзор.
+   Модернизация — ОКР по новому варианту уже выпускаемого изделия: ≈40 % трудоёмкости, треть оснастки; серия и договоры переходят на новый вариант.
+   Испытания у заказчика — крупные тендеры решаются после сравнительных испытаний шорт-листа: отказы образцов снижают оценку,
+   скрытые дефекты вскрываются. Вооружённые конфликты поднимают спрос армий региона; отчёты о боевом применении меняют репутацию изделий и фирм.
+   Автоплан — выпуск под график поставок по договорам и под прямые продажи в пределах мощности. */
+const ENT_UPG={h:.4,ext:.5,test:.6,tool:.35,proto:.5,hid:.6};
+const ENT_GOVK={mk:.1};
+const ENT_GOVN={mbt:"основной боевой танк",ifv:"боевая машина пехоты",apc:"бронетранспортёр",how_t:"буксируемая гаубица",how_sp:"самоходная гаубица",at:"противотанковая пушка",tgun:"танковая пушка",auto:"автоматическая пушка",
+  am_ke:"бронебойный подкалиберный выстрел",am_heat:"кумулятивный выстрел",am_he:"осколочно-фугасный снаряд",am_auto:"выстрел к автоматической пушке"};
+const ENT_GOVC={ru:["Прорыв","Рубеж","Гранит","Кедр","Ольха","Терновник","Сосна","Пион","Вереск","Курган","Бастион","Тайфун","Магистраль","Клевер","Ястреб","Сармат"],
+  de:["Falke","Luchs","Fuchs","Adler","Wiesel","Keiler","Kranich","Igel","Dachs","Marder"],us:["XM1","XM9","XM30","XM11","XM204","XM1113","XM360","XM813","XM1155","XM1208"]};
+const ENT_GOVD={mbt:["f","p"],ifv:["p","m"],apc:["p","m"],how_t:["f"],how_sp:["f"],at:["f"],tgun:["f"],auto:["f"],am_ke:["f"],am_heat:["f"],am_he:["f"],am_auto:["f"]};
+const ENT_GOVDN={f:"огонь",p:"защита",m:"подвижность",r:"надёжность"};
+/* типовая трудоёмкость ОКР по категориям, нормо-ч — для предельной цены конкурса */
+const ENT_GOVH={mbt:1.4e6,ifv:.8e6,apc:.45e6,how_t:3e5,how_sp:3.5e5,at:3.4e5,tgun:2.9e5,auto:1.25e5,am_ke:9e4,am_heat:7e4,am_he:3.5e4,am_auto:2e4};
+const ENT_GOVM={veh:54,gun:36,ammo:24};
+/* требование ТТЗ в физических величинах (обратный пересчёт оценки) — подсказка конструктору */
+function entGovPh(cat,d,v){if(d==="f"&&(cat==="am_ke"||cat==="am_heat"))return`≈${Math.round(v*9)} мм брони`;if(d==="f"&&cat==="tgun")return`≈${Math.round(v*8.6)} мм подкалиберным`;
+  if(d==="f"&&cat==="am_he"&&v>35)return`≈${(Math.pow((v-35)/12,3)).toFixed(1).replace(".",",")} кг ТНТ в снаряде`;if(d==="p"&&(cat==="mbt"||cat==="ifv"||cat==="apc"))return`≈${Math.round(-350*Math.log(1-Math.min(.95,v/100)))} мм стали в лоб`;return"";}
+function entGovReq(g){return Object.entries(g.req).map(([d,v])=>{const ph=entGovPh(g.cat,d,v);return`${ENT_GOVDN[d]} не ниже ${v}${ph?` (${ph})`:""}`;}).join(", ");}
+/* испытания у заказчика: стоимость образцов и сопровождения, $; длительность, мес */
+const ENT_TRK={veh:{c:1.2e6,m:4},gun:{c:.5e6,m:3},ammo:{c:.25e6,m:2}};
+const ENT_TRF={veh:["отказ трансмиссии на марше","перегрев двигателя","течь гидросистемы подвески","сбой СУО"],gun:["задержка экстракции гильзы","сбой полуавтоматики затвора","разгар канала выше нормы","отказ досылателя"],
+  ammo:["разброс по дальности выше нормы","отказы взрывателей","срыв ведущего пояска","нестабильная баллистика партии"]};
+const ENT_CBT={veh:["экипажи пережили попадания, машины вернулись своим ходом","потери машин от огня противника выше ожидаемых"],gun:["высокая точность и живучесть ствола в интенсивной стрельбе","отказы противооткатных устройств и затвора"],
+  ammo:["высокая эффективность по целям","много отказов взрывателей и недолётов"]};
+/* вооружённые конфликты: вероятность начала ≈2 % в месяц (не больше двух одновременно), веса регионов, длительность 1–4 года; спрос и бюджеты армий региона растут */
+const ENT_WARR={me:.3,eu:.14,sa:.14,af:.16,sea:.1,ca:.06,ap:.05,la:.05};
+function entV62Init(E){if(!E.G)E.G=[];if(!E.war)E.war={};E.v=4;return E;}
+function entKindOf(cat){return["mbt","ifv","apc"].includes(cat)?"veh":String(cat).startsWith("am_")?"ammo":"gun";}
+function entV62Month(E){entGovMonth(E);entWarMonth(E);entCombat(E);}
+function entWarMonth(E){if(!E.war)E.war={};const act=Object.keys(E.war);
+  act.forEach(r=>{const w=E.war[r];if(E.m>=w.end){delete E.war[r];E.cust.forEach(c=>{if(c.reg===r&&!c.ret)c.bud/=1.15;});E.stop=true;entLog(E,`Конфликт в регионе «${ENT_REG[r]}» затих: закупки армий региона возвращаются к обычным`,"e");return;}
+    if(E.wd&&E.wd[r]!=null)E.wd[r]=Math.max(E.wd[r],1+w.k*.8);});
+  if(act.length<2&&Math.random()<.02){const L=Object.keys(ENT_WARR).filter(r=>!E.war[r]&&E.cust.some(c=>c.reg===r&&!c.ret));if(!L.length)return;const tot=L.reduce((a,r)=>a+ENT_WARR[r],0);let x=Math.random()*tot;
+    const r=L.find(q=>(x-=ENT_WARR[q])<0)||L[0],k=entR(.3,.6);E.war[r]={m0:E.m,end:E.m+Math.round(entR(12,48)),k};if(E.wd)E.wd[r]=Math.min(1.9,(E.wd[r]||1)+k);
+    E.cust.forEach(c=>{if(c.reg!==r||c.ret)return;c.bud*=1.15;for(const q in c.need)c.need[q]=Math.round(c.need[q]*(q.startsWith("am_")?1.5:1.2));});E.stop=true;
+    entLog(E,`Вооружённый конфликт в регионе «${ENT_REG[r]}»: армии региона срочно закупают боеприпасы и технику — спрос +${Math.round(k*100)} %, бюджеты +15 %`,"e");}}
+
+/* ---------- 1. Госзаказ на ОКР ---------- */
+function entGovGen(E){const H=E.home,cats=Object.keys(H.need).filter(k=>H.need[k]>0&&ENT_GOVD[k]&&!E.G.some(g=>g.cat===k&&(g.st==="open"||g.st==="apply"||g.st==="act")));if(!cats.length)return null;
+  const cat=cats[Math.floor(Math.random()*cats.length)],kind=entKindOf(cat),comps=E.comp.filter(x=>x.cat===cat&&x.on!==false),req={};
+  ENT_GOVD[cat].forEach(d=>{const v=comps.map(x=>entCompScore(E,x)[d]).sort((a,b)=>a-b),med=v.length?v[Math.floor(v.length/2)]:50;req[d]=Math.round(entCl(med+entR(-4,5),15,95));});
+  const C=entC(E),rate=["des","eng","tst"].reduce((s,k)=>s+entWage(E,k),0)/3*(1+C.social)/(ENT_HPM*.85),
+    bud=Math.round((ENT_GOVH[cat]*rate*1.3+{veh:5e6,gun:2.5e6,ammo:1e6}[kind]*E.fx*C.toolK)*entR(.9,1.2)),
+    codes=ENT_GOVC[E.c]||ENT_GOVC.ru,code=codes[Math.floor(Math.random()*codes.length)],am=kind==="ammo",need=H.need[cat]||0,
+    batch=am?Math.max(2000,Math.round(need*entR(.08,.15)/1000)*1000):Math.max(2,Math.round(need*entR(.08,.15)));
+  const g={id:E.id++,cat,kind,n:`ОКР «${code}» — ${ENT_GOVN[cat]}`,req,bud,mo:ENT_GOVM[kind],dlA:E.m+Math.round(entR(2,4)),st:"open",pid:null,fund:0,rev:0,c0:0,dl:null,batch,riv:1+Math.floor(Math.random()*3),fee:0};
+  E.G.push(g);if(E.P.some(p=>p.st==="rd"&&p.cat===cat)||E.start==="kb")E.stop=true;
+  entLog(E,`${H.n} объявил конкурс: ${g.n}. ТТЗ: ${entGovReq(g)}; финансирование до ${entMoney(bud,E)}; заявки до ${entDate(E,g.dlA)}`,"g");return g;}
+function entGovCheck(E,g,p){if(!p)return"нет изделия";if(p.cat!==g.cat)return"другая категория изделий";if(p.st!=="rd")return"нужна ОКР в работе (до приёмки)";if(p.gov!=null&&p.gov!==g.id)return"по этой ОКР уже есть госконтракт";
+  const s=p.it.sc,miss=Object.entries(g.req).filter(([d,v])=>(s[d]||0)<v);if(miss.length)return"не выполнено ТТЗ: "+miss.map(([d,v])=>`${ENT_GOVDN[d]} ${s[d]||0} из ${v}`).join(", ");return"";}
+function entGovApply(E,gid,pid){const g=E.G.find(x=>x.id===gid),p=E.P.find(x=>x.id===pid);if(!g||(g.st!=="open"&&g.st!=="apply"))return"конкурс закрыт";const why=entGovCheck(E,g,p);if(why)return why;
+  const L=entProjLeft(E,p);if(L>g.mo*1.5)return`при нынешнем КБ ОКР займёт ≈${L} мес — не успеть к сроку ${g.mo} мес`;
+  if(!g.fee){g.fee=1;entBuy(E,"44",{veh:150e3,gun:80e3,ammo:50e3}[g.kind]*E.fx,`Конкурсная документация: ${g.n}`);}g.st="apply";g.pid=p.id;return"";}
+function entGovWithdraw(E,gid){const g=E.G.find(x=>x.id===gid);if(g&&g.st==="apply"){g.st="open";g.pid=null;}}
+function entGovJudge(E,g){const p=g.pid!=null?E.P.find(x=>x.id===g.pid):null,why=p?entGovCheck(E,g,p):"нет заявки";g.endM=E.m;
+  if(!p||why){g.st="closed";if(p){E.stop=true;entLog(E,`Заявка на ${g.n} снята: ${why}`,"w");}return;}
+  const s=p.it.sc,marg=Object.entries(g.req).reduce((a,[d,v])=>a+((s[d]||0)-v)/12,0),my=.55+(E.rep-50)/150+Math.min(.8,marg*1.5)+(p.stg>=2?.15:0)+(p.stg>=3?.1:0)+entR(-.25,.25);let best=-9;for(let i=0;i<g.riv;i++)best=Math.max(best,entR(.1,.95));
+  E.stop=true;if(my<best){g.st="lost";entLog(E,`${g.n}: конкурс проигран — заказчик выбрал проект другого разработчика`,"w");return;}
+  const est=entProjEst(E,p.it),left=Math.max(.05,1-entProg(p));g.bud=Math.round(Math.min(g.bud,est.money*left*1.2));g.st="act";g.dl=E.m+g.mo;g.c0=p.c08;p.gov=g.id;p.govIP=true;
+  entLog(E,`Выигран конкурс: ${g.n} — госконтракт на ОКР «${p.n}». Затраты возмещаются с нормой прибыли ${Math.round(ENT_GOVK.mk*100)} % (до ${entMoney(g.bud,E)}), срок сдачи — ${entDate(E,g.dl)}; права на результат — у заказчика`,"g");}
+/* возмещение затрат этапов ОКР по госконтракту: месячные затраты на 08 → себестоимость, выручка «затраты плюс» */
+function entGovRD(E){if(!E.G||!E.G.length)return;const C=entC(E);
+  E.G.forEach(g=>{if(g.st!=="act")return;const p=E.P.find(x=>x.id===g.pid);if(!p||p.st!=="rd")return;const d=p.c08-g.c0;
+    if(d>1){const f=Math.min(d,Math.max(0,g.bud-g.fund));if(f>1){const net=f*(1+ENT_GOVK.mk),vat=net*C.vat;entPost(E,"90.2","08.8",f,`Себестоимость этапа ОКР по госконтракту «${p.n}»`);p.c08-=f;
+      entPost(E,"62","90.1",net+vat,`Сдан этап ОКР по госконтракту: ${g.n}`);if(vat>0)entPost(E,"90.3","68.2",vat,`НДС: этап ОКР «${p.n}»`);E.recv.push({m:E.m+1,loc:net+vat,usd:0,kid:"ОКР-"+g.id});g.fund+=f;g.rev+=net;
+      if(g.fund>=g.bud-1&&!g.wB){g.wB=1;E.stop=true;entLog(E,`${g.n}: лимит финансирования исчерпан — дальнейшие затраты за счёт фирмы`,"w");}}}
+    g.c0=p.c08;});}
+function entGovCert(E,p){const g=(E.G||[]).find(x=>x.id===p.gov);if(!g||g.st!=="act")return;g.st="done";g.endM=E.m;E.rep=Math.min(100,E.rep+4);E.stop=true;
+  const shops=ENT_SHOPS.some(k=>E.shops[k].pos>0);
+  if(!shops){const comps=E.comp.filter(x=>x.cat===p.cat),med=comps.length?entMed(comps.map(x=>x.pr)):0,roy=Math.round(.015*med*g.batch/12);p.lic={buyer:"серийный завод заказчика",roy,until:E.m+60,gov:1};
+    entLog(E,`${g.n} выполнена: «${p.n}» принят, репутация +4. Серию выпускает завод заказчика, КБ получает за авторский надзор ≈${entUsd(roy)} в месяц 5 лет`,"g");return;}
+  p.govB=g.batch;entLog(E,`${g.n} выполнена: «${p.n}» принят, репутация +4. После подготовки производства — установочная партия ${Math.round(g.batch)} шт.`,"g");if(p.st==="ser")entGovBatch(E,p);}
+function entGovBatch(E,p){const q=p.govB;p.govB=0;if(!(q>0))return;const C=entC(E),am=p.kind==="ammo",uc=entUnitCost(E,p,Math.max(1,q/12)),ga=1+(E.gaK||.12),price=uc.tot*ga*(1+C.homeMarg),FR=entFreeRate(E,p),
+    r0=Math.min(q/11,Math.max(am?50:1,FR.free)),rate=am?Math.max(50,Math.ceil(r0/50)*50):Math.max(1,Math.ceil(r0));
+  const o={id:E.id++,pid:p.id,qty:q,price:Math.round(price),rate,start:E.m+2,exp:E.m+3,share:1,gov:1};E.O.push(o);E.stop=true;
+  entLog(E,`${E.home.n}: установочная партия по итогам ОКР — «${p.n}», ${q} шт. по ${entMoney(o.price,E)} без НДС (затраты плюс ${Math.round(C.homeMarg*100)} %); ответить до ${entDate(E,o.exp)}`,"g");}
+function entGovFail(E,g,p,why,k){g.st="fail";g.endM=E.m;const fine=g.fund*(k||.05);if(fine>1)entPost(E,"91.2","51",fine,`Штраф по госконтракту на ОКР (${g.n})`);E.rep=Math.max(0,E.rep-6);E.stop=true;if(p)p.gov=null;
+  entLog(E,`${g.n}: ${why} — штраф ${entMoney(fine,E)}, репутация −6; права на выполненную часть остаются у заказчика`,"w");}
+function entGovMonth(E){if(!E.G)E.G=[];
+  if(E.m>=2&&Math.random()<(E.start==="kb"?.08:.055)&&E.G.filter(g=>g.st==="open"||g.st==="apply").length<2)entGovGen(E);
+  E.G.forEach(g=>{if((g.st==="open"||g.st==="apply")&&g.dlA<=E.m)entGovJudge(E,g);
+    else if(g.st==="act"){const p=E.P.find(x=>x.id===g.pid);if(!p||p.st==="stop")entGovFail(E,g,p,"работа прекращена",.1);
+      else if(p.st==="rd"&&E.m>g.dl)entGovFail(E,g,p,"сорван срок сдачи ОКР",.05);
+      else if(p.st==="rd"&&g.dl-E.m<=6&&!g.w6){g.w6=1;const L=entProjLeft(E,p);if(L>g.dl-E.m){E.stop=true;entLog(E,`${g.n}: до срока сдачи ${g.dl-E.m} мес, а работ осталось ≈${L} мес — поднимите приоритет ОКР или наберите людей`,"w");}}}});
+  E.G=E.G.filter(g=>g.st==="open"||g.st==="apply"||g.st==="act"||E.m-(g.endM||g.dlA)<36);}
+
+/* ---------- 2. Модернизация ---------- */
+function entUpgName(p){const b=p.n.replace(/-М\d*$/,""),k=(p.upgN||0)+1;return(b+(k===1?"-М":"-М"+k)).slice(0,40);}
+function entUpgCheck(E,p,src){if(!p||(p.st!=="ser"&&p.st!=="cert"&&p.st!=="tpp"))return"модернизировать можно принятое изделие";if(p.kind==="alloy")return"сплавы не модернизируются";
+  if(E.P.some(q=>q.upg===p.id&&q.st==="rd"))return"модернизация уже идёт";if(!src)return"выберите новый вариант";if(src.kind!==p.kind)return"другой вид изделия";if(p.kind==="ammo"&&src.t!==p.t)return"другой тип выстрела";if(p.kind!=="veh"&&+((src.d||{}).cal)!==+((p.d||{}).cal))return"другой калибр — это новое изделие, а не модернизация";return"";}
+function entUpgNew(E,pid,src){const p=E.P.find(x=>x.id===pid),why=entUpgCheck(E,p,src);if(why)return why;let it=null;
+  try{it=src.kind==="veh"?entItemVeh(src.d):src.kind==="gun"?entItemGun(src.d):entItemAmmo(src.d,src.t);}catch(e){return"не удалось рассчитать изделие";}
+  if(!it||it.cat!==p.cat)return`новый вариант относится к другой категории (${it?ENT_CAT[it.cat]:"?"})`;const q=entProjNew(E,{kind:src.kind,d:src.d,t:src.t,n:entUpgName(p),upg:p.id});return q?"":"не удалось открыть ОКР";}
+/* приёмка модернизации: затраты — в нематериальный актив изделия, оснастка — сразу, серия переходит на новый вариант */
+function entUpgCert(E,q){const p=E.P.find(x=>x.id===q.upg);if(!p||p.st==="stop"||p.st==="done")return false;const C=entC(E),v=q.c08,s0=entPSc(E,p);
+  if(v>0)entPost(E,"04","08.8",v,`Приняты результаты ОКР модернизации «${q.n}» (литера О1)`);q.c08=0;q.cert=true;q.mCert=E.m;p.r04=(p.r04||0)+v;p.am=p.r04/60;
+  if(q.it.techL&&q.it.techL.length&&typeof entTechLearn==="function")entTechLearn(E,q.it.techL,`ОКР «${q.n}»`);
+  const tool=q.it.tool$*E.fx*C.toolK*entIx(E,"st")*(E.tech?entTechK(E).tool:1);if(tool>0&&ENT_SHOPS.some(k=>E.shops[k].pos>0))entBuy(E,"01.2",tool,`Оснастка под модернизацию «${q.n}»`);
+  const old=p.n;p.it=q.it;p.d=q.d;p.did=q.did;p.t=q.t;p.std=q.std;p.n=q.n;p.wu=(p.wu||0)*.7;p.hid=(p.hid||0)+(q.hid||0);p.found+=q.found||0;p.fixH=(p.fixH||0)+(q.fixH||0);p.upgN=(p.upgN||0)+1;p.mUpg=E.m;
+  q.st="done";q.merged=p.id;E.rep=Math.min(100,E.rep+1);E.stop=true;const s1=entPSc(E,p);
+  entLog(E,`Модернизация принята: «${old}» → «${p.n}». Оценка О/З/П/Н была ${s0.f}/${s0.p}/${s0.m}/${s0.r}, стала ${s1.f}/${s1.p}/${s1.m}/${s1.r}; серия, склад и договоры переходят на новый вариант`,"g");
+  if(q.gov!=null){p.gov=q.gov;p.govIP=true;entGovCert(E,p);}return true;}
+
+/* ---------- 3. Сравнительные испытания у заказчика ---------- */
+function entTrialNeed(E,t){return!!(t.big||t.qty*t.maxP>=1.5e8);}
+function entTrialStart(E,t,bids,me){if(!me||bids.length<2||!entTrialNeed(E,t))return false;const sl=bids.slice(0,3);if(!sl.includes(me))return false;
+  const p=me.p,K=ENT_TRK[p.kind]||ENT_TRK.gun,c=E.cust[t.cu];
+  t.sl=sl.map(b=>({me:!!b.me,n:b.n,mk:b.mk||"",price:b.price,rate:b.rate,s:b.s,pol:b.pol||0,P:b.P,xi:b.x?E.comp.indexOf(b.x):-1,pid:b.me?p.id:null}));
+  t.st="trial";t.trM=E.m+K.m;t.trP=0;entBuy(E,"44",K.c*E.fx,`Образцы на сравнительные испытания: ${c.n} (доставка, расчёты, сопровождение)`,true);E.stop=true;
+  entLog(E,`Тендер ${c.n} (${ENT_CAT[t.cat]}): шорт-лист — ${sl.map(b=>b.me?"«"+b.n+"» (вы)":b.n).join(", ")}. Сравнительные испытания на полигоне заказчика до ${entDate(E,t.trM)}; подготовку образцов можно усилить во вкладке «Рынок»`,"g");return true;}
+function entTrialPrep(E,tid){const t=E.T.find(x=>x.id===tid);if(!t||t.st!=="trial")return"испытаний нет";if(t.trP)return"подготовка уже усилена";const b=(t.sl||[]).find(x=>x.me),p=b&&E.P.find(x=>x.id===b.pid);if(!p)return"изделие не найдено";
+  const K=ENT_TRK[p.kind]||ENT_TRK.gun;entBuy(E,"44",K.c*E.fx,`Подготовка образцов к испытаниям (${E.cust[t.cu].n}): доводка, контрольные прогоны, бригада сопровождения`,true);t.trP=1;return"";}
+function entTrial(E,t){const c=E.cust[t.cu],bids=[],rep=[];let me=null;
+  (t.sl||[]).forEach(b=>{let lam,sc,p=null,x=null;
+    if(b.me){p=E.P.find(y=>y.id===b.pid);if(!p||p.st==="stop")return;sc=entPSc(E,p);lam=(.35*(p.hid||0)+(p.fixH>0?.3:0)+(p.st==="rd"?.4:0)+.08)*(t.trP?.5:1);}
+    else{x=E.comp[b.xi];if(!x)return;sc=entCompScore(E,x);lam=.18+(x.y&&entYear(E)-x.y<2?.2:0);}
+    const fails=entPois(lam),tr=-.3*fails+(sc.r-70)/80+.12*entGauss(),nb=Object.assign({},b,{s:b.s+tr,x,p,fails});nb.P=Object.assign({},b.P,{tr:+tr.toFixed(2)});bids.push(nb);if(b.me)me=nb;
+    const F=ENT_TRF[p?p.kind:entKindOf(x.cat)]||ENT_TRF.gun;rep.push(`${b.me?"«"+b.n+"»":b.n} — ${fails?fails+" "+(fails===1?"отказ":fails<5?"отказа":"отказов")+" ("+F[Math.floor(Math.random()*F.length)]+")":"без отказов"}`);
+    if(p&&fails){const f=Math.min(fails,p.hid||0);if(f>0){p.hid-=f;p.found+=f;p.fixH+=f*p.it.rdH*.006;}}});
+  E.stop=true;entLog(E,`Испытания у заказчика (${c.n}): ${rep.join("; ")}`,me&&me.fails?"w":"i");bids.sort((a,b)=>b.s-a.s);t.st=me?"bid":"closed";entAward(E,t,bids,me);}
+
+/* ---------- 4. Боевое применение ---------- */
+function entCpK(E,p){return(p&&p.cp!=null&&E.m-p.cp<36?.12:0)-(p&&p.cpBad!=null&&E.m-p.cpBad<24?.1:0);}
+function entCombat(E){if(!E.wd)return;const perf=(sc,kind)=>kind==="veh"?.5*sc.p+.3*sc.r+.2*sc.m:.6*sc.f+.4*sc.r;
+  for(const r in E.wd){const T=E.wd[r],war=E.war&&E.war[r];if(!war&&T<1.15)continue;if(Math.random()>(war?.12:(T-1.1)*.05))continue;
+    const mine=[];E.K.forEach(k=>{if(k.cu<0||k.dlv<=0)return;const c=E.cust[k.cu];if(!c||c.reg!==r)return;const p=E.P.find(x=>x.id===k.pid);if(p&&p.kind!=="alloy"&&p.st!=="stop"&&!mine.some(q=>q[0]===p))mine.push([p,c]);});
+    if(mine.length&&Math.random()<.45){const [p,c]=mine[Math.floor(Math.random()*mine.length)],v=perf(entPSc(E,p),p.kind)+10*entGauss()-8*(p.hid||0),T2=ENT_CBT[p.kind]||ENT_CBT.gun;
+      if(v>=66){E.rep=Math.min(100,E.rep+3);E.cust.forEach(q=>{if(q.reg===r&&!q.ret)q.rel=Math.min(100,(q.rel||50)+4);});p.cp=E.m;E.stop=true;
+        entLog(E,`Боевое применение («${ENT_REG[r]}»): «${p.n}» — ${T2[0]}. Репутация +3, доверие армий региона +4; «проверено в бою» — три года заявки и прямые продажи оцениваются выше`,"g");}
+      else if(v<48){E.rep=Math.max(0,E.rep-4);c.rel=Math.max(0,(c.rel||50)-6);p.cpBad=E.m;let fx="";if(p.hid>0){p.hid--;p.found++;p.fixH+=p.it.rdH*.008;fx="; вскрыт дефект — конструкторы дорабатывают";}E.stop=true;
+        entLog(E,`Боевое применение («${ENT_REG[r]}»): «${p.n}» — ${T2[1]}. Репутация −4, доверие заказчика −6${fx}`,"w");}
+      continue;}
+    const A=E.comp.filter(x=>x.on!==false&&E.cust.some(c=>c.reg===r&&!c.ret&&(c.pol[x.co]||0)>0&&c.need[x.cat]>0));if(!A.length)continue;
+    const x=A[Math.floor(Math.random()*A.length)],kind=entKindOf(x.cat),v=perf(entCompScore(E,x),kind)+10*entGauss(),T2=ENT_CBT[kind];
+    if(v>=66){x.rep=Math.min(90,(x.rep||70)+8);x.up=(x.up||0)+1.5;entLog(E,`Боевое применение («${ENT_REG[r]}»): ${x.n} (${x.mk}) — ${T2[0]}; спрос на него растёт`,"e");}
+    else if(v<48){x.rep=Math.max(20,(x.rep||70)-12);entLog(E,`Боевое применение («${ENT_REG[r]}»): ${x.n} (${x.mk}) — ${T2[1]}; доверие заказчиков к нему упало`,"e");}}}
+
+/* ---------- интерфейс ---------- */
+function entSrcCat(s){const d=s&&s.d||{};if(!s)return"";if(s.kind==="veh")return d.cls==="tank"?"mbt":d.cls==="ifv"?"ifv":"apc";if(s.kind==="ammo")return d.cls==="auto"?"am_auto":ENT_AMT[s.t]||"am_he";
+  if(s.kind==="gun")return d.cls==="auto"?"auto":d.cls==="how"?((d.mount==="spg"||d.mount==="truck")?"how_sp":"how_t"):(d.mount==="towed"?"at":"tgun");return"";}
+function entGovCard(E,g){const P=E.P.filter(p=>p.st==="rd"&&p.cat===g.cat&&(p.gov==null||p.gov===g.id)),req=entGovReq(g);let body="";
+  if(g.st==="act"){const p=E.P.find(x=>x.id===g.pid),L=p&&p.st==="rd"?entProjLeft(E,p):0;
+    body=`${entBar(g.fund/Math.max(1,g.bud),"ok")}<div class="entkv"><span>ОКР</span><b>«${eE(p?p.n:"?")}» · ${p&&p.st==="rd"?ENT_STG[p.stg].n.toLowerCase():"принята"}</b><span>Возмещено затрат</span><b>${entMoney(g.fund,E)} из ${entMoney(g.bud,E)}</b><span>Выручка с нормой прибыли</span><b>${entMoney(g.rev,E)}</b>
+      <span>Срок сдачи</span><b class="${L>g.dl-E.m?"neg":""}">${entDate(E,g.dl)} · осталось ${Math.max(0,g.dl-E.m)} мес${L?`, работ ≈${L} мес`:""}</b><span>Установочная партия</span><b>${eN(g.batch)} шт.</b></div>`;}
+  else{const sv=ENTUI.gp&&ENTUI.gp[g.id]!=null?+ENTUI.gp[g.id]:(g.pid!=null?g.pid:(P[0]&&P[0].id)),p=E.P.find(x=>x.id===sv),why=p?entGovCheck(E,g,p):"нет подходящей ОКР",L=p&&!why?entProjLeft(E,p):0;
+    body=`<div class="entkv"><span>ТТЗ</span><b>${req}</b><span>Финансирование</span><b>до ${entMoney(g.bud,E)} · затраты + ${Math.round(ENT_GOVK.mk*100)} %</b><span>Срок ОКР</span><b>${g.mo} мес с контракта</b><span>Установочная партия</span><b>${eN(g.batch)} шт.</b>
+      <span>Заявки до</span><b>${entDate(E,g.dlA)} · соперников ${g.riv}</b>${g.st==="apply"?`<span>Ваша заявка</span><b>«${eE((E.P.find(x=>x.id===g.pid)||{}).n||"?")}»</b>`:""}</div>
+    ${P.length?`${entSel("gp:"+g.id,Object.fromEntries(P.map(x=>[x.id,`${eE(x.n)} (${ENT_GOVD[g.cat].map(d=>ENT_GOVDN[d]+" "+(x.it.sc[d]||0)).join(", ")})`])),sv)}${why?`<p class="tag neg">${eE(why)}</p>`:`<p class="tag">ТТЗ выполнено${L?`, по оценке ≈${L} мес работ${L>g.mo?` — <span class="neg">дольше срока</span>`:""}`:""}. Шансы выше при запасе по требованиям, поздней стадии ОКР и хорошей репутации.</p>`}`
+      :`<p class="tag">Подходящей ОКР нет. Создайте изделие с нужными характеристиками в «Цехе» и откройте ОКР во вкладке «КБ» — заявку можно подать до ${entDate(E,g.dlA)}.</p>`}
+    <div class="row1">${g.st==="apply"?`<button data-a="gwd" data-v="${g.id}">Отозвать</button>`:""}<button class="wsgo" data-a="gapp" data-v="${g.id}"${!p||why?" disabled":""}>${g.st==="apply"?"Заменить заявку":"Подать заявку"}</button></div>`;}
+  return`<div class="entcard${g.st==="act"?" hl":""}"><div class="enth"><b>${eE(g.n)}</b><span>${{open:"конкурс",apply:"заявка подана",act:"госконтракт"}[g.st]||""}</span></div>${body}</div>`;}
+function entGovH(E){const L=(E.G||[]).filter(g=>g.st==="open"||g.st==="apply"||g.st==="act"),
+    done=(E.G||[]).filter(g=>!["open","apply","act"].includes(g.st)).slice(-6).reverse().map(g=>`<div class="entl ${g.st==="done"?"g":g.st==="fail"||g.st==="lost"?"w":"i"}"><i>${entDate(E,g.endM!=null?g.endM:g.dlA)}</i>${eE(g.n)} — ${{done:"выполнена, принята заказчиком",fail:"сорвана",lost:"конкурс проигран",closed:"без вашей заявки"}[g.st]||g.st}</div>`).join("");
+  if(!L.length&&!done)return"";
+  return`<span class="lbl">Госзаказ на ОКР</span>${L.map(g=>entGovCard(E,g)).join("")||"<p class='tag'>Открытых конкурсов нет — министерство объявляет их несколько раз в год.</p>"}
+  <p class="tag">Министерство финансирует ОКР по «затраты плюс»: фактические затраты КБ и опытного производства возмещаются с нормой прибыли до предельной суммы; права на результат — у заказчика, лицензию продать нельзя. После приёмки — установочная партия; если завода нет, серию выпускает завод заказчика, а КБ получает плату за авторский надзор. Срыв срока — штраф 5 % полученного и репутация −6.</p>
+  ${done?entSec("gdone","Итоги конкурсов ОКР","",done,false):""}`;}
+function entTrialCard(E,t){const c=E.cust[t.cu],me=(t.sl||[]).find(b=>b.me),p=me&&E.P.find(x=>x.id===me.pid),K=p?(ENT_TRK[p.kind]||ENT_TRK.gun):ENT_TRK.gun;
+  return`<div class="entcard hl"><div class="enth"><b>${eE(c.n)} · испытания</b><span>${ENT_CAT[t.cat]}</span></div><div class="entkv"><span>Шорт-лист</span><b>${(t.sl||[]).map(b=>b.me?"«"+eE(b.n)+"» (вы)":eE(b.n)).join(", ")}</b>
+    <span>Количество</span><b>${eN(t.qty)} шт.</b><span>Испытания до</span><b>${entDate(E,t.trM)}</b><span>Ваш образец</span><b>${p?`«${eE(p.n)}» · надёжность ${entPSc(E,p).r}${p.fixH>0?" · дефекты в доработке":""}`:"—"}</b><span>Подготовка</span><b>${t.trP?"усилена — отказов вдвое меньше":"обычная"}</b></div>
+  ${t.trP||!p?"":`<button class="wsgo" data-a="trp" data-v="${t.id}">Усилить подготовку · ${entMoney(K.c*E.fx,E)}</button>`}<p class="tag">Шорт-лист проверяют на полигоне заказчика: каждый отказ снижает оценку заявки, высокая надёжность добавляет. Скрытые дефекты вскрываются — конструкторы их доработают. Отказы бывают и у конкурентов, чаще у новинок.</p></div>`;}
+function entUpgH(E,p){if(p.kind==="alloy"||!(p.st==="ser"||p.st==="cert"||p.st==="tpp"))return"";const run=E.P.find(q=>q.upg===p.id&&q.st==="rd");
+  if(run)return`<p class="tag">Идёт модернизация: «${eE(run.n)}» — ${ENT_STG[run.stg].n.toLowerCase()}, ≈${entProjLeft(E,run)} мес.</p>`;
+  const L=entSrcList().filter(s=>s.kind===p.kind&&(p.kind!=="ammo"||s.t===p.t)&&entSrcCat(s)===p.cat&&(p.kind==="veh"||+((s.d||{}).cal)===+((p.d||{}).cal)));if(!L.length)return"";
+  const sid=(ENTUI.up&&ENTUI.up[p.id])||"",s=L.find(x=>x.id===sid);let info="";
+  if(s){let it=null;try{it=s.kind==="veh"?entItemVeh(s.d):s.kind==="gun"?entItemGun(s.d):entItemAmmo(s.d,s.t);}catch(e){}
+    if(it){const RP=entRdPrep(E,it),h=Math.round((RP.rdH-RP.need.h-RP.qH)*ENT_UPG.h+RP.need.h+RP.qH),it2=Object.assign({},it,{rdH:h,ext:it.ext*ENT_UPG.ext,test$:it.test$*ENT_UPG.test,proto:Math.max(1,Math.round(it.proto*ENT_UPG.proto))}),est=entProjEst(E,it2),a=entPSc(E,p),b=it.sc;
+      const d=k=>{const x=(b[k]||0)-(a[k]||0);return`<b class="${x>0?"pos":x<0?"neg":""}">${b[k]||0}</b>`;};
+      info=`<div class="entkv"><span>Было → станет (О/З/П/Н)</span><b>${a.f}/${a.p}/${a.m}/${a.r} → ${d("f")}/${d("p")}/${d("m")}/${d("r")}</b><span>ОКР модернизации</span><b>${Math.round(h/1000)} тыс. нормо-ч · ≈${est.mo} мес · ≈${entMoney(est.money,E)}</b>
+        <span>Оснастка</span><b>${entMoney(it.tool$*ENT_UPG.tool*E.fx*entC(E).toolK,E)}</b>${RP.need.L.length?`<span>Новые технологии</span><b class="neg">${RP.need.L.map(t=>eE(t.n)).join(", ")}</b>`:""}</div>`;}}
+  return entSec("upg"+p.id,"Модернизация",`${p.upgN?"было "+p.upgN+" · ":""}≈40 % трудоёмкости`,`${entSel("up:"+p.id,Object.assign({"":"— новый вариант из цеха —"},Object.fromEntries(L.map(x=>[x.id,eE(x.n)]))),sid)}${info}
+    <button class="wsgo" data-a="upgo" data-v="${p.id}"${s?"":" disabled"}>Открыть ОКР модернизации</button><p class="tag">Новый вариант изделия (из «Цеха») проходит сокращённую ОКР: ≈40 % трудоёмкости, полкомплекта опытных образцов, треть оснастки. Серия не останавливается; после приёмки выпуск, склад и договоры переходят на новый вариант, освоение сохраняется на 70 %. Конкуренты каждый год улучшают свои образцы — без модернизации изделие стареет.</p>`,false);}
+function entPCardX(E,p){let o="";const g=p.gov!=null?(E.G||[]).find(x=>x.id===p.gov):null;
+  if(g&&g.st==="act")o+=`<span>Госконтракт</span><b>${eE(g.n)} · возмещено ${entMoney(g.fund,E)} из ${entMoney(g.bud,E)} · сдать до ${entDate(E,g.dl)}</b>`;
+  if(p.upg!=null){const b=E.P.find(x=>x.id===p.upg);o+=`<span>Модернизация изделия</span><b>${b?"«"+eE(b.n)+"»":"—"}</b>`;}
+  if(p.govIP)o+=`<span>Права на результат</span><b>у заказчика — лицензию продать нельзя</b>`;
+  if(p.lic&&p.lic.gov)o+=`<span>Авторский надзор</span><b>≈${entUsd(p.lic.roy)} в месяц до ${entDate(E,p.lic.until)}</b>`;
+  return o;}
+/* ---------- 5. Автоплан выпуска: под договоры (с догоном отставания) и под прямые продажи, в пределах мощности ---------- */
+function entAutoPlan(E,p){const am=p.kind==="ammo";let r=0,left=0,due=0;
+  E.K.forEach(k=>{if(k.st!=="act"||k.pid!==p.id)return;left+=k.qty-k.dlv;if(k.start>E.m+2)return;r+=k.rate;due+=Math.max(0,Math.min(k.qty,k.rate*Math.max(0,E.m-k.start+2))-k.dlv);});
+  const have=(p.stock||0)+(p.pend||0),catch_=Math.max(0,due-have)/2,spot=p.list>0?Math.max(p.spotA||0,(ENT_SPOT[p.cat]||0)*.5):0,free=Math.max(0,have-due),top=Math.max(0,spot*1.5-free);
+  let q=Math.min(r+catch_,Math.max(0,left-have))+top;q=Math.min(q,entCapM(E,p)*.98);if(!(q>0))return 0;return am?Math.ceil(q/50)*50:Math.max(1,Math.round(q));}
 
 /* ===== Фирма: интерфейс (вкладка «Фирма») ===== */
 var ENTUI={seg:"ov",cc:"",open:{},bid:null,conf:"",msg:"",new:{c:"ru",start:"pr",kbN:"ОКБ «Гром»",plN:"Завод «Гром»"},np:"",jn:30};
@@ -6674,9 +6881,12 @@ function entHints(E){const C=entC(E),o=[],cash=E.B["51"]||0,burn=entBurn(E);
   const ku=E.kbUse;if(ku&&E.kb.des+E.kb.eng+E.kb.tst>0){const id=["des","eng","tst"].filter(k=>E.kb[k]>0&&ku[k]<.5);if(id.length)o.push(["w",`КБ загружено слабо (${id.map(k=>({des:"конструкторы",eng:"технологи",tst:"испытатели"})[k]+" "+ePct(ku[k])).join(", ")}): простой идёт в управленческие расходы. Откройте ОКР или сократите штат.`]);}
   if(E.util!=null&&ENT_SHOPS.some(k=>E.shops[k].pos)&&E.util<.5)o.push(["w",`Цеха загружены на ${ePct(E.util)}: накладные расходы простаивающих мощностей списываются в убыток.`]);
   E.K.filter(k=>k.st==="act").forEach(k=>{const p=E.P.find(x=>x.id===k.pid);if(!p)return;const due=Math.min(k.qty,k.rate*Math.max(0,E.m-k.start+1));if(k.dlv<due)o.push(["w",`Договор №${k.id} (${eE(k.cuN)}): отставание ${due-k.dlv} шт. — неустойка каждый месяц.`]);
-    else if(E.m>=k.start-2&&p.st==="ser"&&p.plan<k.rate)o.push(["i",`«${eE(p.n)}»: план выпуска ${p.plan}/мес меньше темпа поставок по договору №${k.id} (${k.rate}/мес).`]);});
-  E.P.filter(p=>p.st==="ser"&&!p.plan&&!p.pause).forEach(p=>o.push(["i",`«${eE(p.n)}» готов к серии, но план выпуска 0 — задайте его во вкладке «Завод».`]));
+    else if(E.m>=k.start-2&&p.st==="ser"&&!p.auto&&p.plan<k.rate)o.push(["i",`«${eE(p.n)}»: план выпуска ${p.plan}/мес меньше темпа поставок по договору №${k.id} (${k.rate}/мес).`]);});
+  E.P.filter(p=>p.st==="ser"&&!p.plan&&!p.pause).forEach(p=>o.push(["i",p.auto?`«${eE(p.n)}»: автоплан 0 — договоров нет. Для прямых продаж задайте экспортную цену или план вручную («Завод»).`:`«${eE(p.n)}» готов к серии, но план выпуска 0 — задайте его во вкладке «Завод».`]));
   E.P.filter(p=>p.st==="cert"&&!p.lic).forEach(p=>o.push(["i",`«${eE(p.n)}» принят, но своих цехов нет: продайте лицензию («КБ») или купите оборудование («Завод»).`]));
+  (E.G||[]).filter(g=>g.st==="open"&&E.P.some(p=>p.st==="rd"&&p.cat===g.cat&&!entGovCheck(E,g,p))).forEach(g=>o.push(["g",`Конкурс ${eE(g.n)}: ваша ОКР подходит под ТТЗ — заявка до ${entDate(E,g.dlA)} («Рынок»).`]));
+  (E.G||[]).filter(g=>g.st==="act").forEach(g=>{const p=E.P.find(x=>x.id===g.pid);if(p&&p.st==="rd"){const L=entProjLeft(E,p);if(L>g.dl-E.m)o.push(["w",`${eE(g.n)}: работ ≈${L} мес, до срока сдачи ${Math.max(0,g.dl-E.m)} — поднимите приоритет ОКР или наберите людей в КБ.`]);}});
+  E.T.filter(t=>t.st==="trial").forEach(t=>o.push(["g",`Сравнительные испытания у заказчика (${eE(E.cust[t.cu].n)}) до ${entDate(E,t.trM)} — «Рынок».`]));
   if(E.O.length)o.push(["g",`Госзаказчик ждёт ответа по ${E.O.length} предложени${E.O.length===1?"ю":"ям"} — «Рынок».`]);
   const tn=E.T.filter(t=>t.st==="open"&&E.P.some(p=>p.cat===t.cat&&p.st!=="stop"&&(p.st!=="rd"||p.stg>=3)));if(tn.length)o.push(["g",`Открыто тендеров по вашим изделиям: ${tn.length} — «Рынок».`]);
   if(!E.P.length)o.push(["i","Начните с ОКР: «КБ» → «Новая разработка». Изделия берутся из цеха (пушки, выстрелы, машины, сплавы) или по образцам реальных."]);
@@ -6687,7 +6897,7 @@ function entOvH(E){const H=E.hist.slice(-36),sp=(k,c)=>entSpark(H.map(h=>h[k]),3
   return`${hints?`<div class="entbox">${hints}</div>`:""}
   ${H.length>1?`<div class="entcharts"><div><span>Деньги <b>${entMoney(E.B["51"]||0,E)}</b></span>${sp("cash","#7fd1ff")}</div><div><span>Выручка за месяц <b>${entMoney(last.net,E)}</b></span>${sp("net","#f0c24f")}</div>
     <div><span>Чистая прибыль <b>${entMoney(last.np,E)}</b></span>${sp("np","#8be08b")}</div><div><span>Портфель заказов <b>${entMoney(entBacklog(E),E)}</b></span>${sp("bk","#d9a3ff")}</div></div>`:""}
-  ${sv?entSec("svc","Текущие работы по заказу",`${ePct(sv.k*sv.share)} объёма`,`<p class="tag">${eE(sv.n)} — постоянная работа фирмы по договору «затраты плюс ${Math.round(sv.mk*100)} %»: занимает ${sv.shop?`до ${ePct(sv.shop*sv.k*sv.share)} мощности цехов и `:""}часть КБ, покрывает постоянные расходы. Объём сокращается ≈${Math.round(sv.decay*1200)/10} % в месяц; при хорошей репутации в декабре заказчик продлевает договор.</p>
+  ${sv?entSec("svc","Текущие работы по заказу",`${ePct(sv.k*sv.share)} объёма`,`<p class="tag">${eE(sv.n)} — постоянная работа фирмы по договору «затраты плюс ${Math.round(sv.mk*100)} %»: занимает ${sv.shop?`до ${ePct(sv.shop*sv.k*sv.share)} мощности цехов и `:""}часть КБ, покрывает постоянные расходы. Объём сокращается ≈${Math.round(sv.decay*1200)/10} % в месяц; в декабре заказчик продлевает договор — тем больше, чем выше репутация (на полный год — от 50).</p>
     <div class="row1"><label class="lbl">Брать работ</label>${entSel("svshare",{1:"100 %",.75:"75 %",.5:"50 %",.25:"25 %",0:"не брать"},sv.share)}</div>${sv.rev?`<p class="tag">В прошлом месяце: выручка ${entMoney(sv.rev,E)}, себестоимость ${entMoney(sv.costM,E)}.</p>`:""}`,false):""}
   ${E.sup&&(E.sup.fleet>0)?entSec("sup","Сопровождение поставленной техники",`${eN(E.sup.fleet)} ед. в войсках`,`<p class="tag">Армии, получившие вашу технику, покупают запчасти и ремонт: выручка — затраты плюс 35 %. Работы идут свободной мощностью цехов (до половины свободного времени). В прошлом месяце: выручка ${entMoney(E.sup.rev,E)}, себестоимость ${entMoney(E.sup.costM,E)}, выполнено ${ePct(E.sup.f||0)} потребности.</p>`,false):""}
   ${entSec("log","События",E.log.length+"",ev||"<p class='tag'>Пока событий нет.</p>",true)}
@@ -6701,7 +6911,7 @@ function entKBH(E){const C=entC(E),kb=E.kb,cap=k=>kb[k]*ENT_HPM*.85*kb.skill,pay
   return`${entSec("kbst","Штат КБ",`${kb.des+kb.eng+kb.tst} чел. · ${entMoney(pay,E)}/мес`,staff,true)}
   <span class="lbl">Разработки (сверху — приоритетнее)</span>${act}
   ${entSec("np","Новая разработка","",entNewPH(E),!E.P.length)}
-  ${done.length?entSec("pd","Закрытые",done.length+"",done.map(p=>`<div class="entl i">${eE(p.n)} — ${p.st==="done"?"квалифицирован":"прекращена"}</div>`).join(""),false):""}`;}
+  ${done.length?entSec("pd","Закрытые",done.length+"",done.map(p=>`<div class="entl i">${eE(p.n)} — ${p.st==="done"?(p.merged!=null?"модернизация принята, серия перешла на новый вариант":"квалифицирован"):"прекращена"}</div>`).join(""),false):""}`;}
 function entPCard(E,p){const C=entC(E),A=(a,t,x)=>`<button data-a="${a}" data-v="${p.id}"${x||""}>${t}</button>`,kindN={veh:"машина",gun:"орудие",ammo:"выстрел",alloy:"сплав"}[p.kind];
   let stage="",bar=0,extra="";
   if(p.st==="rd"){const s=p.stg,H=entStH(p,s);bar=entProg(p);stage=`${ENT_STG[s].n}: ${ePct(Math.min(1,p.sh/Math.max(1,H)))}`+(s===3?` · образцы: ${ePct(1-entProtoLeft(p)/Math.max(1,p.protoT))}`:"")+(p.fixH>0?` · доработка ${Math.round(p.fixH/1000)} тыс. ч`:"");
@@ -6714,8 +6924,8 @@ function entPCard(E,p){const C=entC(E),A=(a,t,x)=>`<button data-a="${a}" data-v=
   return`<div class="entcard${p.pause?" paused":""}"><div class="enth"><b>${eE(p.n)}</b><span>${kindN}${p.cat?` · ${ENT_CAT[p.cat]}`:""}</span></div>${entBar(bar,p.st==="ser"?"ok":"")}
   <div class="entsub">${stage}${p.pause?" · <b>пауза</b>":""}</div>
   <div class="entkv"><span>Затраты ОКР</span><b>${entMoney(cost,E)}</b>${est&&est.mo?`<span>Осталось ≈</span><b>${est.mo} мес</b>`:""}<span>Дефекты: выявлено</span><b>${p.found}${p.fixH>0?" (дорабатываются)":""}</b>
-   ${p.kind!=="alloy"?`<span>Оценка: огонь / защита / подвижность / надёжность</span><b>${sc.f} / ${sc.p} / ${sc.m} / ${sc.r}</b>`:""}${p.it.qH?`<span>Квалификация своих сплавов</span><b>${Math.round(p.it.qH/1000)} тыс. ч</b>`:""}</div>${extra}
-  <div class="row1 entbtns">${A("pup","▲ Выше")}${p.st!=="ser"&&p.st!=="cert"?A("ppause",p.pause?"Продолжить":"Пауза"):""}${(p.st==="cert"||p.st==="ser")&&!p.lic&&p.kind!=="alloy"?A("plic","Продать лицензию"):""}${p.st==="cert"&&ENT_SHOPS.some(k=>E.shops[k].pos)?A("ptpp","Начать ТПП"):""}${A("pcancel",ENTUI.conf==="pc"+p.id?"Точно прекратить?":"Прекратить")}</div></div>`;}
+   ${p.kind!=="alloy"?`<span>Оценка: огонь / защита / подвижность / надёжность</span><b>${sc.f} / ${sc.p} / ${sc.m} / ${sc.r}</b>`:""}${p.it.qH?`<span>Квалификация своих сплавов</span><b>${Math.round(p.it.qH/1000)} тыс. ч</b>`:""}${entPCardX(E,p)}</div>${extra}${entUpgH(E,p)}
+  <div class="row1 entbtns">${A("pup","▲ Выше")}${p.st!=="ser"&&p.st!=="cert"?A("ppause",p.pause?"Продолжить":"Пауза"):""}${(p.st==="cert"||p.st==="ser")&&!p.lic&&!p.govIP&&p.kind!=="alloy"?A("plic","Продать лицензию"):""}${p.st==="cert"&&ENT_SHOPS.some(k=>E.shops[k].pos)?A("ptpp","Начать ТПП"):""}${A("pcancel",ENTUI.conf==="pc"+p.id?"Точно прекратить?":"Прекратить")}</div></div>`;}
 /* источники для новых ОКР: проекты цеха, их выстрелы, свои сплавы, образцы реальных */
 function entSrcList(){const L=[];const nm=d=>d.name||"Проект";
   (WS.guns||[]).forEach(d=>{L.push({id:"g:"+d.id,kind:"gun",d,n:nm(d),g:"Орудия цеха"});let r=null;try{r=wsCalc(wsGNorm(JSON.parse(JSON.stringify(d))));}catch(e){}if(r)Object.keys(r.sh||{}).filter(t=>ENT_AMT[t]).forEach(t=>L.push({id:"a:"+d.id+":"+t,kind:"ammo",d,t,n:`${nm(d)}: ${(WS_AN[t]||t)}`,g:"Выстрелы к орудиям цеха"}));});
@@ -6752,17 +6962,17 @@ function entPlH(E){const C=entC(E),sv=E.svc;
   <span class="lbl">Изделия в производстве</span>${prods}
   ${entSec("cmd","Сырьё и материалы",`запасы ${entMoney(E.B["10"]||0,E)}`,`<div class="enttab">${cm}</div><p class="tag">Цены сырья меняются каждый месяц (вольфрам и кобальт особенно резко). Запас материалов изделия задаётся в месяцах выпуска: купленное раньше списывается по цене закупки. Нехватку на месяц закупают срочно, на 12 % дороже.</p>`,false)}`;}
 function entProdCard(E,p){const C=entC(E);if(p.st==="tpp")return`<div class="entcard"><div class="enth"><b>${eE(p.n)}</b><span>подготовка производства</span></div>${entBar(p.tppH/Math.max(1,p.tppN))}<div class="entsub">Оснастка, приспособления, технологии — ${ePct(p.tppH/Math.max(1,p.tppN))}</div></div>`;
-  const cap=entCapM(E,p)+(p.plan||0),uc=entUnitCost(E,p,Math.max(1,p.plan||1)),am=p.kind==="ammo",step=am?50:1,comps=E.comp.filter(x=>x.cat===p.cat),med=comps.length?entMed(comps.map(x=>x.pr))*Math.pow(1.03,E.m/12):0;
+  const FR=entFreeRate(E,p),cap=FR.cap,uc=entUnitCost(E,p,Math.max(1,p.plan||1)),am=p.kind==="ammo",step=am?50:1,comps=E.comp.filter(x=>x.cat===p.cat),med=comps.length?entMed(comps.map(x=>x.pr))*Math.pow(1.03,E.m/12):0;
   const need=E.K.filter(k=>k.st==="act"&&k.pid===p.id&&k.start<=E.m+2).reduce((s,k)=>s+k.rate,0);
   return`<div class="entcard"><div class="enth"><b>${eE(p.n)}</b><span>${ENT_CAT[p.cat]}</span></div>
-  <div class="entrow"><label>План выпуска в месяц ${entNumI("pl:"+p.id,p.plan,0,999999,step,"80px")}</label><label>Запас материалов ${entSel("pm:"+p.id,{0:"нет",1:"1 мес",2:"2 мес",3:"3 мес",6:"6 мес"},p.stockM)}</label></div>
-  <div class="entrow"><label>Контроль качества ${entSel("qc:"+p.id,{0:ENT_QC[0].n,1:ENT_QC[1].n,2:ENT_QC[2].n},p.qc!=null?p.qc:1)}</label></div><p class="tag">Строже контроль — больше нормо-часов (+4 % / +9 %), зато скрытые дефекты чаще ловят на заводе, а не в войсках: меньше гарантийных расходов и рекламаций.</p>
-  <div class="entkv"><span>Мощность при нынешних цехах</span><b>≈${am?eN(Math.floor(cap/50)*50):cap.toFixed(cap<10?1:0).replace(".",",")} шт./мес${p.bott?` · узкое место: ${ENT_SHOP[p.bott].s.toLowerCase()}`:""}</b>
+  <div class="entrow"><label>План ${entSel("pa:"+p.id,{1:"авто",0:"вручную"},p.auto?1:0)}</label><label>Выпуск в месяц ${entNumI("pl:"+p.id,p.plan,0,999999,step,"80px")}</label><label>Запас материалов ${entSel("pm:"+p.id,{0:"нет",1:"1 мес",2:"2 мес",3:"3 мес",6:"6 мес"},p.stockM)}</label></div>
+  <div class="entrow"><label>Контроль качества ${entSel("qc:"+p.id,{0:ENT_QC[0].n,1:ENT_QC[1].n,2:ENT_QC[2].n},p.qc!=null?p.qc:1)}</label></div><p class="tag">План «авто» — выпуск под график поставок по договорам (с догоном отставания) и под прямые продажи, если задана экспортная цена; ручное изменение выпуска переключает на «вручную». Строже контроль — больше нормо-часов (+4 % / +9 %), зато скрытые дефекты чаще ловят на заводе, а не в войсках: меньше гарантийных расходов и рекламаций.</p>
+  <div class="entkv"><span>Мощность при нынешних цехах</span><b>≈${am?eN(Math.floor(cap/50)*50):cap.toFixed(cap<10?1:0).replace(".",",")} шт./мес${p.bott?` · узкое место: ${ENT_SHOP[p.bott].s.toLowerCase()}`:""}${p.plan>cap*1.02?` · <span class="neg">план больше мощности</span>`:""}</b>
    ${need?`<span>Нужно по договорам</span><b class="${need>p.plan?"neg":""}">${eN(need)} шт./мес</b>`:""}<span>Выпущено / освоение</span><b>${eN(p.done)} шт. · трудоёмкость ×${uc.LC.toFixed(2).replace(".",",")} к зрелой</b>
    <span>Склад</span><b>${eN(p.stock)}${p.pend?` + ${p.pend} на приёмке`:""} · материалы на ${p.plan?(p.ms/p.plan).toFixed(1).replace(".",","):"—"} мес</b>
    <span>Себестоимость ед.</span><b>${entMoney(uc.tot,E)}</b><span>— материалы / комплектующие</span><b>${entMoney(uc.mat,E)} / ${entMoney(uc.comp,E)}</b><span>— труд / накладные / НИОКР</span><b>${entMoney(uc.lab,E)} / ${entMoney(uc.ovh,E)} / ${entMoney(uc.am,E)}</b>
    ${p.ucLast?`<span>Фактическая в прошлом выпуске</span><b>${entMoney(p.ucLast,E)}</b>`:""}${med?`<span>Цены конкурентов (медиана)</span><b>${entUsd(med)} ≈ ${entMoney(med*E.fx,E)}</b>`:""}
-   <span>Продано / выручка</span><b>${eN(p.sold)} шт. · ${entMoney(p.rev,E)}${p.rev?` · маржа ${ePct(1-p.cogs/p.rev)}`:""}</b></div>
+   <span>Продано / выручка</span><b>${eN(p.sold)} шт. · ${entMoney(p.rev,E)}${p.rev?` · маржа ${ePct(1-p.cogs/p.rev)}`:""}</b>${p.mCert!=null?`<span>Образец</span><b>принят ${entDate(E,p.mCert)}${p.upgN?` · модернизаций ${p.upgN}`:""}${p.cp!=null&&E.m-p.cp<36?" · <span class=\"pos\">проверен в бою</span>":""}${p.cpBad!=null&&E.m-p.cpBad<24?" · <span class=\"neg\">неудачное боевое применение</span>":""}</b>`:""}</div>
   <div class="entrow"><label>Прямые продажи по цене, $ ${entNumI("lp:"+p.id,Math.round(p.list||0),0,1e9,am?10:10000,"96px")}</label></div><p class="tag">0 — не продавать со склада; спрос зависит от цены и оценки изделия относительно конкурентов.</p></div>`;}
 /* ---------- Рынок ---------- */
 function entPolT(v){return v>.15?"дружественное":v<-.6?"не допускает":v<-.15?"настороженное":"нейтральное";}
@@ -6771,8 +6981,8 @@ function entMkH(E){const C=entC(E);
     <span>Цена за единицу без НДС</span><b>${entMoney(o.price,E)}</b><span>Аванс</span><b>${ePct(C.homeAdv)} — ${entMoney(o.price*o.qty*C.homeAdv,E)}</b><span>Доля в закупках</span><b>${ePct(o.share)}</b></div>
     <div class="row1"><button class="wsgo" data-a="oa" data-v="${o.id}">Подписать</button><button data-a="od" data-v="${o.id}">Отказаться</button></div><p class="tag">Ответ до ${entDate(E,o.exp)}. Неустойка за просрочку ≈${(C.penM*100).toFixed(1).replace(".",",")} % стоимости недопоставки в месяц.</p></div>`;}).join("");
   const mine=E.P.filter(p=>p.st!=="stop"&&p.st!=="done"&&p.kind!=="alloy");
-  const tend=E.T.filter(t=>t.st==="open"||t.st==="bid").sort((a,b)=>(E.P.some(p=>p.cat===b.cat)?1:0)-(E.P.some(p=>p.cat===a.cat)?1:0)||a.dl-b.dl).map(t=>entTCard(E,t,mine)).join("")||"<p class='tag'>Открытых тендеров нет.</p>";
-  const f2=x=>(x>0?"+":"")+(+x||0).toFixed(2).replace(".",","),dbr=r=>r&&r.q!=null?`<i>качество ${f2(r.q)} · цена ${f2(r.pr)} · сроки ${f2(r.dl)}${r.st?" · калибры "+f2(r.st):""} · доверие ${f2(r.rp)} · политика ${f2(r.pol)}${r.ex?" · офсет и выставки "+f2(r.ex):""}</i>`:"";
+  const tend=E.T.filter(t=>t.st==="open"||t.st==="bid"||t.st==="trial").sort((a,b)=>(b.st==="trial")-(a.st==="trial")).sort((a,b)=>(E.P.some(p=>p.cat===b.cat)?1:0)-(E.P.some(p=>p.cat===a.cat)?1:0)||a.dl-b.dl).map(t=>entTCard(E,t,mine)).join("")||"<p class='tag'>Открытых тендеров нет.</p>";
+  const f2=x=>(x>0?"+":"")+(+x||0).toFixed(2).replace(".",","),dbr=r=>r&&r.q!=null?`<i>качество ${f2(r.q)} · цена ${f2(r.pr)} · сроки ${f2(r.dl)}${r.st?" · калибры "+f2(r.st):""} · доверие ${f2(r.rp)} · политика ${f2(r.pol)}${r.ex?" · офсет, выставки, боевой опыт "+f2(r.ex):""}${r.tr!=null?" · испытания "+f2(r.tr):""}</i>`:"";
   const closed=E.T.filter(t=>t.res&&t.st!=="open"&&t.st!=="bid").slice(-8).reverse().map(t=>{const me=t.res.find(r=>r.me),w=t.res[0];
     return`<div class="entl ${t.st==="won"?"g":t.st==="lost"?"w":"i"}"><i>${entDate(E,t.dl)}${t.reg?" · "+eE(ENT_REG[t.reg]||""):""}</i>${eE(E.cust[t.cu].n)}: ${ENT_CAT[t.cat]}, ${eN(t.qty)} шт. — ${t.res.slice(0,3).map(r=>`${r.me?"<b>":""}${eE(r.n)} ${entUsd(r.price)} (${String(r.s).replace(".",",")})${r.me?"</b>":""}`).join(", ")}
       ${me?`<i>Победитель «${eE(w.n)}»:</i>${dbr(w)}${me!==w?`<i>Ваша заявка:</i>${dbr(me)}`:""}`:""}</div>`;}).join("");
@@ -6784,7 +6994,7 @@ function entMkH(E){const C=entC(E);
   const comp=E.comp.filter(x=>x.cat===cc).sort((a,b)=>(a.on===false)-(b.on===false)).map(x=>{const s=entCompScore(E,x),soon=x.on===false;return`<div class="enttr${soon?" dim":""}"><span><b>${eE(x.n)}${x.y&&!soon?" · новинка":""}</b><i>${eE(x.mk)}, ${ENT_CO[x.co]||x.co}${soon?` · выйдет в ${x.y}`:""}</i></span><span>${Math.round(s.f)}/${Math.round(s.p)}/${Math.round(s.m)}/${Math.round(s.r)}</span><span>${entUsd(x.pr*infl*(soon?1:entCompPK(x)))}</span><span>${soon?"—":ePct(x.load)}</span></div>`;}).join("");
   const sh=E.share[cc]||{},tot=Object.values(sh).reduce((a,b)=>a+b,0),shH=tot?Object.entries(sh).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([n,q])=>`<div class="entsh"><span>${n==="_me"?"<b>Вы</b>":eE(n)}</span>${entBar(q/tot,n==="_me"?"ok":"")}<i>${ePct(q/tot)}</i></div>`).join(""):"<p class='tag'>Контрактов в этой категории ещё не было.</p>";
   const cust=E.cust.filter(c=>!c.ret).map(c=>`<div class="enttr"><span><b>${eE(c.n)}</b><i>${eE(ENT_REG[c.reg]||"")} · ${c.std==="nato"?"НАТО":c.std==="su"?"советские калибры":"смешанное вооружение"}${c.off?` · офсет ${Math.round(c.off*100)} %`:""}</i></span><span>${entUsd(c.bud-c.spent)}</span><span>${entPolT(c.pol[E.c]||0)}</span><span>${Math.round(c.rel||50)}</span></div>`).join("");
-  return`${offers?`<span class="lbl">Предложения госзаказчика</span>${offers}`:""}<span class="lbl">Тендеры</span>${tend}
+  return`${offers?`<span class="lbl">Предложения госзаказчика</span>${offers}`:""}${entGovH(E)}<span class="lbl">Тендеры</span>${tend}
   ${closed?entSec("tclosed","Итоги тендеров","",closed,false):""}${entSec("kk","Договоры",E.K.filter(k=>k.st==="act").length+" активных",ks,!!E.K.length)}
   ${entSec("comp","Конкуренты и доли рынка",ENT_CAT[cc],`${entSel("cc",Object.fromEntries(cats.map(c=>[c,ENT_CAT[c]])),cc)}<div class="enttab"><div class="entth"><span>Изделие</span><span>О/З/П/Н</span><span>Цена</span><span>Загрузка</span></div>${comp}</div><span class="lbl">Доли по контрактам</span>${shH}<p class="tag">Конкуренты с недогруженными заводами сбивают цену; после ваших побед в категории начинается ценовая война. О/З/П/Н — огонь, защита, подвижность, надёжность.</p>`,false)}
   ${entSec("world","Мировой рынок",`${Object.keys(ENT_REG).length} регионов · ${E.cust.filter(c=>!c.ret).length} стран`,entWorldH(E),false)}
@@ -6793,28 +7003,28 @@ function entMkH(E){const C=entC(E);
 function entWorldH(E){const infl=Math.pow(1.03,E.m/12),A=E.cust.filter(c=>!c.ret);
   const reg=Object.entries(ENT_REG).map(([r,n])=>{const L=A.filter(c=>c.reg===r);if(!L.length)return"";const wd=(E.wd&&E.wd[r])||1,b=L.reduce((s,c)=>s+Math.max(0,c.bud-c.spent),0),nt=E.T.filter(t=>(t.st==="open"||t.st==="bid")&&t.reg===r).length,
       rel=L.reduce((s,c)=>s+(c.rel||50),0)/L.length,ok=L.filter(c=>(c.pol[E.c]||0)>=-.6).length;
-    return`<div class="enttr"><span><b>${eE(n)}</b><i>${L.map(c=>eE(c.n)).join(", ")}${E.exB&&E.exB[r]>=E.m?" · после выставки":""}</i></span><span>${wd>1.08?"▲":wd<.92?"▼":"●"} ${Math.round(wd*100)} %</span><span>${entUsd(b)}</span><span>${nt} · ${ok}/${L.length}</span></div>`;}).join("");
+    return`<div class="enttr"><span><b>${eE(n)}${E.war&&E.war[r]?' · <span class="neg">конфликт</span>':""}</b><i>${L.map(c=>eE(c.n)).join(", ")}${E.exB&&E.exB[r]>=E.m?" · после выставки":""}</i></span><span>${wd>1.08?"▲":wd<.92?"▼":"●"} ${Math.round(wd*100)} %</span><span>${entUsd(b)}</span><span>${nt} · ${ok}/${L.length}</span></div>`;}).join("");
   const pr=Object.keys(ENT_CAT).map(cat=>{const H=(E.wpH&&E.wpH[cat])||[];const L=E.comp.filter(x=>x.cat===cat&&x.on!==false);if(!L.length)return"";const med=entMed(L.map(x=>x.pr*infl*entCompPK(x))),ld=L.reduce((s,x)=>s+x.load,0)/L.length,y0=H.length>12?H[H.length-13]:H[0]||med,ch=(med/y0-1)*100;
     return`<div class="enttr"><span><b>${ENT_CAT[cat]}</b><i>${L.length} образцов</i></span><span>${entUsd(med)}</span><span class="${ch>2?"neg":ch<-2?"pos":""}">${ch>0?"+":""}${ch.toFixed(0)} %</span><span>${ePct(ld)}</span></div>`;}).join("");
   const mk=Object.entries(E.mks||{}).sort((a,b)=>b[1]-a[1]),tot=mk.reduce((s,x)=>s+x[1],0),mkH=tot?mk.slice(0,8).map(([n,v])=>`<div class="entsh"><span>${n==="_me"?"<b>"+eE(E.kbN)+"</b>":eE(n)}</span>${entBar(v/tot,n==="_me"?"ok":"")}<i>${ePct(v/tot)}</i></div>`).join(""):"<p class='tag'>Контрактов на мировом рынке пока не было.</p>";
   const ex=entExpoList(E,12).map(o=>`<div class="entl ${o.st===2?"g":o.st?"g":o.ban?"w":"i"}"><i>${entDate(E,o.m)} · ${eE(ENT_REG[o.x.reg])}</i>${eE(o.x.n)} — ${o.ban?"фирмы вашей страны не допускаются":o.st===2?"участие состоялось":o.st?"вы участвуете":`участие ≈${entMoney(o.x.c*E.fx,E)}`}${!o.ban&&!o.st&&o.m>E.m?` <button class="entmini2" data-a="expo" data-v="${o.key}">Участвовать</button>`:""}</div>`).join("");
   return`<span class="lbl">Регионы: спрос, свободные бюджеты, открытые тендеры, допускают вас</span><div class="enttab c4"><div class="entth"><span>Регион</span><span>Спрос</span><span>Бюджеты</span><span>Тендеры · доступ</span></div>${reg}</div>
   <span class="lbl">Мировые цены по категориям</span><div class="enttab c4"><div class="entth"><span>Категория</span><span>Медиана</span><span>За год</span><span>Загрузка заводов</span></div>${pr}</div>
-  <p class="tag">Цены конкурентов зависят от загрузки их заводов: собственные армии дают базовый заказ, крупные экспортные победы перегружают завод — тогда он поднимает цену и растягивает сроки. После трёх проигрышей подряд конкурент снижает цену.</p>
+  <p class="tag">В регионе с вооружённым конфликтом армии закупают больше (особенно боеприпасы), а поставленные туда изделия получают отчёты о боевом применении: удачные поднимают репутацию и оценку заявок, неудачные — снижают. Цены конкурентов зависят от загрузки их заводов: собственные армии дают базовый заказ, крупные экспортные победы перегружают завод — тогда он поднимает цену и растягивает сроки. После трёх проигрышей подряд конкурент снижает цену.</p>
   <span class="lbl">Крупнейшие поставщики по сумме контрактов</span>${mkH}
   <span class="lbl">Выставки вооружений на год вперёд</span>${ex||"<p class='tag'>Ближайших выставок нет.</p>"}<p class="tag">Участие поднимает доверие армий региона (+6) и репутацию; полгода после выставки ваши заявки в регионе оцениваются выше, а тендеры объявляются раньше.</p>`;}
-function entTCard(E,t,mine){const c=E.cust[t.cu],pol=c.pol[E.c]||0,ps=mine.filter(p=>p.cat===t.cat),b=t.bid,open=ENTUI.bid===t.id||!!b;let form="";
+function entTCard(E,t,mine){if(t.st==="trial")return entTrialCard(E,t);const c=E.cust[t.cu],pol=c.pol[E.c]||0,ps=mine.filter(p=>p.cat===t.cat),b=t.bid,open=ENTUI.bid===t.id||!!b;let form="";
   if(ps.length){const bf=ENTUI.bf||{},bv=k=>bf[k+":"+t.id],pid=+(bv("bp")||(b&&b.pid)||ps[0].id),p=E.P.find(x=>x.id===pid)||ps[0],why=entBidCheck(E,t,p),
-      price=+(bv("bpr")||(b?b.price:Math.round(t.maxP*.9/(t.cat.startsWith("am_")?10:1000))*(t.cat.startsWith("am_")?10:1000))),rate=+(bv("brt")||(b?b.rate:Math.max(1,Math.min(t.need,Math.floor(entCapM(E,p)+(p.plan||0))||1))));
-    let ch="";if(!why){const sc=entPSc(E,p),ofx=+(bv("boff")||(b?b.off:0)||0),my=entScore(sc,c.w,price,t.maxP,p.std,c.std,rate,t.need,(E.rep+(c.rel||50))/2)+pol+ofx*1.5+(E.exB&&E.exB[c.reg]>=E.m?.12:0)-(p.st==="rd"?.3:0),co=E.comp.filter(x=>x.cat===t.cat&&x.on!==false&&(c.pol[x.co]||0)>=-.6).map(x=>entScore(entCompScore(E,x),c.w,Math.min(x.pr*Math.pow(1.03,E.m/12)*entCompPK(x),t.maxP),t.maxP,x.std,c.std,Math.min(t.need,x.cap/12*.5),t.need,x.rep)+(c.pol[x.co]||0)).sort((a,b)=>b-a);
+      price=+(bv("bpr")||(b?b.price:Math.round(t.maxP*.9/(t.cat.startsWith("am_")?10:1000))*(t.cat.startsWith("am_")?10:1000))),FR=entFreeRate(E,p,t.id),rate=+(bv("brt")||(b?b.rate:Math.max(1,Math.min(t.need,(p.kind==="ammo"?Math.floor(FR.free/50)*50:Math.floor(FR.free))||1))));
+    let ch="";if(!why){const sc=entPSc(E,p),ofx=+(bv("boff")||(b?b.off:0)||0),my=entScore(sc,c.w,price,t.maxP,p.std,c.std,rate,t.need,(E.rep+(c.rel||50))/2)+pol+ofx*1.5+(E.exB&&E.exB[c.reg]>=E.m?.12:0)-(p.st==="rd"?.3:0),co=E.comp.filter(x=>x.cat===t.cat&&x.on!==false&&(c.pol[x.co]||0)>=-.6&&(!t.cat.startsWith("am_")||entStdOk(x.std,c.std))).map(x=>entScore(entCompScore(E,x),c.w,Math.min(x.pr*Math.pow(1.03,E.m/12)*entCompPK(x),t.maxP),t.maxP,x.std,c.std,Math.min(t.need,x.cap/12*.5),t.need,x.rep)+(c.pol[x.co]||0)).sort((a,b)=>b-a);
       const best=co[0]==null?-9:co[0];ch=my>best+.25?"высокие":my>best-.15?"равные с лидером":my>best-.5?"ниже лидера":"низкие";}
     form=`<div class="entbid">${entSel("bp:"+t.id,Object.fromEntries(ps.map(x=>[x.id,x.n])),pid)}<div class="entrow"><label>Цена за единицу, $ ${entNumI("bpr:"+t.id,price,1,1e10,t.cat.startsWith("am_")?10:10000,"104px")}</label><label>Темп, шт./мес ${entNumI("brt:"+t.id,rate,1,1e7,t.cat.startsWith("am_")?50:1,"70px")}</label></div>
       <div class="entrow"><label>Офсет сверх требований ${entSel("boff:"+t.id,{0:"нет",.1:"+10 %",.2:"+20 %",.3:"+30 %"},bv("boff")||(b?b.off:0)||0)}</label></div>
-      ${why?`<p class="tag neg">Нельзя: ${why}</p>`:`<p class="tag">Шансы: <b>${ch}</b>. Мощность по изделию ≈${Math.round(entCapM(E,p)+(p.plan||0))} шт./мес. Подготовка заявки ≈${entMoney((p.kind==="veh"?120e3:p.cat.startsWith("how")?60e3:p.kind==="gun"?30e3:40e3)*E.fx,E)}.</p>`}
-      <div class="row1">${b?`<button class="wsgo" data-a="bgo" data-v="${t.id}">Изменить заявку</button><button data-a="bun" data-v="${t.id}">Отозвать</button>`:`<button class="wsgo" data-a="bgo" data-v="${t.id}"${why?" disabled":""}>Подать заявку</button>`}</div></div>`;}
+      ${why?`<p class="tag neg">Нельзя: ${why}</p>`:price>t.maxP?`<p class="tag neg">Цена выше предельной ${entUsd(t.maxP)} — заявку не рассмотрят.</p>`:`<p class="tag">Шансы: <b>${ch}</b>. Мощность по изделию ≈${Math.round(FR.cap)} шт./мес, свободно ≈${Math.round(FR.free)}${rate>FR.free*1.05?` — <span class="neg">темп больше свободной мощности: возможны просрочки</span>`:""}. Подготовка заявки ≈${entMoney((p.kind==="veh"?120e3:p.cat.startsWith("how")?60e3:p.kind==="gun"?30e3:40e3)*E.fx,E)}.</p>`}
+      <div class="row1">${b?`<button class="wsgo" data-a="bgo" data-v="${t.id}">Изменить заявку</button><button data-a="bun" data-v="${t.id}">Отозвать</button>`:`<button class="wsgo" data-a="bgo" data-v="${t.id}"${why||price>t.maxP?" disabled":""}>Подать заявку</button>`}</div></div>`;}
   return`<div class="entcard${b?" hl":""}"><div class="enth"><b>${eE(c.n)}${t.big?" · крупный":""}</b><span>${ENT_CAT[t.cat]}</span></div>
   <div class="entkv"><span>Количество</span><b>${eN(t.qty)} шт. · темп от ${eN(t.need)}/мес</b><span>Предельная цена</span><b>${entUsd(t.maxP)} за ед.</b><span>Заявки до · поставки с</span><b>${entDate(E,t.dl)} · ${entDate(E,t.start)}</b>
-  <span>Калибры · отношение к вашей стране</span><b>${t.std==="nato"?"НАТО":t.std==="su"?"советские":"любые"} · ${entPolT(pol)}</b>${t.reg?`<span>Регион</span><b>${eE(ENT_REG[t.reg]||"")}${t.inv?" · вы приглашены после выставки":""}</b>`:""}${t.off?`<span>Офсет</span><b>${Math.round(t.off*100)} % локализации (≈${Math.round(t.off*22)} % стоимости поставки уйдёт на обязательства)</b>`:""}${b?`<span>Ваша заявка</span><b>${eE((E.P.find(x=>x.id===b.pid)||{}).n)} · ${entUsd(b.price)} · ${b.rate}/мес</b>`:""}</div>
+  <span>Калибры · отношение к вашей стране</span><b>${t.std==="nato"?"НАТО":t.std==="su"?"советские":"любые"} · ${entPolT(pol)}</b>${t.reg?`<span>Регион</span><b>${eE(ENT_REG[t.reg]||"")}${t.inv?" · вы приглашены после выставки":""}</b>`:""}${entTrialNeed(E,t)?`<span>Испытания</span><b>крупный контракт: перед решением шорт-лист проходит сравнительные испытания у заказчика</b>`:""}${t.off?`<span>Офсет</span><b>${Math.round(t.off*100)} % локализации (≈${Math.round(t.off*22)} % стоимости поставки уйдёт на обязательства)</b>`:""}${b?`<span>Ваша заявка</span><b>${eE((E.P.find(x=>x.id===b.pid)||{}).n)} · ${entUsd(b.price)} · ${b.rate}/мес</b>`:""}</div>
   ${ps.length?(open?form:`<button data-a="tb" data-v="${t.id}">Подготовить заявку</button>`):`<p class="tag">Своего изделия этой категории нет.</p>`}</div>`;}
 /* ---------- Учёт ---------- */
 function entPLrows(E){const H=E.hist,last=H[H.length-1],y=entYear(E,E.m-1),ytd=H.filter(h=>entYear(E,h.m)===y),py=H.filter(h=>entYear(E,h.m)===y-1),S=(a,k)=>a.reduce((s,h)=>s+(h[k]||0),0);
@@ -6854,10 +7064,11 @@ function entField(f,v){const E=ENT,[k,id]=f.split(":"),n=+v,P=id&&E?E.P.find(x=>
   if(k==="kbt")E.kb.tgt[id]=entCl(Math.round(n)||0,0,3000);
   else if(k==="wt")E.shops[id].tgt=entCl(Math.round(n)||0,0,E.shops[id].pos*3*ENT_WPP);
   else if(k==="sh"){E.shops[id].shift=entCl(Math.round(n),1,3);}
-  else if(k==="pl"&&P)P.plan=Math.max(0,P.kind==="ammo"?Math.round(n/50)*50:Math.round(n));
+  else if(k==="pl"&&P){P.plan=Math.max(0,P.kind==="ammo"?Math.round(n/50)*50:Math.round(n));P.auto=false;}else if(k==="pa"&&P){P.auto=!!n;if(P.auto&&P.st==="ser")P.plan=entAutoPlan(E,P);}
   else if(k==="pm"&&P)P.stockM=entCl(n,0,12);
   else if(k==="lp"&&P)P.list=Math.max(0,Math.round(n));
   else if(k==="pout"&&P)P.out=entCl(n,0,.5);else if(k==="pfast"&&P)P.fast=!!n;
+  else if(k==="gp"){ENTUI.gp=ENTUI.gp||{};ENTUI.gp[id]=v;}else if(k==="up"){ENTUI.up=ENTUI.up||{};ENTUI.up[id]=v;}
   else if(k==="np")ENTUI.np=v;else if(k==="cc")ENTUI.cc=v;else if(k==="svshare"&&E.svc)E.svc.share=entCl(n,0,1);
   else if(k==="ln")ENTUI.ln=Math.max(0,n);else if(k==="lt")ENTUI.lt=n;
   else if(k==="rsh"){E.R=E.R||{q:[],h:0,share:.1,cost:0};E.R.share=entCl(n,0,.5);}else if(k==="qc"&&P)P.qc=entCl(Math.round(n),0,2);
@@ -6891,6 +7102,10 @@ function entAct(a,v,b){const E=ENT;if(a!=="reset"&&!(a==="pcancel"))ENTUI.conf="
   else if(a==="jmore"){ENTUI.jn+=50;}
   else if(a==="tq+"){entTechQ(E,v,true);ENTUI.msg=`Технология «${eE(ENT_TECH[v].n)}» добавлена в очередь НИР${E.R.share>0?"":" — задайте долю КБ на НИР"}.`;}else if(a==="tq-"){entTechQ(E,v,false);}
   else if(a==="tlic"){const r=entTechBuy(E,v);ENTUI.msg=r?"Лицензию купить нельзя: "+r:`Куплена лицензия: «${eE(ENT_TECH[v].n)}».`;}
+  else if(a==="gapp"){const g=(E.G||[]).find(x=>x.id===+v),P2=E.P.filter(p=>g&&p.st==="rd"&&p.cat===g.cat),sv=ENTUI.gp&&ENTUI.gp[v]!=null?+ENTUI.gp[v]:(g&&g.pid!=null?g.pid:(P2[0]&&P2[0].id));const r=entGovApply(E,+v,sv);ENTUI.msg=r?"Заявка не принята: "+eE(r):"Заявка на конкурс ОКР подана — итоги в месяце окончания приёма заявок.";}
+  else if(a==="gwd"){entGovWithdraw(E,+v);}
+  else if(a==="trp"){const r=entTrialPrep(E,+v);ENTUI.msg=r?"Не получилось: "+eE(r):"Подготовка образцов к испытаниям усилена.";}
+  else if(a==="upgo"&&P){const id=ENTUI.up&&ENTUI.up[P.id],s=id?entSrcList().find(x=>x.id===id):null,r=entUpgNew(E,P.id,s);ENTUI.msg=r?"Модернизацию открыть нельзя: "+eE(r):`Открыта ОКР модернизации «${eE(P.n)}».`;if(!r&&ENTUI.up)delete ENTUI.up[P.id];}
   else if(a==="expo"){const r=entExpoJoin(E,v);ENTUI.msg=r?"Не получилось: "+r:"Участие в выставке оплачено.";}
   entSave();entUI();}
 /* перейти на полигон: своя пушка или своя машина в стадии испытаний */
