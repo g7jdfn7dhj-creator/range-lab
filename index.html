@@ -782,7 +782,7 @@ const A=()=>{const a=AMMO[S.a],g=GP(G());
 const NL=5;
 const lc=t=>t.charAt(0).toLowerCase()+t.slice(1);
 S.base=0;S.tilt=0;S.tv=0;
-const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reduce=false,REDUCE_OS=!!(typeof matchMedia==="function"&&matchMedia("(prefers-reduced-motion: reduce)").matches);
 const D=80, AXIS=2.25;
 
 /* --- сцена --- */
@@ -1408,7 +1408,7 @@ function hotAt(x,y){return(S.hot||[]).reduce((m,h)=>Math.max(m,h.k*Math.exp(-((x
 const COND={soft:3,hc:2.5,steel:1,hard:.9,du:.6,ti:.35,cer:.25,frp:.2,ara:.2,pe:.15,rub:.15,era:1,perf:1,slat:1.5};
 function updHot(dt){const H=S.hot||[];const fl=layers[frontIdx()],cd=fl?(COND[MAT[fl.k].beh]||1):1,cool=.08*cd*Math.sqrt(120/Math.max(10,(fl&&fl.t)||120));
   for(let i=H.length-1;i>=0;i--){const h=H[i];if(h.pk==null)h.pk=h.k;h.k-=h.k*cool*dt+.004*dt;h.r=Math.min(h.r*(1+dt*.05),.6);if(h.k<.02){H.splice(i,1);if(h.pk>.7)try{temper(h);}catch(e){}}}
-  fires.forEach(f=>{if(f.g.parent===plate&&f.life>0){const near=H.find(h=>Math.hypot(h.x-f.g.position.x,h.y-f.g.position.y)<.08);if(near)near.k=Math.max(near.k,.45);else addHot(f.g.position.x,f.g.position.y,.12,.45);}});
+  fires.forEach(f=>{if(f.g.parent===plate&&f.life>0){const near=H.find(h=>Math.hypot(h.x-f.g.position.x,h.y-f.g.position.y)<.08);if(near)near.k=Math.max(near.k,.62);else addHot(f.g.position.x,f.g.position.y,.12,.62);}});
   H.forEach((h,i)=>{HOT.u.value[i].set(h.x,h.y,h.r,h.k);HOT.l.value[i].set(0,h.to==null?99:h.to,0,0);});HOT.n.value=H.length;
   const mx=H.reduce((m,h)=>Math.max(m,h.k),0);if($("plateT"))$("plateT").textContent=mx>.02?Math.round(20+mx*1280)+" °C":"≈ 20 °C";}
 /* побежалость: тонкая окисная плёнка на остывшем металле — от серого в центре через синий и фиолетовый к соломенному по краю */
@@ -1465,7 +1465,7 @@ function buildPlate(){
     z+=l.tv;return Object.assign({},l,{mesh,spent:false});});
   S.temp=[];S.T=T;S.mass=3.2*L.reduce((s,l)=>s+l.t*MAT[l.k].dens,0);
   buildMount(T);mount.visible=true;
-  S.marks=[];S.fallen=false;S.fall=0;S.tilt=0;S.tv=0;S.yawD=0;S.yawV=0;S.slideV=0;S.hot=[];pivot.position.y=1.45;stand.position.z=D;
+  S.marks=[];S.fallen=false;S.toss=null;pivot.position.x=0;pivot.position.z=0;S.fall=0;S.tilt=0;S.tv=0;S.yawD=0;S.yawV=0;S.slideV=0;S.hot=[];pivot.position.y=1.45;stand.position.z=D;
   S.integrity=1;S.poly=[[-1,-.8],[1,-.8],[1,.8],[-1,.8]];CG.n=[];CG.e=[];S.decor=[];S.holes=[];S.flat=false;S.broken=false;if(crackObj){plate.remove(crackObj);crackObj.geometry.dispose();crackObj=null;}
   (S.pieces||[]).forEach(p=>{scene.remove(p.g);p.g.traverse(o=>{if(o.geometry)o.geometry.dispose();});});S.pieces=[];
   updPlate();if(typeof onPlateBuilt==="function")onPlateBuilt();
@@ -1486,7 +1486,7 @@ $("ang").oninput=()=>{updPlate();updBal();};
 S.fuze="inst";if($("fuze"))$("fuze").onchange=e=>{S.fuze=e.target.value;};
 if($("temp"))$("temp").oninput=()=>{S.balCache=null;S.indCache=null;updBal();};
 /* повреждения металла: ослабление и прогиб */
-function weak(x,y){const ht=typeof hotAt==="function"?hotAt(x,y):0;let cw=1;try{cw=crackW(x,y);}catch(e){}return Math.max(.35,(1-.22*ht)*S.marks.reduce((w,m)=>w*(1-m.sev*Math.exp(-((x-m.x)**2+(y-m.y)**2)/(2*m.r*m.r))),1)*cw);}
+function weak(x,y){const ht=typeof hotAt==="function"?hotAt(x,y):0;let cw=1;try{cw=crackW(x,y);}catch(e){}return Math.max(.35,(typeof mxWeak==="function"?mxWeak(x,y,ht):1-.22*ht)*S.marks.reduce((w,m)=>w*(1-m.sev*Math.exp(-((x-m.x)**2+(y-m.y)**2)/(2*m.r*m.r))),1)*cw);}
 /* прогиб считается для каждого слоя отдельно: слой, до которого снаряд не дошёл, не гнётся */
 const frontIdx=()=>{const i=layers.findIndex(l=>l.mesh&&l.mesh.visible!==false);return i<0?0:i;};
 const backIdx=()=>{for(let i=layers.length-1;i>=0;i--)if(layers[i].mesh)return i;return 0;};
@@ -2273,7 +2273,7 @@ function detFlash(p,Rr){if(!fxOK())return;const t=flashTex();if(!t)return;let o=
   o.m.position.copy(p);o.m.material.rotation=R(0,6.283);o.on=true;o.t=0;o.life=.06+.02*Math.min(3,Rr);o.sz=Rr*2.6;o.I=7;o.c=[1,.9,.72];o.m.visible=true;}
 var clodMat=null;
 /* p — точка разрыва; W — тротиловый эквивалент, кг; o.fill — ВВ (tnt, compb, pe, aix, tbx); o.surf — на поверхности брони; o.ground — на грунте; o.n — нормаль поверхности */
-function boom(p,W,o){if(!p)return;o=o||{};try{shockAdd(p.clone().setY(Math.max(.3,p.y)),Math.min(90,W));}catch(e){}if(reduce)return;
+function boom(p,W,o){if(!p)return;o=o||{};try{cmShock(p,W);}catch(e){}try{shockAdd(p.clone().setY(Math.max(.3,p.y)),Math.min(90,W));}catch(e){}if(reduce)return;
   const W3=Math.cbrt(Math.max(.004,W)),fk=o.fill||"tnt",F=FILL[fk]||FILL.tnt,soot=F.soot,al=fk==="aix"?1.3:fk==="tbx"?1.9:1;
   const Rr=Math.min(9,1.15*W3*al),tau=Math.min(1.1,(.09+.05*W3)*(fk==="aix"?1.8:fk==="tbx"?4:1)),tc=camera.position.clone().sub(p),L=tc.length(),pc=p.clone();
   if(o.surf&&L>1e-3)pc.addScaledVector(tc,Math.min(Rr*.45,L*.3)/L);if(o.ground)pc.y=Math.max(pc.y,Rr*.5);
@@ -2516,7 +2516,7 @@ let CRM=null;function craterMat(){if(CRM)return CRM;const cv=document.createElem
     let g=x.createRadialGradient(128,128,10,128,128,128);g.addColorStop(0,"rgba(10,8,6,.85)");g.addColorStop(.45,"rgba(30,24,16,.45)");g.addColorStop(.8,"rgba(80,66,44,.25)");g.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=g;x.fillRect(0,0,256,256);
     x.globalCompositeOperation="destination-in";g=x.createRadialGradient(128,128,40,128,128,128);g.addColorStop(0,"rgba(0,0,0,1)");g.addColorStop(.75,"rgba(0,0,0,.9)");g.addColorStop(1,"rgba(0,0,0,0)");x.fillStyle=g;x.fillRect(0,0,256,256);}
   return CRM=new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,roughness:1,polygonOffset:true,polygonOffsetFactor:-2});}
-function missed(s){if(s.a&&s.a.type==="illum"&&!s.fail){illumAt(s);return;}if(S.task)taskEvent("miss");try{sMiss(s);}catch(e){}
+function missed(s){try{if($("xsec"))$("xsec").hidden=true;}catch(e){}if(s.a&&s.a.type==="illum"&&!s.fail){illumAt(s);return;}if(S.task)taskEvent("miss");try{sMiss(s);}catch(e){}
   if(s.fail){S.st.miss++;updTally();const p=s.to.clone();if(!(s.cmG&&CM_LONG(s.cmG)))for(let i=0;i<5;i++)puff(new THREE.Vector3(p.x+R(-.3,.3),.2,p.z+R(-.3,.3)),i<2,.3,0x8a7a58,new THREE.Vector3(R(-1,1),R(1,2),R(-1,1)),R(1.5,2.5));if(!S.lock)$("res").textContent=s.fail;return;}
   if((s.a.type==="he"||s.a.type==="hesh")&&!reduce){const c=G().cal/120,p0=s.to.clone();p0.y=.3;
     const fb=fireBall(0xffb050);fb.position.copy(p0);scene.add(fb);glows.push({m:fb,t:0,life:.4,blast:1.6*c});
@@ -2781,11 +2781,11 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
       /* ОФ снаряд с ударным взрывателем не пробивает как болванка — он рвётся на поверхности.
          Лист ломает контактный взрыв и осколки корпуса; слои за зазором получают ослабленную волну и обломки */
       const L2=layers.map((l,i)=>({l,i})).filter(o=>!(o.l.spent&&!o.l.fresh)&&!isE(o.l.k));
-      let q=cal*.72*Math.min(1,Math.pow(cal/100,.6))*(.7+.3*cosA())*R(.9,1.1);const front=[],rest=[];let gapMM=0,slatHit=false,seen=false;
+      let q=cal*.72*Math.min(1,Math.pow(cal/100,.6))*(G().wh&&G().wh[a.key]?1:(.7+.3*cosA()))*R(.9,1.1);const front=[],rest=[];let gapMM=0,slatHit=false,seen=false;
       for(const o of L2){if(o.l.k==="slat"){if(!front.length)slatHit=true;continue;}if(o.l.k==="gap"){if(front.length){seen=true;gapMM+=o.l.t;}continue;}(seen?rest:front).push(o);}
       if(slatHit){q*=.4;out.push("Фугасное: взрыватель сработал на решётке — до листа дошли ослабленная волна и осколки");}
       if(eraHit)q*=.8;
-      const FL=FILL[fillOf(a,G())];q*=FL.br*((AMMO[a.key]&&AMMO[a.key].qf)||1);s.fill=FL;if(G().custom&&G().heWkg)q*=Math.cbrt(G().heWkg/(1.6*Math.pow(cal/100,3)));{const w0=G().wh&&G().wh[a.key];if(w0)q*=Math.cbrt(w0.W/(1.6*Math.pow(cal/100,3)));}out.push(`ВВ: ${FL.n} — ${FL.d}`);
+      const FL=FILL[fillOf(a,G())];q*=FL.br*((AMMO[a.key]&&AMMO[a.key].qf)||1);s.fill=FL;if(G().custom&&G().heWkg)q*=Math.cbrt(G().heWkg/(1.6*Math.pow(cal/100,3)));{const w0=G().wh&&G().wh[a.key];if(w0)q*=Math.cbrt(w0.W/(1.6*Math.pow(cal/100,3)));}if(s.sto)q*=s.sto;out.push(`ВВ: ${FL.n} — ${FL.d}`);
       /* взрыватель: мгновенный — подрыв на поверхности; с замедлением — корпус пробивает тонкий лист и рвётся за ним; бесконтактный — подрыв в воздухе перед целью */
       let fz=null;let fu=s.graze?"inst":(S.fuze||"inst");{const gF=G().fuzes;if(gF&&!gF.includes(fu)){const f2=gF.includes("inst")?"inst":gF[0];out.push(`Взрыватель «${fu==="prox"?"бесконтактный":fu==="delay"?"с замедлением":"мгновенный"}» на ${G().wh?"этой БЧ":"этом снаряде"} не предусмотрен — сработал ${f2==="delay"?"штатный, с замедлением":"ударный мгновенный"}`);fu=f2;}}
       if(s.graze){q*=.5;out.push(`Скользящее касание под ${Math.round(g)}°: взрыватель сработал на касании — подрыв сбоку от листа, давление действует наискось`);}
@@ -3078,6 +3078,8 @@ function tick(t){
       else if(!sh.miss){const lp=plate.worldToLocal(sh.to.clone());sh.lx=lp.x;sh.ly=lp.y;if(S.fallen||!PL.inside([lp.x,lp.y],S.poly))sh.miss=true;}
       if(sh.miss){missed(sh);try{if(sh.a&&(sh.a.type==="he"||sh.a.type==="hesh")&&!sh.fail){addCrater(sh.to,G().cal);fxaGround(sh.to,G().cal);}else if(sh.a&&sh.a.type!=="illum"&&sh.a.type!=="smoke"&&G().cal>=20&&sh.to.y<1&&fxOK())dirtHit(sh.to,G().cal);else if(sh.a&&sh.a.type!=="illum"&&sh.a.type!=="smoke"&&G().cal>=20&&sh.to.y<1)fxa("exp",sh.to.clone().setY(0),Math.max(1,G().cal/1000*14),.9,{glow:1,op:.8});}catch(e){}if(S.veh){if(!S.lock)$("res").textContent=vehWord($("res").textContent);try{vehNear(sh);}catch(e){}}}else impact(sh);
       if(sh.cmG)try{cmAfter(sh);}catch(e){console.error(e);}
+      try{thAfter(sh);}catch(e){console.error(e);}
+      try{mxAfter(sh);}catch(e){console.error(e);}
       if(S.veh&&sh.vmsg&&sh.vmsg.length&&!S.lock)$("res").textContent+="\n"+sh.vmsg.join("\n");}}
   try{if(S.bld&&BLD)bldTick(dtv);}catch(e){if(!S.bldErr){S.bldErr=1;console.error(e);}}
   updFires(dtv,t);updPieces(dtv);updGlows(dtv);try{ricoTick(dtv);fxaTick(dtv);spkTick(dtv);impactFlashTick(dtv);fireballTick(dtv);if(VFX)vfxTick(dtv);}catch(e){}try{updFlares(dtv);}catch(e){}
@@ -3089,6 +3091,7 @@ function tick(t){
     S.yawV=(S.yawV||0)+(-35*(S.yawD||0)-3.5*(S.yawV||0))*dt;S.yawD=(S.yawD||0)+S.yawV*dt;stand.rotation.y=(S.yawBase||0)+S.yawD;
     if(S.slideV>0){stand.position.z=Math.min(D+1.8,stand.position.z+S.slideV*dt);S.slideV=Math.max(0,S.slideV-4*dt);}
     if(Math.abs(S.tilt)>.8){try{sFall();}catch(e){}if(!reduce){const bp=new THREE.Vector3(0,0,0);plate.localToWorld(bp);for(let i=0;i<14;i++)puff(new THREE.Vector3(bp.x+R(-1.2,1.2),.25,bp.z+R(-.8,1.6)),false,.6,0x9a8c68,new THREE.Vector3(R(-2,2),R(.3,1.2),R(-1,2)),R(2,3.5));}S.fallen=true;S.fall=0;S.fallFrom=pivot.rotation.x;$("res").textContent="Лист сбит со стойки — слишком лёгкий для этого калибра.";}}
+  else if(S.toss){const T=S.toss;T.vy-=9.8*dt;pivot.position.x+=T.vx*dt;pivot.position.y+=T.vy*dt;pivot.position.z+=T.vz*dt;pivot.rotation.x+=T.w*dt;if(pivot.position.y<=S.T/2+.02&&T.vy<0){pivot.position.y=S.T/2+.02;pivot.rotation.x=Math.PI/2;S.toss=null;try{if(!reduce){const bp=new THREE.Vector3();plate.getWorldPosition(bp);for(let i=0;i<8;i++)puff(new THREE.Vector3(bp.x+R(-1,1),.25,bp.z+R(-1,1)),false,.7,0x9a8c68,new THREE.Vector3(R(-2,2),R(.3,1.2),R(-2,2)),R(2,3));}}catch(e){}}}
   else if(S.fall<1){S.fall=Math.min(1,S.fall+dt*1.4);const k=S.fall*S.fall;pivot.rotation.x=S.fallFrom+(Math.PI/2-S.fallFrom)*k;pivot.position.y=1.45-(1.45-S.T/2-.02)*k;}
   {const sp=S.veh?(S.drive&&S.drive.on?0:vehSpd(dtv)):(+$("move").value||0);S.mvx=S.mvx||0;S.mvDir=S.mvDir||1;
     if(sp>.02&&!S.fallen){S.mvx+=S.mvDir*sp*dtv*(S.veh&&VEH?Math.abs(Math.sin((VEH.hd||0)*Math.PI/180)):1);if(S.mvx>MV){S.mvx=2*MV-S.mvx;S.mvDir=-1;}if(S.mvx<-MV){S.mvx=-2*MV-S.mvx;S.mvDir=1;}}else if(sp===0&&!S.veh){S.mvx+=(0-S.mvx)*Math.min(1,dt*.8);}
@@ -3102,7 +3105,7 @@ function tick(t){
     else if(S.followHold>0){S.followHold-=dt;}
     else{const v=views[3];camera.position.lerp?camera.position.lerp(new THREE.Vector3(...v.p),Math.min(1,dt*2)):0;if(controls)controls.target.set(...v.t);}}
   if(controls)controls.update();
-  let jit=null;if(S.cam>0&&!reduce){S.cam=Math.max(0,S.cam-dt*1.8);const k=S.cam*(views&&$("v2").getAttribute("aria-pressed")==="true"?.12:.04);jit=new THREE.Vector3(R(-k,k),R(-k,k),R(-k,k));camera.position.add(jit);}
+  let jit=null;if(S.cam>0&&!reduce){S.cam=Math.max(0,S.cam-dt*1.8);const k=(REDUCE_OS?.3:1)*S.cam*(views&&$("v2").getAttribute("aria-pressed")==="true"?.12:.04);jit=new THREE.Vector3(R(-k,k),R(-k,k),R(-k,k));camera.position.add(jit);}
   try{shadowFit();shockTick(dtv);}catch(e){}
   renderFrame();try{postWatch(dt);}catch(e){}
   if(jit)camera.position.sub(jit);
@@ -3624,7 +3627,7 @@ function fxaSprite(kind){let o=FXA.pool.find(p=>!p.on&&p.kind===kind);if(o)retur
 function fxa(kind,pos,size,life,o2){if(reduce||!pos)return;const o=fxaSprite(kind);if(!o)return;o2=o2||{};o.on=true;o.t=0;o.life=life||1.4;o.glow=o2.glow||1;o.rise=o2.rise||0;o.grow=o2.grow||0;o.op=o2.op==null?1:o2.op;o.col=o2.col||null;o.size=size;
   const sp=o.sp;sp.position.copy(pos);if(kind==="exp")sp.center.set(.5,.06);else{sp.center.set(.5,.5);const tc=camera.position.clone().sub(pos),L=tc.length();if(L>1e-3)sp.position.addScaledVector(tc,Math.min(size*.45,L*.3)/L);}sp.material.rotation=kind==="exp"?0:R(-.4,.4);
   sp.material.blending=o2.add?THREE.AdditiveBlending:THREE.NormalBlending;sp.scale.set(size,size,1);sp.visible=true;sp.renderOrder=kind==="smoke"?3:5;FXA.live.push(o);}
-function fxaTick(dt){if(!FXA.live.length)return;FXA.live=FXA.live.filter(o=>{o.t+=dt;const k=o.t/o.life;if(k>=1){o.on=false;o.sp.visible=false;return false;}
+function fxaTick(dt){try{cmShockTick(dt);}catch(e){}try{mxHeatTick(dt);}catch(e){}try{wfTick(dt);}catch(e){}if(!FXA.live.length)return;FXA.live=FXA.live.filter(o=>{o.t+=dt;const k=o.t/o.life;if(k>=1){o.on=false;o.sp.visible=false;return false;}
   const f=Math.min(15,Math.floor(k*16)),c=f%4,r=Math.floor(f/4);o.u.value.set(c*.25,1-(r+1)*.25,.25,.25);
   const g=o.glow*(1+(o.glow-1)*0)*(k<.25?1:Math.max(1,o.glow*(1-k)));const m=o.sp.material;if(o.col)m.color.setHex(o.col);else m.color.setRGB(1,1,1);m.color.multiplyScalar(k<.3?g:1+(g-1)*Math.max(0,1-(k-.3)*3));
   m.opacity=o.op*(k>.75?(1-k)/.25:1);const s=o.size*(1+o.grow*k);o.sp.scale.set(s,s,1);if(o.rise)o.sp.position.y+=o.rise*dt;return true;});}
@@ -4636,7 +4639,7 @@ function vehPrep(sh){const vh=sh.vh;vehEnsure();const [lx,ly]=vehUV(vh);
   if(eraSpent)pack=pack.filter(l=>!(MAT[l[0]]&&MAT[l[0]].beh==="era"));{const note=[];pack=vehDamagePack(vh.zone,pack,lx,ly,G().cal,note);vh.note=note;vh.og=note.some(t=>/брешь/.test(t));}vh.uv=[lx,ly];if(!pack.length)pack=[["rha",5]];
   const key=S.vt+"|"+vh.zone+"|"+JSON.stringify(pack);S.vAng=vh.tilt;S.vYaw=vh.yaw;
   if(key!==S.vKey||S.broken||S.fallen||!PL.inside([lx,ly],S.poly)){S.vPrep=true;try{setLayers(pack);}finally{S.vPrep=false;}S.vKey=key;}else updPlate();
-  S.tilt=0;S.yawD=0;pivot.rotation.x=S.base;stand.rotation.y=S.yawBase;pivot.position.y=1.45;
+  S.tilt=0;S.yawD=0;S.toss=null;pivot.position.x=0;pivot.position.z=0;pivot.rotation.x=S.base;stand.rotation.y=S.yawBase;pivot.position.y=1.45;
   VEH.g.updateMatrixWorld(true);const W=VEH.g.localToWorld(vh.pL.clone());
   stand.updateMatrixWorld(true);const w=plate.localToWorld(new THREE.Vector3(lx,ly,-S.T/2));
   S.vOffX=(S.vOffX||0)+W.x-w.x;stand.position.x+=W.x-w.x;stand.position.y+=W.y-w.y;stand.position.z+=W.z-w.z;stand.updateMatrixWorld(true);
@@ -7661,7 +7664,7 @@ function bBlast(sh,det,out){const X=det.W?{W:det.W,Wb:det.W*1.25,We:det.W*1.15,f
   else if(inside&&!det.air)msgs.push(room&&room.atr?"Разрыв в атриуме: волна свободно расходится по галереям всех этажей":`Разрыв внутри помещения (≈${Math.round(room.V)} м³): волна отражается от стен и плит, газы взрыва держат давление ≈${Math.round(Pq/.6)} кПа${tbx?" — объёмный взрыв, отделка горит":""}`);
   if(det.air)msgs.push(det.ric?"Рикошетный разрыв: осколки бьют сверху и в стороны, пролома нет":"Осколки секут фасад: кладка выщерблена, стёкла выбиты, пролома нет");
   const dv=BLD.stat.vol-st0.vol;if(dv>.01)msgs.push(`выбито кладки и бетона ≈${bF1(dv,2)} м³ (≈${bF1(BLD.stat.mass-st0.mass,1)} т)`);
-  out.push(...msgs.map(x=>"• "+x));
+  try{if(typeof thBldLines==="function")msgs.push(...thBldLines(p,X,inside,det));}catch(e){console.error(e);}out.push(...msgs.map(x=>"• "+x));
   try{const n=det.n?bWDir(det.n):new THREE.Vector3(0,1,0);boom(bW(p),Math.min(big?600:90,X.We),{surf:!inside,fill:X.fk,n});if(big&&typeof cmBigFX==="function")cmBigFX(bW(p),X.We,X.fk,{noBoom:true,ground:!inside&&p[1]<1.5,dust:0x8a8378});if(inside&&!reduce){const w=bW(p),W1=Math.cbrt(Math.max(.01,X.We));for(let i=0;i<8;i++)puff(w.clone().add(new THREE.Vector3(R(-1.5,1.5),R(-.5,1.5),R(-1.5,1.5))),true,1.4*W1,0x2a2622,new THREE.Vector3(R(-1,1),R(.5,1.5),R(-1,1)),R(5,9));}}catch(e){}
   if(tbx&&inside)bFire(p,8+6*Math.cbrt(X.We));else if(det.fire&&inside)bFire(p,14+5*W3e);return X;}
 function bWDir(n){return new THREE.Vector3(n[0],n[1],n[2]);}
@@ -8030,10 +8033,20 @@ function cmBigFX(p,We,fk,o){if(!p||reduce||!(We>0))return;o=o||{};const W3=Math.
 /* ---------- после встречи: лист на стойке и бронемашина — тяжёлая БЧ рвёт и сносит; промах — волна по расстоянию ---------- */
 function cmAfter(sh){const g=sh.cmG;if(!g)return;const w=cmWH(g,sh.a&&sh.a.key);if(!w||sh.fail)return;const H=heW(g,sh.a.key),We=H.We,W3=Math.cbrt(We),msg=[],who=g.cls==="cm"?"Ракета":"Дрон",fe=g.cls==="cm"?"а":"";
   if(sh.miss&&!S.lock){const L=$("res").textContent.split("\n");L[0]=sh.cmMv?`Цель двигалась: ${who.toLowerCase()} наводится по координатам, заданным при пуске, — на точке удара цели уже нет`:`Промах наведения: ${who.toLowerCase()} ${g.cls==="cm"?"пришла":"пришёл"} мимо (срединный промах ≈${g.cep} м)`;$("res").textContent=L.join("\n");}
-  if(!S.veh){const c=new THREE.Vector3();plate.getWorldPosition(c);const Rm=Math.max(.3,sh.to.distanceTo(c)),Z=Rm/W3;
-    if(sh.miss)msg.push(`Разрыв в ${cmF(Rm,1)} м от листа · ${H.W>=1?cmF(H.W):cmF(H.W,1)} кг ВВ, приведённое расстояние ${cmF(Z,1)} м/кг^⅓`);
-    if(!S.fallen&&(!sh.miss||Z<2.8)){S.fallen=true;S.fall=0;S.fallFrom=pivot.rotation.x;try{sFall();}catch(e){}
-      msg.push(sh.miss?"Ударная волна сорвала лист со стойки":sh.breach?"Лист проломлен и сорван со стойки: контактный разрыв такой массы ВВ":"Пролома нет, но ударная волна сорвала лист со стойки и отбросила его");}
+  if(!S.veh){const c=new THREE.Vector3();plate.getWorldPosition(c);const Rm=Math.max(.3,sh.to.distanceTo(c)),Z=Rm/W3,was=S.fallen;let imp="";sh._hdr=$("res").textContent.split("\n")[0];
+    /* близкий промах: ударная волна и осколки бьют по листу как подрыв на отстоянии — пролом по той же модели, что и контактный, но с ослаблением
+       по приведённому расстоянию (на 0,4 м/кг^⅓ — около трети контактного действия, на 1 м/кг^⅓ — десятая часть) */
+    if(sh.miss&&!was&&Z<1.6){const sto=1/(1+Math.pow(Z/.25,1.5)),lp=plate.worldToLocal(sh.to.clone()),C=PL.centroid(S.poly);let lx=lp.x,ly=lp.y;
+      for(let k=0;k<20&&!PL.inside([lx,ly],S.poly);k++){lx+=(C[0]-lx)*.25;ly+=(C[1]-ly)*.25;}
+      const s2=Object.assign({},sh,{miss:false,lx,ly,sto,B:Object.assign({},sh.B,{obl:0,cN:1}),to:sh.to.clone()}),fz=S.fuze;S.fuze="inst";
+      try{impact(s2);imp=$("res").textContent.split("\n").slice(1).filter(l=>!/^ВВ:|^Сила удара/.test(l)).join("\n");}catch(e){console.error(e);}S.fuze=fz;sh.breach=s2.breach;}
+    if(sh.miss)msg.push(`Разрыв в ${cmF(Rm,1)} м от листа · ${H.W>=1?cmF(H.W):cmF(H.W,1)} кг ВВ, приведённое расстояние ${cmF(Z,1)} м/кг^⅓ — давление во фронте ≈${cmF(typeof kgPs==="function"?kgPs(Z)*101.3/1000:0,1)} МПа`);
+    if(imp)msg.push("Волна и осколки на отстоянии:\n"+imp);
+    if(!was&&(!sh.miss||Z<2.8)){S.fallen=true;S.fall=0;S.fallFrom=pivot.rotation.x;try{sFall();}catch(e){}
+      /* отброс: удельный импульс отражённой волны ≈150·W^⅓/Z² Па·с на площадь листа, делённый на его массу */
+      const m=Math.max(200,S.mass||2000),ir=150*W3/Math.max(.15,Z*Z)*(sh.miss?1:2.5),v=Math.min(45,ir*2.3/m);
+      if(v>1.5){const d=c.clone().sub(sh.to);d.y=0;if(d.length()<.01)d.set(0,0,1);d.normalize();S.toss={vx:d.x*v,vz:d.z*v,vy:v*(sh.miss?.55:.35),w:R(2,6)*(Math.random()<.5?-1:1)};S.fall=1;}
+      msg.push((sh.miss?(sh.breach?"Лист проломлен ударной волной и сорван":"Лист выгнут и сорван со стойки"):sh.breach?"Лист проломлен контактным разрывом и сорван":"Пролома нет, лист сорван со стойки")+(v>1.5?` — отброшен со скоростью ≈${Math.round(v)} м/с (масса ${Math.round(m)} кг)`:""));}
     else if(sh.miss&&Z<7)msg.push("Лист иссечён осколками корпуса, стойка устояла");
     else if(sh.miss)msg.push("На таком расстоянии волна листу не опасна");
     cmBigFX(sh.to.clone(),We,H.fk,{ground:sh.miss||sh.to.y<1.5,surf:!sh.miss});if(sh.miss){try{addCrater(sh.to,Math.max(g.cal,200),Math.min(1.6,W3/4));}catch(e){}}}
@@ -8043,13 +8056,200 @@ function cmAfter(sh){const g=sh.cmG;if(!g)return;const w=cmWH(g,sh.a&&sh.a.key);
         msg.push(vehKill(m,(w.J||0)>=300&&H.W<lim?`кумулятивное ядро БЧ пробило броню, следом — разрыв ${cmF(H.W)} кг ВВ`:`прямое попадание БЧ ≈${cmF(H.W)} кг ВВ: корпус разорван ударной волной`));try{vehState();}catch(e){}}}
     else if(sh.miss&&Rm<W3*1.1&&VS.kill!=="cat"){VS.mob=true;msg.push("Ударная волна сорвала гусеницы, навесное и приборы наблюдения — машина обездвижена");try{vehState();}catch(e){}}
     cmBigFX(sh.to.clone(),We,H.fk,{ground:sh.miss||sh.to.y<1.2,surf:!sh.miss});if(sh.miss){try{addCrater(sh.to,Math.max(g.cal,200),Math.min(1.6,W3/4));}catch(e){}}}
-  if(msg.length&&!S.lock)$("res").textContent+="\n"+msg.join("\n");}
+  if(msg.length&&!S.lock){if(!S.veh&&sh.miss){$("res").textContent=[sh._hdr||""].concat(msg).join("\n");}else $("res").textContent+="\n"+msg.join("\n");}}
 if($("cmProf"))$("cmProf").onchange=()=>{S.balCache=null;try{updBal();}catch(e){}};
 /* ---------- пуск: маршрут, модель, звук ---------- */
 function cmLaunch(g,B,target,bh,sh){if(reduce||!CM_FW(g))return;if(sh.fail&&CM_LONG(g)){sh.tr.visible=false;sh.dur=.3;return;}const P=cmPath(g,B,target,bh);sh.path=P.curve;sh.dur=P.dur;sh.cmLen=P.L;sh.from=P.curve.getPointAt(0);
   try{sCM(g,sh);}catch(e){}}
+/* видимый фронт ударной волны: прозрачная сфера и кольцо пыли по грунту, растут со скоростью фронта (у заряда — в разы быстрее звука) и гаснут;
+   работает и без постобработки (на телефоне она бывает выключена) */
+const CMSH=[];let CMSH_G=null;
+function cmShock(p,W){if(reduce||!p||!(W>0.02))return;if(!CMSH_G)CMSH_G={s:new THREE.SphereGeometry(1,28,14),r:new THREE.RingGeometry(.86,1,48)};
+  const W3=Math.cbrt(W),sp=new THREE.Mesh(CMSH_G.s,new THREE.MeshBasicMaterial({color:0xfff6e8,transparent:true,opacity:.3,depthWrite:false}));sp.position.copy(p);scene.add(sp);
+  const rg=new THREE.Mesh(CMSH_G.r,new THREE.MeshBasicMaterial({color:0xcbbb98,transparent:true,opacity:.45,depthWrite:false,side:THREE.DoubleSide}));rg.rotation.x=-Math.PI/2;rg.position.set(p.x,.06,p.z);rg.visible=p.y<6;scene.add(rg);
+  CMSH.push({sp,rg,t:0,life:.28+.06*W3,Rm:6+9*W3});if(CMSH.length>8){const o=CMSH.shift();scene.remove(o.sp);scene.remove(o.rg);o.sp.material.dispose();o.rg.material.dispose();}}
+function cmShockTick(dt){for(let i=CMSH.length-1;i>=0;i--){const o=CMSH[i];o.t+=dt;const k=o.t/o.life;if(k>=1){scene.remove(o.sp);scene.remove(o.rg);o.sp.material.dispose();o.rg.material.dispose();CMSH.splice(i,1);continue;}
+  const r=o.Rm*Math.pow(k,.6);o.sp.scale.setScalar(Math.max(.1,r));o.sp.material.opacity=.3*(1-k)*(1-k);o.rg.scale.setScalar(Math.max(.1,r*1.05));o.rg.material.opacity=.45*(1-k);}}
 
-gatherFar();buildGunList();setGun(0);setLayers(DEF_LAYERS);updBal();updTally();applyRange();resize();setView(0);requestAnimationFrame(tick);
+/* ===== v67: ударная волна по параметрам фронта, тепловое воздействие огненного шара, горение =====
+   Фронт: избыточное давление и импульс — Кинни–Грэм; отражение — Ренкин–Гюгонио (до 8× у сильной волны); фаза сжатия — по треугольной
+   аппроксимации t₊ = 2I/P; скоростной напор q = 5P²/2(7P₀+P); скорость воздуха за фронтом и нагрев воздуха во фронте — из ударной адиабаты (γ = 1,4).
+   Огненный шар: радиус ≈1,25·W^⅓ (у термобарической смеси ≈1,9×, у алюминизированного ВВ ≈1,3×), горит (0,09 + 0,05·W^⅓) с
+   (термобарика ≈4×), температура 2100–2900 К; тепло на цель — излучение σεT⁴·t (ε ≈ 0,5) с ослаблением как (Rш/R)², внутри шара ещё и конвекция.
+   Порог воспламенения: сухая трава ≈120 кДж/м², краска ≈150, резина и брезент ≈250 (во влажную погоду и холод — выше). */
+const TH_P0=101.325;
+function thBlast(We,R,cosI,surf){const W=Math.max(1e-4,We*(surf?1.8:1)),W3=Math.cbrt(W),Z=Math.max(.05,R/W3);
+  const Ps=kgPs(Z)*TH_P0,Is=kgImp(Z,W),cr=2+6*Ps/(Ps+7*TH_P0),c=Math.max(0,Math.min(1,cosI==null?1:cosI)),Pr=Ps*(1+(cr-1)*c*c),Ir=Is*(1+(cr-1)*.75*c*c);
+  const td=Math.max(.05,2*Is/(Ps*1000)*1000),q=2.5*Ps*Ps/(7*TH_P0+Ps),M=Math.sqrt(1+6*Ps/(7*TH_P0)),u=5*Ps/(7*TH_P0)*340/M,pr=1+Ps/TH_P0,T2=288*pr*(6+pr)/(1+6*pr);
+  return{Z,Ps,Pr,Is,Ir,td,q,Us:340*M,u,T2};}
+function thFire(W,fk){const W3=Math.cbrt(Math.max(1e-4,W)),k=fk==="tbx"?{r:1.9,t:4,T:2600}:fk==="aix"?{r:1.3,t:1.8,T:2900}:{r:1,t:1,T:fk==="tnt"?2100:2300};
+  const Rf=1.25*W3*k.r,tf=(.09+.05*W3)*k.t;return{Rf,tf,T:k.T,Qf:.5*5.67e-8*Math.pow(k.T,4)*tf/1000};}
+function thQ(F,R){return R<=F.Rf?F.Qf*1.6:F.Qf*Math.pow(F.Rf/R,2);}
+/* сухость: дождь и снег гасят, жара сушит */
+function thDry(){const T=+(($("temp")||{}).value)||15,w=typeof wetK==="function"?wetK():0;return Math.max(.05,(1-.85*w)*Math.max(.3,Math.min(1.1,.45+.02*(T+5))));}
+/* прогрев поверхности стали коротким тепловым импульсом: ΔT = 2Q/√(π·t·kρc) */
+function thDT(Q,t){return 2*Q*1000/Math.sqrt(Math.PI*Math.max(.01,t))/12700;}
+const thK=p=>p>=1000?`${(p/1000).toFixed(1).replace(".",",")} МПа`:`${Math.round(p)} кПа`,thF=(x,n)=>(+x).toFixed(n||0).replace(".",",");
+function thWaveTxt(B,R){return`Ударная волна в ${thF(R,1)} м: фронт ${thK(B.Ps)}, при отражении от преграды ${thK(B.Pr)}, импульс ${Math.round(B.Ir)} Па·с, фаза сжатия ${thF(B.td,1)} мс, скоростной напор ${thK(B.q)} — воздух за фронтом несётся со скоростью ≈${Math.round(B.u)} м/с и на мгновение нагрет до ≈${Math.round(B.T2-273)} °C`;}
+function thFireTxt(F,Q,inside){return`Огненный шар Ø≈${thF(2*F.Rf,1)} м, ≈${F.T} К, горит ${Math.round(F.tf*1000)} мс: ${inside?"цель внутри шара — ":""}≈${Math.round(Q)} кДж/м² тепла`;}
+/* ---------- очаги горения в мире: трава, техника, помещения ---------- */
+const WF=[],WF_CAP=24;let WF_DISC=null;
+function wfKill(f){if(f.g.parent)f.g.parent.remove(f.g);f.g.traverse(o=>{if(o.material&&o.material.dispose&&o!==f.disc)o.material.dispose();});if(f.disc){if(f.disc.parent)f.disc.parent.remove(f.disc);}}
+function wfAdd(p,o){if(reduce||!p)return null;if(WF.length>=WF_CAP)wfKill(WF.shift());o=o||{};
+  const f={p:p.clone(),r:o.r||1,kind:o.kind||"pt",life:o.life||60,t:0,ros:o.ros||0,rmax:o.rmax||o.r||1,sz:o.sz||1,g:new THREE.Group(),fl:[],pt:0,sp:o.sp||1e9,room:o.room||null,bld:o.bld||null,mode:!!S.bld,heat:o.heat||0};
+  (o.parent||scene).add(f.g);f.g.position.copy(p);const n=f.kind==="grass"?18:f.kind==="room"?5:f.kind==="vent"?2:3,tint=f.kind==="grass"?[1,.8,.55]:[1,.75,.5];
+  for(let i=0;i<n;i++){let m;if(typeof flameMesh==="function"&&fxOK())m=flameMesh(f.sz*R(.8,1.2),tint);else if(THREE.Sprite&&fireTex()){m=new THREE.Sprite(new THREE.SpriteMaterial({map:fireTex(),color:0xffa050,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));m.scale.set(f.sz,f.sz*1.5,1);}else continue;
+    m.userData.a=i/n*6.283+R(-.2,.2);m.userData.o=[R(-1,1),R(-1,1)];f.g.add(m);f.fl.push(m);}
+  if(f.kind==="grass"){if(!WF_DISC)WF_DISC=new THREE.CircleGeometry(1,40);f.disc=new THREE.Mesh(WF_DISC,new THREE.MeshBasicMaterial({color:0x161310,transparent:true,opacity:.6,depthWrite:false}));f.disc.rotation.x=-Math.PI/2;f.disc.position.set(p.x,.035,p.z);f.disc.renderOrder=1;scene.add(f.disc);}
+  WF.push(f);return f;}
+function wfTick(dt){if(!WF.length)return;const wind=+(($("wind")||{}).value)||0,now=performance.now();
+  for(let i=WF.length-1;i>=0;i--){const f=WF[i];f.t+=dt;
+    if(f.mode!==!!S.bld||((f.kind==="room"||f.kind==="vent")&&(typeof BLD==="undefined"||BLD!==f.bld))||f.t>=f.life+6){wfKill(f);WF.splice(i,1);continue;}
+    const fade=Math.max(0,Math.min(1,f.t/1.2,(f.life-f.t)/6));
+    if(f.kind==="grass"){f.r=Math.min(f.rmax,f.r+f.ros*dt);f.g.position.x+=Math.sign(wind)*Math.min(1,Math.abs(wind)/8)*f.ros*.6*dt;const n=f.fl.length;
+      f.fl.forEach((m,j)=>{const a=m.userData.a+f.t*.02,dw=Math.cos(a)*Math.sign(wind||1),h=f.sz*(1+.5*Math.max(0,dw)*Math.min(1,Math.abs(wind)/6));m.position.set(Math.cos(a)*f.r,h*.65,Math.sin(a)*f.r);if(m.userData.flame)m.scale.set(h*.42,h*.75,1);});
+      if(f.disc){f.disc.position.x=f.g.position.x;f.disc.position.z=f.g.position.z;f.disc.scale.setScalar(Math.max(.3,f.r*(f.t>f.life*.5?1:.97)));}
+      if(Math.abs(wind)>4&&f.t>15&&Math.random()<dt*.012&&WF.filter(q=>q.kind==="grass").length<10){const q=f.g.position.clone();q.x+=Math.sign(wind)*(f.r+R(6,14));q.z+=R(-6,6);q.y=0;if(!(Math.abs(q.x)<3.2&&!S.bld))wfAdd(q,{kind:"grass",r:.8,ros:f.ros,rmax:f.rmax*.8,life:f.life*.8,sz:f.sz});}}
+    else f.fl.forEach(m=>{m.position.set(m.userData.o[0]*f.r*.6,f.sz*.6,m.userData.o[1]*f.r*.6);});
+    f.fl.forEach((m,j)=>{if(m.userData.flame){const U=m.material.uniforms;U.uTime.value+=dt;U.uI.value=fade*(.8+.2*Math.sin(now/90+j*2.3));}else if(m.material)m.material.opacity=fade;});
+    f.pt-=dt;if(f.pt<=0){f.pt=f.kind==="room"?.22:f.kind==="grass"?.3:.4;const w=new THREE.Vector3();f.g.getWorldPosition(w);
+      if(f.kind==="grass"){const a=Math.random()*6.283;w.x+=Math.cos(a)*f.r;w.z+=Math.sin(a)*f.r;}w.y+=f.sz*1.2;
+      puff(w,true,(f.kind==="room"?2.2:1.2)*f.sz*fade+.2,f.kind==="grass"?0x5d564c:0x1c1916,new THREE.Vector3(Math.sign(wind)*Math.min(3,Math.abs(wind)*.4),R(1.2,2.6),R(-.3,.3)),R(5,9));}
+    if(f.kind==="room"){f.sp-=dt;if(f.sp<=0){f.sp=R(25,45);try{thRoomSpread(f);}catch(e){}}if(!f.win&&f.t>R(8,16)){f.win=1;try{thRoomWindows(f);}catch(e){}}if(!f.spall&&f.t>R(50,80)){f.spall=1;try{thSpall(f);}catch(e){}}}}}
+/* ---------- после разрыва на стенде (лист, бронемашина, промах): параметры волны у цели, тепло, возгорание ---------- */
+function thAfter(sh){const a=sh.a;if(!a||sh.fail||!(a.type==="he"||a.type==="hesh"))return;const g=G(),H=heW(g,a.key),F=thFire(H.W,H.fk),dry=thDry(),L=[],p=sh.to.clone();
+  const tc=new THREE.Vector3();if(S.veh&&VEH){VEH.g.getWorldPosition(tc);tc.y+=(VT[S.vt].top||2)*.5;}else plate.getWorldPosition(tc);
+  const contact=!sh.miss,R0=contact?0:Math.max(.2,p.distanceTo(tc));
+  if(!contact&&R0<80){const B=thBlast(H.We,R0,1,p.y<1.5);L.push(thWaveTxt(B,R0));
+    /* лист на стойке: импульс отражённой волны на площадь листа (≈2,3 м²) разгоняет его — опрокидывает или отбрасывает */
+    if(!S.veh&&!S.fallen&&R0<40){const m=Math.max(150,S.mass||2000),Iw=B.Ir*2.3,v=Iw/m;if(v>.6){S.fallen=true;S.fall=0;S.fallFrom=pivot.rotation.x;try{sFall();}catch(e){}
+      if(v>2){const d=tc.clone().sub(p);d.y=0;if(d.length()<.01)d.set(0,0,1);d.normalize();S.toss={vx:d.x*v,vz:d.z*v,vy:v*.5,w:R(2,5)*(Math.random()<.5?-1:1)};S.fall=1;}
+      L.push(`Импульс волны на лист ≈${Math.round(Iw)} Н·с при массе ${Math.round(m)} кг: лист ${v>2?`отброшен со скоростью ≈${thF(v,1)} м/с`:"опрокинут со стойки"}`);}}}
+  const inF=contact||R0<=F.Rf,Q=contact?F.Qf*1.6:thQ(F,R0);
+  if(contact||R0<40)L.push(thFireTxt(F,Q,inF)+(Q>=150?" — краска обуглилась и выгорела":Q>=40?" — краска вздулась и потемнела":" — краска почти не пострадала"));
+  if(!S.veh&&(contact||R0<15)&&typeof mxThermal==="function"){CF.w=.002;CF.wf=1;try{mxThermal(Q,F.tf,L,contact?[sh.lx||0,sh.ly||0]:PL.centroid(S.poly));}catch(e){}}
+  if(!S.veh&&inF){const fl=layers.find(l=>!l.spent&&l.k!=="gap"),m=fl&&MAT[fl.k];
+    if(m&&m.burn>0&&Q*dry>=150&&Math.random()<Math.min(1,m.burn*1.5)){const lx=contact?(sh.lx||0):PL.centroid(S.poly)[0],ly=contact?(sh.ly||0):PL.centroid(S.poly)[1];
+      try{ignite(lx,ly,-S.T/2-.01,1+Math.min(2,F.Rf/3),R(15,40),m.beh==="rub"||m.beh==="pe",fl.k);}catch(e){}L.push(`${m.n}: загорелся от огненного шара`);}}
+  if(S.veh&&VEH&&VS&&VS.kill!=="cat"&&inF&&Q*dry>=250&&Math.random()<.55){const v=VT[S.vt],wh=v.run&&v.run.kind!=="track";
+    wfAdd(new THREE.Vector3(R(-.5,.5),(v.top||2)+.1,R(-1,1)),{kind:"veh",parent:VEH.g,r:Math.min(1.6,v.W*.35),sz:.9,life:R(60,150)});
+    L.push(`Огонь на броне: загорелись брезент, ящики ЗИП${wh?", шины":" и резиновые экраны"} — пожар снаружи, внутрь через закрытые люки не проходит`);}
+  /* трава — вне гравийной дороги (|x| < 3,2 м); огненный шар шире полосы дороги дотягивается до травы на обочине */
+  let gp=null;if(p.y<1.6&&!S.bld){if(Math.abs(p.x)>=3.2)gp=new THREE.Vector3(p.x,0,p.z);else if(F.Rf>3.2-Math.abs(p.x)+.3)gp=new THREE.Vector3((p.x<0?-1:1)*3.6,0,p.z);}
+  if(gp){p.copy(gp);const pg=dry*(1-Math.exp(-F.Qf*F.tf/25))*(Math.abs(sh.to.x)<3.2?.7:1);
+    if(Math.random()<pg){const ros=(.03+.06*Math.abs(+(($("wind")||{}).value)||0))*dry;wfAdd(new THREE.Vector3(p.x,0,p.z),{kind:"grass",r:Math.max(.6,F.Rf*.8),ros,rmax:8+2*F.Rf+3*Math.abs(+(($("wind")||{}).value)||0),life:R(90,180),sz:1.4});
+      L.push(`Загорелась сухая трава: кромка огня идёт ≈${thF(ros*60,1)} м/мин${Math.abs(+$("wind").value||0)>2?", по ветру быстрее":""}`);}}
+  if(L.length&&!S.lock)$("res").textContent+="\n"+L.join("\n");}
+/* ---------- здание: волна на расстояниях, огненный шар, пожар в помещении и его распространение ---------- */
+function thBldLines(p,X,inside,det){const F=thFire(X.W,X.fk),L=[],B5=thBlast(X.We,5,1,!inside),B15=thBlast(X.We,15,1,!inside);
+  L.push(`ударная волна: в 5 м — фронт ${thK(B5.Ps)}, отражённое ${thK(B5.Pr)}, ${thF(B5.td,1)} мс, ветер ≈${Math.round(B5.u)} м/с; в 15 м — ${thK(B15.Ps)} / ${thK(B15.Pr)}`);
+  L.push(`огненный шар Ø≈${thF(2*F.Rf,1)} м, ≈${F.T} К, ${Math.round(F.tf*1000)} мс`);
+  if(!det.air&&(inside||det.fire)){const pI=det.fire||X.fk==="tbx"?1:.8*(1-Math.exp(-F.Qf*F.tf/15));
+    if(Math.random()<pI&&thBldFire(p,F))L.push(`${det.fire?"горит топливо, ":""}загорелись мебель, бумага и отделка помещения — пожар будет распространяться по этажу и через выбитые окна вверх`);}
+  return L;}
+function thBldFire(p,F){if(typeof BLD==="undefined"||!BLD||reduce)return false;const rm=bRoom(p);if(!rm)return false;BLD.fires=BLD.fires||{};const key=rm.f+":"+Math.round(rm.x0)+":"+Math.round(rm.z0);if(BLD.fires[key])return false;
+  if(Object.keys(BLD.fires).length>=12)return false;BLD.fires[key]=1;const lv=BLC.lv,y=lv[rm.f]+.15,q=[Math.min(Math.max(p[0],rm.x0+1),rm.x1-1),y,Math.min(Math.max(p[2],rm.z0+1),rm.z1-1)];
+  wfAdd(bW(q),{kind:"room",r:Math.min(5,(rm.x1-rm.x0)*.35),sz:1.9,life:R(260,460),room:rm,bld:BLD,sp:R(20,40)});BLD.stat.fires=(BLD.stat.fires||0)+1;return true;}
+function thRoomSpread(f){const rm=f.room,C=BLC;if(!rm||rm.atr)return;const opts=[];const cx=(rm.x0+rm.x1)/2,cz=(rm.z0+rm.z1)/2,y=C.lv[rm.f]+1.5;
+  [[12,0],[-12,0],[0,8],[0,-8]].forEach(([dx,dz])=>{const q=[cx+dx,y,cz+dz];if(q[0]>1&&q[0]<C.L-1&&q[2]>1&&q[2]<C.W-1&&!bInVoid(q[0],q[2],0))opts.push(q);});
+  if(rm.f<4&&f.win)opts.push([cx,C.lv[rm.f+1]+1.5,cz]);if(!opts.length||Math.random()>.55)return;const q=opts[Math.floor(Math.random()*opts.length)];
+  if(thBldFire(q,null)&&!S.lock&&S.bld)$("res").textContent+=`\nПожар перекинулся ${q[1]>y+1?"на этаж выше через выбитые окна":"в соседнее помещение"}`;}
+function thRoomWindows(f){const rm=f.room;if(!rm||typeof BLD==="undefined"||!BLD)return;let n=0;for(const e of BLD.E){if(e.k!=="g"||e.st===2||e.f!==rm.f)continue;const c=bCtr(e);if(!bInBox(c,rm))continue;if(bGlass(e,[0,.2,0],1.5,"blast")){n++;BLD.stat.win=(BLD.stat.win||0)+1;
+    /* после выхода стекла пламя вырывается из проёма наружу и лижет фасад вверх */
+    if(n<=3){const nn=bOutN(e,c),wp=bW([c[0]+nn[0]*.35,c[1]-.4,c[2]+nn[2]*.35]);wfAdd(wp,{kind:"vent",r:.4,sz:2.2,life:Math.max(30,f.life-f.t),bld:BLD});}}}
+  if(n&&!S.lock&&S.bld)$("res").textContent+=`\nОкна горящего помещения лопнули от жара (стекло не выдерживает перепада ≈60–100 °C): ${n}`;}
+
+/* взрывное откалывание бетона при пожаре: вода в порах при 300–600 °C превращается в пар и отрывает защитный слой — оголяется арматура */
+function thSpall(f){const rm=f.room;if(!rm||typeof BLD==="undefined"||!BLD)return;const cx=(rm.x0+rm.x1)/2,cz=(rm.z0+rm.z1)/2,s=bSlabAt(cx,cz,rm.f+1);if(!s||s.st===2||s.falling)return;
+  const y=s.b?s.b[4]-s.th:BLC.lv[rm.f+1]-.25;bDmgCells(s,[cx+R(-2,2),y,cz+R(-2,2)],1.1,.25,[0,-1,0],{v:3});bDust([cx,y,cz],[.6,.6,.58],1.2);
+  if(!S.lock&&S.bld)$("res").textContent+="\nПожар: потолок над очагом прогрелся до 300–600 °C — пар в порах бетона откалывает защитный слой, арматура оголяется";}
+
+/* ===== v68: механики разрушения материала листа =====
+   • Надлом по трещине — линейная механика разрушения: у вершины трещины длиной a коэффициент интенсивности K = Y·σ·√(πa) (Y = 1,12 у краевой);
+     K ≥ K_IC (вязкость разрушения слоя, на морозе ниже) — трещина бежит через лист; 0,35·K_IC ≤ K < K_IC — подрастает (усталость, закон Пэриса).
+     σ у вершины: от удара — контактное давление, спадающее как (r₀/r)^1,5; от взрыва — изгиб листа отражённым давлением σ ≈ 0,3·P·(L/h)².
+   • Дробление — модель Грейди: средний обломок s = (√24·K / (ρ·c·ε̇))^⅔ — чем выше скорость деформации ε̇, тем мельче крошка;
+     хрупкий лист (керамика, стекло, хладноломкая сталь) от ударной волны раскалывается целиком, если волна разгоняет его быстрее предела v ≈ 2 + K_IC/3 м/с.
+   • Тепло — поверхностный нагрев коротким импульсом ΔT = 2Q/√(π·t·e), e = √(kρc) — тепловая активность материала;
+     выше точки плавления или разложения слой оплавляется, выше воспламенения — загорается; керамика и стекло трескаются от термоудара при ΔT > σ(1−ν)/(Eα).
+   • Прочность металла при нагреве — коэффициенты снижения предела текучести по Еврокоду 3 (600 °C — 47 %, 800 °C — 11 %), для других материалов —
+     по гомологической температуре; сплав, нагретый выше плавления, проплавляется насквозь и стекает каплями. */
+const MX_E={steel:12900,hard:12900,perf:12900,era:12900,slat:12900,soft:17000,ti:4200,du:8000,cer:10200,frp:700,ara:600,pe:850,rub:600};
+const MX_A={steel:1.2e-5,hard:1.1e-5,perf:1.2e-5,soft:5e-5,ti:2.9e-6,du:1.1e-5,cer:9e-6,frp:2e-7,ara:2e-7,pe:2e-7,rub:1e-7};
+const MX_TS={cer:[350,8e-6,.22],glass:[50,9e-6,.22],sic:[400,4e-6,.14],b4c:[350,5e-6,.17],tib2:[400,7e-6,.1],alon:[300,6e-6,.24],spinel:[250,7e-6,.26]};
+const MX_EC=[[20,1],[400,1],[500,.78],[600,.47],[700,.23],[800,.11],[900,.06],[1000,.04],[1200,.02]];
+function mxF(){const i=frontIdx(),l=layers[i];return l&&l.k!=="gap"&&MAT[l.k]?{i,l,m:MAT[l.k],p:phy(l.k)}:null;}
+function mxEff(k){return k==="glass"?1450:k==="wood"?400:MX_E[MAT[k].beh]||12900;}
+function mxAl(k){return k==="glass"?5e-7:k==="wood"?1.5e-7:MX_A[MAT[k].beh]||1.2e-5;}
+const mxF1=(x,n)=>(+x).toFixed(n||0).replace(".",",");
+/* прочность при нагреве: доля от холодной */
+function mxSoftK(k,T){const p=phy(k);if(!p)return 1;const Tm=p.Tm||1480,Te=(T+273)/(Tm+273)*1753-273;if(Te<=400)return 1;
+  for(let i=1;i<MX_EC.length;i++)if(Te<=MX_EC[i][0]){const a=MX_EC[i-1],b=MX_EC[i];return a[1]+(b[1]-a[1])*(Te-a[0])/(b[0]-a[0]);}return .02;}
+function mxWeak(x,y,ht){const f=mxF();if(!f||ht<=0)return 1-.22*ht;return Math.min(1,.25+.75*mxSoftK(f.l.k,20+ht*1280));}
+/* ---------- вершины трещин: длина ветви, направление роста ---------- */
+function mxTips(){const deg=new Map(),adj=new Map();CG.e.forEach(e=>{if(e.f===false)return;[0,1].forEach(j=>{const v=e[j];deg.set(v,(deg.get(v)||0)+1);if(!adj.has(v))adj.set(v,[]);adj.get(v).push(e[1-j]);});});
+  const out=[];CG.n.forEach((n,i)=>{if(n.b||deg.get(i)!==1)return;let prev=i,cur=adj.get(i)[0];const pv=CG.n[cur];if(!pv)return;let len=Math.hypot(pv.x-n.x,pv.y-n.y),st=0;
+    while(deg.get(cur)===2&&st++<300){const nx=adj.get(cur).find(v=>v!==prev);if(nx==null)break;len+=Math.hypot(CG.n[nx].x-CG.n[cur].x,CG.n[nx].y-CG.n[cur].y);prev=cur;cur=nx;}
+    out.push({i,a:len,ang:Math.atan2(n.y-pv.y,n.x-pv.x),edge:!!(CG.n[cur]&&CG.n[cur].b)});});return out;}
+function mxCrackLoad(P,sigAt,msgs,why){const f=mxF();if(!f||!f.p||!f.p.K||S.broken)return;const fib=["ara","pe","rub","frp"].includes(f.m.beh);if(fib)return;
+  const Kc=kEff(f.l.k),tips=mxTips();if(!tips.length)return;let run=0,grew=0,da=0,Km=0;
+  for(const t of tips){const n=CG.n[t.i];if(!n)continue;const d=Math.max(.02,Math.hypot(n.x-P[0],n.y-P[1])),s=sigAt(d);if(!(s>0))continue;
+    const K=(t.edge?1.12:1)*s*Math.sqrt(Math.PI*Math.min(1.5,Math.max(.005,t.a)));Km=Math.max(Km,K);
+    if(K>=Kc){grow(t.i,t.ang,2.5,{jit:.15});run++;}
+    else if(K>=.35*Kc){const dd=Math.min(.08,Math.max(.004,.06*Math.pow(K/Kc,4)));grow(t.i,t.ang,dd,{jit:.2});grew++;da+=dd;}}
+  if(run)msgs.push(`Надлом${why?" ("+why+")":""}: у ${run===1?"трещины":run+" трещин"} K ≈ ${Math.round(Km)} МПа·√м — больше вязкости разрушения «${lc(f.m.n)}» K_IC ≈ ${Math.round(Kc)}${Kc<f.p.K*.8?" (на морозе ниже, чем в тепле)":""}: трещина побежала через лист`);
+  else if(grew)msgs.push(`Трещины подросли от нового нагружения (усталость): +${Math.max(1,Math.round(da*100))} см, K до ≈ ${Math.round(Km)} из ${Math.round(Kc)} МПа·√м`);
+  if(run||grew){try{processCuts(msgs);}catch(e){}drawCracks();}}
+/* ---------- расколоть многоугольник прямой через точку ---------- */
+function mxCut(poly,c,ang){const dx=Math.cos(ang),dy=Math.sin(ang),A=[c[0]-dx*6,c[1]-dy*6],B=[c[0]+dx*6,c[1]+dy*6];let lo=null,hi=null;
+  for(let k=0;k<poly.length;k++){const h=PL.seg(A,B,poly[k],poly[(k+1)%poly.length]);if(!h)continue;const t=h.t;if(t<.5&&(!lo||t>lo.t))lo=h;if(t>.5&&(!hi||t<hi.t))hi=h;}
+  if(!lo||!hi)return null;return cutPoly(poly,[[lo.x,lo.y],[c[0]+R(-.02,.02),c[1]+R(-.02,.02)],[hi.x,hi.y]]);}
+function mxShatter(n,msgs,why){let P=[S.poly];for(let i=0;i<n;i++){P.sort((a,b)=>PL.area(b)-PL.area(a));const big=P.shift(),c=PL.centroid(big),r=mxCut(big,[c[0]+R(-.1,.1),c[1]+R(-.08,.08)],R(0,3.1416));if(r&&PL.area(r[0])>4e-4&&PL.area(r[1])>4e-4)P.push(r[0],r[1]);else P.push(big);}
+  let k=0;P.forEach(p=>{if(PL.area(p)>3e-4){makePiece(p,false);k++;}});
+  S.broken=true;layers.forEach(l=>{if(l.mesh)l.mesh.visible=false;if(l.side)l.side.visible=false;});mount.visible=false;CG.n=[];CG.e=[];S.decor=[];S.fallen=true;S.fall=1;S.toss=null;try{sFall();}catch(e){}
+  msgs.push(`${why}: лист раскололся на ${k} ${k<5?"куска":"кусков"} — хрупкий материал не гнётся, а разлетается`);}
+/* ---------- после выстрела по листу ---------- */
+function mxAfter(sh){if(S.veh||S.bld||!sh.a||sh.fail)return;const a=sh.a,mode=a.type,g=G(),msgs=[],f=mxF();if(!f||S.broken)return;
+  const solid=layers.filter(l=>l.mesh&&l.k!=="gap"&&!l.spent),hT=solid.reduce((t,l)=>t+l.t,0)/1000||S.T||.05,area=solid.reduce((t,l)=>t+l.t/1000*(MAT[l.k].dens||7.85)*1000,0);
+  const P=sh.miss?PL.centroid(S.poly):[sh.lx||0,sh.ly||0];
+  if(mode==="he"||mode==="hesh"){const H=heW(g,a.key),c0=new THREE.Vector3();plate.getWorldPosition(c0);const R0=sh.miss?Math.max(.3,sh.to.distanceTo(c0)):0;if(sh.miss&&R0>40)return;
+    /* напряжение в листе не больше предела текучести (≈200·Rt МПа: сталь ≈1000, алюминий ≈360) */
+    const sy=.8*(f.p.Rt||5)*200,Lh=Math.min(12,1.2/Math.max(.01,hT)),sigAt=d=>{const B=thBlast(H.We,Math.max(.15,Math.hypot(d,R0)),1,false);return Math.min(sy,.3*B.Pr/1000*Lh*Lh);};
+    /* хрупкий лист и ударная волна: скорость, которую волна сообщает листу, против предела хрупкого разрушения */
+    const B=thBlast(H.We,Math.max(.3,R0||.3),1,false),v=B.Ir/Math.max(5,area),br=brOf(f.l.k),brittle=f.m.beh==="cer"||f.l.k==="glass"||br>.55,vc=2+(kEff(f.l.k)||5)/3;
+    if(brittle&&v>vc){const allBr=solid.every(l=>MAT[l.k].beh==="cer"||l.k==="glass"||brOf(l.k)>.55);
+      if(allBr||solid.length===1){S.lastBlast={x:P[0],y:P[1],v:Math.min(30,v*1.5)};mxShatter(Math.min(14,3+Math.round(v/vc*2)),msgs,`Ударная волна разогнала хрупкий лист до ≈${mxF1(v,1)} м/с при пределе ≈${mxF1(vc,1)} м/с`);}
+      else{f.l.spent=true;f.l.fresh=false;if(f.l.mesh)f.l.mesh.visible=false;if(f.l.side)f.l.side.visible=false;for(let k=0;k<10;k++){const q=[P[0]+R(-.6,.6),P[1]+R(-.5,.5)];if(PL.inside(q,S.poly))makeChip(q,R(.05,.14));}
+        msgs.push(`Ударная волна раздробила хрупкий слой «${lc(f.m.n)}» (скорость ≈${mxF1(v,1)} м/с при пределе ≈${mxF1(vc,1)}): плитки осыпались, остальной пакет цел`);}}
+    else mxCrackLoad(P,sigAt,msgs,sh.miss?"от ударной волны":"от взрыва");
+    if(!sh.miss&&!S.broken)mxGrady(sh,"he",H,msgs);}
+  else if(mode==="ke"||mode==="heat"){if(sh.miss)return;const v=(sh.vimp||a.vimp||800)/1000,rp=a.key==="bops"?17:7.85,r0=mode==="heat"?.004:(a.key==="bops"?.22:a.key==="apds"?.35:1)*g.cal/2000;
+    const sc=mode==="heat"?20000:Math.min((f.p.Rt||5)*1000*1.5,.5*rp*v*v*1000),sy=.8*(f.p.Rt||5)*200,sigAt=d=>Math.min(sy,sc*Math.pow(r0/Math.max(r0,d),1.5));
+    mxCrackLoad(P,sigAt,msgs,"от удара");if(!S.broken)mxGrady(sh,mode,null,msgs);}
+  if(msgs.length&&!S.lock)$("res").textContent+="\n"+msgs.join("\n");}
+/* ---------- дробление по Грейди ---------- */
+function mxGrady(sh,mode,H,msgs){const f=mxF();if(!f||!f.p||!f.p.K)return;const br=brOf(f.l.k);if(!(f.m.beh==="cer"||f.l.k==="glass"||br>.55))return;const cer=f.m.beh==="cer"||f.l.k==="glass";if(cer?!(sh.breach||sh.through||(sh.ratio||0)>.3||mode==="ke"||mode==="heat"):!(sh.breach||sh.through===true||(sh.ratio||0)>.6))return;
+  const p=f.p,K=Math.max(.3,kEff(f.l.k))*1e6,rho=p.rho*1000,c=(p.c||6)*1000,g=G(),d=mode==="heat"?.01:Math.max(.005,(sh.a.key==="bops"?.22:1)*g.cal/1000),v=(sh.vimp||800);
+  const ed=mode==="he"?3e4*Math.cbrt(Math.max(.05,H.W)):mode==="heat"?2e6:v/d,s0=Math.pow(Math.sqrt(24)*K/(rho*c*ed),2/3),rc=mode==="he"?Math.min(.5,.12*Math.cbrt(H.W)):mode==="heat"?.03:Math.min(.25,2.5*d),
+    t=Math.min(f.l.t/1000,rc*1.2),N=Math.PI*rc*rc*t/Math.pow(s0,3);
+  msgs.push(`Дробление «${lc(f.m.n)}»: зона Ø≈${mxF1(rc*200,0)} см, средний обломок ≈${s0<1e-3?mxF1(s0*1e6,0)+" мкм":mxF1(s0*1000,1)+" мм"} при скорости деформации ≈${ed>=1e6?mxF1(ed/1e6,1)+"·10⁶":Math.round(ed).toLocaleString("ru")} 1/с — ≈${N>1e6?mxF1(N/1e6,1)+" млн":N>1e3?Math.round(N/1e3)+" тыс.":Math.round(N)} обломков`);
+  if(!reduce&&sh.to){try{spkEmit(sh.to.clone(),new THREE.Vector3(0,.3,-1),40,1.1,18,{hot:0,life:1.2,w:.6,col:0xd8d4cc});}catch(e){}for(let i=0;i<5;i++)puff(sh.to.clone().add(new THREE.Vector3(R(-.2,.2),R(0,.3),-.2)),false,.4+rc,0xd5d0c6,new THREE.Vector3(R(-1,1),R(.2,1),-R(.5,2)),R(2,4));
+    for(let k=0;k<Math.min(6,2+Math.round(rc*20));k++){const q=[(sh.lx||0)+R(-rc,rc),(sh.ly||0)+R(-rc,rc)];if(PL.inside(q,S.poly))makeChip(q,R(.02,.06));}}}
+/* ---------- тепловой импульс огненного шара по лицевому слою ---------- */
+function mxThermal(Q,tf,msgs,P){const f=mxF();if(!f||!f.p||Q<5)return;const e=mxEff(f.l.k),dT=2*Q*1000/Math.sqrt(Math.PI*Math.max(.01,tf))/e,T0=+(($("temp")||{}).value)||15,Ts=T0+dT,dl=Math.sqrt(mxAl(f.l.k)*tf)*1000,p=f.p,nm=lc(f.m.n);
+  let s=`Поверхность «${nm}» прогрета до ≈${Math.round(Ts)} °C на глубину ≈${mxF1(dl,dl<1?2:1)} мм (тепловая активность ${Math.round(e)} Дж/(м²·К·с^½))`;
+  if(p.Tm&&Ts>=p.Tm)s+=["frp","ara","pe","rub"].includes(f.m.beh)?` — выше разложения ≈${p.Tm} °C: слой оплавился и обуглился`:` — выше плавления ≈${p.Tm} °C: тонкая плёнка оплавилась`;
+  msgs.push(s);const ts=MX_TS[f.l.k]||(f.m.beh==="cer"?MX_TS.cer:null);
+  if(ts){const dTc=ts[0]*(1-ts[2])/(p.E*1000*ts[1]);if(dT>dTc&&P){for(let i=0;i<8;i++)grow(cgNode(P[0]+R(-.15,.15),P[1]+R(-.15,.15)),R(0,6.283),R(.02,.06),{jit:.5});drawCracks();msgs.push(`Термоудар: перепад ≈${Math.round(dT)} °C больше допустимого для «${nm}» ≈${Math.round(dTc)} °C — поверхность покрылась сеткой трещин`);}}}
+/* ---------- нагрев зон листа: плавление сплава и полимеров ---------- */
+function mxHeatTick(dt){if(S.veh||S.bld||S.broken||!S.hot||!S.hot.length)return;const f=mxF();if(!f||!f.p||!f.p.Tm)return;
+  for(const h of S.hot){const T=20+h.k*1280;if(h.mx||T<f.p.Tm)continue;h.mx=1;const r=Math.min(.14,Math.max(.03,h.r*.7));try{addHole(f.i,h.x,h.y,r,2);}catch(e){}
+    const w=new THREE.Vector3(h.x,h.y-r,-S.T/2);plate.localToWorld(w);if(!reduce)try{spkEmit(w,new THREE.Vector3(0,-1,0),24,.3,1.6,{hot:.95,life:2.4,w:1.8,drag:.3});}catch(e){}
+    const poly=["frp","ara","pe","rub"].includes(f.m.beh);if(!S.lock)$("res").textContent+=`\n${poly?"Расплав":"Проплавление"}: «${lc(f.m.n)}» нагрет до ≈${Math.round(T)} °C — выше ${poly?"разложения":"плавления"} ≈${f.p.Tm} °C: ${poly?"слой потёк и выгорел":"металл расплавился, капли стекают вниз"}, дыра Ø≈${Math.round(r*200)} см`;
+    if(f.p.Ti&&T>=f.p.Ti&&!fires.some(q=>q.g.parent===plate&&Math.hypot(q.g.position.x-h.x,q.g.position.y-h.y)<.1))try{ignite(h.x,h.y,-S.T/2-.01,1,R(10,25),true,f.l.k);}catch(e){}}}
+
+gatherFar();buildGunList();setGun(0);setLayers(DEF_LAYERS);
+if(typeof window!=="undefined"&&!window.__noBld)setTimeout(()=>{try{if($("tmode")&&!S.bld){$("tmode").value="bld";$("tmode").onchange();}}catch(e){console.error(e);}},0);updBal();updTally();applyRange();resize();setView(0);requestAnimationFrame(tick);
 </script>
 <div id="loadMsg" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:#e9e2c4;font:600 14px system-ui;background:rgba(20,22,16,.8);padding:10px 16px;border-radius:12px;z-index:50">Загрузка текстур…</div>
 <script>
