@@ -23,6 +23,16 @@
       if (IM[name]) { t = new THREE.Texture(IM[name]); t.needsUpdate = true; } else t = loader.load(base + path);
       if (srgb && THREE.sRGBEncoding !== undefined) t.encoding = THREE.sRGBEncoding;
       if (rep) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(rep, rep); } t.anisotropy = 8; return (C[name] = t); }
+    /* текстура-замена: сначала плейсхолдер (не чёрный), затем новая картинка; при ошибке — старая */
+    function texA(name, newPath, oldName, oldPath, srgb = true, ph = "#9a9078") {
+      if (C[name]) return C[name];
+      const cv = document.createElement("canvas"); cv.width = cv.height = 2; const g = cv.getContext("2d"); if (g) { g.fillStyle = ph; g.fillRect(0, 0, 2, 2); }
+      const t = new THREE.Texture(cv); t.needsUpdate = true; if (srgb && THREE.sRGBEncoding !== undefined) t.encoding = THREE.sRGBEncoding; t.anisotropy = 8;
+      const set = im => { t.image = im; t.needsUpdate = true; };
+      const im = new Image(); im.onload = () => set(im);
+      im.onerror = () => { const o = tex(oldName, oldPath, 0, srgb); if (o.image) set(o.image); else { const o2 = new Image(); o2.onload = () => set(o2); o2.src = base + oldPath; } };
+      im.src = base + newPath; return (C[name] = t);
+    }
     const inPlay = (x, z, pad = 6) => x > PA.minX - pad && x < PA.maxX + pad && z > PA.minZ - pad && z < PA.maxZ + pad;
     const rnd = (a, b) => a + Math.random() * (b - a);
 
@@ -63,7 +73,9 @@
     cross("grass_tuft", "sprites/vegetation/grass_tuft.png", 1.1, .9, 1500, 12, 220);
 
     /* ---------- 4. Постройки: коробки с фасадами (кирпич/штукатурка/руины), без коллизий ---------- */
-    const facades = ["brick", "plaster", "ruin"].map(k => new THREE.MeshStandardMaterial({ map: tex(k, `textures/env/${k}.jpg`), normalMap: tex(k + "_n", `textures/env/${k}_normal.jpg`, 0, false), roughness: .9 }));
+    const facades = ["brick", "plaster", "ruin"].map(k => k === "plaster"
+      ? new THREE.MeshStandardMaterial({ map: texA("plaster_a", "textures/env/plaster_a.webp", "plaster", "textures/env/plaster.jpg"), normalMap: texA("plaster_a_n", "textures/env/plaster_a_n.webp", "plaster_n", "textures/env/plaster_normal.jpg", false, "#8080ff"), roughness: .9 })
+      : new THREE.MeshStandardMaterial({ map: tex(k, `textures/env/${k}.jpg`), normalMap: tex(k + "_n", `textures/env/${k}_normal.jpg`, 0, false), roughness: .9 }));
     const roofMat = new THREE.MeshStandardMaterial({ color: 0x4a4a46, roughness: .8 });
     for (let i = 0; i < 14; i++) { const a = rnd(0, 6.28), r = rnd(150, R * .7), x = Math.cos(a) * r, z = 40 + Math.sin(a) * r; if (inPlay(x, z, 40)) continue;
       const w = rnd(8, 18), d = rnd(8, 14), hh = rnd(4, 12), m = facades[i % 3], b = noRay(new THREE.Mesh(new THREE.BoxGeometry(w, hh, d), [m, m, roofMat, roofMat, m, m]));
