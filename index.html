@@ -1,4 +1,4 @@
-<!doctype html><html><head><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1f2a1f"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Range Lab"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#1f2a1f"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Range Lab"><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Стенд танковых пушек</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
@@ -443,6 +443,7 @@ html,body,.hud,.hud *,.sheet,.sheet *{touch-action:manipulation}
 .bldtest{display:flex;flex-direction:column;gap:6px;margin-top:6px}.bldt{font-size:11.5px;line-height:1.45;color:var(--ink);border-left:2px solid rgba(240,194,79,.5);padding:2px 0 2px 8px}.bldt .n{color:var(--dim)}
 .bldbox .wst td,.bldbox .wst th{font-size:10.5px}
 
+@media (max-width:430px){#fire{font-size:16px!important;letter-spacing:.04em!important;padding-left:6px!important;padding-right:6px!important;white-space:nowrap}}
 </style>
 
 <div id="app"></div>
@@ -829,7 +830,11 @@ const D=80, AXIS=2.25;
 
 /* --- сцена --- */
 const app=$("app");
-const renderer=new THREE.WebGLRenderer({antialias:true});
+let renderer;
+try{renderer=new THREE.WebGLRenderer({antialias:true});}
+catch(e){console.error(e);document.body.insertAdjacentHTML("beforeend",'<div id="noGL" role="alert" style="position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;text-align:center;color:#eee;font:16px system-ui;background:#111">Нужен WebGL: включите аппаратное ускорение или откройте игру в другом браузере</div>');throw e;}
+renderer.domElement.addEventListener("webglcontextlost",e=>{e.preventDefault();},false);
+renderer.domElement.addEventListener("webglcontextrestored",()=>{location.reload();},false);
 renderer.setPixelRatio(Math.min(2,devicePixelRatio));
 renderer.shadowMap.enabled=true;
 if(THREE.PCFSoftShadowMap!==undefined)renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -3070,7 +3075,9 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
 }
 
 let last=performance.now();
-function tick(t){
+let tickErr=0;
+function tick(t){requestAnimationFrame(tick);try{tickBody(t);}catch(e){if(++tickErr<=5)console.error("tick error ("+tickErr+")",e);}}
+function tickBody(t){
   const dt=Math.min(.1,(t-last)/1000);last=t;const dtv=dt*(S.slow?.2:1);
   S.heat=Math.max(0,S.heat-6*dt);
   if(S.lock>0){S.lock-=dt;if(S.lock<=0){S.lock=0;$("res").textContent="Ствол остыл. Можно стрелять.";}}
@@ -3152,7 +3159,6 @@ function tick(t){
   try{shadowFit();shockTick(dtv);}catch(e){}
   renderFrame();try{postWatch(dt);}catch(e){}
   if(jit)camera.position.sub(jit);
-  requestAnimationFrame(tick);
 }
 const aimMark=new THREE.Mesh(new THREE.RingGeometry(.035,.05,24),new THREE.MeshBasicMaterial({color:0xff3b2f,side:THREE.DoubleSide,depthTest:false,transparent:true}));
 aimMark.visible=false;plate.add(aimMark);
@@ -9079,7 +9085,7 @@ if(typeof window!=="undefined"&&!window.__noBld)setTimeout(()=>{try{if($("tmode"
 window.AIIMG={};(function(){var L={rha:"textures/armor/rha.jpg",cast:"textures/armor/cast.jpg",cer:"textures/armor/cer.jpg",comp:"textures/armor/comp.jpg",
   rub:"textures/armor/rub.jpg",scorch:"textures/armor/scorch.jpg",ground:"textures/armor/ground.jpg",fireball:"sprites/fx/fireball.png",smoke:"sprites/fx/smoke.png",muzzle:"sprites/fx/muzzle_flash.png",era:"textures/armor/era.jpg",mud:"textures/env/mud.jpg",gravel:"textures/env/gravel.jpg",
   rha_n:"textures/armor/rha_normal.jpg",cast_n:"textures/armor/cast_normal.jpg",cer_n:"textures/armor/cer_normal.jpg",comp_n:"textures/armor/comp_normal.jpg",
-  brick:"textures/env/brick.jpg",atlas_exp:"sprites/fx/atlas_exp.webp",atlas_spark:"sprites/fx/atlas_spark.webp",atlas_smoke:"sprites/fx/atlas_smoke.webp"};
+  brick:"textures/env/brick.jpg"};
   var keys=Object.keys(L),n=0,done=false;
   function go(){if(done)return;done=true;var m=document.getElementById("loadMsg");if(m)m.remove();
     if(typeof THREE==="undefined"){document.body.insertAdjacentHTML("beforeend",'<div style="position:fixed;inset:0;display:grid;place-items:center;color:#eee;font:16px system-ui;background:#111">Не удалось загрузить 3D-движок. Проверьте соединение.</div>');return;}

@@ -67,7 +67,7 @@
     const roofMat = new THREE.MeshStandardMaterial({ color: 0x4a4a46, roughness: .8 });
     for (let i = 0; i < 14; i++) { const a = rnd(0, 6.28), r = rnd(150, R * .7), x = Math.cos(a) * r, z = 40 + Math.sin(a) * r; if (inPlay(x, z, 40)) continue;
       const w = rnd(8, 18), d = rnd(8, 14), hh = rnd(4, 12), m = facades[i % 3], b = noRay(new THREE.Mesh(new THREE.BoxGeometry(w, hh, d), [m, m, roofMat, roofMat, m, m]));
-      [m].forEach(mm => { mm.map.wrapS = mm.map.wrapT = THREE.RepeatWrapping; mm.map.repeat.set(2, 1); });
+      [m].forEach(mm => { [mm.map, mm.normalMap].forEach(tx => { if (tx) { tx.wrapS = tx.wrapT = THREE.RepeatWrapping; tx.repeat.set(2, 1); } }); });
       b.position.set(x, terrainH(x, z) + hh / 2 - .3, z); b.rotation.y = rnd(0, 3.14); b.castShadow = b.receiveShadow = true; root.add(b); }
 
     /* ---------- 5. Облака: спрайты в небе, медленно дрейфуют ---------- */
