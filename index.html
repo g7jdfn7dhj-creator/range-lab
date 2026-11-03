@@ -1965,7 +1965,7 @@ function fireOne(){
   /* калиберные бронебойные и бетонобойные снаряды крупных калибров: пробитие по формуле Жакоб де Марра от скорости встречи и калибра */
   if(ke&&(a.key==="apbc"||a.key==="cp")&&g.cls!=="auto"&&g.cls!=="mg")a.pen=Math.round(188*Math.pow(B.vx/1000,1.43)*Math.pow(g.cal/100,1.07)*(a.key==="cp"?.8:1));
   const target=new THREE.Vector3(lx,ly,-S.T/2-.01);plate.localToWorld(target);target.x+=lead;
-  const own=!gd&&!auto&&a.type!=="illum"&&!reduce;const tr=(CM_FW(g)&&!reduce)?cmMesh(g):gd?(g.cls==="drone"?droneM:mslM):own?projMesh(a,g):tracers[ti++%tracers.length];if(own)scene.add(tr);tr.visible=true;if(!gd&&!own)tr.scale.set(auto?.6:1,auto?.6:1,1);
+  const own=!gd&&!auto&&a.type!=="illum"&&!reduce;const tr=(CM_FW(g)&&!reduce)?cmMesh(g):gd?(g.cls==="drone"?droneM:mslM):own?projMesh(a,g):tracers[ti++%tracers.length];if(own){scene.add(tr);try{shellGlow(tr,a,g);}catch(e){}}tr.visible=true;if(!gd&&!own)tr.scale.set(auto?.6:1,auto?.6:1,1);
   if(own&&(a.key==="bops"||a.key==="apds")){const mz=muzzleWorld(),dir=new THREE.Vector3(0,0,1);sabot(mz,dir,g.cal);}
   const fly=fly0;
   if(miss){target.set(target.x,Math.max(.05,target.y-1.2),Dv()-R(1,6));if(fail)target.set(R(-8,8),.05,Dv()*R(.3,.85));}
@@ -1986,6 +1986,7 @@ function fireOne(){
     if(!auto)for(let i=0;i<5;i++)puff(new THREE.Vector3(R(-2.5,2.5),.25,R(1,mz.z)),false,.4*k+.2,0xa89a74,new THREE.Vector3(R(-2,2),R(.2,.8),R(-.5,1.5)),R(.8,1.6));
     if(g.cls==="how")[-1,1].forEach(sd=>{for(let i=0;i<3;i++)puff(new THREE.Vector3(mz.x+sd*.3,mz.y,mz.z-.3),false,.35*k,0xcfc9b8,new THREE.Vector3(sd*R(3,6),R(0,.6),R(-1,.5)),R(1,1.8));});
     if(auto){const ep=new THREE.Vector3(.35,S.ax+.1,1.1);emit(ep,new THREE.Vector3(1,.8,-.2),1,.3,3.5,false,false,brassMat);}
+    try{fxa("exp",mz,Math.max(.9,Math.min(7,g.cal/22))*(g.cls==="how"?1.4:1),auto?.12:.3,{glow:2.4,op:.95,add:1,col:0xffd9a0});}catch(e){}
     S.rockV+=Math.pow(k,2)*(auto?.08:1.1);}
   try{sShot(g,a,B,fly);}catch(e){}
   try{if(!gd&&g.cls!=="drone"&&(!auto||Math.random()<.35)){const mz=muzzleWorld();mz.z+=.6;fxaMuzzle(mz,g.cal,1);}}catch(e){}
@@ -3123,7 +3124,7 @@ let last=performance.now();
 let tickErr=0;
 function tick(t){requestAnimationFrame(tick);try{tickBody(t);}catch(e){if(++tickErr<=5)console.error("tick error ("+tickErr+")",e);}}
 function tickBody(t){
-  const dt=Math.min(.1,(t-last)/1000);last=t;const dtv=dt*(S.slow?.2:1);
+  const raw=(t-last)/1000,dt=Math.min(.1,raw);last=t;const dtv=dt*(S.slow?.2:1),dts=Math.min(.35,raw)*(S.slow?.2:1);
   S.heat=Math.max(0,S.heat-6*dt);
   if(S.lock>0){S.lock-=dt;if(S.lock<=0){S.lock=0;$("res").textContent="Ствол остыл. Можно стрелять.";}}
   if(S.loading){S.load+=dt/S.loadT;if(S.load>=1){S.load=1;S.loading=false;if(!(G().cls==="auto"||G().cls==="mg"))try{sLoad();}catch(e){}}}
@@ -3161,11 +3162,12 @@ function tickBody(t){
   try{sTick(dt);}catch(e){}
   try{if(SKIRT){SKIRT.position.x=camera.position.x;SKIRT.position.z=camera.position.z;if(scene.fog&&scene.fog.color)SKIRT.material.color.copy(scene.fog.color);}if(ENV)ENV.update(dt,camera);if(WORLD)worldTick(dt);if(STARS&&STARS.visible)STARS.position.copy(camera.position);if(LIT)LIT.update(dt,camera);if(RFL&&S.rfl){RFL.update(dt);}}catch(e){}
   if(S.burstLeft>0){S.burstT+=dt;if(S.burstT>=(G().rate||.11)){S.burstT=0;S.burstLeft--;fireOne();}}
-  for(let i=shots.length-1;i>=0;i--){const sh=shots[i];sh.t+=dtv;if(sh.pvo&&pvoShot(sh,i,dtv))continue;const k=Math.min(1,sh.t/sh.dur);if(sh.path)cmMove(sh,k,dtv);else{sh.tr.position.lerpVectors(sh.from,sh.to,k);sh.tr.lookAt(sh.to);sh.tr.rotateX(Math.PI/2);
+  for(let i=shots.length-1;i>=0;i--){const sh=shots[i];sh.t+=dts;if(sh.pvo&&pvoShot(sh,i,dts))continue;const k=Math.min(1,sh.t/sh.dur);if(sh.path)cmMove(sh,k,dtv);else{sh.tr.position.lerpVectors(sh.from,sh.to,k);sh.tr.lookAt(sh.to);sh.tr.rotateX(Math.PI/2);
     if(!reduce)sh.tr.position.y+=4*sh.arc*k*(1-k);if(VFX)try{vfxStreak(sh);}catch(e){}
     if(sh.drone){sh.tr.rotation.set(.28+(k>.85?.5:0),0,Math.sin(sh.t*2.1)*.12);if(!reduce)sh.tr.position.x+=Math.sin(sh.t*.9)*.7*(1-k);(sh.tr.rotors||[]).forEach(r=>r.rotation.z+=dt*70);}}
+    try{shotExhaust(sh,dts);}catch(e){}
     if(sh.trail&&!reduce){sh.pt=(sh.pt||0)-dtv;if(sh.pt<=0){sh.pt=.05;puff(sh.tr.position.clone(),false,.14,0xd8d4c8,new THREE.Vector3(R(-.1,.1),.15,0),R(1.6,2.6));}}
-    if(sh.spin&&sh.tr.rotateY){sh.sp=(sh.sp||0)+dt*30;sh.tr.rotateY(sh.sp);}
+    if(sh.spin&&sh.tr.rotateY){sh.tr.rotateY(dts*34);}
     if(k>=1){raidSw(sh);sh.tr.visible=false;if(sh.cmG)scene.remove(sh.tr);if(sh.own){scene.remove(sh.tr);sh.tr.traverse(o=>{if(o.geometry)o.geometry.dispose();});}shots.splice(i,1);
       if(sh.ph&&sh.ph.hit){try{pvoArrive(sh);}catch(e){console.error(e);}pvoAfter(sh);continue;}
       if(sh.bh&&S.bld){try{bldArrive(sh);}catch(e){console.error(e);}pvoAfter(sh);continue;}
@@ -3194,6 +3196,7 @@ function tickBody(t){
     let jx=0;if(S.shake>0){S.shake=Math.max(0,S.shake-dt*.8);jx=R(-1,1)*S.shake*.15;}stand.position.x=S.mvx+jx+(S.veh?S.vOffX||0:0);}
   try{if(S.veh)vehTick(dtv,dt);}catch(e){}
   updFrags(dtv);
+  try{exhClean();}catch(e){}
   if(S.view===3&&!reduce){const sh=shots[0];
     if(sh){const tp=sh.tr.position,d=tp.clone().sub(sh.pp||sh.from);sh.pp=tp.clone();if(d.length()<1e-4)d.set(0,0,1);d.normalize();
       const side=new THREE.Vector3(d.z,0,-d.x);if(side.length()<1e-3)side.set(1,0,0);side.normalize();
@@ -3461,22 +3464,29 @@ function vfxNoiseTex(){const N=128,cv=document.createElement("canvas");cv.width=
   for(let y=0;y<N;y++)for(let x=0;x<N;x++){let s=0,s2=0,a=.5;for(let o=0;o<5;o++){const P=4<<o,f=P/N;s+=a*tn(x*f,y*f,P);s2+=a*tn(x*f+1.7*P/4,y*f+2.9*P/4,P);a*=.5;}const i=(y*N+x)*4;img.data[i]=Math.min(255,s*270);img.data[i+1]=Math.min(255,s2*270);img.data[i+2]=0;img.data[i+3]=255;}
   c.putImageData(img,0,0);const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t;}
 function vfxInit(){if(VFX||!THREE.InstancedBufferGeometry||!THREE.InstancedBufferAttribute||!THREE.ShaderMaterial||!THREE.UniformsLib)return null;const tN=vfxNoiseTex();if(!tN)return null;
-  const CAP=Math.round(380+320*WQ),base=new THREE.PlaneGeometry(1,1),g=new THREE.InstancedBufferGeometry();g.index=base.index;g.setAttribute("position",base.attributes.position);g.setAttribute("uv",base.attributes.uv);
+  const CAP=Math.round(520+380*WQ),base=new THREE.PlaneGeometry(1,1),g=new THREE.InstancedBufferGeometry();g.index=base.index;g.setAttribute("position",base.attributes.position);g.setAttribute("uv",base.attributes.uv);
   const A=(n)=>{const a=new THREE.InstancedBufferAttribute(new Float32Array(CAP*n),n);if(a.setUsage)a.setUsage(THREE.DynamicDrawUsage);return a;};const aPos=A(3),aP=A(4),aC=A(4);
   g.setAttribute("iPos",aPos);g.setAttribute("iP",aP);g.setAttribute("iC",aC);g.instanceCount=0;
   const U=THREE.UniformsUtils.merge([THREE.UniformsLib.fog,{tN:{value:tN},uSunV:{value:new THREE.Vector3(0,1,0)},uSunC:{value:new THREE.Color(1,1,1)},uAmb:{value:new THREE.Color(.5,.5,.5)}}]);U.tN.value=tN;
   const mat=new THREE.ShaderMaterial({uniforms:U,transparent:true,depthWrite:false,fog:true,
-    vertexShader:`attribute vec3 iPos;attribute vec4 iP;attribute vec4 iC;varying vec2 vUv;varying vec4 vC;varying vec2 vA;
+    vertexShader:`attribute vec3 iPos;attribute vec4 iP;attribute vec4 iC;varying vec2 vUv;varying vec4 vC;varying vec2 vA;varying vec2 vN;
 #include <fog_pars_vertex>
-void main(){vUv=uv;vC=iC;vA=iP.zw;vec4 mvPosition=modelViewMatrix*vec4(iPos,1.);float c=cos(iP.y),s=sin(iP.y);vec2 q=position.xy*iP.x;mvPosition.xy+=vec2(c*q.x-s*q.y,s*q.x+c*q.y);gl_Position=projectionMatrix*mvPosition;
+void main(){vUv=uv;vC=iC;vA=iP.zw;vec4 mvPosition=modelViewMatrix*vec4(iPos,1.);vN=vec2(-mvPosition.z,iP.x*.5);float c=cos(iP.y),s=sin(iP.y);vec2 q=position.xy*iP.x;mvPosition.xy+=vec2(c*q.x-s*q.y,s*q.x+c*q.y);
+  /* клуб — шар, а не плоская картинка: сдвиг к камере на долю радиуса, чтобы плоскость не врезалась в землю и стены прямой линией */
+  mvPosition.z+=min(iP.x*.22,max(0.,-mvPosition.z-.6));gl_Position=projectionMatrix*mvPosition;
 #include <fog_vertex>
 }`,
-    fragmentShader:`uniform sampler2D tN;uniform vec3 uSunV,uSunC,uAmb;varying vec2 vUv;varying vec4 vC;varying vec2 vA;
+    fragmentShader:`uniform sampler2D tN;uniform vec3 uSunV,uSunC,uAmb;varying vec2 vUv;varying vec4 vC;varying vec2 vA;varying vec2 vN;
 #include <fog_pars_fragment>
-void main(){vec2 q=vUv*2.-1.;float r=length(q);if(r>1.)discard;vec2 nu=vUv*.5+vC.w*vec2(.37,.71)+vA.x*vec2(.05,.09);vec4 n1=texture2D(tN,nu),n2=texture2D(tN,nu*2.3+.41);
-  float dens=(1.-smoothstep(.15,1.,r))*(.45+.8*n1.r)+.3*(n2.g-.5);float thr=.2+.5*vA.x*vA.x;float a=smoothstep(thr,thr+.28,dens);if(a<.008)discard;
-  vec3 nrm=normalize(vec3(q*.85+(vec2(n1.r,n2.g)-.5)*.9,sqrt(max(0.,1.-r*r))+.2));float dif=clamp(dot(nrm,uSunV)*.55+.5,0.,1.);
-  float lum=dot(vC.rgb,vec3(.33));vec3 col=vC.rgb*(uAmb+uSunC*dif*(.55+.45*lum))*(.82+.36*n1.r);
+void main(){vec2 q=vUv*2.-1.;float r=length(q);if(r>1.)discard;vec2 nu=vUv*.5+vC.w*vec2(.37,.71)+vA.x*vec2(.05,.09);
+  vec2 wp=texture2D(tN,nu*.7+.13).rg-.5;vec4 n1=texture2D(tN,nu+wp*.35),n2=texture2D(tN,nu*2.3+.41-wp*.2),n3=texture2D(tN,nu*4.7+.77);
+  float rr=r*(1.+.3*(n3.g-.5));
+  float dens=(1.-smoothstep(0.,1.,rr))*(.55+.8*n1.r)+.3*(n2.g-.5)+.12*(n3.r-.5);float thr=.1+.5*vA.x*vA.x;float a=smoothstep(thr,thr+.5,dens);a*=1.-smoothstep(.72,1.,r);
+  /* рядом с камерой клуб тает: не закрывает экран плоским пятном */
+  a*=smoothstep(vN.y*.15,vN.y*1.3+.8,vN.x);if(a<.006)discard;
+  vec3 nrm=normalize(vec3(q*.85+(vec2(n1.r,n2.g)-.5)*1.1,sqrt(max(0.,1.-r*r))+.2));float dif=clamp(dot(nrm,uSunV)*.6+.5,0.,1.);
+  float lum=dot(vC.rgb,vec3(.33));float core=smoothstep(.25,.9,dens);vec3 col=vC.rgb*(uAmb+uSunC*dif*(.55+.45*lum))*(.8+.4*n1.r)*(1.05-.3*core*(1.-dif));
+  col=mix(col,col*vec3(1.08,1.04,.98)+uSunC*.05*dif,(1.-core)*.4);
   gl_FragColor=vec4(col,a*vA.y);
 #include <tonemapping_fragment>
 #include <encodings_fragment>
@@ -3485,7 +3495,10 @@ void main(){vec2 q=vUv*2.-1.;float r=length(q);if(r>1.)discard;vec2 nu=vUv*.5+vC
   const mesh=new THREE.Mesh(g,mat);mesh.frustumCulled=false;mesh.renderOrder=6;mesh.raycast=()=>{};scene.add(mesh);
   VFX={CAP,g,aPos,aP,aC,mat,mesh,P:[],tmp:new THREE.Vector3(),streaks:[]};return VFX;}
 /* клуб дыма или пыли: та же подпись, что у старых клубов */
-function vfxSmoke(pos,dark,size,col,vel,life){const V=VFX;if(!V)return false;let p;if(V.P.length>=V.CAP){p=V.P.reduce((a,b)=>a.life/a.max<b.life/b.max?a:b);}else{p={pos:new THREE.Vector3(),vel:new THREE.Vector3(),c:new THREE.Color()};V.P.push(p);}
+function vfxSmoke(pos,dark,size,col,vel,life,sub){const V=VFX;if(!V)return false;
+  /* крупный клуб — это несколько мелких, налезающих друг на друга: бугристый силуэт вместо одного круга */
+  if(!sub&&size>=1.4&&!reduce){const n=WQ<.6?1:2;for(let i=0;i<n;i++){const o=new THREE.Vector3(R(-.5,.5),R(-.25,.45),R(-.5,.5)).multiplyScalar(size);vfxSmoke(pos.clone().add(o),dark,size*R(.45,.65),col,vel?vel.clone().multiplyScalar(R(.7,1.2)).add(o.clone().multiplyScalar(.12)):null,(life||R(1.6,3.2))*R(.8,1.1),1);}size*=.8;}
+  let p;if(V.P.length>=V.CAP){p=V.P.reduce((a,b)=>a.life/a.max<b.life/b.max?a:b);}else{p={pos:new THREE.Vector3(),vel:new THREE.Vector3(),c:new THREE.Color()};V.P.push(p);}
   p.pos.copy(pos);if(vel)p.vel.copy(vel);else p.vel.set(0,0,0);p.dark=!!dark;p.c.setHex(col||(dark?0x1a1816:0x8a877e));p.life=p.max=life||R(1.6,3.2);p.s=size*R(.85,1.25);p.rot=R(0,6.283);p.rs=R(-.25,.25);p.seed=Math.random()*10;return true;}
 function vfxTick(dt){const V=VFX;if(!V)return;const wind=+(($("wind")||{}).value)||0,P=V.P;
   for(let i=P.length-1;i>=0;i--){const p=P[i];p.life-=dt;if(p.life<=0){P.splice(i,1);continue;}const k=1-p.life/p.max;
@@ -3612,18 +3625,19 @@ function postInit(){try{if(!renderer.capabilities||!renderer.capabilities.isWebG
   const a=mk(sz.x>>2,sz.y>>2),b=mk(sz.x>>2,sz.y>>2),a2=mk(sz.x>>3,sz.y>>3),b2=mk(sz.x>>3,sz.y>>3);
   const V="varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}";
   const SM=(u,f)=>new THREE.ShaderMaterial({uniforms:u,vertexShader:V,fragmentShader:f,depthTest:false,depthWrite:false});
-  const bright=SM({t:{value:null},th:{value:1.05}},"uniform sampler2D t;uniform float th;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb;float l=dot(c,vec3(.2126,.7152,.0722));gl_FragColor=vec4(c*smoothstep(th,th*2.2,l),1.);}");
+  const bright=SM({t:{value:null},th:{value:1.05}},"uniform sampler2D t;uniform float th;varying vec2 vUv;vec3 sn(vec3 v){return(v==v)?min(max(v,vec3(0.)),vec3(60.)):vec3(0.);}void main(){vec3 c=sn(texture2D(t,vUv).rgb);float l=dot(c,vec3(.2126,.7152,.0722));gl_FragColor=vec4(c*smoothstep(th,th*2.2,l),1.);}");
   const blur=SM({t:{value:null},d:{value:new THREE.Vector2()}},"uniform sampler2D t;uniform vec2 d;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb*.227;c+=(texture2D(t,vUv+d*1.385).rgb+texture2D(t,vUv-d*1.385).rgb)*.316;c+=(texture2D(t,vUv+d*3.231).rgb+texture2D(t,vUv-d*3.231).rgb)*.07;gl_FragColor=vec4(c,1.);}");
   const comp=SM({t:{value:null},px:{value:new THREE.Vector2(1/sz.x,1/sz.y)},sh:{value:.32},b1:{value:null},b2:{value:null},s:{value:.55},ex:{value:1},gr:{value:0},asp:{value:1},al:{value:null},key:{value:.18},aeMin:{value:.75},aeMax:{value:2.8},aeOn:{value:0},sw:{value:[new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4()]}},`uniform sampler2D t,b1,b2,al;uniform float s,ex,gr,asp,key,aeMin,aeMax,aeOn,sh;uniform vec2 px;uniform vec4 sw[4];varying vec2 vUv;
+    vec3 sn(vec3 v){return(v==v)?min(max(v,vec3(0.)),vec3(60.)):vec3(0.);}
     vec3 gRrt(vec3 v){vec3 a=v*(v+.0245786)-.000090537;vec3 b=v*(.983729*v+.4329510)+.238081;return a/b;}
     vec3 gAces(vec3 c){const mat3 i=mat3(.59719,.07600,.02840,.35458,.90834,.13383,.04823,.01566,.83777);const mat3 o=mat3(1.60475,-.10208,-.00327,-.53108,1.10813,-.07276,-.07367,-.00605,1.07602);c=i*c;c=gRrt(c);return clamp(o*c,0.,1.);}
     vec3 gSrgb(vec3 c){return mix(c*12.92,1.055*pow(max(c,vec3(0.)),vec3(1./2.4))-.055,step(.0031308,c));}
     float gH(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233))+gr)*43758.5453);}
     void main(){vec2 uv=vUv;for(int i=0;i<4;i++){vec4 q4=sw[i];if(q4.w>0.){vec2 d=(uv-q4.xy)*vec2(asp,1.);float L=length(d);float x=(L-q4.z)/max(.003,q4.z*.12+.004);uv-=d/max(L,1e-4)*vec2(1./asp,1.)*q4.w*x*exp(-x*x);}}
-    vec3 c0=texture2D(t,uv).rgb,cn=texture2D(t,uv+vec2(px.x,0.)).rgb+texture2D(t,uv-vec2(px.x,0.)).rgb+texture2D(t,uv+vec2(0.,px.y)).rgb+texture2D(t,uv-vec2(0.,px.y)).rgb;vec3 c=max(c0+(c0-cn*.25)*sh,vec3(0.))+(texture2D(b1,uv).rgb*.6+texture2D(b2,uv).rgb*.8)*s;float ae=1.;if(aeOn>.5){float Lm=exp(texture2D(al,vec2(.5)).r);ae=clamp(pow(key/max(Lm,1e-4),.55),aeMin,aeMax);}c*=ex/.6*ae;c=gAces(c);{float lu=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(lu),c,.95);c*=mix(vec3(.965,.99,1.04),vec3(1.045,1.01,.94),smoothstep(.12,.7,lu));c=clamp((c-.45)*1.05+.45,0.,1.);}vec2 q=vUv-.5;c*=1.-dot(q,q)*.42;c=gSrgb(c);c+=(gH(vUv*913.)-.5)*.012;gl_FragColor=vec4(c,1.);}`);
+    vec3 c0=sn(texture2D(t,uv).rgb),cn=sn(texture2D(t,uv+vec2(px.x,0.)).rgb)+sn(texture2D(t,uv-vec2(px.x,0.)).rgb)+sn(texture2D(t,uv+vec2(0.,px.y)).rgb)+sn(texture2D(t,uv-vec2(0.,px.y)).rgb);vec3 c=max(c0+(c0-cn*.25)*sh,vec3(0.))+(sn(texture2D(b1,uv).rgb)*.6+sn(texture2D(b2,uv).rgb)*.8)*s;float ae=1.;if(aeOn>.5){float Lm=exp(texture2D(al,vec2(.5)).r);ae=clamp(pow(key/max(Lm,1e-4),.55),aeMin,aeMax);}c*=ex/.6*ae;c=gAces(c);{float lu=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(lu),c,.95);c*=mix(vec3(.965,.99,1.04),vec3(1.045,1.01,.94),smoothstep(.12,.7,lu));c=clamp((c-.45)*1.05+.45,0.,1.);}vec2 q=vUv-.5;c*=1.-dot(q,q)*.42;c=sn(c);c=gSrgb(c);c+=(gH(vUv*913.)-.5)*.012;gl_FragColor=vec4(c,1.);}`);
   const cam=new THREE.OrthographicCamera(-1,1,1,-1,0,1),sc=new THREE.Scene(),quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),bright);quad.frustumCulled=false;sc.add(quad);
   const ae=hf===THREE.HalfFloatType,t1=()=>new THREE.WebGLRenderTarget(1,1,{type:hf,depthBuffer:false,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter});
-  const lum=SM({t:{value:null},st:{value:new THREE.Vector2()},first:{value:1}},"uniform sampler2D t;uniform vec2 st;uniform float first;varying vec2 vUv;void main(){float s=0.,w=0.;for(int i=0;i<4;i++)for(int j=0;j<4;j++){vec2 u=vUv+(vec2(float(i),float(j))-1.5)*st;vec4 c=texture2D(t,u);if(first>.5){float k=mix(1.,.25,smoothstep(.55,.92,u.y))*(1.-.45*length(u-.5));s+=k*log(max(dot(c.rgb,vec3(.2126,.7152,.0722)),1e-4));w+=k;}else{s+=c.r;w+=c.g;}}gl_FragColor=vec4(s/16.,w/16.,0.,1.);}");
+  const lum=SM({t:{value:null},st:{value:new THREE.Vector2()},first:{value:1}},"uniform sampler2D t;uniform vec2 st;uniform float first;varying vec2 vUv;vec3 sn(vec3 v){return(v==v)?min(max(v,vec3(0.)),vec3(60.)):vec3(0.);}void main(){float s=0.,w=0.;for(int i=0;i<4;i++)for(int j=0;j<4;j++){vec2 u=vUv+(vec2(float(i),float(j))-1.5)*st;vec4 c=texture2D(t,u);c.rgb=sn(c.rgb);if(first>.5){float k=mix(1.,.25,smoothstep(.55,.92,u.y))*(1.-.45*length(u-.5));s+=k*log(max(dot(c.rgb,vec3(.2126,.7152,.0722)),1e-4));w+=k;}else{s+=c.r;w+=c.g;}}gl_FragColor=vec4(s/16.,w/16.,0.,1.);}");
   const adapt=SM({cur:{value:null},prev:{value:null},dt:{value:.016},init:{value:0}},"uniform sampler2D cur,prev;uniform float dt,init;varying vec2 vUv;void main(){vec2 cc=texture2D(cur,vec2(.5)).rg;float c=cc.x/max(cc.y,1e-4),p=texture2D(prev,vec2(.5)).r;float r=c>p?2.2:.9;float k=init>.5?1.-exp(-dt*r):1.;gl_FragColor=vec4(mix(p,c,k),0.,0.,1.);}");
   return{rt,a,b,a2,b2,bright,blur,comp,cam,sc,quad,on:true,slow:0,ft:[],ae,lum,adapt,l64:ae?mk(64,64):null,l16:ae?mk(16,16):null,l4:ae?mk(4,4):null,l1:ae?t1():null,ad0:ae?t1():null,ad1:ae?t1():null,adI:false,adInit:false,lt:0};}catch(e){return null;}}
 function postResize(){if(!POST)return;POST.adInit=false;const sz=new THREE.Vector2();renderer.getDrawingBufferSize(sz);try{POST.comp.uniforms.px.value.set(1/sz.x,1/sz.y);}catch(e){}POST.rt.setSize(sz.x,sz.y);POST.a.setSize(Math.max(4,sz.x>>2),Math.max(4,sz.y>>2));POST.b.setSize(Math.max(4,sz.x>>2),Math.max(4,sz.y>>2));POST.a2.setSize(Math.max(4,sz.x>>3),Math.max(4,sz.y>>3));POST.b2.setSize(Math.max(4,sz.x>>3),Math.max(4,sz.y>>3));}
@@ -7255,7 +7269,7 @@ function bPool(name,geo,mat,cap,o){o=o||{};const m=new THREE.InstancedMesh(geo,m
 function bPut(P,M,col){let i;if(P.free.length)i=P.free.pop();else{if(P.n>=P.cap)return -1;i=P.n++;}P.m.setMatrixAt(i,M);if(P.m.instanceColor)(col||_bW).toArray(P.m.instanceColor.array,i*3);
   if(i+1>P.m.count)P.m.count=i+1;P.dirty=P.cdirty=1;return i;}
 function bHide(P,i,free){if(!P||i==null||i<0)return;P.m.setMatrixAt(i,BZ);P.dirty=1;if(free)P.free.push(i);}
-function bTint(P,i,c){if(!P||i<0||!P.m.instanceColor)return;c.toArray(P.m.instanceColor.array,i*3);P.cdirty=1;}
+function bTint(P,i,c){if(!P||i<0||!P.m.instanceColor)return;if(!isFinite(c.r+c.g+c.b))c.setRGB(.5,.5,.5);c.toArray(P.m.instanceColor.array,i*3);P.cdirty=1;}
 function bFlush(){for(const k in BLD.P){const P=BLD.P[k];if(P.dirty){P.m.instanceMatrix.needsUpdate=true;P.dirty=0;}if(P.cdirty&&P.m.instanceColor){P.m.instanceColor.needsUpdate=true;P.cdirty=0;}}}
 function bEl(o){o.id=BLD.E.length;o.st=0;BLD.E.push(o);return o;}
 const bTone=(a)=>_bc.setRGB(1-Math.random()*(a||.05),1-Math.random()*(a||.05),1-Math.random()*(a||.05));
@@ -7509,7 +7523,8 @@ function bRebar(e,dir){const b=e.b,cx=(b[0]+b[3])/2,cz=(b[2]+b[5])/2,h=b[4]-b[1]
 function bDecal(p,n,r){const P=BLD.P.dec;if(r<.02)return;const o=new THREE.Object3D();o.position.set(p[0]+n[0]*.015,p[1]+n[1]*.015,p[2]+n[2]*.015);o.lookAt(o.position.x+n[0],o.position.y+n[1],o.position.z+n[2]);o.rotateZ(R(0,6.28));o.scale.set(r*2,r*2,1);o.updateMatrix();
   if(P.n>=P.cap&&!P.free.length){P.rr=((P.rr||0)+1)%P.cap;P.m.setMatrixAt(P.rr,o.matrix);P.dirty=1;return;}bPut(P,o.matrix);}
 /* ---------- обломки, осколки стекла, пыль, завалы ---------- */
-function bDeb(p,v,s,col,m){const P=BLD.P.deb;let ii;if(P.n>=P.cap&&!P.free.length){const k=BLD.deb.findIndex(d=>d.P==="deb");if(k<0)return;ii=BLD.deb[k].ii;BLD.deb.splice(k,1);}else ii=bPut(P,BZ);
+function bCol3(c){if(typeof c==="number")return[(c>>16&255)/255,(c>>8&255)/255,(c&255)/255];if(c&&c.length>=3&&isFinite(c[0]+c[1]+c[2]))return c;return[.5,.5,.5];}
+function bDeb(p,v,s,col,m){col=bCol3(col);const P=BLD.P.deb;let ii;if(P.n>=P.cap&&!P.free.length){const k=BLD.deb.findIndex(d=>d.P==="deb");if(k<0)return;ii=BLD.deb[k].ii;BLD.deb.splice(k,1);}else ii=bPut(P,BZ);
   const o={ii,p:p.slice(),v:v.slice(),w:[R(-6,6),R(-6,6),R(-6,6)],r:[R(0,6),R(0,6),R(0,6)],s:Math.max(.05,s),col:col,rest:false,P:"deb",t:0};
   _bc.setRGB(col[0]*R(.85,1.1),col[1]*R(.85,1.1),col[2]*R(.85,1.1));bTint(P,ii,_bc);BLD.deb.push(o);}
 function bShard(p,v,s){const P=BLD.P.shard;let ii;if(P.n>=P.cap&&!P.free.length){const k=BLD.deb.findIndex(d=>d.P==="shard");if(k<0)return;ii=BLD.deb[k].ii;BLD.deb.splice(k,1);}else ii=bPut(P,BZ);
@@ -7786,7 +7801,7 @@ function bBlast(sh,det,out){const X=det.W?{W:det.W,Wb:det.W*1.25,We:det.W*1.15,f
     {const rotRoom=room0&&room0.x1===BLC.rot.cx+BLC.rot.r;for(const s3 of BLD.rsec||[]){if(s3.st===2||s3.falling)continue;const top=s3.c[1],bot=top-s3.th,dv=p[1]>=top?p[1]-top:p[1]<=bot?bot-p[1]:0;if(dv>4.3)continue;
         const R3=Math.hypot(bSecDist(s3,p),dv);if(R3>2.4*W3e)continue;const c3=bCtr(s3),Zc=Math.hypot(c3[0]-p[0],c3[1]-p[1],c3[2]-p[2])/W3e,ceil=rotRoom&&s3.lvl===room0.f+1,floor=rotRoom&&s3.lvl===room0.f;
         if(Zc<bThr(.55)||(ceil&&Pq0>bThr(250))||(floor&&Pq0>bThr(350))){bSlabFall(s3);nf++;}}}
-    if(room0&&Pq0>0)for(const e of BLD.E){if(e.k!=="w"||e.st===2||e.f!==room0.f||!(e.g===0&&e.b||e.g===1&&e.side==="R"))continue;if(e.g===0&&!(e.b[0]<room0.x1+.8&&e.b[3]>room0.x0-.8&&e.b[2]<room0.z1+.8&&e.b[5]>room0.z0-.8))continue;
+    if(room0&&Pq0>0)for(const e of BLD.E){if(e.k!=="w"||e.st===2||!(e.g===0&&e.b||e.g===1&&(e.side==="R"||e.nm==="core")))continue;if(e.g===1&&e.nm==="core"?Math.abs(e.f-room0.f)>1:e.f!==room0.f)continue;if(e.g===0&&!(e.b[0]<room0.x1+.8&&e.b[3]>room0.x0-.8&&e.b[2]<room0.z1+.8&&e.b[5]>room0.z0-.8))continue;
       if(Pq0>bThr(120)){const c=bCtr(e),v=[c[0]-p[0],0,c[2]-p[2]],l=Math.hypot(v[0],v[2])||1;bBreach(e,c,(e.g===1?Math.hypot(2*e.hx,2*e.hy,2*e.hz):Math.hypot(e.b[3]-e.b[0],e.b[4]-e.b[1],e.b[5]-e.b[2]))*.55,[v[0]/l,.15,v[2]/l],X);nw++;}}
     if(nf)msgs.push(`газы взрыва и отражённая волна обрушили плит перекрытия: ${nf} — давление в помещении ≈${Math.round(Pq0)} кПа, плита держит ≈250 кПа снизу и ≈350 кПа сверху`);
     if(nw)msgs.push(`стены помещения выдавлены наружу: ${nw} ${nw===1?"участок":nw<5?"участка":"участков"} кладки`);}
@@ -7861,10 +7876,27 @@ function bPartKill(e,dir,p){if(e.st===2)return;e.st=2;bHide(BLD.P[e.P],e.ii);con
 function bFire(p,dur,s){BLD.anim.push({kind:"fire",p:p.slice(),t:0,d:dur,s:s||1});}
 /* ---------- обрушение: колонна без опоры висит; плита падает, потеряв две опоры (или одну у края галереи); перегрузка обломками ведёт к прогрессирующему обрушению ---------- */
 function bColFailed(node,f){if(f<0)return false;for(let q=0;q<=f;q++){const c=BLD.cols[node+","+q];if(!c||c.st===2)return true;}return false;}
+/* ротонда: несущий ствол лифтов и ряд колонн. Колонна без плиты сверху (или снизу) — консоль высотой в этаж и более: теряет устойчивость и падает.
+   Панель ствола без опоры снизу падает; ствол с разрушенным поясом теряет верхние этажи; сектор без опоры на ствол и без колонны падает */
+function bRotStruct(){if(!BLD||!BLD.rsec||!BLD.rsec.length)return false;let ch=false;const rs=BLD.rsec,al=q=>q.st!==2&&!q.falling;
+  if(!BLD.rcs){BLD.rcs={};rs.forEach(q=>{const k=q.lvl+","+q.rc;(BLD.rcs[k]=BLD.rcs[k]||[]).push(q);});BLD.core={};BLD.E.forEach(e=>{if(e.nm==="core")BLD.core[e.seg+","+e.f]=e;});}
+  const cp=(k,f)=>BLD.core[(((k%8)+8)%8)+","+f],live=(k,f)=>{const e=cp(k,f);return!e||bLive(e);};
+  /* ствол */
+  for(let g=1;g<=5;g++){let dead=0;for(let k=0;k<8;k++)if(!live(k,g-1))dead++;
+    for(let k=0;k<8;k++){const e=cp(k,g);if(!e||e.st===2)continue;if((!live(k,g-1)&&(!live(k-1,g-1)||!live(k+1,g-1)))||dead>=4){bWallFall(e);BLD.stat.fall++;ch=true;}}}
+  /* колонны кольца */
+  for(let c=0;c<12;c++)for(let f=0;f<5;f++){const col=BLD.cols["r"+c+",0,"+f];if(!col||col.st===2)continue;
+    const top=BLD.rcs[(f+1)+","+c]||[],bot=f>0?(BLD.rcs[f+","+c]||[]):[1];
+    const topLost=top.length&&!top.some(al),botLost=f>0&&bot.length&&!bot.some(al),belowDead=f>0&&(BLD.cols["r"+c+",0,"+(f-1)]||{}).st===2;
+    if(topLost||botLost||belowDead){bColDmg(col,9,[Math.cos(col.ang||0),-.3,Math.sin(col.ang||0)]);ch=true;}}
+  /* сектор: опора на ствол (панель этажа под плитой или над ней) */
+  for(const q of rs){if(!al(q))continue;const am=(q.a0+q.a1)/2,k=Math.round(am/(Math.PI/4));if(!live(k,q.lvl-1)&&!live(k,Math.min(5,q.lvl))&&!live(k-1,q.lvl-1)&&!live(k+1,q.lvl-1)){bSlabFall(q);ch=true;}}
+  return ch;}
 function bStructure(out){let n=0,guard=0,ch=true;const lv=[],n0=BLD.stat.slabs;
   while(ch&&guard++<14){ch=false;
     for(const s of BLD.slabs){if(s.st===2||s.falling)continue;const ns=s.sup.length;let nf=0;for(const k of s.sup)if(bColFailed(k,s.lvl-1))nf++;
       if((ns>=3&&nf>=2)||(ns>0&&ns<=2&&nf>=1)||s.load>=2||(s.st===1&&bAlive(s)<.35)){bSlabFall(s);lv.push(s.lvl);ch=true;}}
+    try{if(bRotStruct())ch=true;}catch(e){console.error(e);}
     /* ротонда: сектор опирается на ядро и ближайшую колонну кольца (ленточные окна и пояса не несущие) */
     for(const s of BLD.rsec||[]){if(s.st===2||s.falling)continue;if(bColFailed("r"+s.rc+",0",s.lvl-1)||s.load>=2){bSlabFall(s);lv.push(s.lvl);ch=true;}}
     for(const c of BLD.colsAll){if(c.st===2||c.f===0||c.rot)continue;const node=c.i+","+c.j;if(!bColFailed(node,c.f-1))continue;
@@ -7892,6 +7924,8 @@ function bRotSupport(){if(!BLD||!BLD.rseg||!BLD.rsec)return 0;const Rr=BLC.rot,n
     for(const r of BLD.rseg){const s=r.s;for(let f=0;f<=5;f++){
       const sp=M[s+","+f+",sp"],gl=M[s+","+f+",gl"],lt=M[s+","+f+",lt"],pa=M[s+","+f+",pa"],lowLt=f>0?M[s+","+(f-1)+",lt"]:null;
       const kill=e=>{if(!e||e.st===2)return;e.falling=true;if(e.k==="g"){bGlass(e,[0,-.4,0],2,"blast");bFrames(e);}else bWallFall(e);e.st=2;tot++;ch=true;};
+      /* фасадный пояс без плиты у низа и верха этажа — не раскреплён: консоль высотой в этаж падает целиком */
+      if(f>=1&&!slabOk(f,s)&&(f>=5||!slabOk(f+1,s))){kill(sp);kill(gl);kill(lt);kill(pa);}
       if(sp&&sp.st!==2&&f>0&&!al(lowLt)&&!slabOk(f,s))kill(sp);
       if(gl&&gl.st!==2&&sp&&sp.st===2)kill(gl);
       if(lt&&lt.st!==2&&sp&&sp.st===2){const nb=[(s+n-1)%n,(s+1)%n].map(q=>{const x=M[q+","+f+",lt"];return has(q)?(x&&x.st!==2):true;});if(!nb[0]&&!nb[1])kill(lt);else if(gl&&gl.st===2&&!nb[0]&&!nb[1])kill(lt);}
@@ -7941,7 +7975,7 @@ function bSlabFall(s){if(s.falling)return;s.falling=true;try{(s.lights||[]).forE
   /* кладка этажа, стоящая на краю этой плиты, теряет опору */
   const C=BLC,ed=[];if(s.j===0)ed.push(["S",s.i]);if(s.j===C.nz-1)ed.push(["N",s.i]);if(s.i===0)ed.push(["W",s.j]);if(s.i===C.nx-1)ed.push(["E",s.j]);
   for(const[sd,bay]of ed)for(const e of BLD.E){if(e.side!==sd||e.bay!==bay||e.st===2)continue;if(e.k==="w"&&e.f===s.lvl)bWallFall(e);if(e.k==="g"&&e.f===s.lvl){bGlass(e,[0,-1,0],1,"blast");bFrames(e);}}}
-function bWallFall(e){const n=e.k==="w"?(e.side==="R"?(()=>{const x=e.c[0]-BLC.rot.cx,z=e.c[2]-BLC.rot.cz,l=Math.hypot(x,z)||1;return[x/l,0,z/l];})():e.side==="S"?[0,0,-1]:e.side==="N"?[0,0,1]:e.side==="W"?[-1,0,0]:[1,0,0]):[0,0,0];
+function bWallFall(e){const n=e.k==="w"?(e.side==="R"||e.side==="core"?(()=>{const x=e.c[0]-BLC.rot.cx,z=e.c[2]-BLC.rot.cz,l=Math.hypot(x,z)||1;return[x/l,0,z/l];})():e.side==="S"?[0,0,-1]:e.side==="N"?[0,0,1]:e.side==="W"?[-1,0,0]:[1,0,0]):[0,0,0];
   if(bFract(e)){for(let k=0;k<e.cl.ix.length;k++)if(e.cl.ix[k]>=0)bKillCell(e,k,[n[0]*.6,-.2,n[2]*.6],2.5,null);}
   else{e.st=2;bHide(BLD.P[e.P],e.ii);(e.dec||[]).forEach(([pk,i])=>bHide(BLD.P[pk],i));const c=bCtr(e);for(let i=0;i<8;i++)bDeb([c[0]+R(-1,1),c[1]+R(-1,1),c[2]+R(-1,1)],[n[0]*R(1,3),R(-1,1),n[2]*R(1,3)],R(.15,.35),BM[e.m].deb,e.m);}
   if(e.win!=null){const g=BLD.E[e.win];if(g){if(g.st!==2)bGlass(g,n,2,"blast");bFrames(g);}}}
@@ -8677,11 +8711,11 @@ function pvoBuild(k){const S0=PVO_SYS[k],G=new THREE.Group(),c=pvoMat(S0.col),dk
   const add=(geo,m,x,y,z,rx,ry,rz,par)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,rz||0);o.castShadow=true;o.receiveShadow=true;(par||G).add(o);return o;};
   const box=(w,h,l,m,x,y,z,par,rx,ry)=>add(bevelBoxGeo(w,h,l),m,x,y,z,rx,ry,0,par);
   const cyl=(r1,r2,l,m,x,y,z,rx,rz,par,seg)=>add(new THREE.CylinderGeometry(r1,r2,l,seg||14),m,x,y,z,rx,0,rz,par);
-  const wheels=(n,L,W,r,z0,z1)=>{for(let i=0;i<n;i++){const z=z0+(z1-z0)*i/Math.max(1,n-1);[-1,1].forEach(s=>cyl(r,r,.42,tire,s*(W/2-.1),r,z,0,Math.PI/2));}};
+  const wheels=(n,L,W,r,z0,z1)=>{for(let i=0;i<n;i++){const z=z0+(z1-z0)*i/Math.max(1,n-1);[-1,1].forEach(s=>{cyl(r,r,.42,tire,s*(W/2-.1),r,z,0,Math.PI/2,null,18);cyl(r*.55,r*.55,.44,ms,s*(W/2-.1),r,z,0,Math.PI/2,null,12);cyl(r*.18,r*.18,.48,dk,s*(W/2-.1),r,z,0,Math.PI/2,null,8);});}};
   const truck=(L,W,ax)=>{wheels(ax,L,W,.6,L/2-1.4,-L/2+1.2);box(W*.92,.45,L,dk,0,1.0,0);box(W,1.7,2.3,c,0,1.95,L/2-1.15);box(W*.86,.55,.06,gl,0,2.35,L/2+.01);return 1.25;};
   const trailer=(L,W,ax)=>{wheels(ax,L,W,.5,-L/2+1.6,-L/2+.6);box(W,.4,L,c,0,1.05,0);box(.2,.2,1.8,dk,0,.9,L/2+.9);box(.3,.9,.3,dk,0,.45,L/2-.3);return 1.25;};
   const tracked=(L,W)=>{[-1,1].forEach(s=>{box(.58,.85,L,dk,s*(W/2-.29),.48,0);for(let i=0;i<6;i++)cyl(.33,.33,.6,tire,s*(W/2-.29),.4,L/2-.8-i*(L-1.6)/5,0,Math.PI/2);});box(W-1.1,1.0,L-.4,c,0,1.0,0);box(W-.2,.45,L-.8,c,0,1.55,-.2);return 1.78;};
-  const tubes=(nx,ny,r,l,m,x0,y0,z0,el,par)=>{const P=new THREE.Group();P.position.set(x0,y0,z0);P.rotation.x=-el;(par||G).add(P);for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)cyl(r,r,l,m,(i-(nx-1)/2)*r*2.15,(j-(ny-1)/2)*r*2.15,0,Math.PI/2,0,P,10);
+  const tubes=(nx,ny,r,l,m,x0,y0,z0,el,par)=>{const P=new THREE.Group();P.position.set(x0,y0,z0);P.rotation.x=-el;(par||G).add(P);for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){const tx=(i-(nx-1)/2)*r*2.15,ty=(j-(ny-1)/2)*r*2.15;cyl(r,r,l,m,tx,ty,0,Math.PI/2,0,P,14);cyl(r*.78,r*.78,.06,dk,tx,ty,l/2+.015,Math.PI/2,0,P,14);cyl(r*1.08,r*1.08,.12,dk,tx,ty,l/2-.05,Math.PI/2,0,P,14);}
     const tip=new THREE.Vector3(0,0,l/2);P.updateMatrix();return{P,tip:tip.applyMatrix4(P.matrix)};};
   if(k==="pantsir"){const y=truck(10,2.9,4);const T=new THREE.Group();T.position.set(0,y,-2.4);G.add(T);U.tur=T;box(2.4,1.25,2.7,c,0,.62,0,T);
     const sr=new THREE.Group();sr.position.set(0,2.3,-.6);T.add(sr);box(1.7,.95,.14,c,0,0,0,sr);cyl(.06,.06,1.1,dk,0,-.8,0,0,0,sr);U.spin.push(sr);
@@ -8854,10 +8888,24 @@ function pvoArrive(sh){const ph=sh.ph,u=ph.u;if(!u||u.dead)return;const g=G(),a=
 const PVO_VL={s400:1,tor:1,iris:1};
 function pvoYaw(u,w){const U=u.g.userData.pvo;if(!U.tur)return;const lp=u.g.worldToLocal(w.clone());U.tYaw=Math.atan2(lp.x,lp.z);}
 function pvoRadarPt(u){const U=u.g.userData.pvo;return u.g.localToWorld(new THREE.Vector3(0,u.k==="s400"?9:u.k==="igla"||u.k==="stinger"?1.7:4.2,0));}
+/* ---------- след ракеты: пламя двигателя на хвосте и дымовой шлейф вдоль траектории; свечение трассера у снарядов ---------- */
+var EXH=[];
+function shotExhaust(sh,dt){if(reduce||!sh.tr)return;const msl=sh.cmG||sh.trail||(sh.guided&&!sh.drone);if(!msl)return;if(!fireTex())return;const cur=sh.tr.position;
+  if(!sh.xp){sh.xp=cur.clone();const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:fireTex(),color:0xffa23c,transparent:true,opacity:.95,depthWrite:false,blending:THREE.AdditiveBlending}));sp.raycast=()=>{};sp.renderOrder=8;scene.add(sp);
+    const sp2=new THREE.Sprite(new THREE.SpriteMaterial({map:fireTex(),color:0xfff0c8,transparent:true,opacity:.9,depthWrite:false,blending:THREE.AdditiveBlending}));sp2.raycast=()=>{};sp2.renderOrder=9;scene.add(sp2);sh.fl=[sp,sp2];EXH.push(sh);return;}
+  const d=cur.clone().sub(sh.xp),L=d.length();if(L<.02)return;const fw=d.clone().divideScalar(L),len=(sh.tr.userData&&sh.tr.userData.len)||(sh.cmG?(sh.cmG.cls==="cm"?6:2.4):1.1),sz=Math.max(.5,len*.55);
+  const tail=cur.clone().addScaledVector(fw,-len*.5),fl=sh.fl,fk=.85+.3*Math.random();fl[0].position.copy(tail).addScaledVector(fw,-sz*.35);fl[0].scale.set(sz*1.5*fk,sz*1.5*fk,1);fl[1].position.copy(tail);fl[1].scale.set(sz*.6*fk,sz*.6*fk,1);
+  /* шлейф: клубы вдоль пройденного отрезка, не чаще двух за кадр */
+  const sp=Math.max(len*.7,L/2.2),n=Math.min(2,Math.floor(L/sp)+(Math.random()<L/sp%1?1:0));for(let i=0;i<n;i++){const u=Math.random(),pp=sh.xp.clone().lerp(cur,u).addScaledVector(fw,-len*.5);
+    puff(pp,false,Math.max(.3,len*.16),0xd9d5ca,new THREE.Vector3(R(-.25,.25),R(.05,.3),R(-.25,.25)),R(2.4,4.2));}
+  sh.xp.copy(cur);}
+function exhClean(){for(let i=EXH.length-1;i>=0;i--){const sh=EXH[i];if(shots.indexOf(sh)<0||!sh.tr.visible){(sh.fl||[]).forEach(f=>{scene.remove(f);f.material.dispose();});sh.fl=null;EXH.splice(i,1);}}}
+function shellGlow(tr,a,g){if(!THREE.Sprite||!fireTex()||a.key==="bops"||a.key==="apds")return;const he=a.type==="he"||a.type==="hesh",sz=Math.max(.6,Math.min(2.6,g.cal/90));
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:fireTex(),color:he?0xffc070:0xff8a40,transparent:true,opacity:.5,depthWrite:false,blending:THREE.AdditiveBlending}));sp.scale.set(sz,sz,1);sp.raycast=()=>{};sp.renderOrder=8;tr.add(sp);tr.userData.glow=sp;}
 function pvoMissile(sh,P,u,e,tEnd){const U=u.g.userData.pvo,st=u.g.localToWorld(U.launch.clone()),S0=PVO_SYS[u.k],vl=!!PVO_VL[u.k];
   const m=new THREE.Group(),b=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,2.2,8),pvoMat(0xdcdcd2));b.rotation.x=Math.PI/2;m.add(b);const nc=new THREE.Mesh(new THREE.ConeGeometry(.11,.45,8),pvoMat(0xdcdcd2));nc.rotation.x=Math.PI/2;nc.position.z=1.32;m.add(nc);
-  const f=new THREE.Sprite(new THREE.SpriteMaterial({color:0xffd27a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));f.scale.set(1.8,1.8,1);f.position.z=-1.5;m.add(f);
-  const f2=new THREE.Sprite(new THREE.SpriteMaterial({color:0xff8a3a,transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false}));f2.scale.set(1,3.2,1);f2.position.z=-2.6;m.add(f2);
+  const f=new THREE.Sprite(new THREE.SpriteMaterial({map:fireTex()||null,color:0xffd27a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));f.scale.set(1.8,1.8,1);f.position.z=-1.5;m.add(f);
+  const f2=new THREE.Sprite(new THREE.SpriteMaterial({map:fireTex()||null,color:0xff8a3a,transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false}));f2.scale.set(1,3.2,1);f2.position.z=-2.6;m.add(f2);
   m.scale.setScalar({s400:2.4,patriot:2.4,buk:2.4,iris:1.6,nasams:1.7,irondome:1.4,igla:.75,stinger:.75}[u.k]||1.4);m.position.copy(st);scene.add(m);try{pvoYaw(u,pvoAim(sh,P,tEnd,e.tau));}catch(er){}
   const gy=pvoGY(st.x,st.z);
   if(vl){for(let i=0;i<5;i++)puff(st.clone().add(new THREE.Vector3(R(-.6,.6),R(0,1),R(-.6,.6))),false,.8,0xece8e0,new THREE.Vector3(R(-1,1),R(2,5),R(-1,1)),R(1.2,2.2));}
@@ -8867,7 +8915,7 @@ function pvoMissile(sh,P,u,e,tEnd){const U=u.g.userData.pvo,st=u.g.localToWorld(
   pvoSnd(vl?"pop":"launch",st,S0);if(vl)fxLater(.35,()=>pvoSnd("launch",st.clone().add(new THREE.Vector3(0,25,0)),S0));
   PVO.fx.push({m,f,f2,st,sh,P,u,e,vl,t0:sh.t,tt:sh.t,t1:tEnd,last:st.clone(),pt:0,kill:P.R.kill===e,lit:false});}
 function pvoBurst(sh,P,u,e,t0,t1){const U=u.g.userData.pvo,mz=u.g.localToWorld((U.gun||U.launch).clone());
-  let fl=U.mf;if(!fl){fl=U.mf=new THREE.Sprite(new THREE.SpriteMaterial({color:0xffc060,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));fl.visible=false;scene.add(fl);}
+  let fl=U.mf;if(!fl){fl=U.mf=new THREE.Sprite(new THREE.SpriteMaterial({map:fireTex()||null,color:0xffc060,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));fl.visible=false;scene.add(fl);}
   PVO.fx.push({gun:1,sh,P,u,e,t0,tt:sh.t,t1,acc:0,mz,fl,ct:0});pvoSnd("gun",mz,PVO_SYS[u.k],t1-t0);}
 const PVO_TRG=[];
 function pvoTracer(a,b,spd){let t=PVO_TRG.find(x=>!x.on);if(!t){if(PVO_TRG.length>160)return;const m=new THREE.Mesh(new THREE.BoxGeometry(.09,.09,4),new THREE.MeshBasicMaterial({color:0xffb24a,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));m.raycast=()=>{};scene.add(m);t={m,on:false};PVO_TRG.push(t);}
