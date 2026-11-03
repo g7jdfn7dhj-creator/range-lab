@@ -1920,7 +1920,7 @@ if(THREE.Sprite&&fireTex()){const tg=new THREE.Sprite(new THREE.SpriteMaterial({
 const tracers=[];for(let i=0;i<8;i++){const t=tracer.clone();t.visible=false;scene.add(t);tracers.push(t);}
 let ti=0;
 function fireOne(){
-  if((S.fallen&&!S.bld)||S.lock>0)return;
+  if((S.fallen&&!S.bld&&!pvoSel())||S.lock>0)return;
   const a=A(),g=GP(G()),auto=g.cls==="auto"||g.cls==="mg";S.shots++;S.heat=Math.min(100,S.heat+a.heat);
   const gd=GD(g);/* Sim FX: короткий импульс пламени, отдельная фаза отката и накат */
   S.recoil=gd?0:1;S.recoilAge=0;S.recoilTravel=gd?0:g.recoilS!=null?g.recoilS:(auto?.075:g.cls==="how"?.62:Math.min(.48,.24+g.cal/650));
@@ -1946,17 +1946,19 @@ function fireOne(){
     S.bias.r*=.35;S.bias.l*=.35;S.bias.dk*=.35;S.bias.n++;}
   let miss=!!fail||!PL.inside([lx+lead-reachX,ly],S.poly);
   /* режим «бронемашина»: точка встречи ищется лучом по реальной геометрии машины, угол встречи — по нормали поверхности */
-  let vh=null,vmsg=[];if(S.veh&&VS&&!fail){const v=VT[S.vt],AG=AMMO[S.a],laser=(B.guidedShell==="laser")||(gd&&/лазер/i.test(g.guid||""));
+  const PT=pvoSel();let vh=null,vmsg=[];if(S.veh&&VS&&!fail&&!PT){const v=VT[S.vt],AG=AMMO[S.a],laser=(B.guidedShell==="laser")||(gd&&/лазер/i.test(g.guid||""));
     if(laser&&v.lws){const m=vehDeploySmoke("сработала система предупреждения о лазерном облучении");if(m)vmsg.push(m);}
     if(vehSmokeOn(B.t)){const pB=smokeBlock(g,gd,AG),ir=smkIR();if(gd&&Math.random()<pB){fail=(g.cls==="drone"?"Дымовая завеса: оператор дрона потерял цель":"Дымовая завеса: оператор потерял цель, ракета ушла мимо")+(ir?" — аэрозоль непрозрачен и в инфракрасном диапазоне":"");miss=true;}
       else if(gd&&!ir&&pB<.4)vmsg.push("Завеса из обычного дыма: тепловизор и ИК-головка видят цель сквозь неё");
       else if(B.guidedShell&&B.guidedShell!=="gps"&&Math.random()<pB){fail="Дымовая завеса закрыла лазерное пятно — снаряд потерял цель";miss=true;}}}
-  if(S.veh&&!fail){const sk=(!B.indirect&&!gd&&vehSmokeOn(B.t))?(smkIR()?2.6:1.35):1;if(sk>1)vmsg.push(smkIR()?"Цель в многоспектральном аэрозоле: не видна даже в тепловизор, наводчик стреляет по последней видимой точке":"Цель в дыму: тепловизор просвечивает обычный дым, наводчик видит контур — разброс растёт немного");
+  if(S.veh&&!fail&&!PT){const sk=(!B.indirect&&!gd&&vehSmokeOn(B.t))?(smkIR()?2.6:1.35):1;if(sk>1)vmsg.push(smkIR()?"Цель в многоспектральном аэрозоле: не видна даже в тепловизор, наводчик стреляет по последней видимой точке":"Цель в дыму: тепловизор просвечивает обычный дым, наводчик видит контур — разброс растёт немного");
     try{vh=vehShot(B,(lx-ax+lead-reachX)*sk,(ly-ay)*sk);}catch(e){vh=null;}miss=!(vh&&vh.hit);
     if(vh&&vh.hit){const m=vehAPS(vh,AMMO[S.a],g,gd,B);if(m)vmsg.push(m);}}
 
   let cmMv=false;if(!fail&&g.coord&&!S.bld){const mv=S.veh?((S.drive&&S.drive.on&&Math.abs(S.drive.vx||0)>.3)||(S.vSpd||0)>.3):Math.abs(+$("move").value||0)>.2;if(mv){cmMv=true;miss=true;vh=null;}}
-  let bh=null;if(S.bld&&typeof BLD!=="undefined"&&BLD&&!fail){try{bh=bldShot(B,lx-ax+lead-reachX,ly-ay);}catch(e){console.error(e);bh=null;}miss=!(bh&&bh.hit);}
+  let bh=null;if(S.bld&&typeof BLD!=="undefined"&&BLD&&!fail&&!PT){try{bh=bldShot(B,lx-ax+lead-reachX,ly-ay);}catch(e){console.error(e);bh=null;}miss=!(bh&&bh.hit);}
+  /* выбранный комплекс ПВО: луч от дульного среза с рассеиванием (угловым — пересчитанным на дальность до комплекса) по корпусу-мишени */
+  let ph=null;if(PT&&!fail&&!cmMv){try{const kk=pvoDist(PT)/Math.max(50,B.x||Dv());ph=pvoShotAt(PT,(lx-ax+lead-reachX)*kk,(ly-ay)*kk);}catch(e){console.error(e);ph=null;}miss=!(ph&&ph.hit);}
   if(!gd)S.wear=Math.min(100,(S.wear||0)+(auto?.03:a.type==="ke"?.35:.12)*(1+S.heat/100)*(g.wearK||1));S.balCache=null;
   if(S.wear>=100&&!S.wornMsg){S.wornMsg=true;$("res").textContent="Ствол расстрелян: рассеивание резко выросло. Замените ствол в настройках.";}
   const ke=a.type==="ke";a.vimp=B.vx;if(ke){const v0r=B.v0-(B.dvT||0);if(a.key==="bops"&&B.vx>250&&v0r>250){const K=loK(260),rp=17600;a.pen=Math.round(a.pen*Math.exp(K/(rp*Math.pow(v0r/1000,2))-K/(rp*Math.pow(B.vx/1000,2))));}else a.pen=Math.round(a.pen*Math.pow(B.vx/v0r,1.4));}
@@ -1970,8 +1972,9 @@ function fireOne(){
   if(rep&&miss){const wpm=Dv()/Math.max(100,B.x),dR=(ly-ay)/Math.max(.05,Math.tan(B.desc));target.set(Math.max(-60,Math.min(60,lx*wpm*3)),.05,Math.max(D+5,Dv()+Math.max(-80,Math.min(80,dR*wpm))));}
   if(vh){if(vh.hit){target.copy(vh.pt);target.x+=reachX;if(vh.aps)target.add(new THREE.Vector3(0,Math.sin(B.desc||0),-Math.cos(B.desc||0)).multiplyScalar(8));}else if(vh.mp)target.copy(vh.mp);}
   if(bh)target.copy(bh.hit?bh.pw:bh.mp);
+  if(ph)target.copy(ph.hit?ph.pt:ph.mp);
   if(cmMv)target.set(target.x+(Math.random()<.5?-1:1)*R(28,45),.05,target.z+R(-12,12));
-  shots.push({vmsg,bh,vh:vh&&vh.hit?vh:null,own,spin:own&&!g.smooth&&!g.mortar?1:0,a,from:muzzleWorld(),to:target,lx,ly,t:0,dur:reduce?.01:fly,tr,miss,B,fail,rep,dR:B.indirect?S.lastDR:undefined,dL:B.indirect?S.lastDL:undefined,guided:gd,drone:g.cls==="drone",trail:g.cls==="atgm",realT:B.t,cmG:CM_FW(g)?g:null,cmMv,
+  shots.push({vmsg,bh,ph,vh:vh&&vh.hit?vh:null,own,spin:own&&!g.smooth&&!g.mortar?1:0,a,from:muzzleWorld(),to:target,lx,ly,t:0,dur:reduce?.01:fly,tr,miss,B,fail,rep,dR:B.indirect?S.lastDR:undefined,dL:B.indirect?S.lastDL:undefined,guided:gd,drone:g.cls==="drone",trail:g.cls==="atgm",realT:B.t,cmG:CM_FW(g)?g:null,cmMv,
     arc:gd?(g.top>40?(g.cls==="drone"?3:9):g.cls==="drone"?1.6:.35):B.indirect?Math.min(80,Math.max(2,B.apex*Dv()/Math.max(100,B.x)*1.5)):Math.min(6,Math.tan(B.alpha)*Dv()*2.5)});
   if(!CM_FW(g)){try{pvoOnFire(shots[shots.length-1],g,B);}catch(e){console.error(e);}}
   if(CM_FW(g)){const sh0=shots[shots.length-1];try{cmLaunch(g,B,target,bh,sh0);}catch(e){console.error(e);}if(!fail&&!S.lock)$("res").textContent=cmFlyTxt(g,B)+(sh0.pvo?". ПВО ведёт цель…":"");}
@@ -2107,7 +2110,7 @@ function sabot(mz,dir,cal){const pm=M(0x8b8f88,{metalness:.5,roughness:.5});for(
   S.pieces=S.pieces||[];S.pieces.push({g:seg,v:dir.clone().multiplyScalar(R(22,38)).add(out.multiplyScalar(R(5,10))),w:new THREE.Vector3(R(-15,15),R(-15,15),R(-15,15)),rest:false,h:.02,r:.05});}}
 function fire(){
   if(S.loading||S.lock>0||S.burstLeft>0)return;
-  if(S.fallen&&!S.bld){$("res").textContent="Лист сбит со стойки. Откройте настройки и нажмите «Новый лист».";return;}
+  if(S.fallen&&!S.bld&&!pvoSel()){$("res").textContent="Лист сбит со стойки. Откройте настройки и нажмите «Новый лист».";return;}
   {const gg=GP(G()),x=+$("dist").value;if(!GD(gg)&&x>rmaxOf(gg)){$("res").textContent=`Цель вне досягаемости: ${(x/1000).toFixed(1)} км, предел для ${gg.n} — ${(rmaxOf(gg)/1000).toFixed(1)} км${gg.cls==="how"?" (штатный ОФ снаряд, полный заряд)":gg.cls==="mg"?" (действительный огонь пулемёта)":" (прямая наводка)"}.`;return;}
   if(gg.mortar&&x<gg.rmin){$("res").textContent=`Цель ближе минимальной дальности миномёта (${gg.rmin} м).`;return;}if(GD(gg)){if(x>gg.rmax){$("res").textContent=`Цель вне досягаемости: ${x} м, предел для ${gg.n} — ${gg.rmax} м.`;return;}
     if(x<gg.rmin){$("res").textContent=`Цель ближе минимальной дальности (${gg.rmin} м): ${gg.cls==="drone"?"дрон не успевает набрать высоту и выйти на цель":"ракета не успевает выйти на линию визирования и взвести БЧ"}.`;return;}}}
@@ -2363,7 +2366,7 @@ function detFlash(p,Rr){if(!fxOK())return;const t=flashTex();if(!t)return;let o=
   o.m.position.copy(p);o.m.material.rotation=R(0,6.283);o.on=true;o.t=0;o.life=.06+.02*Math.min(3,Rr);o.sz=Rr*2.6;o.I=7;o.c=[1,.9,.72];o.m.visible=true;}
 var clodMat=null;
 /* p — точка разрыва; W — тротиловый эквивалент, кг; o.fill — ВВ (tnt, compb, pe, aix, tbx); o.surf — на поверхности брони; o.ground — на грунте; o.n — нормаль поверхности */
-function boom(p,W,o){if(!p)return;o=o||{};try{pplBlast(p,W);}catch(e){}try{cmShock(p,W);}catch(e){}try{shockAdd(p.clone().setY(Math.max(.3,p.y)),Math.min(90,W));}catch(e){}if(reduce)return;
+function boom(p,W,o){if(!p)return;o=o||{};if(!o.nopvo){try{pvoBlast(p,W);}catch(e){}}try{pplBlast(p,W);}catch(e){}try{cmShock(p,W);}catch(e){}try{shockAdd(p.clone().setY(Math.max(.3,p.y)),Math.min(90,W));}catch(e){}if(reduce)return;
   const W3=Math.cbrt(Math.max(.004,W)),fk=o.fill||"tnt",F=FILL[fk]||FILL.tnt,soot=F.soot,al=fk==="aix"?1.3:fk==="tbx"?1.9:1;
   const Rr=Math.min(9,1.15*W3*al),tau=Math.min(1.1,(.09+.05*W3)*(fk==="aix"?1.8:fk==="tbx"?4:1)),tc=camera.position.clone().sub(p),L=tc.length(),pc=p.clone();
   if(o.surf&&L>1e-3)pc.addScaledVector(tc,Math.min(Rr*.45,L*.3)/L);if(o.ground)pc.y=Math.max(pc.y,Rr*.5);
@@ -3164,6 +3167,7 @@ function tickBody(t){
     if(sh.trail&&!reduce){sh.pt=(sh.pt||0)-dtv;if(sh.pt<=0){sh.pt=.05;puff(sh.tr.position.clone(),false,.14,0xd8d4c8,new THREE.Vector3(R(-.1,.1),.15,0),R(1.6,2.6));}}
     if(sh.spin&&sh.tr.rotateY){sh.sp=(sh.sp||0)+dt*30;sh.tr.rotateY(sh.sp);}
     if(k>=1){raidSw(sh);sh.tr.visible=false;if(sh.cmG)scene.remove(sh.tr);if(sh.own){scene.remove(sh.tr);sh.tr.traverse(o=>{if(o.geometry)o.geometry.dispose();});}shots.splice(i,1);
+      if(sh.ph&&sh.ph.hit){try{pvoArrive(sh);}catch(e){console.error(e);}pvoAfter(sh);continue;}
       if(sh.bh&&S.bld){try{bldArrive(sh);}catch(e){console.error(e);}pvoAfter(sh);continue;}
       if(sh.vh&&sh.vh.aps&&S.veh){try{vehAPSHit(sh);}catch(e){}pvoAfter(sh);continue;}
       if(!sh.miss&&sh.vh&&S.veh){try{vehPrep(sh);}catch(e){sh.miss=true;}}
@@ -7374,12 +7378,15 @@ function bSecGeo(r0,r1,da,h){const n=8,p=[],P=(r,a,y)=>[Math.cos(a)*r,y,Math.sin
     p.push(...A0,...B0,...A1,...A1,...B0,...B1,...a0,...a1,...b0,...a1,...b1,...b0,...A1,...B1,...a1,...a1,...B1,...b1);}
   const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(p,3));g.setAttribute("uv",new THREE.Float32BufferAttribute(new Float32Array(p.length/3*2),2));g.computeVertexNormals();return g;}
 /* ---------- крыша: оборудование вентиляции, надстройка с окнами, выходы на кровлю ---------- */
-function bRoofDecor(){const P=BLD.P,top=BLC.lv[5],R=BLC.rot,add=(b,pk,c)=>bPut(P[pk||"steel"],bMB(b),c);
+/* оборудование на кровле — полноценные элементы (k:"p", f:5): в них попадает луч, их сносит взрыв, они падают вместе с плитой кровли или сектором ротонды */
+function bRoofDecor(){const P=BLD.P,top=BLC.lv[5],R=BLC.rot,add=(b,pk,c,nm)=>{const pp=pk||"steel",ii=bPut(P[pp],bMB(b),c),dx=b[3]-b[0],dy=b[4]-b[1],dz=b[5]-b[2];
+    return bEl({k:"p",m:"steel",g:0,b:b.slice(),ax:dx<dz?0:2,th:Math.max(.02,Math.min(dx,dy,dz)),P:pp,ii,f:5,rd:1,nm:nm||"блок вентиляции",rotd:Math.hypot((b[0]+b[3])/2-R.cx,(b[2]+b[5])/2-R.cz)<R.r?1:0});};
   const units=[[16,4],[40,8],[58,60],[64,10],[100,9],[120,61],[140,36],[156,10],[48,36],[84,36],[110,36]];units.forEach(([x,z])=>{add([x-2,top,z-1.2,x+2,top+1.6,z+1.2],"steel",_bc.setRGB(.85,.86,.86));add([x-1.6,top+1.6,z-.8,x+1.6,top+1.75,z+.8],"frame");});
   add([96,top,56,132,top+4.1,65.4],"acm");for(let x=97;x<131;x+=3)add([x,top+1.2,55.95,x+2,top+3.2,56],"frame");
   /* на ротонде: рама с блоками кондиционеров крестом, как на снимке */
   for(let i=-3;i<=3;i++){add([R.cx+i*2.6-1.1,top,R.cz-1.4,R.cx+i*2.6+1.1,top+1.9,R.cz+1.4],"steel",_bc.setRGB(.9,.9,.9));add([R.cx-1.4,top,R.cz+i*2.6-1.1,R.cx+1.4,top+1.9,R.cz+i*2.6+1.1],"steel",_bc.setRGB(.9,.9,.9));}
-  add([R.cx-9,top+2,R.cz-.15,R.cx+9,top+2.2,R.cz+.15],"frame");add([R.cx-.15,top+2,R.cz-9,R.cx+.15,top+2.2,R.cz+9],"frame");}
+  for(let k=-3;k<3;k++){add([R.cx+k*3,top+2,R.cz-.15,R.cx+k*3+3,top+2.2,R.cz+.15],"frame",null,"стальная рама кондиционеров");if(k!==-1&&k!==0)add([R.cx-.15,top+2,R.cz+k*3,R.cx+.15,top+2.2,R.cz+k*3+3],"frame",null,"стальная рама кондиционеров");}
+  add([R.cx-.15,top+2,R.cz-3,R.cx+.15,top+2.2,R.cz+3],"frame",null,"стальная рама кондиционеров");}
 
 /* ---------- луч по конструкциям (координаты корпуса): коробки, повёрнутые коробки ротонды, наклонные панели, грани пирамиды, секторы перекрытий ---------- */
 /* вход в ребро или угол коробки (стык соседних участков стены): засчитывается грань, на которую луч идёт прямее */
@@ -7426,6 +7433,7 @@ function bDesc(e){if(e&&e.anx&&!e._dd){e._dd=1;let t;try{t="Дом через д
   if(e.k==="g")return`${B_SIDE[e.side]||""}, ${fl(e.f)}${e.bay!=null?", ось "+(e.bay+1):""}: ${e.m==="tglass"?"витрина":"окно"} — ${BM[e.m].d}`;
   if(e.k==="c")return`колонна 500×500 мм, ${e.f+1}-й этаж${e.per?", в толще наружной стены":e.kf<1?", в облицовке шпоном":""} — ${BM.rc.n}`;
   if(e.k==="s")return e.gnd?"пол первого этажа: бетонная плита на грунте":e.lvl===5?"кровля: ж/б плита 250 мм, утеплитель и мембрана":`плита перекрытия над ${e.lvl}-м этажом — ${BM.rc.n} 250 мм${e.rot?" (ротонда)":""}`;
+  if(e.rd)return`кровля: ${e.nm} — ${BM.steel.n} (${BM.steel.d})`;
   if(e.k==="p")return`${e.f+1}-й этаж: ${BM[e.m].n} (${BM[e.m].d})`;if(e.k==="b")return`${e.f+1}-й этаж: стеклянное ограждение галереи атриума`;
   if(e.k==="y")return e.g===3?(e.gab?"стеклянный фронтон кровли атриума":"стеклянная пирамида над залом (стеклопакеты на стальных рёбрах)"):"светопрозрачная кровля атриума (триплекс на стальных прогонах)";return"конструкция";}
 /* ---------- разрушение на ячейки: стена или плита превращается в сетку блоков; текстура та же, по координатам корпуса ---------- */
@@ -7596,6 +7604,10 @@ function bldArrive(sh){if(!BLD)return;const bh=sh.bh,g=G(),a=sh.a;if(a.type==="i
     else if(mode==="heat"){det=bHEAT(sh,H,out);snd="heat";}
     else if(mode==="he"||mode==="hesh"){det=(g.wh&&g.wh[a.key])?bCMpath(sh,H,out):bHEpath(sh,H,out);}
     if(det){const X=bBlast(sh,det,out);snd="boom";sk=Math.cbrt(Math.max(.05,X.We))/1.4;}
+    /* кровельное оборудование на пути луча (рамы, блоки кондиционеров): сердечник и струя рвут его, фугас — в bBlast */
+    if(mode==="ke"||mode==="heat"){let nk=0;for(const h of H){const e=h.e;if(!e.rd)break;if(e.st===2)continue;const thin=e.P==="frame",dm=mode==="ke"?(thin?1:.55):(thin?1:.75);e.hp=(e.hp==null?1:e.hp)-dm;
+        if(e.hp<=.01){bPartKill(e,bh.d,bPt(bh.o,bh.d,Math.max(0,h.t0)));nk++;}else bTint(BLD.P[e.P],e.ii,_bc.setRGB(.5,.5,.5));}
+      if(nk)out.push(`Разрушено кровельное оборудование: ${nk} ${nk===1?"элемент":nk<5?"элемента":"элементов"}`);}
     bStructure(out);}catch(e){console.error(e);out.push("(ошибка расчёта: "+e.message+")");}
   bFlush();if(snd)bSnd(snd,bPt(bh.o,bh.d,H[0].t0),sk);if(!S.lock)$("res").textContent=out.join("\n");try{updTally();}catch(e){}bldUI();}
 /* ---------- бронебойные, подкалиберные, бетонобойные, пули ---------- */
@@ -7776,6 +7788,7 @@ function bBlast(sh,det,out){const X=det.W?{W:det.W,Wb:det.W*1.25,We:det.W*1.15,f
       if(nfu<60){const l=R0||1;bDeb([x,yy,z],[(x-p[0])/l*Math.min(30,P/8),R(1,4),(z-p[2])/l*Math.min(30,P/8)],R(.2,.45),0x6b5a48,"brick");}nfu++;return false;});}
     if(nfu)msgs.push(`волной разметало мебель, стеллажи и светильники: ${nfu} ${nfu<5?"предмета":"предметов"}`);}
   let np=0,nl=0,nc=0;
+  for(const e of BLD.E){if(!e.rd||e.st===2)continue;const c=bCtr(e),R0=bDist(e,p);if(R0>Rmax*.7)continue;let P=bPref(bPso(Math.max(.25,R0)/W3),1);if(P>bThr(e.P==="frame"?20:45)){bPartKill(e,[c[0]-p[0],0,c[2]-p[2]].map((x,i,a)=>x/(Math.hypot(...a)||1)),p);np++;}}
   for(const e of BLD.E){if(e.k!=="p"||e.st===2||e.m!=="gkl")continue;const c=bCtr(e),R0=bDist(e,p);if(R0>Rmax*.7)continue;const inR=bInRoom(e,c,room);
     let P=bPref(bPso(Math.max(.25,R0)/W3),1)*bExpo(e,c,p,room,inR);if(inR)P=Math.max(P,Pq);if(P>bThr(BM.gkl.pf)){bPartKill(e,null,p);np++;}}
   {const mm=new THREE.Matrix4();for(const s of BLD.slabs){if(!s.lights.length)continue;const sc=bCtr(s);if(Math.hypot(sc[0]-p[0],sc[2]-p[2])>Rmax*.7+5)continue;const f=s.lvl-1,pe={k:"l",f};
@@ -7825,7 +7838,9 @@ function bFragStorm(p,X,det,sh){let Mc=0;const Vm=det.V||(sh&&sh.B&&sh.B.vx)||0,
 function bBreach(e,p,rh,dir,X){const v=Math.min(16,5+6*Math.cbrt(X.We));for(const q of BLD.E){if(q.st===2||!(q.k==="w"||(q.k==="s"&&q.g===0&&!q.gnd)))continue;if(q!==e&&(q.k!==e.k||q.side!==e.side||(q.k==="s"&&q.lvl!==e.lvl)))continue;if(bDist(q,p)>rh)continue;
     if(!bFract(q)){if(q.k==="w")bWallFall(q);continue;}
     bDmgCells(q,p,rh,1.3,dir,{v,flat:1});bDmgCells(q,p,rh*1.5,.4,dir,{v:v*.4});if(q.win!=null){const gl=BLD.E[q.win];if(gl&&gl.st!==2)bGlass(gl,dir,v,"blast");}}}
-function bPartKill(e,dir,p){if(e.st===2)return;e.st=2;bHide(BLD.P[e.P],e.ii);const c=bCtr(e);for(let i=0;i<4;i++)bDeb([c[0]+R(-1,1),c[1]+R(-1,1),c[2]+R(-1,1)],[R(-3,3),R(0,2),R(-3,3)],R(.1,.3),[.92,.92,.9],"gkl");bDust(c,[.9,.9,.88],1.2);}
+function bPartKill(e,dir,p){if(e.st===2)return;e.st=2;bHide(BLD.P[e.P],e.ii);const c=bCtr(e);if(e.rd){/* кровельное оборудование: металлические обломки и пыль, стойки не остаются висеть */BLD.stat.rdKill=(BLD.stat.rdKill||0)+1;
+    const n=e.P==="frame"?2:6;for(let i=0;i<n;i++)bDeb([c[0]+R(-1,1),c[1]+R(0,.8),c[2]+R(-1,1)],[(dir?dir[0]*2:0)+R(-3,3),R(1,4),(dir?dir[2]*2:0)+R(-3,3)],R(.12,.35),[.42,.43,.43],"rc");bDust(c,[.6,.6,.6],1.4);return;}
+  for(let i=0;i<4;i++)bDeb([c[0]+R(-1,1),c[1]+R(-1,1),c[2]+R(-1,1)],[R(-3,3),R(0,2),R(-3,3)],R(.1,.3),[.92,.92,.9],"gkl");bDust(c,[.9,.9,.88],1.2);}
 /* пожар после объёмного взрыва и горящие машины: дым */
 function bFire(p,dur,s){BLD.anim.push({kind:"fire",p:p.slice(),t:0,d:dur,s:s||1});}
 /* ---------- обрушение: колонна без опоры висит; плита падает, потеряв две опоры (или одну у края галереи); перегрузка обломками ведёт к прогрессирующему обрушению ---------- */
@@ -7884,6 +7899,10 @@ function bSlabFall(s){if(s.falling)return;s.falling=true;try{(s.lights||[]).forE
     else{const b=s.b;geo=new THREE.BoxGeometry(b[3]-b[0],b[4]-b[1],b[5]-b[2]);pos=new THREE.Vector3((b[0]+b[3])/2,(b[1]+b[4])/2,(b[2]+b[5])/2);}
     bHide(P,s.ii);const m=new THREE.Mesh(geo,BLD.M.slab);m.position.copy(pos);m.quaternion.copy(quat);m.castShadow=true;m.userData.decor=true;m.raycast=()=>{};BLD.g.add(m);
     BLD.fall.push({o:m,s,v:0,w:new THREE.Vector3(R(-.25,.25),0,R(-.25,.25)),t:0});}
+  if(s.g===4&&s.lvl===5){/* кровельное оборудование ротонды: стоит на секторе под своим центром; в зоне ядра — падает, когда рухнула половина кровли */
+    const R2=BLC.rot,nF=(BLD.rsec||[]).filter(q=>q.lvl===5&&(q.falling||q.st===2)).length;
+    for(const e of BLD.E){if(!e.rd||!e.rotd||e.st===2)continue;const c=bCtr(e),dx=c[0]-R2.cx,dz=c[2]-R2.cz,r=Math.hypot(dx,dz);let a=Math.atan2(dz,dx);if(a<0)a+=Math.PI*2;
+      const own=r>=s.r0&&a>=s.a0&&a<s.a1,core=r<s.r0&&nF>=(BLD.rsec||[]).filter(q=>q.lvl===5).length/2;if(own||core)bPartKill(e,null,c);}}
   if(s.g!==0)return;const b=s.b;
   /* перегородки и ограждения этажа, стоящие на плите, падают вместе с ней */
   for(const e of BLD.E){if(e.st===2||(e.k!=="p"&&e.k!=="b")||e.f!==s.lvl)continue;const c=bCtr(e);if(c[0]<b[0]-.05||c[0]>b[3]+.05||c[2]<b[2]-.05||c[2]>b[5]+.05)continue;
@@ -8047,8 +8066,8 @@ function bldMode(on){on=!!on;if(on&&!BLD){try{bldInit();}catch(e){console.error(
 function bldRange(){if(!BLD||!S.bld)return;farG.updateMatrixWorld(true);if(BLD.aimL)BLD.aimW=bW(BLD.aimL);bTerrain(true);bVeg(true);bBgPlace();bldViews();}
 function bldViews(){if(!BLD)return;const z=Dv();views[1].p=[-96,30,z-64];views[1].t=[-14,8,z+22];views[2].p=[-30,6.5,z-27];views[2].t=[-6,8.5,z+3];bAimView();}
 function bAimView(){const a=BLD&&BLD.aimW;if(!a){views[0]={p:[3.5,3.8,-7.5],t:[0,2,25]};return;}const y=Math.atan2(a.x,a.z),c=Math.cos(y),s=Math.sin(y),px=3.5,pz=-7.5;views[0]={p:[px*c+pz*s,3.8,-px*s+pz*c],t:[a.x,a.y,a.z]};}
-function bldYaw(){if(!S.bld||!BLD||!BLD.aimW)return 0;return Math.atan2(BLD.aimW.x,BLD.aimW.z);}
-function bldElev(){if(!S.bld||!BLD||!BLD.aimW)return 0;const a=BLD.aimW;return Math.max(0,Math.atan2(a.y-S.ax,Math.hypot(a.x,a.z)));}
+function bldYaw(){const pu=pvoSel();if(pu){const w=pvoCenter(pu);return Math.atan2(w.x,w.z);}if(!S.bld||!BLD||!BLD.aimW)return 0;return Math.atan2(BLD.aimW.x,BLD.aimW.z);}
+function bldElev(){const pu=pvoSel();if(pu){const w=pvoCenter(pu);return Math.max(0,Math.atan2(w.y-S.ax,Math.hypot(w.x,w.z)));}if(!S.bld||!BLD||!BLD.aimW)return 0;const a=BLD.aimW;return Math.max(0,Math.atan2(a.y-S.ax,Math.hypot(a.x,a.z)));}
 /* камера у здания: обзор сверху (как на снимке с воздуха) и внутри атриума */
 function bldCam(k){if(!BLD)return;const z=Dv(),V={air:{p:[-150,105,z-130],t:[0,4,z+40]},atr:{p:[-28,7.5,z+24],t:[30,9,z+24]},str:{p:views[2].p,t:views[2].t},rot:{p:[150,10,z-30],t:[96,10,z+34]}}[k];if(!V)return;
   camera.position.set(...V.p);if(controls){controls.target.set(...V.t);controls.update();}else camera.lookAt(...V.t);S.view=-1;views.forEach((_,j)=>$("v"+j).setAttribute("aria-pressed",false));}
@@ -8657,13 +8676,18 @@ function pvoBuild(k){const S0=PVO_SYS[k],G=new THREE.Group(),c=pvoMat(S0.col),dk
   else{/* ПЗРК: стрелок и второй номер */const sk=pvoMat(0x9a7b62),un=pvoMat(S0.col);
     [[0,0],[1.2,-.6]].forEach(([x,z],i)=>{box(.18,.85,.2,un,x-.12,.43,z);box(.18,.85,.2,un,x+.12,.43,z);box(.5,.7,.3,un,x,1.2,z);add(new THREE.SphereGeometry(.13,10,8),sk,x,1.68,z);add(new THREE.SphereGeometry(.15,10,6,0,Math.PI*2,0,Math.PI/2),un,x,1.72,z);
       if(!i){cyl(.045,.045,1.6,pvoMat(0x3d4a35),x+.18,1.55,z+.2,Math.PI/2-.35,0,G,10);}else{box(.3,.25,1.0,pvoMat(0x3d4a35),x,.15,z+.6);}});U.launch.set(.18,1.85,1.0);}
-  G.userData.pvo=U;G.traverse(o=>{if(o.isMesh)o.raycast=()=>{};});return G;}
+  G.userData.pvo=U;G.traverse(o=>{if(o.isMesh)o.raycast=()=>{};});
+  /* корпус-мишень: невидимый параллелепипед по габаритам комплекса на отдельном слое (7) — в него целится стрелок и попадает снаряд */
+  {const bb=new THREE.Box3().setFromObject(G),sz=bb.getSize(new THREE.Vector3()),ct=bb.getCenter(new THREE.Vector3()),hb=new THREE.Mesh(new THREE.BoxGeometry(Math.max(.4,sz.x),Math.max(.4,sz.y),Math.max(.4,sz.z)),new THREE.MeshBasicMaterial({visible:false}));
+    hb.position.copy(ct);hb.layers.set(7);hb.userData.pvoHb=1;G.add(hb);U.hb=hb;U.sz=sz;}
+  return G;}
 function pvoLabel(u){const S0=PVO_SYS[u.k];let cv=u.lc;if(!cv){cv=u.lc=document.createElement("canvas");cv.width=512;cv.height=128;}const c=cv.getContext("2d");c.clearRect(0,0,512,128);
   c.fillStyle="rgba(16,20,14,.72)";c.fillRect(4,10,504,108);c.strokeStyle="rgba(240,194,79,.9)";c.lineWidth=3;c.strokeRect(4,10,504,108);c.fillStyle="#f3e7c4";c.font="bold 40px sans-serif";c.textAlign="center";c.fillText(S0.n.replace(/[«»]/g,""),256,56);
-  c.font="30px sans-serif";c.fillStyle="#cfd6c0";const a=[];if(S0.msl)a.push(`${u.msl} ракет`);if(S0.gun)a.push(`${u.rnd} снар.`);c.fillText(a.join(" · "),256,100);
+  c.font="30px sans-serif";c.fillStyle="#cfd6c0";const a=[];if(S0.msl)a.push(`${u.msl} ракет`);if(S0.gun)a.push(`${u.rnd} снар.`);if(u.hp<1&&!u.dead)a.push(`прочность ${Math.round(u.hp*100)} %`);
+  if(u.dead){c.fillStyle="rgba(60,10,8,.85)";c.fillRect(4,10,504,108);c.strokeStyle="rgba(235,80,60,.95)";c.strokeRect(4,10,504,108);c.fillStyle="#f3e7c4";c.font="bold 40px sans-serif";c.fillText(S0.n.replace(/[«»]/g,""),256,56);c.font="bold 32px sans-serif";c.fillStyle="#ff7a64";c.fillText("УНИЧТОЖЕН",256,100);}else c.fillText(a.join(" · "),256,100);
   if(!u.lbl){const t=new THREE.CanvasTexture(cv);u.lbl=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthTest:false,transparent:true}));u.lbl.renderOrder=6;u.lbl.scale.set(12,3,1);u.g.add(u.lbl);}
   else u.lbl.material.map.needsUpdate=true;u.lbl.position.set(0,u.k==="igla"||u.k==="stinger"?4.5:(u.k==="s400"?12.5:8),0);}
-function pvoRing(u){if(u.ring){u.g.parent&&u.g.parent.remove(u.ring);u.ring=null;}const S0=PVO_SYS[u.k];if(!PVO.rings)return;
+function pvoRing(u){if(u.ring){u.g.parent&&u.g.parent.remove(u.ring);u.ring=null;}const S0=PVO_SYS[u.k];if(!PVO.rings||u.dead)return;
   const rr=[];if(S0.gun)rr.push([S0.gun.rmax,0xffb040]);if(S0.msl&&S0.msl.rmax<=20000)rr.push([S0.msl.rmax,0x60d0ff]);if(!rr.length)return;
   const grp=new THREE.Group();rr.forEach(([r,col])=>{const n=160,p=[],w=pvoWorld(u.g.position);for(let i=0;i<=n;i++){const a=i/n*Math.PI*2,x=w.x+Math.cos(a)*r,z=w.z+Math.sin(a)*r;p.push(Math.cos(a)*r,pvoGY(x,z)+1.2-w.y,Math.sin(a)*r);}
     const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(p,3));const L=new THREE.Line(g,new THREE.LineBasicMaterial({color:col,transparent:true,opacity:.55,depthWrite:false}));L.raycast=()=>{};grp.add(L);});
@@ -8677,8 +8701,8 @@ function pvoTarget(){try{if(S.bld&&BLD&&BLD.g){BLD.g.updateMatrixWorld(true);ret
 function pvoAdd(k,wp){if(!PVO_SYS[k])return null;if(!PVO.root){PVO.root=new THREE.Group();PVO.root.name="pvo";(typeof farG!=="undefined"?farG:scene).add(PVO.root);}
   const S0=PVO_SYS[k],g=pvoBuild(k),lp=wp.clone();try{if(typeof farG!=="undefined")lp.sub(farG.position);}catch(e){}lp.y=pvoGY(wp.x,wp.z);g.position.copy(lp);
   const t=pvoTarget(),a=Math.atan2(-wp.x,-wp.z);g.rotation.y=a;/* к стрелку */
-  PVO.root.add(g);const u={id:++PVO.id,k,g,msl:S0.msl?S0.msl.n0:0,rnd:S0.gun?S0.gun.n0:0,act:[]};PVO.u.push(u);try{pvoLabel(u);}catch(e){}try{pvoRing(u);}catch(e){}pvoList();return u;}
-function pvoDel(u){if(!u)return;try{if(u.beam)scene.remove(u.beam);const U=u.g.userData.pvo;if(U.mf)scene.remove(U.mf);}catch(e){}if(u.ring&&u.ring.parent)u.ring.parent.remove(u.ring);if(u.g.parent)u.g.parent.remove(u.g);u.g.traverse(o=>{if(o.geometry)o.geometry.dispose();});PVO.u=PVO.u.filter(x=>x!==u);pvoList();}
+  PVO.root.add(g);const u={id:++PVO.id,k,g,msl:S0.msl?S0.msl.n0:0,rnd:S0.gun?S0.gun.n0:0,act:[],hp:1,dead:false,hb:g.userData.pvo.hb};u.hb.userData.u=u;PVO.u.push(u);try{pvoLabel(u);}catch(e){}try{pvoRing(u);}catch(e){}pvoList();return u;}
+function pvoDel(u){if(!u)return;if(PVO.sel===u)PVO.sel=null;try{if(u.beam)scene.remove(u.beam);const U=u.g.userData.pvo;if(U.mf)scene.remove(U.mf);}catch(e){}if(u.ring&&u.ring.parent)u.ring.parent.remove(u.ring);if(u.g.parent)u.g.parent.remove(u.g);u.g.traverse(o=>{if(o.geometry)o.geometry.dispose();});PVO.u=PVO.u.filter(x=>x!==u);pvoList();}
 const PVO_SLOT=[[-55,-78],[55,-78],[-135,-70],[135,-70],[-95,-108],[95,-108],[0,-112],[185,-55],[-175,-55],[215,10],[-185,15],[225,70]];
 function pvoAuto(k){/* в режиме «Здание» — на расчищенной площадке перед зданием, без деревьев */if(S.bld&&BLD){const t=pvoTarget(),used=PVO.u.map(u=>pvoWorld(u.g.position));
     const sl=PVO_SLOT.map(([x,z])=>t.clone().add(new THREE.Vector3(x,0,z))).find(p=>!used.some(q=>Math.hypot(q.x-p.x,q.z-p.z)<20));if(sl)return pvoAdd(k,sl);}
@@ -8690,7 +8714,7 @@ function pvoOnFire(sh,g,B){if(!PVO.u.length||!sh||sh.fail)return;const tc=pvoCls
   const T=pvoThreat(g,B);if(!T)return;const to=sh.to.clone().setY(0);let a;
   if(sh.path){const p0=sh.path.getPointAt(0);a=new THREE.Vector3(p0.x-to.x,0,p0.z-to.z);}else a=new THREE.Vector3(sh.from.x-to.x,0,sh.from.z-to.z);
   if(a.length()<1e-3)a.set(-to.x,0,-to.z);if(a.length()<1e-3)a.set(0,0,-1);a.normalize();T.az=[a.x,a.z];
-  const now=performance.now()/1000,units=PVO.u.map(u=>{const w=pvoWorld(u.g.position);u.act=u.act.filter(x=>x>now);return{k:u.k,dx:w.x-to.x,dz:w.z-to.z,msl:u.msl,rnd:u.rnd,busy:u.act.length>=PVO_SYS[u.k].ch,ref:u};});
+  const now=performance.now()/1000,units=PVO.u.filter(u=>!u.dead).map(u=>{const w=pvoWorld(u.g.position);u.act=u.act.filter(x=>x>now);return{k:u.k,dx:w.x-to.x,dz:w.z-to.z,msl:u.msl,rnd:u.rnd,busy:u.act.length>=PVO_SYS[u.k].ch,ref:u};});
   let wx={};try{if(WORLD&&WORLD.st)wx=WORLD.st.wx||{};}catch(e){}
   const R=pvoRun(T,units,{wx});const kill=R.kill;if(!R.ev.length&&!R.un.some(I=>I.det)){sh.pvoTxt=pvoText(R);return;}
   /* учёт боекомплекта и каналов */
@@ -8726,6 +8750,69 @@ function pvoShot(sh,i,dt){const P=sh.pvo;if(!P)return false;while(P.vq.length&&P
   if(!sh.pvoShown){sh.pvoShown=1;sh.tr.visible=true;}return false;}
 function pvoAfter(sh){try{if(typeof raidDone==="function")raidDone(sh,"arr");}catch(e){}if(sh&&sh.pvoTxt&&!S.lock){$("res").textContent+="\n"+sh.pvoTxt;try{pvoTally(false);}catch(e){}}}
 function pvoTally(k){PVO.n=(PVO.n||0)+1;if(k)PVO.k=(PVO.k||0)+1;pvoList();}
+/* ===== поражение ПВО: корпус-мишень, прочность, уничтожение =====
+   Раньше комплексы ПВО были только «защитой»: лучи и касания их не видели (raycast отключён у всех мешей), урона и состояния «уничтожен» не было.
+   Теперь у комплекса есть невидимый корпус-мишень (слой 7), прочность 100 %, бронирование и устойчивость к ударной волне по типу техники.
+   Урон: сердечник/кумулятив — по пробитию брони (мм), фугас — по избыточному давлению ударной волны P(Z), Z = r/∛W (та же bPso, что у здания),
+   осколки и гибель боекомплекта — оценки. Цель выбирается касанием комплекса или кнопкой «Цель» во вкладке «ПВО». */
+const PVO_VUL={gepard:{arm:25,kP:260,nm:"бронированная гусеничная машина"},tor:{arm:15,kP:180,nm:"лёгкобронированная гусеничная машина"},buk:{arm:12,kP:160,nm:"лёгкобронированная гусеничная машина"},
+  igla:{arm:0,kP:35,nm:"расчёт ПЗРК"},stinger:{arm:0,kP:35,nm:"расчёт ПЗРК"}},PVO_VUL0={arm:3,kP:75,nm:"колёсная техника без брони"};
+const pvoVul=u=>PVO_VUL[u.k]||PVO_VUL0;
+function pvoSel(){const u=PVO.sel;return u&&!u.dead&&PVO.u.includes(u)?u:null;}
+function pvoCenter(u){u.g.updateWorldMatrix(true,true);return new THREE.Vector3().setFromMatrixPosition(u.hb.matrixWorld);}
+function pvoDist(u){return Math.max(30,pvoCenter(u).distanceTo(muzzleWorld()));}
+function pvoMsg(t){try{if(!S.lock)$("res").textContent+="\n"+t;}catch(e){}}
+function pvoSelect(u,focus){PVO.sel=u&&!u.dead?u:null;PVO.u.forEach(x=>{try{pvoSelMark(x);}catch(e){}});
+  if(PVO.sel){S.aimMode=false;try{$("aimBtn")&&$("aimBtn").setAttribute("aria-pressed",false);}catch(e){}if(focus)pvoFocus(PVO.sel);if(!S.lock)$("res").textContent=`Цель — ${PVO_SYS[PVO.sel.k].n} (${pvoVul(PVO.sel).nm}), дальность ≈${Math.round(pvoDist(PVO.sel))} м. Стреляйте: орудие развернётся на комплекс.`;}
+  else if(!S.lock&&u===null)$("res").textContent="Цель ПВО снята — орудие снова наводится на основную цель.";pvoList();}
+function pvoSelMark(u){let m=u.selM;if(!PVO.sel||PVO.sel!==u||u.dead){if(m)m.visible=false;return;}
+  if(!m){const r=Math.max(u.g.userData.pvo.sz.x,u.g.userData.pvo.sz.z)*.62;m=u.selM=new THREE.Mesh(new THREE.RingGeometry(r*.92,r,48),new THREE.MeshBasicMaterial({color:0xff4a3a,side:THREE.DoubleSide,transparent:true,opacity:.85,depthTest:false}));m.rotation.x=-Math.PI/2;m.position.y=.25;m.renderOrder=5;m.raycast=()=>{};u.g.add(m);}m.visible=true;}
+function pvoFocus(u){try{const c=pvoCenter(u),o=muzzleWorld(),d=c.clone().sub(o).setY(0);if(d.length()<1)d.set(0,0,1);d.normalize();const sz=Math.max(u.g.userData.pvo.sz.x,u.g.userData.pvo.sz.z,6)*2.2+14;
+    camera.position.copy(c).addScaledVector(d,-sz*.9).add(new THREE.Vector3(-sz*.35,sz*.28,0));controls.target.copy(c);controls.update();S.view=-1;views.forEach((_,j)=>{const b=$("v"+j);b&&b.setAttribute("aria-pressed",false);});}catch(e){}}
+function pvoPickUnit(cx,cy){if(!PVO.u.length)return null;const el=renderer.domElement,r=el.getBoundingClientRect(),m=new THREE.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1),rc=new THREE.Raycaster();rc.setFromCamera(m,camera);rc.layers.set(7);
+  PVO.u.forEach(u=>u.g.updateWorldMatrix(true,true));const h=rc.intersectObjects(PVO.u.filter(u=>!u.dead).map(u=>u.hb),false)[0];return h?h.object.userData.u:null;}
+/* луч от дульного среза к комплексу со смещением dx, dy (м, в плоскости цели) — попадание в корпус-мишень или точка падения на землю */
+function pvoShotAt(u,dx,dy){const hb=u.hb,C=pvoCenter(u),from=muzzleWorld(),dir=C.clone().sub(from),L=dir.length();dir.normalize();
+  const right=new THREE.Vector3().crossVectors(new THREE.Vector3(0,1,0),dir);if(right.lengthSq()<1e-6)right.set(1,0,0);right.normalize();const up=new THREE.Vector3().crossVectors(dir,right).normalize();
+  const T=C.clone().addScaledVector(right,dx).addScaledVector(up,dy),d2=T.clone().sub(from).normalize(),rc=new THREE.Raycaster(from,d2,0,L*3+60);rc.layers.set(7);const h=rc.intersectObject(hb,false)[0];
+  if(h)return{hit:true,pt:h.point.clone(),u,L};
+  let t=L;const p=from.clone().addScaledVector(d2,t),gy=pvoGY(p.x,p.z);if(d2.y<-1e-3&&p.y>gy)t+=(p.y-gy)/-d2.y;p.copy(from).addScaledVector(d2,t);p.y=Math.max(gy,p.y);return{hit:false,mp:p,u,L};}
+/* ударная волна: доля потери прочности по P(Z) на расстоянии от точки разрыва до корпуса */
+function pvoBlastDmg(u,p,W){if(!(W>.2))return 0;const c=pvoCenter(u),sz=u.g.userData.pvo.sz,r=Math.max(.8,c.distanceTo(p)-.35*Math.hypot(sz.x,sz.z)),P=bPso(r/Math.cbrt(W)),kP=pvoVul(u).kP;return P<.2*kP?0:Math.min(1.2,P/kP);}
+function pvoBlast(p,W){if(!PVO.u.length||!(W>.2)||!p)return;PVO.u.forEach(u=>{if(u.dead)return;const d=pvoBlastDmg(u,p,W);if(d>0)pvoDamage(u,d,p,"ударная волна и осколки");});}
+function pvoDamage(u,dmg,p,why){if(u.dead||!(dmg>0))return;const S0=PVO_SYS[u.k],hp0=u.hp;u.hp=Math.max(0,u.hp-dmg);
+  if(u.hp<=0.001){pvoKill(u,p,why,hp0);return;}
+  pvoMsg(`ПВО: ${S0.n} — ${why}: −${Math.round((hp0-u.hp)*100)} %, осталось ${Math.round(u.hp*100)} %${u.hp<.5?" (горит и дымит)":""}`);
+  if(u.hp<.5&&!u.charred){u.charred=1;const seen=new Set();u.g.traverse(o=>{if(o.isMesh&&o.material&&!seen.has(o.material)&&!o.userData.pvoHb){seen.add(o.material);o.material.color.multiplyScalar(.55);}});}
+  try{pvoLabel(u);}catch(e){}pvoList();}
+function pvoKill(u,p,why,hp0){if(u.dead)return;u.dead=true;u.hp=0;PVO.lost=(PVO.lost||0)+1;if(PVO.sel===u)PVO.sel=null;const S0=PVO_SYS[u.k],U=u.g.userData.pvo;u.act=[];
+  try{if(u.ring){u.g.parent&&u.g.parent.remove(u.ring);u.ring=null;}if(u.beam)u.beam.visible=false;if(U.mf)U.mf.visible=false;if(u.selM)u.selM.visible=false;}catch(e){}
+  const c=pvoCenter(u),seen=new Set();u.g.traverse(o=>{if(o.isMesh&&o.material&&!seen.has(o.material)&&!o.userData.pvoHb){seen.add(o.material);o.material.color.multiplyScalar(u.charred?.35:.2);if(o.material.roughness!=null)o.material.roughness=.95;if(o.material.metalness!=null)o.material.metalness=.1;}});
+  u.hb.layers.set(6);if(U.tur)U.tur.rotation.z=.32*(Math.random()<.5?-1:1);u.g.rotation.z+=.05*(Math.random()<.5?-1:1);
+  const ammo=(S0.msl?u.msl*(S0.msl.W||5)*.12:0)+(S0.gun?u.rnd*.002:0),W=Math.min(90,6+ammo);
+  try{boom(c.clone(),W,{fill:"tnt",nopvo:1});}catch(e){}try{pvoSnd("boom",c,null,W);}catch(e){}try{if(LIT)LIT.flash(c,30,0xffa050,10);}catch(e){}
+  const n=14,mat=pvoMat(0x2a2926),sz0=Math.max(.25,Math.cbrt(W)*.12);for(let i=0;i<n;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(sz0*R(.6,1.8),sz0*R(.3,.8),sz0*R(.8,2.2)),mat);m.position.copy(c).add(new THREE.Vector3(R(-1.5,1.5),R(0,1.5),R(-1.5,1.5)));m.castShadow=true;m.raycast=()=>{};scene.add(m);
+    PVO.deb.push({m,v:new THREE.Vector3(R(-9,9),R(5,16),R(-9,9)),w:R(-10,10),pt:0,sz:sz0,fire:i<n*.5});}
+  u.burn=90;u.ft=0;
+  if(u.msl>0&&S0.msl){const k=Math.min(5,Math.ceil(u.msl/4));for(let j=0;j<k;j++)fxLater(.7+j*.8+R(0,.5),()=>{try{const q=c.clone().add(new THREE.Vector3(R(-3,3),R(0,3),R(-3,3)));boom(q,Math.min(8,1.2+(S0.msl.W||5)*.15),{fill:"tnt",nopvo:1});spkEmit(q,new THREE.Vector3(R(-1,1),1,R(-1,1)).normalize(),60,.7,100,{hot:1,life:.6});pvoSnd("boom",q,null,2);}catch(e){}});}
+  try{pvoLabel(u);}catch(e){}
+  pvoMsg(`✖ ${S0.n} уничтожен (${why}): ${pvoVul(u).nm}, прочность ${Math.round((hp0||1)*100)} % → 0; ${u.msl>0?`боекомплект (${u.msl} ракет) детонирует, `:""}комплекс горит. Уничтожено ПВО: ${PVO.lost} из ${PVO.u.length}`);
+  pvoList();}
+function pvoDmgTick(dt){PVO.u.forEach(u=>{if(u.dead&&u.burn>0)u.burn-=dt;if(!(u.dead?u.burn>0:u.hp<.5))return;u.ft=(u.ft||0)-dt;if(u.ft>0)return;u.ft=u.dead?.1:.25;const c=pvoCenter(u);c.y+=u.dead?1.2:2.2;
+    puff(c.clone().add(new THREE.Vector3(R(-1.5,1.5),R(0,1),R(-1.5,1.5))),true,u.dead?2.6:1.4,0x1d1a17,new THREE.Vector3(R(-.3,.3),R(1.5,3),R(-.3,.3)),R(5,9));
+    if(u.dead&&Math.random()<.5)puff(c.clone().add(new THREE.Vector3(R(-1.2,1.2),R(-.5,.5),R(-1.2,1.2))),false,1.5,0xff8a30,new THREE.Vector3(0,.4,0),R(.3,.6));});}
+/* попадание снаряда в корпус-мишень выбранного комплекса */
+function pvoArrive(sh){const ph=sh.ph,u=ph.u;if(!u||u.dead)return;const g=G(),a=sh.a,V=pvoVul(u),p=ph.pt,S0=PVO_SYS[u.k],cal=g.cal||30,pen=a.pen||0;S.st.hit++;PVO.hits=(PVO.hits||0)+1;
+  const ar=g.n+" · "+(a.n||a.key||""),head=`Попадание по ${S0.n} (${V.nm}${V.arm?`, броня ≈${V.arm} мм`:""}), дальность ≈${Math.round(ph.L)} м: ${ar}`;let dmg=0,why="прямое попадание";
+  const sp=(k)=>{try{spkEmit(p,new THREE.Vector3(0,1,0),k,.4,2,{hot:1});}catch(e){}try{puff(p.clone(),false,1.2,0x8f7f62,new THREE.Vector3(R(-1,1),R(.5,1.5),R(-1,1)),R(1,2));}catch(e){}};
+  const man=V.arm===0;
+  if(a.type==="ke"){const thr=pen>=V.arm;dmg=man?(cal>=20?.7:.35):thr?Math.min(1,.18+cal/110):.03;why=thr?`пробитие (запас ≈${Math.round(pen)} мм против ${V.arm} мм)`:`не пробил броню (≈${Math.round(pen)} мм против ${V.arm} мм)`;sp(40);}
+  else if(a.type==="heat"){const thr=pen>=V.arm;dmg=thr?.85:.1;why=thr?`кумулятивная струя прожгла корпус (≈${Math.round(pen)} мм)`:"струя не пробила броню";sp(60);try{boom(p.clone(),Math.min(4,.9*Math.pow(cal/100,3)),{fill:"tnt",nopvo:1});}catch(e){}}
+  else if(a.type==="he"||a.type==="hesh"){let W=0;try{W=heW(g,a.key).W;}catch(e){W=1.6*Math.pow(cal/100,3);}W=Math.max(.05,W);dmg=pvoBlastDmg(u,p,W)+(a.type==="hesh"&&pen>=V.arm?.15:0);why=`подрыв ≈${W<1?W.toFixed(2):Math.round(W)} кг ВВ у борта`;
+    try{boom(p.clone(),Math.min(60,W),{fill:fillOf({key:a.key},g),nopvo:1});}catch(e){}}
+  else{dmg=.02;why=a.type==="smoke"?"дымовой снаряд — вреда нет":"прямое попадание";sp(20);}
+  if(!S.lock)$("res").textContent=head;
+  if(dmg>0)pvoDamage(u,dmg,p,why);else pvoMsg("Урона нет: "+why);}
 /* перехватчик: стартует с пусковой, летит по дуге с разгоном к точке встречи, дым и факел */
 /* вертикальный «холодный» старт (С-400, Тор, IRIS-T): ракету выбрасывает из контейнера, двигатель включается на высоте ≈20–30 м, ракета склоняется на цель;
    наклонный старт — сразу с факелом из направляющей. Перехватчик летит по кубической кривой с разгоном, оставляет дымный след. */
@@ -8754,7 +8841,7 @@ function pvoTracer(a,b,spd){let t=PVO_TRG.find(x=>!x.on);if(!t){if(PVO_TRG.lengt
 function pvoBeam(u,a,b,on){let L=u.beam;if(!L){const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute([0,0,0,0,0,0],3));L=u.beam=new THREE.Line(g,new THREE.LineBasicMaterial({color:0x7fe0ff,transparent:true,opacity:.35,depthWrite:false}));L.frustumCulled=false;L.raycast=()=>{};scene.add(L);}
   L.visible=!!on&&PVO.rings;if(!L.visible)return;const p=L.geometry.attributes.position;p.setXYZ(0,a.x,a.y,a.z);p.setXYZ(1,b.x,b.y,b.z);p.needsUpdate=true;L.material.opacity=.25+.15*Math.sin(performance.now()/90);}
 function pvoTick(dt){if(!PVO.fx.length&&!PVO.deb.length&&!PVO_TRG.some(x=>x.on)&&!PVO.u.length)return;const busy=new Set();
-  PVO.u.forEach(u=>{const U=u.g.userData.pvo;U.spin.forEach(s=>s.rotation.y+=dt*(u.k==="gepard"?6:3.5));
+  PVO.u.forEach(u=>{if(u.dead)return;const U=u.g.userData.pvo;U.spin.forEach(s=>s.rotation.y+=dt*(u.k==="gepard"?6:3.5));
     if(U.tur&&U.tYaw!=null){let d=U.tYaw-U.tur.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));const st=dt*1.6;U.tur.rotation.y+=Math.abs(d)<st?d:Math.sign(d)*st;}});
   PVO.fx=PVO.fx.filter(F=>{const sh=F.sh;F.tt+=dt;const t=F.tt;
     if(F.gun){if(t>=F.t1||!shots.includes(sh)){F.fl.visible=false;return false;}busy.add(F.u);F.acc+=dt;const P=F.P,tg=pvoAim(sh,P,t,F.e.tau);
@@ -8771,10 +8858,11 @@ function pvoTick(dt){if(!PVO.fx.length&&!PVO.deb.length&&!PVO_TRG.some(x=>x.on)&
     const lit=!F.vl||u>.1;F.f.visible=F.f2.visible=lit;if(lit){const s=R(1.5,2.3);F.f.scale.set(s,s,1);if(!F.lit){F.lit=true;if(F.vl)for(let i=0;i<6;i++)puff(q.clone(),false,1.2,0xe8e4da,new THREE.Vector3(R(-2,2),R(-1,1),R(-2,2)),R(2,4));}}
     F.pt-=dt;if(F.pt<=0&&lit){F.pt=.03;puff(q.clone(),false,2.2,0xe6e1d6,new THREE.Vector3(R(-.3,.3),R(.1,.5),R(-.3,.3)),R(3,5));}F.last.copy(q);
     if(u>=1){scene.remove(F.m);F.m.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose();});
-      if(!F.kill){const p=q.clone().add(new THREE.Vector3(R(-8,8),R(-4,6),R(-8,8))),W=Math.min(30,PVO_SYS[F.u.k].msl.W);try{boom(p,W,{fill:"tnt"});}catch(er){}
+      if(!F.kill){const p=q.clone().add(new THREE.Vector3(R(-8,8),R(-4,6),R(-8,8))),W=Math.min(30,PVO_SYS[F.u.k].msl.W);try{boom(p,W,{fill:"tnt",nopvo:1});}catch(er){}
         try{spkEmit(p,tg.clone().sub(p).normalize(),40,.6,120,{hot:1,life:.5});}catch(er){}pvoSnd("boom",p,null,W);}
       return false;}return true;});
   PVO.u.forEach(u=>{if(u.beam&&!busy.has(u))u.beam.visible=false;});
+  try{pvoDmgTick(dt);}catch(e){}
   PVO_TRG.forEach(T=>{if(!T.on)return;T.s+=T.v*dt;if(T.s>=T.L){T.on=false;T.m.visible=false;return;}T.m.position.copy(T.a).addScaledVector(T.d,T.s);});
   PVO.deb=PVO.deb.filter(D=>{D.v.y-=9.8*dt;D.v.multiplyScalar(1-Math.min(.5,dt*.15));D.m.position.addScaledVector(D.v,dt);D.m.rotation.x+=D.w*dt;D.m.rotation.z+=D.w*.7*dt;D.pt-=dt;
     if(D.pt<=0){D.pt=.06;puff(D.m.position.clone(),true,D.sz*1.4,0x2a2622,new THREE.Vector3(0,.4,0),R(1.5,3));if(D.fire&&Math.random()<.6)puff(D.m.position.clone(),false,D.sz*1.1,0xff8a30,new THREE.Vector3(0,.2,0),R(.25,.5));}
@@ -8782,7 +8870,7 @@ function pvoTick(dt){if(!PVO.fx.length&&!PVO.deb.length&&!PVO_TRG.some(x=>x.on)&
       if(D.fire)try{for(let i=0;i<4;i++)puff(new THREE.Vector3(D.m.position.x,gy+.3,D.m.position.z),true,1.5,0x1d1a17,new THREE.Vector3(R(-.3,.3),R(1,2),R(-.3,.3)),R(4,7));}catch(er){}return false;}return true;});}
 function pvoKillFX(sh,P,p){const g=P.g||G(),T=P.R.T;let W=2;try{const w=g.wh&&g.wh[S.a];W=w?w.W:T.tc==="art"?7*Math.pow(g.cal/155,3):T.tc==="fpv"?.6:5;}catch(e){}
   const det=P.R.det,Wb=det?Math.min(600,W):Math.min(20,(PVO_SYS[P.R.kill.u.k].msl||{W:1}).W||1);
-  try{boom(p.clone(),Wb,{fill:det&&g.wh&&g.wh[S.a]?g.wh[S.a].fk:"tnt"});}catch(e){}pvoSnd("boom",p,null,Wb);
+  try{boom(p.clone(),Wb,{fill:det&&g.wh&&g.wh[S.a]?g.wh[S.a].fk:"tnt",nopvo:1});}catch(e){}pvoSnd("boom",p,null,Wb);
   const ku=P.R.kill.u.k,htk=P.R.kill.w==="msl"&&PVO_SYS[ku].msl&&PVO_SYS[ku].msl.htk;
   try{if(LIT)LIT.flash(p,htk?40:20,htk?0xf4f6ff:0xffb466,htk?14:8);}catch(e){}
   try{spkEmit(p,new THREE.Vector3(0,-.3,0).add(P.a.clone().multiplyScalar(-1)),htk?120:70,.9,htk?200:140,{hot:1.2,life:.7});}catch(e){}
@@ -8802,8 +8890,10 @@ function pvoTtx(k){const S0=PVO_SYS[k],m=S0.msl,gn=S0.gun;const L=[`${S0.n} · $
   L.push(S0.rad?`РЛС: ${S0.rad.t}; антенна на высоте ≈${S0.ha} м.`:`${S0.ir.t}.`);L.push(`Время реакции ${S0.react} с, одновременно целей: ${S0.ch}.`);L.push(`Источник ТТХ: ${S0.src}.`);return L.join(" ");}
 function pvoList(){const el=typeof $==="function"&&$("pvoList");if(!el)return;if(!PVO.u.length){el.textContent="Комплексы не поставлены. Выберите комплекс и коснитесь земли — или «Поставить рядом с целью».";return;}
   const t=pvoTarget();el.innerHTML=PVO.u.map((u,i)=>{const S0=PVO_SYS[u.k],w=pvoWorld(u.g.position),d=Math.hypot(w.x-t.x,w.z-t.z);
-    return`<div style="display:flex;gap:6px;align-items:center;margin:3px 0"><span style="flex:1"><b>${i+1}. ${S0.n}</b> · ${pKm(d)} от цели · ${S0.msl?u.msl+" ракет":""}${S0.msl&&S0.gun?" · ":""}${S0.gun?u.rnd+" снар.":""}</span><button data-pvodel="${u.id}" style="padding:2px 8px">✕</button></div>`;}).join("")+(PVO.n?`<div>Перехвачено целей: ${PVO.k||0} из ${PVO.n}</div>`:"");
-  Array.from(el.querySelectorAll?el.querySelectorAll("[data-pvodel]"):[]).forEach(b=>b.onclick=()=>pvoDel(PVO.u.find(u=>u.id===+b.dataset.pvodel)));}
+    const st=u.dead?`<b style="color:#e8604a">УНИЧТОЖЕН</b>`:`${S0.msl?u.msl+" ракет":""}${S0.msl&&S0.gun?" · ":""}${S0.gun?u.rnd+" снар.":""} · прочность ${Math.round(u.hp*100)} %`;
+    return`<div style="display:flex;gap:6px;align-items:center;margin:3px 0"><span style="flex:1${u.dead?";opacity:.65":""}"><b>${i+1}. ${S0.n}</b> · ${pKm(d)} от цели · ${st}</span>${u.dead?"":`<button data-pvosel="${u.id}" aria-pressed="${PVO.sel===u}" style="padding:2px 8px">${PVO.sel===u?"● Цель":"Цель"}</button>`}<button data-pvodel="${u.id}" style="padding:2px 8px">✕</button></div>`;}).join("")+(PVO.n?`<div>Перехвачено целей: ${PVO.k||0} из ${PVO.n}</div>`:"")+(PVO.lost?`<div>Уничтожено комплексов ПВО: ${PVO.lost} из ${PVO.u.length}</div>`:"")+(PVO.hits?`<div>Попаданий по комплексам: ${PVO.hits}</div>`:"");
+  Array.from(el.querySelectorAll?el.querySelectorAll("[data-pvodel]"):[]).forEach(b=>b.onclick=()=>pvoDel(PVO.u.find(u=>u.id===+b.dataset.pvodel)));
+  Array.from(el.querySelectorAll?el.querySelectorAll("[data-pvosel]"):[]).forEach(b=>b.onclick=()=>{const u=PVO.u.find(x=>x.id===+b.dataset.pvosel);pvoSelect(PVO.sel===u?null:u,true);});}
 function pvoPick(cx,cy){const el=renderer.domElement,r=el.getBoundingClientRect(),m=new THREE.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1),rc=new THREE.Raycaster();rc.setFromCamera(m,camera);
   const o=rc.ray.origin,d=rc.ray.direction;if(d.y>-1e-3)return null;let y=0,p=null;for(let it=0;it<4;it++){const k=(y-o.y)/d.y;if(k<0)return null;p=o.clone().addScaledVector(d,k);y=pvoGY(p.x,p.z);}return p;}
 function pvoUI(){if(!$("pvoSys"))return;$("pvoSys").innerHTML=PVO_KEYS.map(k=>`<option value="${k}">${PVO_SYS[k].n} — ${PVO_SYS[k].o}</option>`).join("");
@@ -8811,11 +8901,14 @@ function pvoUI(){if(!$("pvoSys"))return;$("pvoSys").innerHTML=PVO_KEYS.map(k=>`<
   const setP=on=>{PVO.place=on;S.pvoPlace=on;$("pvoPlace").setAttribute("aria-pressed",on);$("pvoPlace").textContent=on?"Коснитесь земли…":"Поставить касанием";if(on&&!S.lock)$("res").textContent=`Коснитесь земли, чтобы поставить ${PVO_SYS[$("pvoSys").value].n}. Камеру можно двигать как обычно.`;};
   $("pvoPlace").onclick=()=>{setP(!PVO.place);if(PVO.place&&typeof closeSheet==="function")try{closeSheet();}catch(e){}};
   $("pvoAuto").onclick=()=>{const u=pvoAuto($("pvoSys").value);if(u&&!S.lock)$("res").textContent=`${PVO_SYS[u.k].n} поставлен рядом с целью.`;};
-  $("pvoUndo").onclick=()=>pvoDel(PVO.u[PVO.u.length-1]);$("pvoClear").onclick=()=>{PVO.u.slice().forEach(pvoDel);PVO.n=0;PVO.k=0;pvoList();};
-  $("pvoReload").onclick=()=>{PVO.u.forEach(u=>{const S0=PVO_SYS[u.k];u.msl=S0.msl?S0.msl.n0:0;u.rnd=S0.gun?S0.gun.n0:0;u.act=[];try{pvoLabel(u);}catch(e){}});pvoList();};
+  $("pvoUndo").onclick=()=>pvoDel(PVO.u[PVO.u.length-1]);$("pvoClear").onclick=()=>{PVO.u.slice().forEach(pvoDel);PVO.n=0;PVO.k=0;PVO.lost=0;PVO.hits=0;PVO.sel=null;pvoList();};
+  $("pvoReload").onclick=()=>{PVO.u.forEach(u=>{if(u.dead)return;const S0=PVO_SYS[u.k];u.msl=S0.msl?S0.msl.n0:0;u.rnd=S0.gun?S0.gun.n0:0;u.act=[];try{pvoLabel(u);}catch(e){}});pvoList();};
   $("pvoSalvo").onchange=()=>{PVO.salvo=$("pvoSalvo").checked;};$("pvoRings").onchange=()=>{PVO.rings=$("pvoRings").checked;PVO.u.forEach(u=>{try{pvoRing(u);}catch(e){}});};
   $("pvoTestBtn").onclick=()=>{$("pvoTest").innerHTML=pvoTestHTML();};
-  const el=renderer.domElement;let dn=null;if(el.addEventListener){el.addEventListener("pointerdown",e=>{dn={x:e.clientX,y:e.clientY,t:performance.now()};});
+  const el=renderer.domElement;let dn=null,d2=null;if(el.addEventListener){el.addEventListener("pointerdown",e=>{dn={x:e.clientX,y:e.clientY,t:performance.now()};d2={x:e.clientX,y:e.clientY,t:performance.now()};});
+    /* касание комплекса ПВО выбирает его целью (повторное касание или касание в другом месте — снимает) */
+    el.addEventListener("pointerup",e=>{if(!d2||PVO.place||!PVO.u.length){d2=null;return;}const mv=Math.hypot(e.clientX-d2.x,e.clientY-d2.y),dtp=performance.now()-d2.t;d2=null;if(mv>8||dtp>450)return;
+      const u=pvoPickUnit(e.clientX,e.clientY);if(u)pvoSelect(PVO.sel===u?null:u,false);else if(PVO.sel)pvoSelect(null,false);});
     el.addEventListener("pointerup",e=>{if(!dn||!PVO.place){dn=null;return;}const mv=Math.hypot(e.clientX-dn.x,e.clientY-dn.y),dtp=performance.now()-dn.t;dn=null;if(mv>8||dtp>450)return;
       const p=pvoPick(e.clientX,e.clientY);if(!p){if(!S.lock)$("res").textContent="Касание не попало в землю — коснитесь земли.";return;}
       const t=pvoTarget();if(Math.hypot(p.x-t.x,p.z-t.z)>6000){$("res").textContent="Слишком далеко от цели — ставьте ближе 6 км.";return;}
