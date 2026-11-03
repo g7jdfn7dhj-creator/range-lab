@@ -1930,7 +1930,7 @@ function fireOne(){
   if(!ok){const c=PL.centroid(S.poly);ax=c[0];ay=c[1];}
   if(S.aimMode&&S.aim){ax=S.aim[0];ay=S.aim[1];}
   const gs=()=>{let u=0;for(let i=0;i<6;i++)u+=Math.random();return(u-3)/1.4;};
-  const fly0=Math.min(gd?25:B.indirect?12:2.5,Math.max(.12,B.t)),vmv=(S.mvDir||1)*(+$("move").value||0);
+  const fly0=Math.min(gd?25:B.indirect?7:2.5,Math.max(.12,B.t)),vmv=(S.mvDir||1)*(+$("move").value||0);
   /* СУО учитывает снос ветром и вводит упреждение по движущейся цели; без СУО поправки — на стрелке */
   const x0=S.mvx||0,reachX=(S.veh&&S.drive&&S.drive.on)?(S.drive.vx||0)*fly0:predX(x0,S.mvDir||1,S.veh?(S.vSpd||0):(+$("move").value||0),fly0)-x0;
   const windCorr=gd?B.drift*R(-1,1):S.fcs?B.drift*R(-.12,.12):B.drift,lead=gd?reachX:S.fcs?reachX*R(.96,1.04):0;
@@ -3504,8 +3504,8 @@ function vfxTick(dt){const V=VFX;if(!V)return;const wind=+(($("wind")||{}).value
 /* след снаряда: тонкий светящийся конус между прошлым и нынешним положением — смаз движения раскалённого донца или трассера */
 const VFX_UP=new THREE.Vector3(0,1,0);
 function vfxStreak(sh){if(!VFX||reduce||!sh.tr)return;const cur=sh.tr.position;if(!sh.vp){sh.vp=cur.clone();return;}const d=cur.clone().sub(sh.vp),L=d.length();if(L<.05){return;}
-  let st=sh.vst;if(!st){const a=sh.a||{},ke=a.type==="ke",tracer=G().cls==="auto"||G().cls==="mg";if(!ke&&!tracer){sh.vp.copy(cur);return;}
-    st=new THREE.Mesh(new THREE.CylinderGeometry(1,.15,1,8,1,true),new THREE.MeshBasicMaterial({color:tracer?0xff6a28:0xffd7a0,transparent:true,opacity:tracer?.85:.28,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));
+  let st=sh.vst;if(!st){const a=sh.a||{},ke=a.type==="ke",tracer=G().cls==="auto"||G().cls==="mg";if(!ke&&!tracer&&!(sh.own&&!sh.guided)){sh.vp.copy(cur);return;}
+    st=new THREE.Mesh(new THREE.CylinderGeometry(1,.15,1,8,1,true),new THREE.MeshBasicMaterial({color:tracer?0xff6a28:0xffd7a0,transparent:true,opacity:tracer?.85:ke?.28:.17,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));
     st.raycast=()=>{};st.frustumCulled=false;st.renderOrder=7;st.userData.r=Math.max(.012,G().cal/1000*(tracer?.9:.55));scene.add(st);sh.vst=st;VFX.streaks.push({m:st,sh,t:0});}
   st.position.copy(sh.vp).addScaledVector(d,.5);st.quaternion.setFromUnitVectors(VFX_UP,d.clone().normalize());const r=st.userData.r;st.scale.set(r,Math.min(L,60),r);st.visible=true;sh.vp.copy(cur);}
 function vfxStreakTick(dt){const L=VFX.streaks;for(let i=L.length-1;i>=0;i--){const s=L[i];if(shots.indexOf(s.sh)<0){s.t+=dt;s.m.material.opacity*=Math.exp(-dt*18);if(s.t>.25){scene.remove(s.m);s.m.geometry.dispose();s.m.material.dispose();L.splice(i,1);}}}}
@@ -7242,6 +7242,14 @@ function bStatic(){if(BZ)return;BZ=new THREE.Matrix4().makeScale(0,0,0);_bm=new 
   B_GEO={box:new THREE.BoxGeometry(1,1,1),cyl:new THREE.CylinderGeometry(.5,.5,1,18),cyl8:new THREE.CylinderGeometry(.5,.5,1,8),cone:new THREE.ConeGeometry(.5,1,10),sph:new THREE.SphereGeometry(1,16,10),ico:new THREE.IcosahedronGeometry(1,1),pl:new THREE.PlaneGeometry(1,1)};}
 function bMB(b){_bm.compose(_bv.set((b[0]+b[3])/2,(b[1]+b[4])/2,(b[2]+b[5])/2),_bq.set(0,0,0,1),_bs.set(Math.max(1e-4,b[3]-b[0]),Math.max(1e-4,b[4]-b[1]),Math.max(1e-4,b[5]-b[2])));return _bm;}
 function bMR(cx,cy,cz,sx,sy,sz,ay){_bq.setFromAxisAngle(_bUp,ay);_bm.compose(_bv.set(cx,cy,cz),_bq,_bs.set(sx,sy,sz));return _bm;}
+/* неровные куски бетона и кирпича: икосаэдр с рваными вершинами, сколотые грани, плоские нормали — не одинаковые «кубики» */
+function bChunkGeo(seed){let g=new THREE.IcosahedronGeometry(.5,1);g=g.toNonIndexed?g.toNonIndexed():g;const p=g.attributes.position,h=(x,y,z)=>{const v=Math.sin(x*127.1+y*311.7+z*74.7+seed*19.19)*43758.5453;return v-Math.floor(v);},m={};
+  for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),k=x.toFixed(3)+","+y.toFixed(3)+","+z.toFixed(3);let f=m[k];if(!f){const r=.62+.55*h(x,y,z);f=m[k]=[r,.78+.3*h(z,x,y)];}
+    p.setXYZ(i,x*f[0],y*f[0]*f[1],z*f[0]*(1.1-.2*f[1]));}
+  /* низ срезан плоскостью: кусок ложится на грань, а не на остриё */
+  for(let i=0;i<p.count;i++){if(p.getY(i)<-.17)p.setY(i,-.17);}
+  g.computeVertexNormals();return g;}
+function bShardGeo(){const g=new THREE.TetrahedronGeometry(.5,0);return g;}
 function bPool(name,geo,mat,cap,o){o=o||{};const m=new THREE.InstancedMesh(geo,mat,cap);m.count=0;m.castShadow=!!o.cast;m.receiveShadow=o.recv!==false;m.frustumCulled=false;m.raycast=()=>{};
   if(o.col!==false)m.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(cap*3).fill(1),3);m.userData.decor=true;if(o.order!=null)m.renderOrder=o.order;BLD.g.add(m);const P={m,n:0,cap,free:[],name};BLD.P[name]=P;return P;}
 function bPut(P,M,col){let i;if(P.free.length)i=P.free.pop();else{if(P.n>=P.cap)return -1;i=P.n++;}P.m.setMatrixAt(i,M);if(P.m.instanceColor)(col||_bW).toArray(P.m.instanceColor.array,i*3);
@@ -7265,8 +7273,8 @@ function bBuild(){bStatic();const C=BLC,g=new THREE.Group();g.name="bld";
   bPool("glass",box,M.glass,580,{order:2,recv:false});bPool("frame",box,M.frame,3700);bPool("gkl",box,M.gkl,820);bPool("gpart",box,M.gpart,1750,{order:3,recv:false});
   bPool("rail",box,M.steel,1050);bPool("steel",box,M.steel,700);bPool("sky",box,M.sky,260,{order:4,recv:false});
   bPool("light",plane.clone().rotateX(Math.PI/2),M.light,q?3000:4900,{recv:false});bPool("acm",box,M.acm,380,{cast:true});bPool("cAcm",box,M.acm,1300,{cast:true});
-  bPool("deb",new THREE.DodecahedronGeometry(.5,0),M.deb,1000,{cast:true});bPool("shard",new THREE.TetrahedronGeometry(.5,0),M.shard,600,{recv:false});
-  bPool("rub",new THREE.DodecahedronGeometry(.5,0),M.deb,1800,{cast:true});bPool("dec",plane,M.dec,520,{recv:false,order:1});
+  bPool("deb",bChunkGeo(1),M.deb,1000,{cast:true});bPool("shard",bShardGeo(),M.shard,600,{recv:false});
+  bPool("rub",bChunkGeo(2),M.deb,1800,{cast:true});bPool("dec",plane,M.dec,520,{recv:false,order:1});
   {const sg=new THREE.PlaneGeometry(1,1);sg.setAttribute("aUvOff",new THREE.InstancedBufferAttribute(new Float32Array(40*2),2));M.sign.onBeforeCompile=sh=>{sh.vertexShader="attribute vec2 aUvOff;\n"+sh.vertexShader.replace("#include <uv_vertex>","#include <uv_vertex>\n#ifdef USE_UV\nvUv=vec2(uv.x,uv.y*.125)+aUvOff;\n#endif");};M.sign.customProgramCacheKey=()=>"bsign";
     const P=bPool("sign",sg,M.sign,40,{recv:false,col:false});P.uv=sg.attributes.aUvOff;}
   bFacade("S");bFacade("N");bFacade("W");bFacade("E");bFrameSlabs();bInterior();bAtria();bRotunda();bRoofDecor();bHall();bOutside();
@@ -7358,8 +7366,8 @@ function bRotunda(){const R=BLC.rot,lv=BLC.lv,P=BLD.P,n=R.n,ro=R.r,ri=R.r-R.t,rm
       const mk=(y0,y1,kind)=>{const hy=(y1-y0)/2;if(hy<=.01)return null;const isG=kind==="g",th=isG?.03:R.t,rr=isG?ro-.25:rm;
         const e=bEl({k:isG?"g":"w",m:isG?(f===0?"tglass":"glass"):"aer",g:1,c:[R.cx+Math.cos(a)*rr,(y0+y1)/2,R.cz+Math.sin(a)*rr],ay,hx:cw/2,hy,hz:th/2,th,P:isG?"glass":"acm",f,side:"R",seg:s,fr:[]});
         e.ii=bPut(isG?P.glass:P.acm,bMR(e.c[0],e.c[1],e.c[2],cw,y1-y0,th,ay));if(isG){const mx=R.cx+Math.cos(a-Math.PI/n)*(ro-.22),mz=R.cz+Math.sin(a-Math.PI/n)*(ro-.22);e.fr.push(bPut(P.frame,bMR(mx,(y0+y1)/2,mz,.08,y1-y0,.12,ay)));}return e;};
-      const sp=mk(yb,w0,"w"),gl=mk(w0,w1,"g"),lt=mk(w1,yt,"w");if(gl)gl.walls=[sp,lt].filter(Boolean).map(e=>e.id);BLD.rseg.push({s,f,ids:[sp,gl,lt].filter(Boolean).map(e=>e.id)});}
-    const pa=bEl({k:"w",m:"aer",g:1,c:[R.cx+Math.cos(a)*rm,lv[5]+.55,R.cz+Math.sin(a)*rm],ay,hx:cw/2,hy:.55,hz:R.t/2,th:R.t,P:"acm",f:5,side:"R",seg:s});pa.ii=bPut(P.acm,bMR(pa.c[0],pa.c[1],pa.c[2],cw,1.1,R.t,ay));}
+      const sp=mk(yb,w0,"w"),gl=mk(w0,w1,"g"),lt=mk(w1,yt,"w");if(sp)sp.rl="sp";if(gl)gl.rl="gl";if(lt)lt.rl="lt";if(gl)gl.walls=[sp,lt].filter(Boolean).map(e=>e.id);BLD.rseg.push({s,f,ids:[sp,gl,lt].filter(Boolean).map(e=>e.id)});}
+    const pa=bEl({k:"w",m:"aer",g:1,c:[R.cx+Math.cos(a)*rm,lv[5]+.55,R.cz+Math.sin(a)*rm],ay,hx:cw/2,hy:.55,hz:R.t/2,th:R.t,P:"acm",f:5,side:"R",seg:s,rl:"pa"});pa.ii=bPut(P.acm,bMR(pa.c[0],pa.c[1],pa.c[2],cw,1.1,R.t,ay));}
   /* перекрытия: 20 секторов по 18° на каждом этаже, ядро лифтов и лестниц — ж/б цилиндр, 12 колонн по кругу */
   const ns=20,core=4.3,da=Math.PI*2/ns,PS=bPool("rsec",bSecGeo(core,ri,da,BLC.sl),BLD.M.slab,110);BLD.rsec=[];
   for(let k=1;k<=5;k++)for(let s=0;s<ns;s++){const a0=s*da,y=lv[k]-BLC.sl/2;_bq.setFromAxisAngle(_bUp,-a0);_bm.compose(_bv.set(R.cx,y,R.cz),_bq,_bs.set(1,1,1));const ii=bPut(PS,_bm);
@@ -7627,7 +7635,7 @@ function bKE(sh,H,out){const a=sh.a,pr=bProj(sh),o=sh.bh.o,d=sh.bh.d,cp=a.key===
 function bKEHole(e,h,pin,pout,pr,L,through,d){const m=BM[e.m],brit=e.m==="brick"||e.m==="rc"||e.m==="aer",nb=h.n.map(x=>-x),dd=pr.kind==="rod"?pr.dc:pr.d;
   if(e.k==="c"){bColDmg(e,Math.min(.45,(pr.kind==="rod"?dd*dd*14:dd*dd*28)/.25+(through?.04:.02)),d);bDecal(pin,h.n,Math.max(.04,dd*1.6));if(through)bDecal(pout,nb,Math.min(.35,.08+.4*dd+.1*L));bDust(pin,m.deb,.5);return;}
   if(e.k==="p"){bDecal(pin,h.n,Math.max(.03,dd*1.2));if(through)bDecal(pout,nb,Math.max(.04,dd*1.6));return;}
-  if(e.g===4||e.gnd){bDecal(pin,h.n,Math.max(.04,dd*1.5));bDust(pin,m.deb||[.6,.6,.6],.5);return;}
+  if(e.g===4||e.gnd){bDecal(pin,h.n,Math.max(.04,dd*1.5));bDust(pin,m.deb||[.6,.6,.6],.5);if(e.g===4&&through){bDecal(pout,nb,Math.max(.06,dd*2));try{bSecHit(e,Math.max(.1,dd*1.3));}catch(er){}}return;}
   const rin=pr.kind==="rod"?Math.max(.04,1.6*dd):brit?Math.max(.04,1.1*dd):.6*dd,rsp=brit&&through?(pr.kind==="rod"?Math.min(.4,.05+.2*L):Math.min(.6,1.2*dd+.15*L)):rin;
   bDecal(pin,h.n,rin);if(through)bDecal(pout,nb,rsp);
   if(brit&&through&&rsp>=.25)bDmgCells(e,pout,rsp*.6,1.2,d,{v:6,flat:1});else if(brit)bDmgCells(e,through?pout:pin,Math.max(.12,rsp*.8),through?.4:.2,d,{v:2});
@@ -7746,12 +7754,17 @@ function bBlast(sh,det,out){const X=det.W?{W:det.W,Wb:det.W*1.25,We:det.W*1.15,f
   if(ncol)msgs.push(`у места разрыва разрушено колонн: ${ncol}`);
   /* разрыв снаружи (на земле, у стены, в воздухе): ударная волна по фасадам. Отражённое давление — по приведённому расстоянию Z = R/W^⅓ и углу встречи;
      кладка разрушается панелью целиком, если оно больше её сопротивления (≈120 кПа для 250 мм, растёт как толщина^1,5: 640 мм ≈ 490 кПа), при трети — трещины и выбоины */
-  if(!in0||det.air){let nb=0,nd=0;const lim=9*W3e+4;for(const e of BLD.E){if(e.k!=="w"||e.st===2||e.g!==0||!e.b||e===det.e)continue;const R0=Math.max(.3,bDist(e,p));if(R0>lim)continue;
+  /* разрыв снаружи над кровлей ротонды: отражённое давление сверху на плиты-секторы (ж/б с арматурой, несущая способность ≈2×) */
+  if((!in0||det.air)&&BLD.rsec){let nr=0,nrd=0;const lim2=6*W3e+4;for(const s3 of BLD.rsec){if(s3.st===2||s3.falling||s3.gnd)continue;const top=s3.c[1],bot=top-s3.th;if(p[1]<bot)continue;const dv=Math.max(0,p[1]-top),dh=bSecDist(s3,p),R0=Math.max(.3,Math.hypot(dh,dv));if(R0>lim2)continue;
+      const ci=Math.min(1,dv/Math.max(.1,Math.hypot(dh,dv))),Ps=bPso(R0/W3e),Pr=bPref(Ps,ci),Pc=bThr(2.2*120*Math.pow(s3.th/.25,1.5)),Ir=(typeof kgImp==="function"?kgImp(R0/W3e,X.We):200*W3e/R0)*(Pr/Math.max(1,Ps)),Ic=bThr(1800*s3.th*1.6);
+      if(Pr>Pc&&Ir>Ic){bSlabFall(s3);nr++;}else if(Pr>.3*Pc){if(bSecHit(s3,1.3*Math.min(3,Pr/Pc)))nr++;else nrd++;}}
+    if(nr)msgs.push(`ударная волна сверху: обрушено секторов кровли и перекрытий ротонды — ${nr}`);if(nrd)msgs.push(`трещины и сколы плит ротонды от волны: ${nrd}`);}
+  if(!in0||det.air){let nb=0,nd=0;const lim=9*W3e+4;for(const e of BLD.E){if(e.k!=="w"||e.st===2||!(e.g===0&&e.b||e.g===1&&e.side==="R")||e===det.e)continue;const R0=Math.max(.3,bDist(e,p));if(R0>lim)continue;
       const c=bCtr(e),n=bOutN(e,c),dx=p[0]-c[0],dy=p[1]-c[1],dz=p[2]-c[2],dot=n[0]*dx+n[1]*dy+n[2]*dz;if(dot<=0)continue;const ci=Math.min(1,dot/Math.max(.1,Math.hypot(dx,dy,dz)));
       const Ps=bPso(R0/W3e),Pr=bPref(Ps,ci)*(det.ground||p[1]<1.2?1.6:1),Pc=bThr(120*Math.pow(e.th/.25,1.5)),
         Ir=(typeof kgImp==="function"?kgImp(R0/W3e,X.We):200*W3e/R0)*(Pr/Math.max(1,Ps)),Ic=bThr(1800*e.th*1.2);/* импульс, Па·с: стену надо сдвинуть со скоростью ≈1,2 м/с */
-      if(Pr>Pc&&Ir>Ic){bBreach(e,c,Math.hypot(e.b[3]-e.b[0],e.b[4]-e.b[1],e.b[5]-e.b[2])*.55,[-n[0],.08,-n[2]],X);nb++;}
-      else if(Pr>Pc*.35){const q=[Math.max(e.b[0],Math.min(e.b[3],p[0])),Math.max(e.b[1],Math.min(e.b[4],p[1])),Math.max(e.b[2],Math.min(e.b[5],p[2]))];if(bDmgCells(e,q,1.3,.6*Pr/Pc,[-n[0],0,-n[2]],{v:2}))nd++;}}
+      if(Pr>Pc&&Ir>Ic){bBreach(e,c,(e.g===1?Math.hypot(2*e.hx,2*e.hy,2*e.hz):Math.hypot(e.b[3]-e.b[0],e.b[4]-e.b[1],e.b[5]-e.b[2]))*.55,[-n[0],.08,-n[2]],X);nb++;}
+      else if(Pr>Pc*.35){const q=e.g===1?c:[Math.max(e.b[0],Math.min(e.b[3],p[0])),Math.max(e.b[1],Math.min(e.b[4],p[1])),Math.max(e.b[2],Math.min(e.b[5],p[2]))];if(bDmgCells(e,q,1.3,.6*Pr/Pc,[-n[0],0,-n[2]],{v:2}))nd++;}}
     if(nb)msgs.push(`ударная волна снаружи разрушила участков кладки: ${nb} — отражённое давление на фасаде больше её сопротивления (кирпич 640 мм держит ≈490 кПа и ≈1,4 кПа·с импульса)`);if(nd)msgs.push(`трещины и выбоины от волны: ${nd} ${nd===1?"участок":nd<5?"участка":"участков"}`);}
   try{const fr=bFragStorm(p,X,det,sh);if(fr)msgs.push(fr);}catch(e){console.error(e);}
   /* плиты над и под разрывом внутри помещения */
@@ -7770,8 +7783,11 @@ function bBlast(sh,det,out){const X=det.W?{W:det.W,Wb:det.W*1.25,We:det.W*1.15,f
       const dh=Math.hypot(Math.max(s2.b[0]-p[0],0,p[0]-s2.b[3]),Math.max(s2.b[2]-p[2],0,p[2]-s2.b[5])),R3=Math.hypot(dh,dv);if(R3>2.4*W3e)continue;
       const ceil=room0&&s2.lvl===room0.f+1&&ov(s2.b),floor=room0&&s2.lvl===room0.f&&ov(s2.b),c2=bCtr(s2),Zc=Math.hypot(c2[0]-p[0],c2[1]-p[1],c2[2]-p[2])/W3e;
       if(Zc<bThr(.55)||(ceil&&Pq0>bThr(250))||(floor&&Pq0>bThr(350))){bSlabFall(s2);nf++;}}
-    if(room0&&Pq0>0)for(const e of BLD.E){if(e.k!=="w"||e.st===2||e.f!==room0.f||e.g!==0||!e.b)continue;if(!(e.b[0]<room0.x1+.8&&e.b[3]>room0.x0-.8&&e.b[2]<room0.z1+.8&&e.b[5]>room0.z0-.8))continue;
-      if(Pq0>bThr(120)){const c=bCtr(e),v=[c[0]-p[0],0,c[2]-p[2]],l=Math.hypot(v[0],v[2])||1;bBreach(e,c,Math.hypot(e.b[3]-e.b[0],e.b[4]-e.b[1],e.b[5]-e.b[2])*.55,[v[0]/l,.15,v[2]/l],X);nw++;}}
+    {const rotRoom=room0&&room0.x1===BLC.rot.cx+BLC.rot.r;for(const s3 of BLD.rsec||[]){if(s3.st===2||s3.falling)continue;const top=s3.c[1],bot=top-s3.th,dv=p[1]>=top?p[1]-top:p[1]<=bot?bot-p[1]:0;if(dv>4.3)continue;
+        const R3=Math.hypot(bSecDist(s3,p),dv);if(R3>2.4*W3e)continue;const c3=bCtr(s3),Zc=Math.hypot(c3[0]-p[0],c3[1]-p[1],c3[2]-p[2])/W3e,ceil=rotRoom&&s3.lvl===room0.f+1,floor=rotRoom&&s3.lvl===room0.f;
+        if(Zc<bThr(.55)||(ceil&&Pq0>bThr(250))||(floor&&Pq0>bThr(350))){bSlabFall(s3);nf++;}}}
+    if(room0&&Pq0>0)for(const e of BLD.E){if(e.k!=="w"||e.st===2||e.f!==room0.f||!(e.g===0&&e.b||e.g===1&&e.side==="R"))continue;if(e.g===0&&!(e.b[0]<room0.x1+.8&&e.b[3]>room0.x0-.8&&e.b[2]<room0.z1+.8&&e.b[5]>room0.z0-.8))continue;
+      if(Pq0>bThr(120)){const c=bCtr(e),v=[c[0]-p[0],0,c[2]-p[2]],l=Math.hypot(v[0],v[2])||1;bBreach(e,c,(e.g===1?Math.hypot(2*e.hx,2*e.hy,2*e.hz):Math.hypot(e.b[3]-e.b[0],e.b[4]-e.b[1],e.b[5]-e.b[2]))*.55,[v[0]/l,.15,v[2]/l],X);nw++;}}
     if(nf)msgs.push(`газы взрыва и отражённая волна обрушили плит перекрытия: ${nf} — давление в помещении ≈${Math.round(Pq0)} кПа, плита держит ≈250 кПа снизу и ≈350 кПа сверху`);
     if(nw)msgs.push(`стены помещения выдавлены наружу: ${nw} ${nw===1?"участок":nw<5?"участка":"участков"} кладки`);}
   /* ударная волна: стёкла, перегородки, светильники, машины */
@@ -7867,7 +7883,22 @@ function bBelow(e,N){const b=e.b;if(b[1]<1.1)return true;if(e.gal){const q=bSlab
     const ox=Math.min(b[3],q.b[3])-Math.max(b[0],q.b[0]),oz=Math.min(b[5],q.b[5])-Math.max(b[2],q.b[2]);if(ox>.05&&oz>.05)return true;}return false;}
 function bSide(e,N,B){const b=e.b;for(const q of N){if(!bLive(q)||(q.k!=="w"&&q.k!=="c")||!B.get(q))continue;if(q.b[4]<b[1]+.3||q.b[1]>b[4]-.3)continue;
     const gx=Math.max(q.b[0]-b[3],b[0]-q.b[3]),gz=Math.max(q.b[2]-b[5],b[2]-q.b[5]);if(gx<.08&&gz<.08)return true;}return false;}
-function bSupportPass(){if(!BLD)return 0;let tot=0;
+/* ротонда: кольцо стеновых панелей, стёкол и парапета стоит стопкой на плитах-секторах и нижних панелях; без опоры панель падает, рама остаётся без стекла и тоже падает */
+function bRotSupport(){if(!BLD||!BLD.rseg||!BLD.rsec)return 0;const Rr=BLC.rot,n=Rr.n,ns=20;let tot=0;
+  if(!BLD.rmap){const M={};BLD.E.forEach(e=>{if(e.side==="R"&&e.rl)M[e.seg+","+e.f+","+e.rl]=e;});BLD.rmap=M;}const M=BLD.rmap,al=e=>!e||(e.st!==2&&!e.falling);
+  const slabOk=(f,s)=>{const q=BLD.rsec[(f-1)*ns+Math.floor(((s+.5)/n)*ns)];return!q||(q.st!==2&&!q.falling);};
+  const segs=BLD.rseg.map(r=>r.s),has=s=>segs.includes((s+n)%n);
+  for(let it=0;it<6;it++){let ch=false;
+    for(const r of BLD.rseg){const s=r.s;for(let f=0;f<=5;f++){
+      const sp=M[s+","+f+",sp"],gl=M[s+","+f+",gl"],lt=M[s+","+f+",lt"],pa=M[s+","+f+",pa"],lowLt=f>0?M[s+","+(f-1)+",lt"]:null;
+      const kill=e=>{if(!e||e.st===2)return;e.falling=true;if(e.k==="g"){bGlass(e,[0,-.4,0],2,"blast");bFrames(e);}else bWallFall(e);e.st=2;tot++;ch=true;};
+      if(sp&&sp.st!==2&&f>0&&!al(lowLt)&&!slabOk(f,s))kill(sp);
+      if(gl&&gl.st!==2&&sp&&sp.st===2)kill(gl);
+      if(lt&&lt.st!==2&&sp&&sp.st===2){const nb=[(s+n-1)%n,(s+1)%n].map(q=>{const x=M[q+","+f+",lt"];return has(q)?(x&&x.st!==2):true;});if(!nb[0]&&!nb[1])kill(lt);else if(gl&&gl.st===2&&!nb[0]&&!nb[1])kill(lt);}
+      if(pa&&pa.st!==2&&!al(M[s+",4,lt"])&&!slabOk(5,s))kill(pa);}}
+    if(!ch)break;}
+  return tot;}
+function bSupportPass(){if(!BLD)return 0;let tot=0;try{tot+=bRotSupport();}catch(e){console.error(e);}
   for(let it=0;it<6;it++){const C=BLD.E.filter(e=>e.g===0&&e.b&&!e.gnd&&e.st!==2&&!e.falling&&(e.k==="w"||e.k==="c"||(e.k==="g"&&!(e.walls&&e.walls.length))));const B=new Map(),NN=new Map();
     C.forEach(e=>{const N=bSupNear(e);NN.set(e,N);B.set(e,bBelow(e,N));});
     /* опора соседей тоже проверяется: стоит ли сосед сам на чём-то */
@@ -7910,7 +7941,7 @@ function bSlabFall(s){if(s.falling)return;s.falling=true;try{(s.lights||[]).forE
   /* кладка этажа, стоящая на краю этой плиты, теряет опору */
   const C=BLC,ed=[];if(s.j===0)ed.push(["S",s.i]);if(s.j===C.nz-1)ed.push(["N",s.i]);if(s.i===0)ed.push(["W",s.j]);if(s.i===C.nx-1)ed.push(["E",s.j]);
   for(const[sd,bay]of ed)for(const e of BLD.E){if(e.side!==sd||e.bay!==bay||e.st===2)continue;if(e.k==="w"&&e.f===s.lvl)bWallFall(e);if(e.k==="g"&&e.f===s.lvl){bGlass(e,[0,-1,0],1,"blast");bFrames(e);}}}
-function bWallFall(e){const n=e.k==="w"?(e.side==="S"?[0,0,-1]:e.side==="N"?[0,0,1]:e.side==="W"?[-1,0,0]:[1,0,0]):[0,0,0];
+function bWallFall(e){const n=e.k==="w"?(e.side==="R"?(()=>{const x=e.c[0]-BLC.rot.cx,z=e.c[2]-BLC.rot.cz,l=Math.hypot(x,z)||1;return[x/l,0,z/l];})():e.side==="S"?[0,0,-1]:e.side==="N"?[0,0,1]:e.side==="W"?[-1,0,0]:[1,0,0]):[0,0,0];
   if(bFract(e)){for(let k=0;k<e.cl.ix.length;k++)if(e.cl.ix[k]>=0)bKillCell(e,k,[n[0]*.6,-.2,n[2]*.6],2.5,null);}
   else{e.st=2;bHide(BLD.P[e.P],e.ii);(e.dec||[]).forEach(([pk,i])=>bHide(BLD.P[pk],i));const c=bCtr(e);for(let i=0;i<8;i++)bDeb([c[0]+R(-1,1),c[1]+R(-1,1),c[2]+R(-1,1)],[n[0]*R(1,3),R(-1,1),n[2]*R(1,3)],R(.15,.35),BM[e.m].deb,e.m);}
   if(e.win!=null){const g=BLD.E[e.win];if(g){if(g.st!==2)bGlass(g,n,2,"blast");bFrames(g);}}}
@@ -7937,7 +7968,7 @@ function bSupportCheck(){if(!BLD)return;const R2=BLD.P.rub;
     bDeb(r.p,[R(-.4,.4),0,R(-.4,.4)],r.s,r.col,"rc");}});
   BLD.deb.forEach(o=>{if(o.rest&&o.P==="shard"){const fl=bFloorY(o.p[0],o.p[2],o.p[1]+.3)+o.s*.08;if(o.p[1]>fl+.4){o.rest=false;o.t=0;o.v=[0,0,0];}}});}
 function bRest(o,i){BLD.deb.splice(i,1);if(o.P==="shard"){o.rest=true;BLD.deb.push(o);return;}const R2=BLD.P.rub;let ii;if(R2.n>=R2.cap&&!R2.free.length){R2.rr=((R2.rr||0)+1)%R2.cap;ii=R2.rr;}else ii=bPut(R2,BZ);
-  _bE.set(o.r[0],o.r[1],o.r[2]);_bQ2.setFromEuler(_bE);_bm.compose(_bv.set(o.p[0],o.p[1]-o.s*.2,o.p[2]),_bQ2,_bs.set(o.s,o.s*.6,o.s*.9));R2.m.setMatrixAt(ii,_bm);R2.dirty=1;(BLD.rubR=BLD.rubR||[])[ii]={p:o.p.slice(),s:o.s,col:o.col};
+  _bE.set((o.r[0]%1)*.22-.11,o.r[1],(o.r[2]%1)*.22-.11);_bQ2.setFromEuler(_bE);_bm.compose(_bv.set(o.p[0],o.p[1]-o.s*.12,o.p[2]),_bQ2,_bs.set(o.s*1.05,o.s*.7,o.s*.95));R2.m.setMatrixAt(ii,_bm);R2.dirty=1;(BLD.rubR=BLD.rubR||[])[ii]={p:o.p.slice(),s:o.s,col:o.col};
   _bc.setRGB(o.col[0],o.col[1],o.col[2]);bTint(R2,ii,_bc);bHide(BLD.P.deb,o.ii,true);}
 /* приземление плиты: раскалывается на куски, пыль, гул; нижняя плита получает нагрузку (с тем, что уже лежало на упавшей) */
 function bLand(f,fl){const s=f.s,c=f.o.position.clone();BLD.g.remove(f.o);if(f.o.geometry!==BLD.P.rsec.m.geometry)f.o.geometry.dispose();
@@ -8637,10 +8668,14 @@ function pvoText(R,dist){const T=R.T,L=[];
   return L.join("\n");}
 /* ===================== сцена: модели комплексов ===================== */
 function pvoMat(c,o){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.82,metalness:.25},o||{}));}
+/* ящик со скруглёнными рёбрами и сглаженными нормалями на кромке: ловит блик, не выглядит «картонной коробкой» */
+function bevelBoxGeo(w,h,l,r){const m=Math.min(w,h,l);r=r!=null?r:Math.min(.14,m*.2);if(r<=.004||!THREE.BoxGeometry)return new THREE.BoxGeometry(w,h,l);const g=new THREE.BoxGeometry(w,h,l,4,4,4),p=g.attributes.position,n=g.attributes.normal,hx=w/2,hy=h/2,hz=l/2,cl=(v,a)=>Math.max(-a,Math.min(a,v));
+  for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),cx=cl(x,hx-r),cy=cl(y,hy-r),cz=cl(z,hz-r);let dx=x-cx,dy=y-cy,dz=z-cz;const L=Math.hypot(dx,dy,dz)||1;dx/=L;dy/=L;dz/=L;p.setXYZ(i,cx+dx*r,cy+dy*r,cz+dz*r);n.setXYZ(i,dx,dy,dz);}
+  return g;}
 function pvoBuild(k){const S0=PVO_SYS[k],G=new THREE.Group(),c=pvoMat(S0.col),dk=pvoMat(0x26282a),gl=pvoMat(0x1d2c36,{metalness:.6,roughness:.25}),tire=pvoMat(0x161616,{roughness:.95}),wt=pvoMat(0xe4e4dc),ms=pvoMat(0x9a9d93,{metalness:.4});
   const U={spin:[],tur:null,launch:new THREE.Vector3(0,3,0),gun:null};
   const add=(geo,m,x,y,z,rx,ry,rz,par)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,rz||0);o.castShadow=true;o.receiveShadow=true;(par||G).add(o);return o;};
-  const box=(w,h,l,m,x,y,z,par,rx,ry)=>add(new THREE.BoxGeometry(w,h,l),m,x,y,z,rx,ry,0,par);
+  const box=(w,h,l,m,x,y,z,par,rx,ry)=>add(bevelBoxGeo(w,h,l),m,x,y,z,rx,ry,0,par);
   const cyl=(r1,r2,l,m,x,y,z,rx,rz,par,seg)=>add(new THREE.CylinderGeometry(r1,r2,l,seg||14),m,x,y,z,rx,0,rz,par);
   const wheels=(n,L,W,r,z0,z1)=>{for(let i=0;i<n;i++){const z=z0+(z1-z0)*i/Math.max(1,n-1);[-1,1].forEach(s=>cyl(r,r,.42,tire,s*(W/2-.1),r,z,0,Math.PI/2));}};
   const truck=(L,W,ax)=>{wheels(ax,L,W,.6,L/2-1.4,-L/2+1.2);box(W*.92,.45,L,dk,0,1.0,0);box(W,1.7,2.3,c,0,1.95,L/2-1.15);box(W*.86,.55,.06,gl,0,2.35,L/2+.01);return 1.25;};
