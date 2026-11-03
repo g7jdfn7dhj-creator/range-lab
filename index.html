@@ -632,6 +632,8 @@ html,body,.hud,.hud *,.sheet,.sheet *{touch-action:manipulation}
 <script src="environment.js"></script>
 <script src="lighting.js"></script>
 <script src="reflections.js"></script>
+<script src="models-v3.js"></script>
+<script src="models-v3-tanks.js"></script>
 <script type="text/plain" id="mainJS">
 const $=id=>document.getElementById(id);
 /* цвета материалов задаются в sRGB, а освещение считается в линейном пространстве: без перевода
@@ -4550,6 +4552,7 @@ function vehUnbatch(m){const b=m.userData.bt,P=b.mesh.geometry.attributes.positi
   const r=new THREE.Mesh(b.geo,b.mat);r.castShadow=r.receiveShadow=b.cs!==false;r.position.copy(m.position);r.quaternion.copy(m.quaternion);r.scale.copy(m.scale);
   const ud=Object.assign({},m.userData);delete ud.bt;r.userData=ud;m.parent.add(r);m.parent.remove(m);return r;}
 function vehBuild(){
+  const NV=!!(window.MV2&&!window.NOMV2&&MV2.has(S.vt));try{window.MV2&&MV2.sync(S.vt,NV);}catch(e){}
   if(VEH&&VEH.deb)VEH.deb.forEach(o=>{o.m.parent&&o.m.parent.remove(o.m);});
   if(VEH){const V0=VEH;V0.g.parent&&V0.g.parent.remove(V0.g);if(V0.tg.parent)V0.tg.parent.remove(V0.tg);vehDispose(V0);}
   const v=VT[S.vt],g=new THREE.Group(),bg=new THREE.Group(),meshes=[],R0=v.run,T0=v.tur;g.add(bg);
@@ -4560,6 +4563,7 @@ function vehBuild(){
     glass=vehMat(0x223038,{roughness:.1,metalness:.9}),lamp=vehMat(0xd8d2b0,{roughness:.2,metalness:.3,emissive:0x222018}),trk=vehMat(0xffffff,{map:vehTrackTx(),roughness:.8,metalness:.5});
   const tag=(m,part)=>{m.userData.part=part;m.castShadow=m.receiveShadow=true;meshes.push(m);return m;};
   const sh0=m=>{m.castShadow=m.receiveShadow=true;return m;};
+  const C={v,S,g,bg,R0,T0,meshes,tag,sh0,mk:vehMat,rub,detM,dark,steel,glass,lamp,body,turM,trk,turMat:()=>vehMat(0xffffff,Object.assign({map:vehTex([.34,.34])},NM(.45,.45),RMx()))};
   const box=(w,h,d,mat,x,y,z,par,rx,ry,rz)=>{const m=sh0(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat));m.position.set(x,y,z);m.rotation.set(rx||0,ry||0,rz||0);(par||bg).add(m);return m;};
   const cyl=(rt,rb,h,s,mat,x,y,z,par,rx,ry,rz)=>{const m=sh0(new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,s),mat));m.position.set(x,y,z);m.rotation.set(rx||0,ry||0,rz||0);(par||bg).add(m);return m;};
   /* масса и просадка подвески */
@@ -4569,11 +4573,12 @@ function vehBuild(){
   const hg=new THREE.ExtrudeGeometry(sh,{depth:v.W-.06,bevelEnabled:true,bevelThickness:.03,bevelSize:.03,bevelSegments:1});hg.rotateY(-Math.PI/2);hg.translate((v.W-.06)/2,0,0);
   {const Pp=hg.attributes.position,col=new Float32Array(Pp.count*3);for(let i=0;i<Pp.count;i++){const y=Pp.getY(i);if(v.slope&&y>v.slope.y0)Pp.setX(i,Pp.getX(i)*(1-(y-v.slope.y0)/(v.top-v.slope.y0)*v.slope.k));
       const k=Math.min(1,.55+.45*Math.max(0,(y-.3)/(v.top-.3)));col[i*3]=k*1.02;col[i*3+1]=k;col[i*3+2]=k*.94;}hg.setAttribute("color",new THREE.BufferAttribute(col,3));hg.computeVertexNormals();}
-  const hull=tag(new THREE.Mesh(hg,body),"hull");bg.add(hull);
+  const hull=tag(new THREE.Mesh(hg,body),"hull");bg.add(hull);if(NV){hull.geometry=MV2.hull(S.vt,v);hg.dispose();}
   {const cv=document.createElement("canvas");cv.width=cv.height=128;const c2=cv.getContext("2d");if(c2&&c2.createRadialGradient){const gr2=c2.createRadialGradient(64,64,8,64,64,64);gr2.addColorStop(0,"rgba(0,0,0,.6)");gr2.addColorStop(.6,"rgba(0,0,0,.35)");gr2.addColorStop(1,"rgba(0,0,0,0)");c2.fillStyle=gr2;c2.fillRect(0,0,128,128);
     const bs=new THREE.Mesh(new THREE.PlaneGeometry(v.W+1.4,v.L+1.6),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-5}));bs.rotation.x=-Math.PI/2;bs.position.y=.05;g.add(bs);}}
   /* ---- ходовая часть ---- */
-  if(R0.kind==="track"){const r=R0.h*.46,ri=r-.07,za=R0.z0+r,zb=R0.z1-r;
+  if(NV&&R0.kind==="track"){MV2.run(S.vt,C);}
+  else if(R0.kind==="track"){const r=R0.h*.46,ri=r-.07,za=R0.z0+r,zb=R0.z1-r;
     [-1,1].forEach(sd=>{const px=sd*R0.x;
       const proxy=tag(new THREE.Mesh(new THREE.BoxGeometry(R0.w,R0.h*.9,R0.z1-R0.z0),rub),"run");proxy.position.set(px,R0.h*.47,(R0.z0+R0.z1)/2);proxy.visible=false;g.add(proxy);
       const s2=new THREE.Shape();s2.moveTo(za,0);s2.lineTo(zb,0);s2.absarc(zb,r,r,-Math.PI/2,Math.PI/2,false);s2.lineTo(za,2*r);s2.absarc(za,r,r,Math.PI/2,Math.PI*1.5,false);
@@ -4595,18 +4600,21 @@ function vehBuild(){
     /* колёсные ниши */
     [-1,1].forEach(sd=>R0.zs.forEach(z=>{box(.04,.05,1.25,detM,sd*(v.W/2+.0),R0.wr*2+.08,z,bg);}));}
   /* ---- башня ---- */
-  const tg=new THREE.Group();tg.position.set(...T0.p);bg.add(tg);
-  if(T0.poly){const ps=new THREE.Shape();T0.poly.forEach((p,i)=>i?ps.lineTo(p[0],-p[1]):ps.moveTo(p[0],-p[1]));ps.closePath();
+  const tg=new THREE.Group();tg.position.set(...T0.p);bg.add(tg);C.tg=tg;
+  if(NV){MV2.turret(S.vt,C);}
+  else if(T0.poly){const ps=new THREE.Shape();T0.poly.forEach((p,i)=>i?ps.lineTo(p[0],-p[1]):ps.moveTo(p[0],-p[1]));ps.closePath();
     const tgeo=new THREE.ExtrudeGeometry(ps,{depth:T0.h,bevelEnabled:true,bevelThickness:.025,bevelSize:.025,bevelSegments:1});tgeo.rotateX(-Math.PI/2);
     const Pp=tgeo.attributes.position;for(let i=0;i<Pp.count;i++){if(Pp.getY(i)>T0.h*.5){Pp.setX(i,Pp.getX(i)*T0.inset);Pp.setZ(i,Pp.getZ(i)*T0.inset);}}tgeo.computeVertexNormals();
     const tm=tag(new THREE.Mesh(tgeo,vehMat(0xffffff,Object.assign({map:vehTex([.34,.34])},NM(.45,.45),RMx()))),"tur");tg.add(tm);cyl(T0.rb*.75,T0.rb*.78,.1,40,dark,0,.03,0,tg);}
   else{const tm=tag(new THREE.Mesh(new THREE.CylinderGeometry(T0.rt,T0.rb,T0.h,40),turM),"tur");tm.position.y=T0.h/2;tg.add(tm);
   const dome=sh0(new THREE.Mesh(new THREE.SphereGeometry(T0.rt,32,8,0,6.283,0,.35),turM));dome.scale.y=.5;dome.position.y=T0.h-.02;tg.add(dome);
   cyl(T0.rb*1.04,T0.rb*1.06,.08,40,dark,0,.04,0,tg);}
-  const gp=new THREE.Group();gp.position.set(0,T0.gun.y,T0.gun.z0*.92);tg.add(gp);
-  const gr=T0.gun.r;tag(new THREE.Mesh(new THREE.BoxGeometry(gr*5.5,gr*4.2,gr*4),turM),"tur");gp.add(meshes[meshes.length-1]);
-  const brl=tag(new THREE.Mesh(new THREE.CylinderGeometry(gr*.8,gr*1.1,T0.gun.L,16),dark),"gun");brl.rotation.x=Math.PI/2;brl.position.z=T0.gun.L/2;gp.add(brl);
-  if(v.dec==="t72"){[.9,1.6,3.3,4.2].forEach(z=>cyl(gr*1.25,gr*1.25,.5,16,detM,0,0,z,gp,Math.PI/2));cyl(.15,.15,.7,16,detM,0,0,2.55,gp,Math.PI/2);cyl(gr*1.05,gr*1.05,.12,16,steel,0,0,T0.gun.L-.06,gp,Math.PI/2);
+  const gp=new THREE.Group();gp.position.set(0,T0.gun.y,T0.gun.z0*.92);tg.add(gp);C.gp=gp;
+  const gr=T0.gun.r;let brl;
+  if(NV){brl=MV2.gun(S.vt,C);}else{tag(new THREE.Mesh(new THREE.BoxGeometry(gr*5.5,gr*4.2,gr*4),turM),"tur");gp.add(meshes[meshes.length-1]);
+  brl=tag(new THREE.Mesh(new THREE.CylinderGeometry(gr*.8,gr*1.1,T0.gun.L,16),dark),"gun");brl.rotation.x=Math.PI/2;brl.position.z=T0.gun.L/2;gp.add(brl);}
+  if(NV){MV2.decor(S.vt,C);}
+  else if(v.dec==="t72"){[.9,1.6,3.3,4.2].forEach(z=>cyl(gr*1.25,gr*1.25,.5,16,detM,0,0,z,gp,Math.PI/2));cyl(.15,.15,.7,16,detM,0,0,2.55,gp,Math.PI/2);cyl(gr*1.05,gr*1.05,.12,16,steel,0,0,T0.gun.L-.06,gp,Math.PI/2);
     /* командирская башенка, прицелы, прожектор, гранатомёты, ящики, антенна */
     cyl(.34,.36,.2,20,turM,.42,T0.h+.08,-.25,tg);for(let i=0;i<6;i++){const a=i/6*6.283;box(.07,.05,.04,glass,.42+Math.sin(a)*.3,T0.h+.15,-.25+Math.cos(a)*.3,tg,0,a);}
     box(.3,.28,.36,turM,-.42,T0.h+.1,.25,tg);box(.22,.14,.02,glass,-.42,T0.h+.14,.44,tg);cyl(.14,.12,.16,16,dark,-.7,T0.h+.12,.15,tg,Math.PI/2);cyl(.1,.1,.02,16,lamp,-.7,T0.h+.12,.24,tg,Math.PI/2);
@@ -4686,7 +4694,7 @@ function vehBuild(){
   lg.visible=lt.visible=!$("vlbl")||$("vlbl").checked!==false;
   g.rotation.y=Math.PI+S.vhead*Math.PI/180;tg.rotation.y=S.vtur*Math.PI/180;g.position.set(S.mvx||0,0,D);g.visible=!!S.veh;
   farG.add(g);VEH={g,b:bg,tg,gp,meshes,hull,marks:[],fx:[],t:S.vt,sag,lg,lt,patches,phys:PH,hd:S.vhead,
-    brl,belts:{"-1":g.children.find(o=>o.userData.belt===-1),"1":g.children.find(o=>o.userData.belt===1)},rws:g.children.filter(o=>o.userData.rw),deb:[],wisps:[],
+    brl,beltAnim:g.userData.beltAnim||null,belts:{"-1":g.children.find(o=>o.userData.belt===-1),"1":g.children.find(o=>o.userData.belt===1)},rws:g.children.filter(o=>o.userData.rw),deb:[],wisps:[],
     mats:(()=>{const L=[],seen=new Set();g.traverse(o=>{const m=o.material;if(m&&m.isMeshStandardMaterial&&!seen.has(m)){seen.add(m);L.push({m,c:m.color.clone(),r:m.roughness});}});return L;})(),
     spin:g.children.filter(m=>m.isMesh&&Math.abs(m.rotation.z-Math.PI/2)<1e-3&&m.position.y<1.3&&((m.geometry.parameters||{}).radiusTop||.56)>.08).map(m=>({m,r:(m.geometry.parameters||{}).radiusTop||.56}))};vehMarksClear();
   try{VEH.merged=vehMerge(bg)+vehMerge(tg)+vehMerge(gp)+vehMerge(g);VEH.batched=vehBatch(bg,o=>!!o.userData.dz)+vehBatch(tg,o=>!!o.userData.dz)+vehBatch(g,o=>!!o.userData.rw);
@@ -5166,7 +5174,7 @@ function vehTick(dt,rdt){if(!VEH)return;const v=VT[S.vt];const DRV=S.drive&&S.dr
   /* ход: курс по направлению движения, вращение катков, пыль */
   const sp=S.vSpd||0,mv=sp>.3;const want=mv?(S.mvDir>0?-90:90):S.vhead;VEH.hd=VEH.hd==null?S.vhead:VEH.hd;
   if(!DRV){let d=want-VEH.hd;while(d>180)d-=360;while(d<-180)d+=360;VEH.hd+=Math.sign(d)*Math.min(Math.abs(d),rdt*(mv?25:90));VEH.g.rotation.y=Math.PI+VEH.hd*Math.PI/180;}
-  if(sp>.05){const sg=DRV?(S.drive.v>=0?-1:1):(S.mvDir>0?-1:1);(VEH.spin||[]).forEach(w=>w.m.rotateY(sp*dt/w.r*sg));if(VEHTX.trk)VEHTX.trk.offset.y+=sp*dt*.25;
+  if(sp>.05){const sg=DRV?(S.drive.v>=0?-1:1):(S.mvDir>0?-1:1);(VEH.spin||[]).forEach(w=>w.m.rotateY(sp*dt/w.r*sg));if(VEHTX.trk)VEHTX.trk.offset.y+=sp*dt*.25;if(VEH.beltAnim)VEH.beltAnim(sp*dt*sg);
     VEH.dust=(VEH.dust||0)-rdt;if(VEH.dust<=0&&!reduce){VEH.dust=.12;VEH.g.updateMatrixWorld(true);const p=VEH.g.localToWorld(new THREE.Vector3(R(-1,1),.2,-v.L/2));puff(p,false,.7+sp*.05,0xa89a74,new THREE.Vector3(R(-.5,.5),R(.2,.8),R(-.5,.5)),R(1.5,2.5));}}
   /* башня доворачивается на стрелка с учётом массы */
   if(VEH.turT!=null&&!VEH.toss&&VEH.tg.parent===VEH.b){let d=VEH.turT-VEH.tg.rotation.y;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;const st=rdt*2*Math.PI/(VEH.phys.trav*((VS&&(VS.drvL||VS.elecL))?5:1));
