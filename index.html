@@ -8081,11 +8081,9 @@ function bOutside(){const P=BLD.P,GM={},G2=B_GEO;
   bBox(GM,"acm",168,.14,90,208,8.6,112);bBox(GM,"frame",168,8.6,90,208,8.9,112);for(let x=170;x<206;x+=3.2)bBox(GM,"frame",x,1.2,89.94,x+2.2,7.6,90);
   bMeshes(GM,["steel","leaf","trunk","acm"]);
   /* машины: у тротуара и на стоянке */
-  const wgeo=new THREE.CylinderGeometry(.5,.5,1,14).rotateX(Math.PI/2);bPool("carB",G2.box,BLD.M.car,190,{cast:true});bPool("carC",G2.box,BLD.M.carG,190,{cast:true});bPool("carW",wgeo,BLD.M.tyre,760);
+  BLD.M.rim=new THREE.MeshStandardMaterial({color:0xc4c8cc,metalness:.85,roughness:.3});BLD.M.lamp=new THREE.MeshBasicMaterial({color:0xffffff});bPool("carB",carBodyGeo(),BLD.M.car,190,{cast:true});bPool("carC",carCabinGeo(),BLD.M.carG,190,{cast:true});bPool("carW",carTyreGeo(),BLD.M.tyre,760);bPool("carR",carRimGeo(),BLD.M.rim,760);bPool("carL",bevelBoxGeo(.1,.13,.32,.04),BLD.M.lamp,800,{recv:false});
   const cols=[[.92,.92,.9],[.92,.92,.9],[.7,.71,.72],[.08,.08,.09],[.38,.39,.4],[.12,.16,.3],[.55,.08,.06],[.74,.69,.58],[.2,.3,.22]];
-  const car=(x,z,ry)=>{const c=cols[(Math.random()*cols.length)|0],s=Math.sin(ry),k=Math.cos(ry),T=(lx,lz)=>[x+lx*k+lz*s,z-lx*s+lz*k],gy=bGroundY(x,z);
-    const bi=bPut(P.carB,bMR(x,gy+.68,z,4.5,.72,1.8,ry),_bc.setRGB(c[0],c[1],c[2]));const q=T(-.25,0),ci=bPut(P.carC,bMR(q[0],gy+1.33,q[1],2.3,.6,1.62,ry));
-    for(const[lx,lz]of[[1.42,.8],[1.42,-.8],[-1.4,.8],[-1.4,-.8]]){const w=T(lx,lz);bPut(P.carW,bMR(w[0],gy+.33,w[1],.66,.66,.22,ry));}BLD.cars.push({x,z,bi,ci});};
+  const car=(x,z,ry)=>{const c=cols[(Math.random()*cols.length)|0],gy=bGroundY(x,z),t=Math.random()<.5?0:Math.random()<.5?1:Math.random()<.7?2:3,{bi,ci}=carBuild(P,x,gy,z,ry,c,t);BLD.cars.push({x,z,bi,ci});};
   for(let x=-52;x<224;x+=6.3){if(x>74&&x<88)continue;if(Math.random()<.68)car(x+R(-.3,.3),-8.25,Math.random()<.5?0:Math.PI);}
   for(let x=1.3;x<156;x+=2.6){if(Math.random()<.62)car(x,76.6,Math.PI/2);if(Math.random()<.55)car(x,81.6,-Math.PI/2);if(Math.random()<.45)car(x,93.6,Math.PI/2);if(Math.random()<.4)car(x,98.6,-Math.PI/2);}
   for(let x=-50;x<224;x+=R(14,40))car(x,Math.random()<.5?-14:-19.3,Math.random()<.5?0:Math.PI);
@@ -8702,6 +8700,22 @@ function pvoText(R,dist){const T=R.T,L=[];
   return L.join("\n");}
 /* ===================== сцена: модели комплексов ===================== */
 function pvoMat(c,o){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.82,metalness:.25},o||{}));}
+/* ---------- v23: мягкие формы для людей и машин ---------- */
+function capsuleGeo(r,len,seg,r2){r2=r2==null?r:r2;const pts=[],n=6;for(let i=0;i<=n;i++){const a=-Math.PI/2+i/n*Math.PI/2;pts.push(new THREE.Vector2(Math.max(0,Math.cos(a)*r2),-len/2+Math.sin(a)*r2));}
+  for(let i=0;i<=n;i++){const a=i/n*Math.PI/2;pts.push(new THREE.Vector2(Math.max(0,Math.cos(a)*r),len/2+Math.sin(a)*r));}return new THREE.LatheGeometry(pts,seg||12);}
+/* кузов легковой машины: скруглённый корпус 4,5×0,72×1,8, капот и багажник ниже, бампера уже в плане */
+function carBodyGeo(){const g=bevelBoxGeo(4.5,.72,1.8,.24),p=g.attributes.position;for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);const ax=Math.abs(x)/2.25,e=Math.max(0,(ax-.55)/.45);if(y>0)y-=.17*e*e;z*=1-.1*ax*ax*ax;if(y<0&&Math.abs(x)>1.9)y+=.05;p.setXYZ(i,x,y,z);}g.computeVertexNormals();return g;}
+/* салон-остекление: скруглённая «кабина» с наклонными стойками */
+function carCabinGeo(){const g=bevelBoxGeo(2.3,.6,1.62,.2),p=g.attributes.position;for(let i=0;i<p.count;i++){let x=p.getX(i),y=p.getY(i),z=p.getZ(i);const t=Math.max(0,(y+.3)/.6);x*=1-.2*t*t*(1+.5*Math.sign(x)*-.0);z*=1-.14*t;p.setXYZ(i,x,y,z);}g.computeVertexNormals();return g;}
+function carTyreGeo(){const R=.33,w=.22,pts=[[.17,-w/2],[R-.07,-w/2],[R-.02,-w/2+.04],[R,-w/4],[R,w/4],[R-.02,w/2-.04],[R-.07,w/2],[.17,w/2]].map(q=>new THREE.Vector2(q[0],q[1]));return new THREE.LatheGeometry(pts,20).rotateX(Math.PI/2);}
+function carRimGeo(){const pts=[[0,.075],[.1,.085],[.19,.07],[.215,.04],[.215,-.04],[.19,-.07],[.1,-.085],[0,-.075]].map(q=>new THREE.Vector2(q[0],q[1]));return new THREE.LatheGeometry(pts,14).rotateX(Math.PI/2);}
+const CAR_T=[{L:1,H:1,W:1,cx:-.25,ch:1,cl:1,wk:1},{L:.9,H:1.02,W:.97,cx:-.4,ch:1.06,cl:1.12,wk:.96},{L:1.05,H:1.26,W:1.07,cx:-.12,ch:1.18,cl:1.08,wk:1.1},{L:1.1,H:1.55,W:1.1,cx:.15,ch:1.6,cl:1.08,wk:1.06}];
+/* одна машина: кузов, салон, 4 колеса с дисками, фары и габариты; возвращает индексы кузова и салона */
+function carBuild(P,x,gy,z,ry,col,t,wheels){const T=CAR_T[t],s=Math.sin(ry),k=Math.cos(ry),Lc=(lx,lz)=>[x+lx*k+lz*s,z-lx*s+lz*k],by=gy+.32+.36*T.H,top=gy+.32+.72*T.H;
+  const bi=bPut(P.carB,bMR(x,by,z,T.L,T.H,T.W,ry),_bc.setRGB(col[0],col[1],col[2]));const q=Lc(T.cx*T.L,0),ci=bPut(P.carC,bMR(q[0],top+.29*T.ch,q[1],T.cl,T.ch,T.W*.96,ry),_bc.setRGB(1,1,1));
+  if(wheels!==false)for(const[lx,lz]of[[1.42,.82],[1.42,-.82],[-1.4,.82],[-1.4,-.82]]){const w=Lc(lx*T.L,lz*T.W);bPut(P.carW,bMR(w[0],gy+.33*T.wk,w[1],T.wk,T.wk,1,ry));if(P.carR)bPut(P.carR,bMR(w[0],gy+.33*T.wk,w[1],T.wk,T.wk,1,ry));}
+  if(P.carL){const hy=gy+.32+.46*T.H;for(const lz of[-.64,.64]){const f=Lc(2.2*T.L,lz*T.W),r=Lc(-2.2*T.L,lz*T.W);bPut(P.carL,bMR(f[0],hy,f[1],1,1,1,ry),_bc.setRGB(1,.96,.82));bPut(P.carL,bMR(r[0],hy,r[1],1,.8,1,ry),_bc.setRGB(.85,.04,.03));}}
+  return{bi,ci};}
 /* ящик со скруглёнными рёбрами и сглаженными нормалями на кромке: ловит блик, не выглядит «картонной коробкой» */
 function bevelBoxGeo(w,h,l,r){const m=Math.min(w,h,l);r=r!=null?r:Math.min(.14,m*.2);if(r<=.004||!THREE.BoxGeometry)return new THREE.BoxGeometry(w,h,l);const g=new THREE.BoxGeometry(w,h,l,4,4,4),p=g.attributes.position,n=g.attributes.normal,hx=w/2,hy=h/2,hz=l/2,cl=(v,a)=>Math.max(-a,Math.min(a,v));
   for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),cx=cl(x,hx-r),cy=cl(y,hy-r),cz=cl(z,hz-r);let dx=x-cx,dy=y-cy,dz=z-cz;const L=Math.hypot(dx,dy,dz)||1;dx/=L;dy/=L;dz/=L;p.setXYZ(i,cx+dx*r,cy+dy*r,cz+dz*r);n.setXYZ(i,dx,dy,dz);}
@@ -8745,6 +8759,9 @@ function pvoBuild(k){const S0=PVO_SYS[k],G=new THREE.Group(),c=pvoMat(S0.col),dk
   else{/* ПЗРК: стрелок и второй номер */const sk=pvoMat(0x9a7b62),un=pvoMat(S0.col);
     [[0,0],[1.2,-.6]].forEach(([x,z],i)=>{box(.18,.85,.2,un,x-.12,.43,z);box(.18,.85,.2,un,x+.12,.43,z);box(.5,.7,.3,un,x,1.2,z);add(new THREE.SphereGeometry(.13,10,8),sk,x,1.68,z);add(new THREE.SphereGeometry(.15,10,6,0,Math.PI*2,0,Math.PI/2),un,x,1.72,z);
       if(!i){cyl(.045,.045,1.6,pvoMat(0x3d4a35),x+.18,1.55,z+.2,Math.PI/2-.35,0,G,10);}else{box(.3,.25,1.0,pvoMat(0x3d4a35),x,.15,z+.6);}});U.launch.set(.18,1.85,1.0);}
+  try{/* мягкая контактная тень под техникой: корпус «садится» на землю */
+    if(!PVO.aoT&&typeof gfxAOTex==="function")PVO.aoT=gfxAOTex();if(PVO.aoT){const bb=new THREE.Box3().setFromObject(G),sx=bb.max.x-bb.min.x,sz=bb.max.z-bb.min.z,cx=(bb.max.x+bb.min.x)/2,cz=(bb.max.z+bb.min.z)/2;
+      const sh=new THREE.Mesh(new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2),new THREE.MeshBasicMaterial({map:PVO.aoT,transparent:true,depthWrite:false,opacity:.85,fog:true}));sh.position.set(cx,.05,cz);sh.scale.set(sx*1.45,1,sz*1.35);sh.renderOrder=1;G.add(sh);}}catch(e){}
   G.userData.pvo=U;G.traverse(o=>{if(o.isMesh)o.raycast=()=>{};});
   /* корпус-мишень: невидимый параллелепипед по габаритам комплекса на отдельном слое (7) — в него целится стрелок и попадает снаряд */
   {const bb=new THREE.Box3().setFromObject(G),sz=bb.getSize(new THREE.Vector3()),ct=bb.getCenter(new THREE.Vector3()),hb=new THREE.Mesh(new THREE.BoxGeometry(Math.max(.4,sz.x),Math.max(.4,sz.y),Math.max(.4,sz.z)),new THREE.MeshBasicMaterial({visible:false}));
@@ -8867,9 +8884,12 @@ function pvoKill(u,p,why,hp0){if(u.dead)return;u.dead=true;u.hp=0;PVO.lost=(PVO.
   try{pvoLabel(u);}catch(e){}
   pvoMsg(`✖ ${S0.n} уничтожен (${why}): ${pvoVul(u).nm}, прочность ${Math.round((hp0||1)*100)} % → 0; ${u.msl>0?`боекомплект (${u.msl} ракет) детонирует, `:""}комплекс горит. Уничтожено ПВО: ${PVO.lost} из ${PVO.u.length}`);
   pvoList();}
-function pvoDmgTick(dt){PVO.u.forEach(u=>{if(u.dead&&u.burn>0)u.burn-=dt;if(!(u.dead?u.burn>0:u.hp<.5))return;u.ft=(u.ft||0)-dt;if(u.ft>0)return;u.ft=u.dead?.1:.25;const c=pvoCenter(u);c.y+=u.dead?1.2:2.2;
-    puff(c.clone().add(new THREE.Vector3(R(-1.5,1.5),R(0,1),R(-1.5,1.5))),true,u.dead?2.6:1.4,0x1d1a17,new THREE.Vector3(R(-.3,.3),R(1.5,3),R(-.3,.3)),R(5,9));
-    if(u.dead&&Math.random()<.5)puff(c.clone().add(new THREE.Vector3(R(-1.2,1.2),R(-.5,.5),R(-1.2,1.2))),false,1.5,0xff8a30,new THREE.Vector3(0,.4,0),R(.3,.6));});}
+function pvoDmgTick(dt){PVO.u.forEach(u=>{if(u.dead&&u.burn>0)u.burn-=dt;if(!(u.dead?u.burn>0:u.hp<.5))return;u.ft=(u.ft||0)-dt;if(u.ft>0)return;u.ft=u.dead?.14:.3;const c=pvoCenter(u);c.y+=u.dead?1.2:2.2;
+    /* столб дыма: тёмное ядро, рыхлая шапка, лёгкий снос ветром; у горящего остова — языки пламени и жар у основания */
+    const k=u.dead?1:.55;puff(c.clone().add(new THREE.Vector3(R(-1.6,1.6),R(0,1),R(-1.6,1.6))),true,(u.dead?3.2:1.7)*R(.8,1.15),0x1d1a17,new THREE.Vector3(R(-.3,.3),R(1.8,3.4)*k+.4,R(-.3,.3)),R(8,14));
+    if(Math.random()<.5)puff(c.clone().add(new THREE.Vector3(R(-2,2),R(1,3),R(-2,2))),true,(u.dead?2.2:1.2),0x3a3632,new THREE.Vector3(R(-.4,.4),R(1,2),R(-.4,.4)),R(7,11));
+    if(u.dead){u.fx=(u.fx||0)-1;if(u.fx<=0){u.fx=3;try{fxa("exp",c.clone().add(new THREE.Vector3(R(-1.2,1.2),-.4,R(-1.2,1.2))),R(2.4,4),R(.7,1.1),{glow:1.7,op:.85,add:1,rise:1.2});}catch(e){}}
+      if(Math.random()<.5)puff(c.clone().add(new THREE.Vector3(R(-1.2,1.2),R(-.5,.5),R(-1.2,1.2))),false,1.6,0xff8a30,new THREE.Vector3(0,.5,0),R(.4,.8));}});}
 /* попадание снаряда в корпус-мишень выбранного комплекса */
 function pvoArrive(sh){const ph=sh.ph,u=ph.u;if(!u||u.dead)return;const g=G(),a=sh.a,V=pvoVul(u),p=ph.pt,S0=PVO_SYS[u.k],cal=g.cal||30,pen=a.pen||0;S.st.hit++;PVO.hits=(PVO.hits||0)+1;
   const ar=g.n+" · "+(a.n||a.key||""),head=`Попадание по ${S0.n} (${V.nm}${V.arm?`, броня ≈${V.arm} мм`:""}), дальность ≈${Math.round(ph.L)} м: ${ar}`;let dmg=0,why="прямое попадание";
@@ -9195,7 +9215,7 @@ function anxBuild(){const A=ANX,P=BLD.P,M=BLD.M,box=B_GEO&&B_GEO.box||new THREE.
   const GM={};bBox(GM,"pave",A.x0-4,-.4,A.z1,A.x1+4,.12,-31);bBox(GM,"pave",A.cx0,-.4,A.cz,A.cx1,.12,A.z1);for(let x=A.x0-3;x<A.x1+3;x+=3.2)bAdd(GM,"steel",B_GEO.cyl8,x,.55,-31.4,{s:[.12,1.0,.12]});
   bBox(GM,"lawn",196,-.4,A.z0-7,208,.16,A.z0-1);bMeshes(GM,["steel"]);
   const cars=[[189,-40,0],[192,-40,0],[195,-40,0],[199,-44,Math.PI/2],[170,-33.6,Math.PI/2],[207,-33.6,Math.PI/2],[212,-33.6,-Math.PI/2]];
-  try{cars.forEach(([x,z,ry])=>{const c=[[.75,.74,.7],[.15,.15,.16],[.62,.6,.55],[.1,.1,.12]][(Math.random()*4)|0];bPut(P.carB,bMR(x,.8,z,4.5,.72,1.8,ry+Math.PI/2),_bc.setRGB(c[0],c[1],c[2]));bPut(P.carC,bMR(x,1.45,z,2.3,.6,1.62,ry+Math.PI/2),_bc.setRGB(c[0],c[1],c[2]));});}catch(e){}
+  try{cars.forEach(([x,z,ry])=>{const c=[[.75,.74,.7],[.15,.15,.16],[.62,.6,.55],[.1,.1,.12]][(Math.random()*4)|0];carBuild(P,x,.12,z,ry+Math.PI/2,c,Math.random()<.6?0:2);});}catch(e){}
   try{anxBillboard();}catch(e){console.error("billboard",e);}try{pplBuild();}catch(e){console.error("ppl",e);}
   BLD.colsAll=BLD.E.filter(e=>e.k==="c");}
 /* билборд 3 × 6 м у дороги рядом с домом: двусторонний, на одной опоре; фото вписано целиком, поля — его же размытая копия.
@@ -9257,24 +9277,28 @@ function pplFlagTex(){if(PPL.ft)return PPL.ft;const c=document.createElement("ca
 function pplFlag(G){const pole=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,2.6,8),PPL.mG);pole.position.set(.32,2.0,.25);pole.castShadow=true;pole.raycast=()=>{};G.add(pole);
   const geo=new THREE.PlaneGeometry(1.2,.75,12,1);geo.translate(.6,0,0);const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:pplFlagTex(),side:THREE.DoubleSide,roughness:.9}));
   m.position.set(.34,2.9,.25);m.castShadow=true;m.raycast=()=>{};G.add(m);G.userData.flag=m;G.userData.fx0=Float32Array.from(geo.attributes.position.array);}
-function pplMan(){const G=new THREE.Group(),sm=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.9},o||{}));
-  const blk=PPL.mB||(PPL.mB=sm(0x1c1d1f)),ol=PPL.mO||(PPL.mO=sm(0x3b3f2e)),red=PPL.mR||(PPL.mR=sm(0xc4161c,{roughness:.7})),gun=PPL.mG||(PPL.mG=sm(0x161616,{metalness:.5,roughness:.5})),
+function pplMan(v){v=v||0;const G=new THREE.Group(),sm=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.9},o||{})),MC=PPL.mc||(PPL.mc={}),cm=(c,o)=>MC[c]||(MC[c]=sm(c,o));
+  const JK=[0x1c1d1f,0x2c3a2a,0x4a4a3c,0x232a38,0x3a2f28][v%5],PT=[0x3b3f2e,0x2e3330,0x4b4636,0x262b34][(v>>1)%4],SK=[0xd9a98a,0xc89572,0xe2b99b,0x9a6b4d][(v*3)%4];
+  const blk=cm(JK),ol=cm(0x3b3f2e),pants=cm(PT),skin=cm(SK,{roughness:.75}),boot=cm(0x15120f,{roughness:.6}),red=PPL.mR||(PPL.mR=sm(0xc4161c,{roughness:.7})),gun=PPL.mG||(PPL.mG=sm(0x161616,{metalness:.5,roughness:.5})),
     em=PPL.mE||(PPL.mE=new THREE.MeshStandardMaterial({map:pplTex(),transparent:true,alphaTest:.3,roughness:.8}));
+  const GE=PPL.ge||(PPL.ge={leg:capsuleGeo(.082,.62,10,.062),boot:bevelBoxGeo(.17,.1,.3,.04),pel:new THREE.SphereGeometry(.16,14,10),tor:capsuleGeo(.16,.3,14,.14),vest:bevelBoxGeo(.47,.3,.3,.08),neck:new THREE.CylinderGeometry(.05,.06,.1,10),head:new THREE.SphereGeometry(.115,16,12),helm:new THREE.SphereGeometry(.135,16,10,0,Math.PI*2,0,Math.PI/2),arm:capsuleGeo(.052,.46,10,.042),hand:new THREE.SphereGeometry(.05,10,8),band:bevelBoxGeo(.14,.1,.15,.03),rifle:bevelBoxGeo(.06,.1,.85,.02),mag:bevelBoxGeo(.05,.18,.06,.015),sh:new THREE.SphereGeometry(.07,10,8)});
   const add=(geo,m,x,y,z,par)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=true;o.raycast=()=>{};(par||G).add(o);return o;};
-  const legL=new THREE.Group(),legR=new THREE.Group();legL.position.set(-.11,.9,0);legR.position.set(.11,.9,0);G.add(legL,legR);
-  add(new THREE.BoxGeometry(.17,.9,.2),ol,0,-.45,0,legL);add(new THREE.BoxGeometry(.17,.9,.2),ol,0,-.45,0,legR);add(new THREE.BoxGeometry(.18,.1,.3),blk,0,-.88,.05,legL);add(new THREE.BoxGeometry(.18,.1,.3),blk,0,-.88,.05,legR);
-  add(new THREE.BoxGeometry(.46,.62,.26),blk,0,1.22,0);add(new THREE.BoxGeometry(.48,.3,.3),ol,0,1.1,0);/* разгрузка */
-  add(new THREE.SphereGeometry(.13,12,10),blk,0,1.68,0);add(new THREE.SphereGeometry(.145,12,8,0,Math.PI*2,0,Math.PI/2),ol,0,1.72,0);
-  const armL=add(new THREE.BoxGeometry(.13,.6,.14),blk,-.3,1.25,.12),armR=add(new THREE.BoxGeometry(.13,.6,.14),blk,.3,1.25,.12);armL.rotation.x=-.9;armR.rotation.x=-.9;
-  add(new THREE.BoxGeometry(.14,.1,.15),red,.3,1.42,.05);/* красная повязка */
-  const r=add(new THREE.BoxGeometry(.06,.1,.85),gun,.05,1.3,.42);r.rotation.x=-.12;add(new THREE.BoxGeometry(.05,.18,.06),gun,.05,1.2,.32);
-  const e1=add(new THREE.PlaneGeometry(.22,.22),em,0,1.32,.155);const e2=add(new THREE.PlaneGeometry(.26,.26),em,0,1.3,-.155);e2.rotation.y=Math.PI;
+  const legL=new THREE.Group(),legR=new THREE.Group();legL.position.set(-.1,.9,0);legR.position.set(.1,.9,0);G.add(legL,legR);
+  add(GE.leg,pants,0,-.47,0,legL);add(GE.leg,pants,0,-.47,0,legR);add(GE.boot,boot,0,-.86,.05,legL);add(GE.boot,boot,0,-.86,.05,legR);
+  const pel=add(GE.pel,pants,0,.95,0);pel.scale.set(1.15,.75,.85);
+  const tor=add(GE.tor,blk,0,1.2,0);tor.scale.set(1.3,1,.78);add(GE.vest,ol,0,1.14,0);
+  add(GE.neck,skin,0,1.5,0);const hd=add(GE.head,skin,0,1.64,0);hd.scale.set(.95,1.15,1);const hm=add(GE.helm,ol,0,1.68,0);hm.scale.set(1,.95,1.05);
+  add(GE.sh,blk,-.27,1.38,0);add(GE.sh,blk,.27,1.38,0);
+  const armL=add(GE.arm,blk,-.29,1.2,.15),armR=add(GE.arm,blk,.29,1.2,.15);armL.rotation.x=-.9;armR.rotation.x=-.9;add(GE.hand,skin,0,-.29,0,armL);add(GE.hand,skin,0,-.29,0,armR);
+  add(GE.band,red,.29,1.4,.04);
+  const r=add(GE.rifle,gun,.05,1.3,.42);r.rotation.x=-.12;add(GE.mag,gun,.05,1.2,.32);
+  const e1=add(new THREE.PlaneGeometry(.22,.22),em,0,1.32,.14);const e2=add(new THREE.PlaneGeometry(.26,.26),em,0,1.3,-.14);e2.rotation.y=Math.PI;
   G.userData={legL,legR};return G;}
 function pplBuild(){PPL.L=[];if(!BLD)return;const grp=new THREE.Group();grp.userData.decor=true;BLD.g.add(grp);BLD.ppl=grp;
   /* двор дома, улица у фасада, крыша северного крыла, у билборда */
   const spots=[[190,0,-45,1],[192,0,-48,0],[195,0,-44,1],[198,0,-47,0],[200,0,-42,1],[188,0,-39,0],[172,0,-33.5,1],[178,0,-33.8,0],[210,0,-33.5,1],[158,0,-31.5,0],[162,0,-31.8,0],
     [172,10.9,-40,0],[180,10.9,-37.5,0],[183,10.9,-58,0],[205,0,-81,1],[194,0,-82,0]];
-  spots.forEach(([x,y,z,pat],i)=>{const m=pplMan();if(!pat&&(i%3===0||i===13))pplFlag(m);m.position.set(x,y,z);m.rotation.y=Math.atan2(81-x,-120-z)+R(-.6,.6);grp.add(m);
+  spots.forEach(([x,y,z,pat],i)=>{const m=pplMan(i);if(!pat&&(i%3===0||i===13))pplFlag(m);m.position.set(x,y,z);m.rotation.y=Math.atan2(81-x,-120-z)+R(-.6,.6);grp.add(m);
     PPL.L.push({m,x,z,y,y0:y,pat:!!pat,ph:Math.random()*6,a:R(0,6.28),st:0,fall:0,ax:Math.random()<.5?1:-1});});}
 function pplTick(dt){if(!PPL.L.length)return;const t=performance.now()/1000;dt=Math.min(dt,.05);
   PPL.L.forEach(P=>{const m=P.m,U=m.userData;
