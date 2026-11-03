@@ -57,27 +57,31 @@
     /* ---------- 3. Растительность: инстансы billboard-ов (дерево/куст/трава) ---------- */
     /* спрайт-растительность: сначала новый WebP (A = {f,w,h}), при ошибке — прежний PNG (B); если нет обоих — тип просто не рисуется.
        Меш создаётся после загрузки картинки, поэтому «чёрных» плоскостей не бывает. */
-    function cross(A, B, count, minD, maxD) {
-      const build = (im, w, hgt) => { const t = new THREE.Texture(im); t.needsUpdate = true; if (THREE.sRGBEncoding !== undefined) t.encoding = THREE.sRGBEncoding; t.anisotropy = 8;
+    /* высота земли и запретные зоны задаёт игра (o.groundY / o.exclude): иначе спрайты «висят» над её рельефом и стоят на дороге */
+    const gY = (x, z) => (typeof o.groundY === "function" ? o.groundY(x, z) : terrainH(x, z)), banned = (k, x, z) => typeof o.exclude === "function" && o.exclude(k, x, z);
+    const vegMeshes = [];
+    function cross(kind, A, B, count, minD, maxD) {
+      /* pad — прозрачная кайма внизу картинки: геометрию опускаем на неё, чтобы ствол/куст касался земли */
+      const build = (im, w, hgt, pad) => { const t = new THREE.Texture(im); t.needsUpdate = true; if (THREE.sRGBEncoding !== undefined) t.encoding = THREE.sRGBEncoding; t.anisotropy = 8;
         const m = new THREE.MeshStandardMaterial({ map: t, alphaTest: .45, transparent: false, side: THREE.DoubleSide, roughness: 1 });
-        const g = new THREE.PlaneGeometry(w, hgt); g.translate(0, hgt / 2, 0);
+        const g = new THREE.PlaneGeometry(w, hgt); g.translate(0, hgt / 2 - pad * hgt, 0);
         const g2 = g.clone(); g2.rotateY(Math.PI / 2); // две скрещенные плоскости — объём с любого ракурса
         const merged = mergeTwo(g, g2);
-        const im2 = noRay(new THREE.InstancedMesh(merged, m, count)); im2.castShadow = true; const M = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
-        let n = 0, guard = 0; while (n < count && guard++ < count * 20) { const a = Math.random() * 6.283, r = rnd(minD, maxD), x = Math.cos(a) * r, z = 40 + Math.sin(a) * r;
-          if (inPlay(x, z)) continue; const sc = rnd(.7, 1.35); p.set(x, terrainH(x, z) - .1, z); q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.random() * 6.28); s.set(sc, sc * rnd(.85, 1.15), sc);
+        const im2 = noRay(new THREE.InstancedMesh(merged, m, count)); im2.castShadow = true; im2.userData.veg = kind; const M = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3();
+        let n = 0, guard = 0; while (n < count && guard++ < count * 40) { const a = Math.random() * 6.283, r = rnd(minD, maxD), x = Math.cos(a) * r, z = 40 + Math.sin(a) * r;
+          if (inPlay(x, z) || banned(kind, x, z)) continue; const sc = rnd(.7, 1.35); p.set(x, gY(x, z) - .03, z); q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.random() * 6.28); s.set(sc, sc * rnd(.85, 1.15), sc);
           M.compose(p, q, s); im2.setMatrixAt(n++, M); }
-        im2.count = n; root.add(im2); };
+        im2.count = n; root.add(im2); vegMeshes.push(im2); if (typeof o.onVeg === "function") { try { o.onVeg(im2); } catch (e) {} } };
       const load = (d, ok, fail) => { const im = new Image(); im.onload = () => ok(im); im.onerror = fail; im.src = base + d.f; };
-      load(A, im => build(im, A.w, A.h), () => { if (B) load(B, im => build(im, B.w, B.h), () => {}); }); }
+      load(A, im => build(im, A.w, A.h, A.pad || 0), () => { if (B) load(B, im => build(im, B.w, B.h, 0), () => {}); }); }
     function mergeTwo(a, b) { const g = new THREE.BufferGeometry(); ["position", "normal", "uv"].forEach(k => { const A = a.attributes[k].array, B = b.attributes[k].array, out = new Float32Array(A.length + B.length); out.set(A); out.set(B, A.length); g.setAttribute(k, new THREE.BufferAttribute(out, a.attributes[k].itemSize)); });
       const ia = a.index.array, ib = b.index.array, off = a.attributes.position.count, idx = new Uint16Array(ia.length + ib.length); idx.set(ia); for (let i = 0; i < ib.length; i++) idx[ia.length + i] = ib[i] + off; g.setIndex(new THREE.BufferAttribute(idx, 1)); return g; }
     function terrainH(x, z) { const dx = Math.max(PA.minX - x, 0, x - PA.maxX), dz = Math.max(PA.minZ - z, 0, z - PA.maxZ), d = Math.hypot(dx, dz), k = Math.min(1, Math.max(0, (d - 25) / 120)); return h(x, z) * k * k - .08; }
     // деревья: берёза и сосна вместе дают те же 220 инстансов, что раньше было у одной берёзы (≈ 68% / 32%)
-    cross({ f: "sprites/vegetation/tree_birch_a.webp", w: 5.76, h: 11.4 }, { f: "sprites/vegetation/tree_birch.png", w: 7, h: 10 }, 150, 40, R * .8);
-    cross({ f: "sprites/vegetation/tree_pine_a.webp", w: 7.7, h: 13.4 }, null, 70, 40, R * .8);
-    cross({ f: "sprites/vegetation/bush_a.webp", w: 2.5, h: 2.32 }, { f: "sprites/vegetation/bush.png", w: 3, h: 2.2 }, 300, 20, R * .6);
-    cross({ f: "sprites/vegetation/grass_tuft_a.webp", w: 1.1, h: .82 }, { f: "sprites/vegetation/grass_tuft.png", w: 1.1, h: .9 }, 1500, 12, 220);
+    cross("tree", { f: "sprites/vegetation/tree_birch_a.webp", w: 5.76, h: 11.4, pad: .027 }, { f: "sprites/vegetation/tree_birch.png", w: 7, h: 10 }, 150, 40, R * .8);
+    cross("tree", { f: "sprites/vegetation/tree_pine_a.webp", w: 7.7, h: 13.4, pad: .027 }, null, 70, 40, R * .8);
+    cross("bush", { f: "sprites/vegetation/bush_a.webp", w: 2.5, h: 2.32, pad: .029 }, { f: "sprites/vegetation/bush.png", w: 3, h: 2.2 }, 300, 20, R * .6);
+    cross("tuft", { f: "sprites/vegetation/grass_tuft_a.webp", w: 1.1, h: .82, pad: .037 }, { f: "sprites/vegetation/grass_tuft.png", w: 1.1, h: .9 }, 1500, 12, 220);
 
     /* ---------- 4. Постройки: коробки с фасадами (кирпич/штукатурка/руины), без коллизий ---------- */
     const facades = ["brick", "plaster", "ruin"].map(k => k === "plaster"
@@ -125,7 +129,7 @@
         pg.attributes.position.needsUpdate = true; } }
     function dispose() { scene.remove(root); root.traverse(x => { if (x.geometry) x.geometry.dispose(); if (x.material) [].concat(x.material).forEach(m => m.dispose()); }); }
     setTimeOfDay(.5);
-    return { root, setSky, setTimeOfDay, setWeather, update, dispose, terrainHeight: terrainH };
+    return { root, veg: vegMeshes, setSky, setTimeOfDay, setWeather, update, dispose, terrainHeight: terrainH };
   }
   global.createEnvironment = createEnvironment;
 })(window);

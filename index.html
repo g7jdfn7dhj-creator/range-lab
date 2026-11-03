@@ -3205,7 +3205,11 @@ $("night").onclick=()=>{S.night=!S.night;$("night").setAttribute("aria-pressed",
   if(scene.fog&&scene.fog.color)scene.fog.color.setHex(S.night?0x0b0f18:0x9fb3b8);};
 ["dist","yaw","wind"].forEach(id=>$(id).oninput=()=>{S.balCache=null;updBal();if(id==="yaw")updPlate();if(id==="dist")applyRange();});
 let ENV=null,LIT=null,RFL=null;S.rfl=false;
-try{if(typeof createEnvironment==="function"){ENV=createEnvironment({scene,renderer,camera,basePath:"./",images:AI()||{},playArea:{minX:-12,maxX:12,minZ:-16,maxZ:480}});
+try{if(typeof createEnvironment==="function"){ENV=createEnvironment({scene,renderer,camera,basePath:"./",images:AI()||{},playArea:{minX:-12,maxX:12,minZ:-16,maxZ:480},
+    /* спрайты окружения ставим на ТУ ЖЕ землю, что и мир игры (wH), и не на дорогу, цель, огневую полосу, грунт */
+    groundY:(x,z)=>{try{return(Math.abs(x)<40&&z>-60&&z<560)?0:wH(x,z);}catch(e){return 0;}},
+    exclude:(k,x,z)=>{try{const ax=Math.abs(x);if(ax<(k==="tree"?18:6)&&z>-30&&z<560)return true;if(k!=="tree"&&wDirt(x,z)>.3)return true;return false;}catch(e){return false;}},
+    onVeg:()=>{try{if(S.bld&&typeof bVeg==="function")bVeg(true);}catch(e){}}});
   (S.oldDecor||[]).forEach(o=>o.visible=false);(S.clouds||[]).forEach(c=>c.visible=false);
   ground.scale.set(80/800,620/800,1);ground.position.z=250;if(TX.ground&&TX.ground.repeat)TX.ground.repeat.set(12,93);if(TXN.ground&&TXN.ground.repeat)TXN.ground.repeat.set(12,93);if(TXRG.ground&&TXRG.ground.repeat)TXRG.ground.repeat.set(12,93);}}catch(e){ENV=null;console.warn("env",e);}
 /* звёздное небо: точки на дальней сфере над горизонтом, видны только ночью */
@@ -7866,6 +7870,7 @@ function bWallFall(e){const n=e.k==="w"?(e.side==="S"?[0,0,-1]:e.side==="N"?[0,0
 /* ---------- кадр: обломки, падающие плиты, лифты, фонтан, дым ---------- */
 let _bE=null,_bQ2=null;
 function bldTick(dt){if(!BLD||!BLD.g.visible)return;try{anxTick();pplTick(dt);}catch(e){}dt=Math.min(.05,dt);BLD.t+=dt;
+  BLD.supT=(BLD.supT||0)+dt;if(BLD.supT>.5){BLD.supT=0;try{bSupportCheck();}catch(e){}}
   for(let i=BLD.deb.length-1;i>=0;i--){const o=BLD.deb[i];if(o.rest)continue;o.t+=dt;o.v[1]-=9.8*dt;const fy0=bFloorY(o.p[0],o.p[2],o.p[1]+.05);for(let a=0;a<3;a++){o.p[a]+=o.v[a]*dt;o.r[a]+=o.w[a]*dt;}
     const fl=Math.max(fy0,bFloorY(o.p[0],o.p[2],o.p[1]+o.s))+o.s*(o.flat?.08:.4);
     if(o.p[1]<fl){o.p[1]=fl;if(Math.abs(o.v[1])>3&&!o.dust&&o.s>.12){o.dust=1;bDust(o.p,[.6,.55,.5],.5);}o.v[0]*=.35;o.v[2]*=.35;o.v[1]=Math.abs(o.v[1])*.22;o.w=o.w.map(x=>x*.5);
@@ -7879,8 +7884,13 @@ function bldTick(dt){if(!BLD||!BLD.g.visible)return;try{anxTick();pplTick(dt);}c
   if(BLD.anim.some(a=>a.kind==="fire"&&a.t>=a.d))BLD.anim=BLD.anim.filter(a=>a.kind!=="fire"||a.t<a.d);
   const ng=S.night?1:0;if(BLD.ng!==ng){BLD.ng=ng;BLD.M.glass.emissive.setHex(ng?0x4a3418:0);BLD.M.gpart.emissive.setHex(ng?0x2a2418:0);}
   bFlush();}
+/* опора лежащих обломков: если плита/крыша под кучей рухнула — обломки «просыпаются» и падают вниз (иначе висят в воздухе) */
+function bSupportCheck(){if(!BLD)return;const R2=BLD.P.rub;
+  (BLD.rubR||[]).forEach((r,ii)=>{if(!r)return;const fl=bFloorY(r.p[0],r.p[2],r.p[1]+.3)+r.s*.4;if(r.p[1]>fl+.4){BLD.rubR[ii]=null;bHide(R2,ii,false);
+    bDeb(r.p,[R(-.4,.4),0,R(-.4,.4)],r.s,r.col,"rc");}});
+  BLD.deb.forEach(o=>{if(o.rest&&o.P==="shard"){const fl=bFloorY(o.p[0],o.p[2],o.p[1]+.3)+o.s*.08;if(o.p[1]>fl+.4){o.rest=false;o.t=0;o.v=[0,0,0];}}});}
 function bRest(o,i){BLD.deb.splice(i,1);if(o.P==="shard"){o.rest=true;BLD.deb.push(o);return;}const R2=BLD.P.rub;let ii;if(R2.n>=R2.cap&&!R2.free.length){R2.rr=((R2.rr||0)+1)%R2.cap;ii=R2.rr;}else ii=bPut(R2,BZ);
-  _bE.set(o.r[0],o.r[1],o.r[2]);_bQ2.setFromEuler(_bE);_bm.compose(_bv.set(o.p[0],o.p[1]-o.s*.2,o.p[2]),_bQ2,_bs.set(o.s,o.s*.6,o.s*.9));R2.m.setMatrixAt(ii,_bm);R2.dirty=1;
+  _bE.set(o.r[0],o.r[1],o.r[2]);_bQ2.setFromEuler(_bE);_bm.compose(_bv.set(o.p[0],o.p[1]-o.s*.2,o.p[2]),_bQ2,_bs.set(o.s,o.s*.6,o.s*.9));R2.m.setMatrixAt(ii,_bm);R2.dirty=1;(BLD.rubR=BLD.rubR||[])[ii]={p:o.p.slice(),s:o.s,col:o.col};
   _bc.setRGB(o.col[0],o.col[1],o.col[2]);bTint(R2,ii,_bc);bHide(BLD.P.deb,o.ii,true);}
 /* приземление плиты: раскалывается на куски, пыль, гул; нижняя плита получает нагрузку (с тем, что уже лежало на упавшей) */
 function bLand(f,fl){const s=f.s,c=f.o.position.clone();BLD.g.remove(f.o);if(f.o.geometry!==BLD.P.rsec.m.geometry)f.o.geometry.dispose();
@@ -7986,8 +7996,13 @@ function bTerrain(on){const W=typeof WORLD!=="undefined"?WORLD:null;if(!W||!W.te
   p.needsUpdate=true;g.computeVertexNormals();g.computeBoundingSphere();}
 function bVeg(on){const W=typeof WORLD!=="undefined"?WORLD:null;if(!W)return;
   if(BLD&&BLD.veg){BLD.veg.forEach(([m,i,a])=>{m.instanceMatrix.array.set(a,i*16);m.instanceMatrix.needsUpdate=true;});BLD.veg=null;}
-  if(!on||!BLD)return;const r=bSiteRect(),list=[W.grass].concat(W.trees||[]).filter(Boolean);BLD.veg=[];
-  list.forEach(m=>{const A=m.instanceMatrix.array,n=Math.min(m.count,A.length/16);let ch=0;for(let i=0;i<n;i++){const x=A[i*16+12],z=A[i*16+14];if(x>r.x0-5&&x<r.x1+5&&z>r.z0-5&&z<r.z1+5){BLD.veg.push([m,i,A.slice(i*16,i*16+16)]);A.fill(0,i*16,i*16+16);ch=1;}}if(ch)m.instanceMatrix.needsUpdate=true;});}
+  if(!on||!BLD)return;const r=bSiteRect(),M=34,list=[W.grass].concat(W.trees||[]).concat((typeof ENV!=="undefined"&&ENV&&ENV.veg)||[]).filter(Boolean);BLD.veg=[];
+  /* внутри участка (площадка, дороги, тротуары, парковка, здание) растительность убрана; в полосе плавного перехода рельефа (M м) — посажена на выровненный рельеф, как bTerrain */
+  list.forEach(m=>{const A=m.instanceMatrix.array,n=Math.min(m.count,A.length/16);let ch=0;for(let i=0;i<n;i++){const x=A[i*16+12],z=A[i*16+14];if(x===0&&z===0&&A[i*16+13]===0)continue;
+    if(x>r.x0-5&&x<r.x1+5&&z>r.z0-5&&z<r.z1+5){BLD.veg.push([m,i,A.slice(i*16,i*16+16)]);A.fill(0,i*16,i*16+16);ch=1;continue;}
+    const dx=Math.max(r.x0-x,0,x-r.x1),dz=Math.max(r.z0-z,0,z-r.z1),d=Math.hypot(dx,dz);if(d>=M)continue;const k=d/M,sm=k*k*(3-2*k);
+    BLD.veg.push([m,i,A.slice(i*16,i*16+16)]);A[i*16+13]=-.05+(A[i*16+13]+.05)*sm;ch=1;}
+    if(ch)m.instanceMatrix.needsUpdate=true;});}
 /* ---------- режим «Здание» ---------- */
 function bldInit(){if(BLD)return BLD;const t0=performance.now();bBuild();farG.add(BLD.g);BLD.mk=bAimMarker();BLD.g.add(BLD.mk);BLD.g.visible=false;bFlush();
   BLD.ms=Math.round(performance.now()-t0);console.log("здание построено за",BLD.ms,"мс; конструкций",BLD.E.length);return BLD;}
@@ -9057,14 +9072,21 @@ function pplBuild(){PPL.L=[];if(!BLD)return;const grp=new THREE.Group();grp.user
     [172,10.9,-40,0],[180,10.9,-37.5,0],[183,10.9,-58,0],[205,0,-81,1],[194,0,-82,0]];
   spots.forEach(([x,y,z,pat],i)=>{const m=pplMan();if(!pat&&(i%3===0||i===13))pplFlag(m);m.position.set(x,y,z);m.rotation.y=Math.atan2(81-x,-120-z)+R(-.6,.6);grp.add(m);
     PPL.L.push({m,x,z,y,y0:y,pat:!!pat,ph:Math.random()*6,a:R(0,6.28),st:0,fall:0,ax:Math.random()<.5?1:-1});});}
-function pplTick(dt){if(!PPL.L.length)return;const t=performance.now()/1000;
+function pplTick(dt){if(!PPL.L.length)return;const t=performance.now()/1000;dt=Math.min(dt,.05);
   PPL.L.forEach(P=>{const m=P.m,U=m.userData;
     if(P.st&&U.flag&&!U.fd){U.fd=1;}
-    if(P.st){if(P.fall<1){P.fall=Math.min(1,P.fall+dt*2.2);const k=P.fall*P.fall;m.rotation.x=P.ax*k*Math.PI/2*.98;m.position.y=P.yy+.15*k;}return;}
-    /* опора: если перекрытие под ним рухнуло — падает вниз */
-    if(P.y0>1){let fy=P.y0;try{fy=bFloorY(P.x,P.z,P.y0+.2);}catch(e){}if(fy<P.y0-1){P.y0=fy;P.st=2;P.yy=fy;PPL.log++;}}
-    if(P.pat){P.a+=dt*.35;const px=P.x+Math.cos(P.a)*2.2,pz=P.z+Math.sin(P.a)*2.2;m.position.x=px;m.position.z=pz;m.rotation.y=Math.atan2(-Math.sin(P.a),Math.cos(P.a));const s=Math.sin(t*5+P.ph)*.45;U.legL.rotation.x=s;U.legR.rotation.x=-s;}
-    else{m.rotation.z=Math.sin(t*.8+P.ph)*.02;}
+    /* живой патрульный ходит по кругу; убитые/раненые лежат на месте */
+    if(!P.st&&P.pat){P.a+=dt*.35;m.position.x=P.x+Math.cos(P.a)*2.2;m.position.z=P.z+Math.sin(P.a)*2.2;m.rotation.y=Math.atan2(-Math.sin(P.a),Math.cos(P.a));const s=Math.sin(t*5+P.ph)*.45;U.legL.rotation.x=s;U.legR.rotation.x=-s;}
+    /* опора под ногами проверяется ВСЕГДА (и у лежащих): рухнула плита/крыша — человек (и тело) падает вместе с обломками, потом ложится на нижнюю опору;
+       человек стоит ровно на плите/земле/тротуаре (bFloorY), стопа у него на 0,03 м ниже начала координат */
+    let sup=P.cy===undefined?P.y0:P.cy;try{sup=bFloorY(m.position.x,m.position.z,(P.cy===undefined?P.y0:P.cy)+.25);}catch(e){}sup+=.03;
+    if(P.cy===undefined){P.cy=sup;P.vy=0;}
+    if(P.cy>sup+.04){if(!P.fl){P.fl=1;P.f0=P.cy;}P.vy-=9.8*dt;P.cy+=P.vy*dt;
+      if(P.cy<=sup){P.cy=sup;P.vy=0;P.fl=0;if(!P.st&&P.f0-sup>1){P.st=2;P.fall=0;P.ax=P.ax||1;P.yy=sup;PPL.log++;}}}
+    else{P.cy=sup;P.vy=0;P.fl=0;}
+    if(P.st){const k=P.fall*P.fall;if(P.fall<1)P.fall=Math.min(1,P.fall+dt*2.2);m.rotation.x=P.ax*k*Math.PI/2*.98;m.position.y=P.cy+.15*k;return;}
+    m.position.y=P.cy;
+    if(!P.pat){m.rotation.z=Math.sin(t*.8+P.ph)*.02;}
     const F=U.flag;if(F){const a=F.geometry.attributes.position,b=U.fx0,w=+(($("wind")||{}).value)||3;for(let i=0;i<a.count;i++){const x=b[i*3];a.setZ(i,Math.sin(x*4.2-t*(4+Math.abs(w)*.3)+P.ph)*.09*x+(.05+Math.min(.3,Math.abs(w)*.02))*x*x);}a.needsUpdate=true;}});}
 /* разрыв: p — точка в мировых координатах, W — масса ВВ (кг) */
 function pplBlast(p,W){if(!PPL.L.length||!BLD||!(W>0))return;let lp;try{lp=BLD.g.worldToLocal(p.clone());}catch(e){return;}
