@@ -912,7 +912,7 @@ function eraTex(c,key){const E=ERA[key],m=MAT[key],px=256,py=320,base="#"+m.col.
   c.fillStyle="#2a2d22";c.fillRect(0,0,512,512);const nx=Math.round(2/E.cw),ny=Math.round(1.6/E.ch),gw=Math.max(2,E.seam*E.cw*px/2),gh=Math.max(2,E.seam*E.ch*py/2);
   for(let iy=0;iy<ny;iy++)for(let ix=0;ix<nx;ix++){const x0=ix*E.cw*px+gw,y0=512-(iy+1)*E.ch*py+gh,w=E.cw*px-2*gw,h=E.ch*py-2*gh;
     c.fillStyle=base;c.fillRect(x0,y0,w,h);
-    {const im=typeof AI==="function"&&AI()&&AI().era;if(im&&c.drawImage){const bi=(ix*7+iy*5+key.length)%16,bx=(bi%4)*256+24,by=((bi/4)|0)*256+20;c.save();c.globalAlpha=.92;c.drawImage(im,bx,by,208,196,x0,y0,w,h);
+    {const im=typeof AI==="function"&&AI()&&AI().era;if(im&&c.drawImage){const bi=(ix*7+iy*5+key.length)%16,sk=im.width/1024,bx=((bi%4)*256+(sk<1?10:24))*sk,by=(((bi/4)|0)*256+(sk<1?8:20))*sk;c.save();c.globalAlpha=.92;c.drawImage(im,bx,by,(sk<1?236:208)*sk,(sk<1?240:196)*sk,x0,y0,w,h);
       c.globalCompositeOperation="multiply";c.globalAlpha=.35;c.fillStyle=base;c.fillRect(x0,y0,w,h);c.restore();}}if(c.createLinearGradient){const g=c.createLinearGradient(x0,y0,x0,y0+h);g.addColorStop(0,"rgba(255,255,255,.12)");g.addColorStop(1,"rgba(0,0,0,.22)");c.fillStyle=g;c.fillRect(x0,y0,w,h);}
     c.strokeStyle="rgba(15,15,10,.7)";c.lineWidth=2;c.strokeRect(x0,y0,w,h);
     if(key==="relikt"||key==="duplet"){c.beginPath();c.moveTo(x0,y0+h/2);c.lineTo(x0+w,y0+h/2);c.stroke();}
@@ -933,6 +933,8 @@ const NRM={era5:3.2,relikt:3.2,malakhit:3.2,nozh:3.2,duplet:3.2,blazer:3,arat:2.
 function derive(key,rep){if(TXN[key]!==undefined)return;TXN[key]=null;TXRG[key]=null;const t=tex(key),src=t&&t.image;if(!src||!src.getContext)return;
   try{const N=1024,cv=document.createElement("canvas");cv.width=cv.height=N;const c=cv.getContext("2d");c.drawImage(src,0,0,N,N);const im=c.getImageData(0,0,N,N),d=im.data,h=new Float32Array(N*N);
     for(let i=0;i<N*N;i++)h[i]=(d[i*4]*.3+d[i*4+1]*.59+d[i*4+2]*.11)/255*(d[i*4+3]/255);
+    {let m0=0,v0=0;for(let i=0;i<N*N;i++)m0+=h[i];m0/=N*N;for(let i=0;i<N*N;i++){const q=h[i]-m0;v0+=q*q;}const sd=Math.sqrt(v0/(N*N)),sc=sd>1e-4?Math.max(1,Math.min(2.6,.1/sd)):1;
+      if(sc>1.02)for(let i=0;i<N*N;i++)h[i]=m0+(h[i]-m0)*sc;}   /* малоконтрастные фото-основы (новые стальные текстуры) получают тот же рельеф и разброс шероховатости, что и прежние */
     const k=NRM[key]||2,on=c.createImageData(N,N),o=on.data,H=(x,y)=>h[((y+N)%N)*N+((x+N)%N)];
     for(let y=0;y<N;y++)for(let x=0;x<N;x++){const dx=(H(x+1,y-1)+2*H(x+1,y)+H(x+1,y+1))-(H(x-1,y-1)+2*H(x-1,y)+H(x-1,y+1)),dy=(H(x-1,y+1)+2*H(x,y+1)+H(x+1,y+1))-(H(x-1,y-1)+2*H(x,y-1)+H(x+1,y-1));
       let nx=-dx*k,ny=dy*k,nz=1;const l=Math.hypot(nx,ny,nz);const j=(y*N+x)*4;o[j]=(nx/l*.5+.5)*255;o[j+1]=(ny/l*.5+.5)*255;o[j+2]=(nz/l*.5+.5)*255;o[j+3]=255;}
@@ -985,7 +987,7 @@ function tex(key,rep=1){if(TX[key])return TX[key];
   else if(key==="net"){c.clearRect(0,0,512,512);c.strokeStyle="#4a4d3c";c.lineWidth=5;for(let k=-512;k<1024;k+=48){c.beginPath();c.moveTo(k,0);c.lineTo(k+512,512);c.stroke();c.beginPath();c.moveTo(k,512);c.lineTo(k+512,0);c.stroke();}c.lineWidth=10;c.strokeRect(0,0,512,512);}
   else if(key==="camo"){fill("#55603f");rnd(c,26,"#3f4a30",30,80,.8,1);rnd(c,20,"#6e6a48",25,60,.8,1);rnd(c,800,"#2d3322",.5,1.5,.2,.5);vehWear(c);}
   if(typeof ERA!=="undefined"&&ERA[key])eraTex(c,key);
-  {const PH={soil:"mud",brick:"brick",cfrp:null,armox:"rha",bain:"rha",stb:"comp",pbo:"comp",road:"gravel",rha:"rha",hh:"rha",uhh:"rha",dual:"rha",perf:"rha",cast:"cast",du:"cast",cer:"cer",sic:"cer",b4c:"cer",tib2:"cer",frp:"comp",ara:"comp",rub:"rub",ground:"ground"},
+  {const PH={soil:"mud",brick:"brick",cfrp:null,armox:"rha",bain:"rha",stb:"comp",pbo:"comp",road:"gravel",rha:"rha",hh:"rha",uhh:"rha",dual:"rha",perf:"rha",cast:"cast",du:"cast",cer:"cer",sic:"cer",b4c:"cer",tib2:"cer",frp:"comp",ara:"comp",rub:"rub",ground:"ground",conc:"conc",wood:"wood"},
     ph=PH[key]||(key==="road"?"gravel":null),im=ph&&AI()&&AI()[ph];
     if(im&&c.drawImage){c.save();c.globalCompositeOperation="source-atop";const era=typeof ERA!=="undefined"&&ERA[key];c.globalAlpha=era?.3:key==="ground"?1:["rha","hh","uhh","dual","perf","cast","du"].includes(key)?.55:.85;
       const tiles=PTILE[key]||1,ts=512/tiles;for(let ty=0;ty<tiles;ty++)for(let tx=0;tx<tiles;tx++)c.drawImage(im,tx*ts,ty*ts,ts,ts);
@@ -3262,7 +3264,7 @@ function wTerrainGeo(){const N=Math.round(170+70*WQ),H=5000,cx=0,cz=250,pos=[],u
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){const a=j*(N+1)+i,b=a+1,c=a+N+1,d=c+1;idx.push(a,c,b,b,c,d);}
   const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));g.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2));
   g.setIndex(N*N*6>65000?new THREE.Uint32BufferAttribute(idx,1):new THREE.Uint16BufferAttribute(idx,1));g.computeVertexNormals();return g;}
-function wTex(path,srgb){const t=new THREE.TextureLoader().load(path);t.wrapS=t.wrapT=THREE.RepeatWrapping;if(srgb!==false&&THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy?renderer.capabilities.getMaxAnisotropy():4);return t;}
+function wTex(path,srgb,key){const pim=key&&typeof AI==="function"&&AI()&&AI()[key];let t;if(pim){t=new THREE.Texture(pim);t.needsUpdate=true;}else t=new THREE.TextureLoader().load(path);t.wrapS=t.wrapT=THREE.RepeatWrapping;if(srgb!==false&&THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy?renderer.capabilities.getMaxAnisotropy():4);return t;}
 /* материал земли: трава двух масштабов (без видимого повтора), пятна грунта, вытоптанная полоса у огневого рубежа и мишени, колеи, склоны — грунт, сухие и сочные поля, тени облаков */
 function wGroundMat(W){const m=new THREE.MeshStandardMaterial({color:0xffffff,map:W.tGrass,normalMap:W.tGrassN,normalScale:new THREE.Vector2(.9,.9),roughness:.96,metalness:0});
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,{tMud:{value:W.tMud},tGrav:{value:W.tGrav},uCloud:W.U.cloud,uCov:W.U.cov,uSunW:W.U.sunW,uWet:W.U.wet,uSnow:W.U.snow});
@@ -3381,7 +3383,7 @@ function wTreeSet(W,spots,shadow){kinds={birch:{h:[14,21],leafCol:[.62,.78,.42],
 /* ---------- сборка мира и связь с погодой и временем суток игры ---------- */
 function worldInit(){if(WORLD||!THREE.ShaderMaterial||!THREE.InstancedMesh)return null;
   const W={U:{time:{value:0},windS:{value:1},windD:{value:new THREE.Vector2(1,0)},cloud:{value:new THREE.Vector2(0,0)},cov:{value:.42},sunW:{value:1},wet:{value:0},snow:{value:0}},
-    tGrass:wTex("textures/env/grass.jpg"),tGrassN:wTex("textures/env/grass_normal.jpg",false),tMud:wTex("textures/env/mud.jpg"),tGrav:wTex("textures/env/gravel.jpg"),root:new THREE.Group(),st:{wx:{rain:0,snow:0,fog:0,wet:0},tod:.5,sky:"clear"}};
+    tGrass:wTex("textures/env/grass.jpg",true,"grass"),tGrassN:wTex("textures/env/grass_normal.jpg",false,"grass_n"),tMud:wTex("textures/env/mud.jpg",true,"mud"),tGrav:wTex("textures/env/gravel.jpg",true,"gravel"),root:new THREE.Group(),st:{wx:{rain:0,snow:0,fog:0,wet:0},tod:.5,sky:"clear"}};
   W.root.name="world";scene.add(W.root);
   /* небо */
   W.sky=new THREE.Mesh(new THREE.SphereGeometry(7000,48,24),wSkyMat());W.sky.renderOrder=-10;W.sky.frustumCulled=false;W.sky.raycast=()=>{};W.root.add(W.sky);
@@ -9101,15 +9103,18 @@ if(typeof window!=="undefined"&&!window.__noBld)setTimeout(()=>{try{if($("tmode"
 </script>
 <div id="loadMsg" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);color:#e9e2c4;font:600 14px system-ui;background:rgba(20,22,16,.8);padding:10px 16px;border-radius:12px;z-index:50">Загрузка текстур…</div>
 <script>
-window.AIIMG={};(function(){var L={rha:"textures/armor/rha.jpg",cast:"textures/armor/cast.jpg",cer:"textures/armor/cer.jpg",comp:"textures/armor/comp.jpg",
-  rub:"textures/armor/rub.jpg",scorch:"textures/armor/scorch.jpg",ground:"textures/armor/ground.jpg",fireball:"sprites/fx/fireball.png",smoke:"sprites/fx/smoke.png",muzzle:"sprites/fx/muzzle_flash.png",era:"textures/armor/era.jpg",mud:"textures/env/mud.jpg",gravel:"textures/env/gravel.jpg",
-  rha_n:"textures/armor/rha_normal.jpg",cast_n:"textures/armor/cast_normal.jpg",cer_n:"textures/armor/cer_normal.jpg",comp_n:"textures/armor/comp_normal.jpg",
+window.AIIMG={};(function(){/* сначала новые WebP-текстуры, при ошибке — прежние JPG (массив = цепочка запасных адресов); если не загрузилось ничего — работает процедурная текстура */
+var L={rha:["textures/armor/rha_a.webp","textures/armor/rha.jpg"],cast:["textures/armor/cast_a.webp","textures/armor/cast.jpg"],cer:["textures/armor/cer_a.webp","textures/armor/cer.jpg"],comp:["textures/armor/comp_a.webp","textures/armor/comp.jpg"],
+  rub:["textures/armor/rub_a.webp","textures/armor/rub.jpg"],scorch:"textures/armor/scorch.jpg",ground:["textures/armor/ground_a.webp","textures/armor/ground.jpg"],fireball:"sprites/fx/fireball.png",smoke:"sprites/fx/smoke.png",muzzle:"sprites/fx/muzzle_flash.png",era:["textures/armor/era_a.webp","textures/armor/era.jpg"],
+  mud:["textures/env/mud_a.webp","textures/env/mud.jpg"],gravel:["textures/env/gravel_a.webp","textures/env/gravel.jpg"],grass:["textures/env/grass_a.webp","textures/env/grass.jpg"],grass_n:["textures/env/grass_a_n.webp","textures/env/grass_normal.jpg"],
+  conc:["textures/armor/con_a.webp"],wood:["textures/armor/wood_a.webp"],
+  rha_n:["textures/armor/rha_a_n.webp","textures/armor/rha_normal.jpg"],cast_n:["textures/armor/cast_a_n.webp","textures/armor/cast_normal.jpg"],cer_n:["textures/armor/cer_a_n.webp","textures/armor/cer_normal.jpg"],comp_n:["textures/armor/comp_a_n.webp","textures/armor/comp_normal.jpg"],
   brick:"textures/env/brick.jpg"};
   var keys=Object.keys(L),n=0,done=false;
   function go(){if(done)return;done=true;var m=document.getElementById("loadMsg");if(m)m.remove();
     if(typeof THREE==="undefined"){document.body.insertAdjacentHTML("beforeend",'<div style="position:fixed;inset:0;display:grid;place-items:center;color:#eee;font:16px system-ui;background:#111">Не удалось загрузить 3D-движок. Проверьте соединение.</div>');return;}
     var sc=document.createElement("script");sc.textContent=document.getElementById("mainJS").textContent;document.body.appendChild(sc);}
-  keys.forEach(function(k){var im=new Image();im.onload=function(){AIIMG[k]=im;if(++n===keys.length)go();};im.onerror=function(){if(++n===keys.length)go();};im.src=L[k];});
+  keys.forEach(function(k){var u=L[k];if(typeof u==="string")u=[u];var i=0;(function t(){var im=new Image();im.onload=function(){AIIMG[k]=im;if(++n===keys.length)go();};im.onerror=function(){if(++i<u.length)t();else if(++n===keys.length)go();};im.src=u[i];})();});
   setTimeout(go,8000);})();
 </script>
 
