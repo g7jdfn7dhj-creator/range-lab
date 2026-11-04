@@ -9571,11 +9571,11 @@ pvoTick=function(dt){PVO.fx.filter(F=>F.las).forEach(F=>{F.tt+=dt;const t=F.tt,s
   try{pvoRadTick(dt);}catch(e){}};
 /* ---------- экран РЛС ---------- */
 const RAD={on:false,cv:null,sc:3,S:[10e3,50e3,150e3,400e3,900e3],hist:[],t:0,place:false};
-function pvoRadInit(){if(RAD.cv||typeof document==="undefined")return;const cv=document.createElement("canvas");cv.id="pvoRad";const sz=Math.min(360,Math.round(innerWidth*.9));cv.width=sz*2;cv.height=sz*2;
-  Object.assign(cv.style,{position:"absolute",left:"8px",top:"150px",width:sz+"px",height:sz+"px",zIndex:6,borderRadius:"50%",boxShadow:"0 0 0 2px rgba(120,200,120,.5),0 4px 18px rgba(0,0,0,.6)",display:"none",touchAction:"none"});
-  (app||document.body).appendChild(cv);RAD.cv=cv;
-  const bar=document.createElement("div");Object.assign(bar.style,{position:"absolute",left:"8px",top:(150+sz+6)+"px",zIndex:6,display:"none",gap:"6px"});bar.id="pvoRadBar";
-  bar.innerHTML='<button id="radZm" style="padding:6px 12px">−</button><button id="radZp" style="padding:6px 12px">+</button><button id="radPl" style="padding:6px 10px">Поставить на РЛС</button><button id="radX" style="padding:6px 10px">✕</button>';(app||document.body).appendChild(bar);RAD.bar=bar;
+function pvoRadInit(){if(RAD.cv||typeof document==="undefined")return;const cv=document.createElement("canvas");cv.id="pvoRad";const sz=Math.max(200,Math.min(340,innerWidth-104,innerHeight-300));cv.width=sz*2;cv.height=sz*2;
+  Object.assign(cv.style,{position:"relative",flex:"none",pointerEvents:"auto",width:sz+"px",height:sz+"px",zIndex:6,borderRadius:"50%",boxShadow:"0 0 0 2px rgba(120,200,120,.5),0 4px 18px rgba(0,0,0,.6)",display:"none",touchAction:"none"});
+  const box=RAD.box=document.createElement("div");box.id="pvoRadBox";Object.assign(box.style,{position:"absolute",left:"8px",top:"78px",zIndex:6,display:"none",flexDirection:"column",gap:"6px",maxWidth:"calc(100% - 104px)",maxHeight:"calc(100% - 170px)",overflowY:"auto",pointerEvents:"none"});box.appendChild(cv);(app||document.body).appendChild(box);RAD.cv=cv;
+  const bar=document.createElement("div");Object.assign(bar.style,{display:"none",gap:"6px",flexWrap:"wrap",maxWidth:sz+"px",pointerEvents:"auto"});bar.id="pvoRadBar";
+  bar.innerHTML='<button id="radZm" style="padding:6px 12px">−</button><button id="radZp" style="padding:6px 12px">+</button><button id="radPl" style="padding:6px 10px">Поставить на РЛС</button><button id="radX" style="padding:6px 10px">✕</button>';box.appendChild(bar);RAD.bar=bar;
   $("radZm").onclick=()=>{RAD.sc=Math.min(RAD.S.length-1,RAD.sc+1);};$("radZp").onclick=()=>{RAD.sc=Math.max(0,RAD.sc-1);};$("radX").onclick=()=>pvoRadShow(false);
   $("radPl").onclick=()=>{RAD.place=!RAD.place;$("radPl").textContent=RAD.place?"Коснитесь РЛС…":"Поставить на РЛС";};
   cv.addEventListener("pointerup",e=>{if(!RAD.place)return;const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*2-1,y=(e.clientY-r.top)/r.height*2-1;if(x*x+y*y>1)return;
@@ -9918,9 +9918,9 @@ function pvoRadExtra(){if(RAD.tbl||!RAD.bar)return;const b=document.createElemen
   b.onclick=()=>{RAD.auto=!RAD.auto;b.setAttribute("aria-pressed",RAD.auto);if(!RAD.auto){let i=0;while(i<RAD.S.length-1&&RAD.S[i]<RAD.Rcur)i++;RAD.sc=i;}};
   const zm=$("radZm").onclick,zp=$("radZp").onclick;$("radZm").onclick=()=>{RAD.auto=false;b.setAttribute("aria-pressed",false);zm();};$("radZp").onclick=()=>{RAD.auto=false;b.setAttribute("aria-pressed",false);zp();};
   const t=document.createElement("div");t.id="pvoRadTbl";const sz=parseFloat(RAD.cv.style.width)||340;
-  Object.assign(t.style,{position:"absolute",left:"8px",top:(150+sz+50)+"px",zIndex:6,display:"none",width:sz+"px",maxHeight:"30vh",overflow:"auto",background:"rgba(4,20,10,.86)",color:"#9ef0ae",font:"11px/1.35 monospace",padding:"6px 8px",borderRadius:"8px",boxShadow:"0 0 0 1px rgba(120,200,120,.4)"});
-  (app||document.body).appendChild(t);RAD.tbl=t;}
-const _pvoRadShow0=pvoRadShow;pvoRadShow=function(on){_pvoRadShow0(on);try{pvoRadExtra();if(RAD.tbl)RAD.tbl.style.display=on?"block":"none";}catch(e){console.error(e);}};
+  Object.assign(t.style,{display:"none",flex:"none",pointerEvents:"auto",width:sz+"px",maxHeight:"22vh",boxSizing:"border-box",overflow:"auto",background:"rgba(4,20,10,.86)",color:"#9ef0ae",font:"11px/1.35 monospace",padding:"6px 8px",borderRadius:"8px",boxShadow:"0 0 0 1px rgba(120,200,120,.4)"});
+  RAD.box.appendChild(t);RAD.tbl=t;}
+const _pvoRadShow0=pvoRadShow;pvoRadShow=function(on){_pvoRadShow0(on);try{if(RAD.box)RAD.box.style.display=on?"flex":"none";if(on&&$("more")&&!$("more").hidden&&$("toggle"))$("toggle").click();pvoRadExtra();if(RAD.tbl)RAD.tbl.style.display=on?"block":"none";}catch(e){console.error(e);}};
 function pvoRadTau(h,now){const el=now-h.w0;if(h.ph&&el<h.ph){const u=el/h.ph,e=1-Math.pow(1-u,1.6);return{tau:h.tauAll-(h.tauAll-h.tmax)*e,fast:(h.tauAll-h.tmax)/h.ph};}return{tau:h.tmax*(1-h.k),fast:0};}
 pvoRadTick=function(dt){if(!RAD.on||!RAD.cv)return;RAD.t+=dt;if((RAD.acc=(RAD.acc||0)+dt)<.06)return;const st=RAD.acc;RAD.acc=0;
   const cv=RAD.cv,c=cv.getContext("2d"),W=cv.width,H=W/2,t=pvoTarget(),now=performance.now()/1000;
