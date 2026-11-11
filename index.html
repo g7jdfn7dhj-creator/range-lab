@@ -701,7 +701,7 @@ const guns=[
   {n:"CAESAR",cal:155,L:52,cls:"how",pen:.52,heP:1.7,load:2.1,heat:1.2,t:"САУ на шасси, Франция",rmax:30000,v0:930,am:["he","bb","excal","smoke","illum"]},
   {n:"2А42",cal:30,L:80,cls:"auto",burst:5,pen:.2,heP:.25,load:.55,heat:.14,t:"БМП-2, БМД-2, Ка-50"},
   {n:"2А72",cal:30,L:80,cls:"auto",burst:5,pen:.2,heP:.25,load:.55,heat:.14,t:"БМП-3, БТР-82А"},
-  {n:"M242 Bushmaster",cal:25,L:88,cls:"auto",burst:5,pen:0.25,heP:.2,load:.5,heat:.12,t:"M2 Bradley, LAV-25"},
+  {n:"M242 Bushmaster",cal:25,L:88,cls:"auto",burst:5,pen:0.25,heP:.2,load:.5,heat:.12,dragA:{apbc:.3},t:"M2 Bradley, LAV-25"},
   {n:"Mk44 Bushmaster II",cal:30,L:80,approx:true,cls:"auto",burst:5,pen:0.3,heP:.25,load:.55,heat:.14,t:"БМП НАТО, ASCOD, Stryker"},
   {n:"Bofors L/70",cal:40,L:70,cls:"auto",burst:3,pen:0.5,heP:.35,load:.7,heat:.2,t:"CV90"},
   {n:"Д-10Т",glm:"gl1",cal:100,L:53.5,smooth:false,pen:0.79,load:1.2,heat:1.0,t:"Т-54, Т-55"},
@@ -842,17 +842,17 @@ const ROUNDS={
   "2А46М":{bops:"3БМ42 «Манго»",heat:"3БК18М",he:"3ОФ26",gl:"9М119 «Рефлекс»"},"2А46М-5":{bops:"3БМ59 «Свинец-1»",heat:"3БК29М",he:"3ОФ26",gl:"9М119М «Инвар»"},"2А82-1М":{bops:"3БМ69 «Вакуум-1»",he:"3ОФ26",gl:"9М119М «Инвар»"},
 "2А20":{bops:"3БМ6",heat:"3БК4",he:"3ОФ11",gl1:"9М117 «Шексна»"},"2А45М «Спрут-Б»":{bops:"3БМ42",heat:"3БК18М",he:"3ОФ26",gl:"9М119"},"МТ-12 «Рапира»":{bops:"3БМ6",heat:"3БК16М",he:"3ОФ12",gl1:"9М117 «Кастет»"},
 "L7":{bops:"L64",heat:"M456",hesh:"L35",he:"M393"},"M68":{bops:"M833",heat:"M456",hesh:"M393",he:"M393"},"L30A1":{bops:"L27A1 CHARM 3",hesh:"L31"},
-"M242 Bushmaster":{apds:"M791",apbc:"M919",he:"M792"},"Bofors L/70":{apds:"APFSDS-T",he:"3P"},"Mk44 Bushmaster II":{apds:"MK258",he:"MK264"},"2А45М «Спрут-Б»":{bops:"3БМ42"},
+"M242 Bushmaster":{apds:"M791",apbc:"M919",he:"M792"},"Bofors L/70":{apds:"APFSDS-T",he:"3P"},"Mk44 Bushmaster II":{apds:"MK258",he:"MK264"},
   "Rh-120 L/44":{bops:"DM53",heat:"DM12A1",he:"DM11"},"Rh-120 L/55":{bops:"DM63",heat:"DM12A1",he:"DM11"},
   "CN120-26":{bops:"OFL 120 F1",heat:"OECC 120 F1",he:"OE 120 F1"},"CN08":{bops:"K279",heat:"K280"},
   "Д-10Т":{bops:"3БМ25",heat:"3БК17М",he:"ОФ-412",smoke:"Д-412",gl1:"9М117 «Бастион»"},
   "2А42":{apds:"3УБР8",apbc:"3УБР6",he:"3УОФ8"},"2А72":{apds:"3УБР8",apbc:"3УБР6",he:"3УОФ8"},
-  "M242 Bushmaster":{apds:"M791",he:"M792"},"КПВТ":{mgapi:"Б-32",mgap:"БС-41"},"Корд":{mgapi:"Б-32",mgap:"БС"},"НСВТ «Утёс»":{mgapi:"Б-32"},
+  "КПВТ":{mgapi:"Б-32",mgap:"БС-41"},"Корд":{mgapi:"Б-32",mgap:"БС"},"НСВТ «Утёс»":{mgapi:"Б-32"},
   "M2HB Browning":{mgapi:"M8",mgap:"M2"},"ПКТ":{mgapi:"Б-32",mgap:"7Н13"},"M240":{mgap:"M61"},"Д-30":{he:"ОФ-462",heat:"БК-6М",smoke:"Д-462"},"M777":{rap:"M549",excal:"M982 Excalibur",illum:"M485"},"M284":{rap:"M549",excal:"M982 Excalibur",illum:"M485"},
   "PzH 2000":{bb:"ERFB-BB",excal:"M982 Excalibur"},"CAESAR":{bb:"ERFB-BB",excal:"M982 Excalibur"},"Archer":{bb:"ERFB-BB",excal:"M982 Excalibur"},"K9 Thunder":{bb:"ERFB-BB",excal:"M982 Excalibur"},
   "2А65 «Мста-Б»":{he:"ОФ45",krasn:"3ОФ39 «Краснополь»"},"2А64":{krasn:"3ОФ39 «Краснополь»"},"2А88":{krasn:"3ОФ39 «Краснополь»"},"2А36 «Гиацинт-Б»":{krasn:"3ОФ39 «Краснополь»"},
   "M201 (M110A2)":{he:"M106",rap:"M650"},"2Б8 «Тюльпан»":{he:"53-Ф-864",smel:"3Ф5 «Смельчак»"},
-  "2А65 «Мста-Б»":{he:"ОФ45"},"2А44":{he:"ОФ43"},"M201 (M110A2)":{he:"M106"},"Б-4М":{he:"Ф-625",cp:"Г-620"},"2Б8 «Тюльпан»":{he:"53-Ф-864"},
+  "2А44":{he:"ОФ43"},"Б-4М":{he:"Ф-625",cp:"Г-620"},
   "9К111 «Фагот»":{msl:"9М111"},"9К113 «Конкурс-М»":{mslT:"9М113М"},"9К135 «Корнет»":{mslT:"9М133",mslHE:"9М133Ф"},"BGM-71 TOW-2A":{mslT:"BGM-71E"},
   "FGM-148 Javelin":{mslT:"FGM-148"},"FPV-дрон · ПГ-7ВЛ":{fpvH:"ПГ-7ВЛ"},"FPV-дрон · ПГ-7ВР":{fpvT:"ПГ-7ВР"},"Дрон-сброс · ВОГ-17":{vog:"ВОГ-17"},
   "3М-14 «Калибр»":{cmHE:"(450 кг)"},"Х-101":{cmHE:"(400 кг)",cmPen:"(400 кг)"},"BGM-109 Tomahawk Block IV":{cmHE:"WDU-36/B"},"Storm Shadow / SCALP-EG":{cmTP:"BROACH"},"Taurus KEPD 350":{cmTP:"MEPHISTO"},
@@ -876,9 +876,12 @@ const D=80, AXIS=2.25;
 
 /* --- сцена --- */
 const app=$("app");
+const MOBILE=(()=>{try{return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||"");}catch(e){return false;}})();
 let renderer;
-try{renderer=new THREE.WebGLRenderer({antialias:true});}
+try{renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});}
 catch(e){console.error(e);document.body.insertAdjacentHTML("beforeend",'<div id="noGL" role="alert" style="position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:24px;text-align:center;color:#eee;font:16px system-ui;background:#111">Нужен WebGL: включите аппаратное ускорение или откройте игру в другом браузере</div>');throw e;}
+/* анизотропная фильтрация: на наклонных поверхностях (земля, листы под углом) текстуры остаются резкими; на телефоне — умеренная */
+const ANISO=MOBILE?8:16;
 renderer.domElement.addEventListener("webglcontextlost",e=>{e.preventDefault();},false);
 renderer.domElement.addEventListener("webglcontextrestored",()=>{location.reload();},false);
 renderer.setPixelRatio(Math.min(2,devicePixelRatio));
@@ -902,7 +905,7 @@ const hemi=new THREE.HemisphereLight(0xdfe8f0,0x4a4630,.55);scene.add(hemi);
 S.env=buildEnv();if(S.env)scene.environment=S.env;
 const sun=new THREE.DirectionalLight(0xfff2d8,1.0);
 sun.position.set(-30,50,20);sun.castShadow=true;
-sun.shadow.mapSize.set(2048,2048);if(sun.shadow)sun.shadow.bias=-.0004;Object.assign(sun.shadow.camera,{left:-20,right:20,top:100,bottom:-20,near:1,far:150});
+{const big=!MOBILE&&renderer.capabilities&&renderer.capabilities.maxTextureSize>=8192;sun.shadow.mapSize.set(big?4096:2048,big?4096:2048);}if(sun.shadow)sun.shadow.bias=-.0004;Object.assign(sun.shadow.camera,{left:-20,right:20,top:100,bottom:-20,near:1,far:150});
 sun.target.position.set(0,0,40);scene.add(sun,sun.target);
 
 
@@ -1028,7 +1031,7 @@ function tex(key,rep=1){if(TX[key])return TX[key];
   if(["rha","hh","dual","cast"].includes(key))steelWear(c,key);
   else if(key==="ti")tiWear(c);else if(key==="al"||key==="mg")alWear(c);
   else if(["cer","b4c","sic"].includes(key))tileWear(c,key);
-  const t=new THREE.CanvasTexture(cv);if(THREE.sRGBEncoding!==undefined)t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;if(t.repeat)t.repeat.set(rep,rep);t.anisotropy=Math.min(8,renderer.capabilities&&renderer.capabilities.getMaxAnisotropy?renderer.capabilities.getMaxAnisotropy():4);TX[key]=t;return t;}
+  const t=new THREE.CanvasTexture(cv);if(THREE.sRGBEncoding!==undefined)t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;if(t.repeat)t.repeat.set(rep,rep);t.anisotropy=Math.min(ANISO,renderer.capabilities&&renderer.capabilities.getMaxAnisotropy?renderer.capabilities.getMaxAnisotropy():4);TX[key]=t;return t;}
 const box=(w,h,d,mat,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;scene.add(m);return m;};
 const rR=(a,b)=>a+Math.random()*(b-a);
 const GRASS={t:{value:0},w:{value:1}};
@@ -1396,7 +1399,28 @@ addEventListener("resize",resize);
 const angV=()=>S.vAng!=null?S.vAng:+$("ang").value,yawV=()=>S.vYaw!=null?S.vYaw:+$("yaw").value;
 const cosA=()=>S.curCos||Math.cos(angV()*Math.PI/180);
 /* внешняя баллистика (игровая модель): скорость падает с дистанцией, снаряд снижается, растёт угол падения и рассеивание */
-const BAL={mgap:{v:860,k:4.5e-4,mil:.6},mgapi:{v:850,k:4.5e-4,mil:.6},bops:{v:1650,k:6e-5,mil:.2},apds:{v:1300,k:9e-5,mil:.5},apbc:{v:900,k:1.6e-4,mil:.3},cp:{v:620,k:1.4e-4,mil:.4},gl:{v:350,k:1e-4,mil:.1},gl1:{v:370,k:1e-4,mil:.1},rap:{v:800,k:2.5e-4,mil:.4},bb:{v:800,k:2.5e-4,mil:.35},excal:{v:800,k:2.5e-4,mil:.35},krasn:{v:800,k:2.5e-4,mil:.35},smel:{v:350,k:3e-4,mil:.5},illum:{v:750,k:2.8e-4,mil:.5},heat:{v:900,k:2.2e-4,mil:.3},hesh:{v:730,k:2.5e-4,mil:.35},he:{v:800,k:2.5e-4,mil:.35},smoke:{v:700,k:3e-4,mil:.45}};
+const BAL={mgap:{v:860,k:4.5e-4,mil:.6},mgapi:{v:850,k:4.5e-4,mil:.6},bops:{v:1650,k:3.6e-5,e:.7,mil:.2},apds:{v:1300,k:5.6e-5,e:.6,mil:.5},apbc:{v:900,k:9e-5,e:.9,mil:.3},cp:{v:620,k:1.4e-4,mil:.4},gl:{v:350,k:1e-4,mil:.1},gl1:{v:370,k:1e-4,mil:.1},rap:{v:800,k:2.5e-4,mil:.4},bb:{v:800,k:2.5e-4,mil:.35},excal:{v:800,k:2.5e-4,mil:.35},krasn:{v:800,k:2.5e-4,mil:.35},smel:{v:350,k:3e-4,mil:.5},illum:{v:750,k:2.8e-4,mil:.5},heat:{v:900,k:2.2e-4,mil:.3},hesh:{v:730,k:1.4e-4,e:1,mil:.35},he:{v:800,k:1.3e-4,e:.9,mil:.35},smoke:{v:700,k:1.5e-4,e:1,mil:.45}};
+/* коэффициент сопротивления настильного снаряда k (1/м): замедление a = k·v² при дульной скорости и +15 °C. Опорное значение — для калибра 120 мм,
+   пересчёт на калибр (120/кал)^e: у калиберных снарядов поперечная нагрузка растёт с калибром (e = 1), у подкалиберных сердечников — слабее.
+   Значения подобраны по табличному падению скорости: лом 120–125 мм теряет 55–65 м/с на километр, ОФ 125 мм — около 100 м/с, ОФ 30 мм — около 400 м/с */
+function dragK(key,cal){const b=BAL[key]||BAL.he;return b.k*Math.pow(120/Math.max(5,cal),b.e||.5);}
+/* ===== настильная стрельба: точечная масса в плоскости выстрела =====
+   замедление a = k·(ρ/ρ₀)·f(M)·v², где f(M) = Cd(M)/Cd(M дульное): у скорости звука сопротивление растёт (волновой кризис), на дозвуке падает;
+   плотность воздуха и скорость звука — по температуре. Угол бросания находится пристрелкой, поэтому скорость у цели, время полёта,
+   возвышение и угол падения согласованы между собой, а не взяты из отдельных приближений */
+const FFC=new Map();
+function flatFire(v0,k,x,T0){const key=Math.round(v0*10)+"|"+k.toExponential(4)+"|"+x+"|"+T0,c=FFC.get(key);if(c)return c;
+  const Tk=(isFinite(T0)?T0:15)+273.15,cs=20.05*Math.sqrt(Tk),rhoK=288.15/Tk,kr=k*rhoK/cdM(v0/cs),step=Math.max(2,x/260);
+  const run=th=>{let X=0,Y=0,px=0,py=0,pt=0,t=0,vx=v0*Math.cos(th),vy=v0*Math.sin(th);
+    for(let i=0;i<6000&&X<x;i++){const v=Math.hypot(vx,vy),dt=Math.min(.05,step/Math.max(20,vx)),kd=kr*cdM(v/cs)*v;
+      const mx=vx-kd*vx*dt*.5,my=vy-(9.81+kd*vy)*dt*.5,vm=Math.hypot(mx,my),km=kr*cdM(vm/cs)*vm;
+      px=X;py=Y;pt=t;vx-=km*mx*dt;vy-=(9.81+km*my)*dt;X+=mx*dt;Y+=my*dt;t+=dt;if(vx<8||Y<-x)break;}
+    if(X<x)return{ok:false,y:Y-(x-X),t,v:Math.hypot(vx,vy),desc:Math.atan2(-vy,vx)};
+    const f=(x-px)/Math.max(1e-9,X-px);return{ok:true,y:py+(Y-py)*f,t:pt+(t-pt)*f,v:Math.hypot(vx,vy),desc:Math.atan2(-vy,vx)};};
+  let a0=0,r0=run(0),a1=Math.min(.6,Math.max(1e-5,-r0.y/x)),r1=run(a1),best=r1,th=a1;
+  for(let i=0;i<10&&Math.abs(r1.y)>.01;i++){const d=r1.y-r0.y;if(Math.abs(d)<1e-9)break;const a2=Math.max(0,Math.min(.75,a1-r1.y*(a1-a0)/d));a0=a1;r0=r1;a1=a2;r1=run(a1);if(r1.ok||!best.ok){best=r1;th=a1;}}
+  const out={v:best.v,t:best.t,alpha:th,desc:Math.max(0,best.desc),rhoK,ok:best.ok&&Math.abs(best.y)<1};
+  if(FFC.size>400)FFC.clear();FFC.set(key,out);return out;}
 /* ===== внешняя баллистика навесного и дальнего огня =====
    точечная масса: тяжесть + сопротивление ρ·Cd(M)·S·v²/2; плотность и скорость звука падают с высотой (стандартная атмосфера),
    температура у земли меняет плотность воздуха и начальную скорость (тёплый заряд горит быстрее);
@@ -1440,6 +1464,7 @@ function withAngles(r){const tilt=angV()*Math.PI/180,yaw=yawV()*Math.PI/180;
   return Object.assign({},r,{obl,oblN:obl,cN:c});}
 const RMAXC={mg:2000,auto:4000,at:5000};
 function rmaxOf(g){return g.cls==="how"&&g.rmax?Math.min(30000,Math.round(g.rmax*rmOf(S.a)/50)*50):g.rmax||RMAXC[g.cls]||5000;}
+const MGK=[8.5e-4,4.6e-4,4.2e-4];
 function ballistics(){
   const g=GP(G()),a=AMMO[S.a],b=BAL[S.a],x=+$("dist").value;
   if(GD(g)){const t=(g.lr?g.lr*1000:x)/g.v,desc=(CM_FW(g)?cmTop(g):(g.top||0))*Math.PI/180,tilt=angV()*Math.PI/180,yaw=yawV()*Math.PI/180;
@@ -1455,16 +1480,18 @@ function ballistics(){
   const RV=ROUNDV[g.n]&&ROUNDV[g.n][S.a];
   let v0=RV?RV*(1-(S.wear||0)/100*.05):g.v0?g.v0*(1-(S.wear||0)/100*.05)*(b.v/800):b.v*(g.cls==="how"?.85:g.cls==="auto"&&S.a!=="apds"?1.1:1)*(.9+.1*Math.min(1.2,g.L/50))*(1-(S.wear||0)/100*.05);
   const Tz=+$("temp").value,TT=isNaN(Tz)?15:Tz;const v0n=v0;v0*=1+(TT-15)*.0007*(S.a==="bops"&&g.tempK!=null?g.tempK:1);
-  const k=g.cls==="mg"?(g.cal<9?8.5e-4:g.cal<14?4.2e-4:4.5e-4):b.k*Math.sqrt(120/g.cal)*(g.dragA&&g.dragA[S.a]||1),vx=v0*Math.exp(-k*x),t=(Math.exp(k*x)-1)/(k*v0);
-  const alpha=Math.atan(9.81*t*t/(2*x)),desc=alpha*(1+.6*(1-vx/v0));
+  const k=g.cls==="mg"?(g.cal<9?MGK[0]:g.cal<14?MGK[1]:MGK[2]):dragK(S.a,g.cal)*(g.dragA&&g.dragA[S.a]||1);
+  const FF=flatFire(v0,k,x,TT),vx=FF.v,t=FF.t,alpha=FF.alpha,desc=FF.desc;
   const tilt=angV()*Math.PI/180,yaw=yawV()*Math.PI/180;
   let c=Math.sin(desc)*Math.sin(tilt)+Math.cos(desc)*Math.cos(tilt)*Math.cos(yaw);c=Math.max(.05,Math.min(1,c));
   const obl=Math.acos(c)*180/Math.PI,norm=S.a==="apbc"?6:a.mode==="ke"?2:0;
   const oblN=Math.max(0,obl-(obl<70?norm:0)),cN=Math.cos(oblN*Math.PI/180);
   const mil=b.mil*(g.cls==="how"?1.4:g.cls==="auto"?1.6:1)*(1+(S.wear||0)/100*1.8)*(1+(S.heat||0)/160)*(g.disp||1)*(g.dispA&&g.dispA[S.a]||1),spread=mil/1000*x;
   /* снос ветром по правилу запаздывания: ветер × (время полёта − время полёта без сопротивления) */
-  const drift=(+$("wind").value||0)*Math.max(0,t-x/v0);
-  return{x,v0,vx,t,alpha,desc,obl,oblN,cN,spread,drift,dvT:v0-v0n,TT};
+  const wd=(+$("wind").value||0)*Math.max(0,t-x/v0);
+  /* деривация: вращающийся снаряд нарезного орудия уходит вправо (эмпирическая формула Литца при запасе устойчивости ≈1,5); оперённые лом и кумулятивный не вращаются */
+  const spin=!g.smooth&&S.a!=="bops"&&S.a!=="heat"&&!(a&&a.gl),der=spin?(t<=8?.0857*Math.pow(t,1.83):3.85*Math.pow(t/8,1.2)):0,drift=wd+der;
+  return{x,v0,vx,t,alpha,desc,obl,oblN,cN,spread,drift,wd,der,rhoK:FF.rhoK,dvT:v0-v0n,TT};
 }
 function updBal(){const B=ballistics();$("distTxt").textContent=B.x+" м";$("windTxt").textContent=$("wind").value+" м/с";$("wearTxt").textContent=Math.round(S.wear||0)+"%";$("yawTxt").textContent=$("yaw").value+"°";
   $("distTxt").textContent=B.x>=1000?(B.x/1000).toFixed(B.x>=10000?1:2)+" км":B.x+" м";if($("tempTxt"))$("tempTxt").textContent=(+$("temp").value>0?"+":"")+$("temp").value+" °C";
@@ -1474,7 +1501,7 @@ function updBal(){const B=ballistics();$("distTxt").textContent=B.x+" м";$("win
     ` · вероятность попадания в лист ≈ ${B.pHit<.001?"<0,1":(B.pHit*100).toFixed(B.pHit<.1?1:0)}% (без учёта пристрелки) · осколки поражают в радиусе ≈${Math.round(.25*g.cal)} м`+
     `${B.out?` · ЦЕЛЬ ДАЛЬШЕ ПРЕДЕЛА (${(B.maxX/1000).toFixed(1)} км)`:""} · предел ${(rmaxOf(g)/1000).toFixed(1)} км`;return;}
   if(B.guided){const g=GP(G());if(g.wh||CM_FW(g)){$("balTxt").textContent=cmBal(B,g);return;}$("balTxt").textContent=`Наведение: ${g.guid} · средняя скорость ${g.v} м/с · полёт ${B.t.toFixed(1)} с · дальность ${g.rmin}–${g.rmax} м${B.x>g.rmax?" — ЦЕЛЬ ДАЛЬШЕ ПРЕДЕЛА":B.x<g.rmin?" — ЦЕЛЬ БЛИЖЕ МИНИМУМА":""}${g.top?` · атака сверху, пикирование ≈${g.top}°`:""} · угол встречи с листом ${Math.round(B.obl)}° · ошибка наведения ±${Math.round(B.spread*100)} см`;return;}
-  $("balTxt").textContent=`${Math.abs(B.dvT||0)>=1?`Заряд при ${B.TT>0?"+":""}${B.TT} °C: скорость ${B.dvT>0?"+":"−"}${Math.abs(Math.round(B.dvT))} м/с к табличной · `:""}Начальная ${Math.round(B.v0)} м/с → у цели ${Math.round(B.vx)} м/с · полёт ${B.t.toFixed(2)} с · возвышение ${(B.alpha*1000).toFixed(1)} тыс. · угол падения ${(B.desc*180/Math.PI).toFixed(2)}° · угол встречи с листом ${Math.round(B.obl)}° · рассеивание ±${(B.spread*100).toFixed(0)} см · снос ветром ${(B.drift*100).toFixed(0)} см (игровая модель)`;}
+  $("balTxt").textContent=`${Math.abs(B.dvT||0)>=1?`Заряд при ${B.TT>0?"+":""}${B.TT} °C: скорость ${B.dvT>0?"+":"−"}${Math.abs(Math.round(B.dvT))} м/с к табличной · `:""}Начальная ${Math.round(B.v0)} м/с → у цели ${Math.round(B.vx)} м/с · полёт ${B.t.toFixed(2)} с · возвышение ${(B.alpha*1000).toFixed(1)} тыс. · угол падения ${(B.desc*180/Math.PI).toFixed(2)}° · угол встречи с листом ${Math.round(B.obl)}° · рассеивание ±${(B.spread*100).toFixed(0)} см · снос ветром ${((B.wd!=null?B.wd:B.drift)*100).toFixed(0)} см${B.der>=.005?` · деривация ${(B.der*100).toFixed(0)} см вправо`:""}${B.rhoK&&Math.abs(B.rhoK-1)>=.015?` · плотность воздуха ${B.rhoK>1?"+":"−"}${Math.abs(Math.round((B.rhoK-1)*100))} % к норме`:""}${S.fcs?"":(Math.abs(B.drift)>=.05?" — без СУО поправки не введены":"")} (точечная масса, сопротивление по числу Маха)`;}
 function effOf(kind,list=layers){return list.reduce((s,l)=>s+(l.spent?0:l.t*MAT[l.k][kind]),0)/cosA();}
 function readLayers(){return [0,1,2,3,4,5,6,7,8,9].map(i=>({k:$("m"+i).value,t:+$("t"+i).value})).filter(l=>l.k!=="none"&&l.t>0);}
 function clearHits(){
@@ -1702,7 +1729,7 @@ function wsCalc0(d0,noRef){const d=wsGNorm(Object.assign({},d0)),C=WSP.cls[d.cls
     out.dispA[t]=sg<1?4:sg<1.3?1+(1.3-sg)*2.5:(d.cls==="how"&&sg>3.5?1.15:1);});}
   /* пробитие */
   const BK={bops:6e-5,apds:9e-5,apbc:1.6e-4,heat:2.2e-4,he:2.5e-4,hesh:2.5e-4,smoke:3e-4},dragA={};if(d.k_tip&&sh.bops)dragA.bops=.9;if(sh.apbc)dragA.apbc=(WSP.apbc[d.b_type]||WSP.apbc.ap).dr;out.dragA=dragA;
-  const vAt=(t,x)=>{const k=(BK[t]||2.5e-4)*Math.sqrt(120/d.cal)*(dragA[t]||1);return out.v[t]*Math.exp(-k*x);};out.vAt=vAt;
+  const vAt=(t,x)=>{const k=dragK(t,d.cal)*(dragA[t]||1);return out.v[t]*Math.exp(-k*x);};out.vAt=vAt;
   if(sh.bops){const b=sh.bops;[0,1000,2000].forEach((x,i)=>out[["pen","pen1","pen2"][i]].bops=wsLO(b.Lr,b.LD,vAt("bops",x),b.rho,b.a));}
   if(sh.apds){const b=sh.apds,wl=Math.max(0,Math.min(1,(b.LD-6)/4)),dM=v=>100*Math.pow(v*Math.sqrt(b.mr)/(2400*Math.pow(b.dr*10,.75)),1/.7)*(b.rho/17600);
     [0,1000,2000].forEach((x,i)=>{const v=vAt("apds",x);out[["pen","pen1","pen2"][i]].apds=wl*wsLO(b.Lr,b.LD,v,b.rho,b.a)+(1-wl)*dM(v);});}
@@ -1742,7 +1769,7 @@ function wsCalc0(d0,noRef){const d=wsGNorm(Object.assign({},d0)),C=WSP.cls[d.cls
   let disp=1;if(!d.sleeve&&d.cls==="tank")disp*=1.18;if(d.L>55&&!d.sleeve&&d.cls==="tank")disp*=1+.012*(d.L-55);if(d.cls==="how"&&d.L>52)disp*=1+.008*(d.L-52);if(d.mrs)disp*=.92;
   if(sh.bops&&sh.bops.LD>32)disp*=1+.035*(sh.bops.LD-32);if(sh.bops&&d.brake!=="none")disp*=1.06;if(sh.bops&&d.bore==="rifled")disp*=1.04;if(d.cls==="auto"&&d.L<60)disp*=1.15;if(d.mount==="towed")disp*=1.05*(({none:1,opt:.95,dig:.85})[d.fcsA]||1);out.disp=disp;
   /* прямой выстрел по цели высотой 2 м, время полёта на 2 км */
-  out.direct={};out.t2={};types.forEach(t=>{if(!BK[t]||d.cls==="how")return;const k=BK[t]*Math.sqrt(120/d.cal)*(dragA[t]||1);out.direct[t]=Math.log(1+1.277*k*out.v[t])/k;out.t2[t]=(Math.exp(k*2000)-1)/(k*out.v[t]);});
+  out.direct={};out.t2={};types.forEach(t=>{if(!BK[t]||d.cls==="how")return;const k=dragK(t,d.cal)*(dragA[t]||1);out.direct[t]=Math.log(1+1.277*k*out.v[t])/k;out.t2[t]=(Math.exp(k*2000)-1)/(k*out.v[t]);});
   out.heat=d.cls==="auto"?.14*Math.sqrt(Math.max(.02,sh.apds?sh.apds.w:.12)/.117):Math.sqrt(Math.max(...types.map(t=>sh[t].w))/8.5);
   /* лафет буксируемого орудия */
   if(d.mount==="towed"){const TR=WSP.trails[d.carrTr]||WSP.trails[2];let mc=(.3+.455*out.Mgun/1000+.0102*out.Fr/1000)*TR.mk*(typeof wsCarrK==="function"?wsCarrK(d.carrMat):(d.carrMat==="ti"?.52:1))+(d.shield?.12+.1*d.cal/100:0)+(d.carrWh===4?.25:0)+(d.apu?1.2:0);if(d.cls==="auto")mc=.45+5*out.Mgun/1000+(d.shield?.08:0)+(d.carrWh===4?.15:0);
@@ -1944,6 +1971,9 @@ function fireOne(){
   const windCorr=gd?B.drift*R(-1,1):S.fcs?B.drift*R(-.12,.12):B.drift,lead=gd?reachX:S.fcs?reachX*R(.96,1.04):0;
   let fail=null;if(gd&&Math.random()>g.rel)fail=CM_LONG(g)?cmFailTxt(g):g.cls==="drone"?"Потеря связи с дроном (помехи, РЭБ, рельеф): дрон упал, не долетев до цели":/провод/.test(g.guid)?"Обрыв провода управления: ракета ушла с линии визирования и упала":"Сбой наведения: ракета потеряла цель и ушла мимо";
   let lx=ax+gs()*B.spread+windCorr,ly=ay+gs()*B.spread,rep=null;
+  /* разброс начальной скорости от выстрела к выстрелу (навеска и температура заряда, износ): быстрый снаряд ложится выше, медленный — ниже;
+     на дальности эллипс рассеивания вытягивается по высоте, а скорость встречи и пробитие немного «гуляют» */
+  const dv0=(!gd&&!B.indirect)?gs()*(g.cls==="mg"?.006:auto?.005:.0025)*(1+(S.wear||0)/100):0;if(dv0)ly+=2*dv0*B.x*Math.tan(B.alpha||0);
   if(B.indirect&&B.guidedShell){const AG=AMMO[S.a];if(Math.random()>AG.rel)fail=AG.guided==="gps"?"Сигнал спутниковой навигации подавлен — снаряд потерял координаты и ушёл с курса":"Подсветка сорвана (дым, пыль, облачность) — снаряд потерял лазерное пятно";
     const dR=gs()*B.spreadR,dL=gs()*B.spread;S.lastDR=dR;S.lastDL=dL;lx=ax+dL;ly=ay+dR*Math.tan(B.desc);
     rep=`${AG.guided==="gps"?"по координатам":"по лазерному пятну"}: ${Math.abs(dR)<.5?"по дальности точно":(dR>0?"перелёт ":"недолёт ")+dR.toFixed(1).replace("-","")+" м"}, ${Math.abs(dL)<.5?"по направлению точно":(dL>0?"правее ":"левее ")+dL.toFixed(1).replace("-","")+" м"}`;}
@@ -1969,7 +1999,7 @@ function fireOne(){
   let ph=null;if(PT&&!fail&&!cmMv){try{const kk=pvoDist(PT)/Math.max(50,B.x||Dv());ph=pvoShotAt(PT,(lx-ax+lead-reachX)*kk,(ly-ay)*kk);}catch(e){console.error(e);ph=null;}miss=!(ph&&ph.hit);}
   if(!gd)S.wear=Math.min(100,(S.wear||0)+(auto?.03:a.type==="ke"?.35:.12)*(1+S.heat/100)*(g.wearK||1));S.balCache=null;
   if(S.wear>=100&&!S.wornMsg){S.wornMsg=true;$("res").textContent="Ствол расстрелян: рассеивание резко выросло. Замените ствол в настройках.";}
-  const ke=a.type==="ke";a.vimp=B.vx;if(ke){const v0r=B.v0-(B.dvT||0);if(a.key==="bops"&&B.vx>250&&v0r>250){const K=loK(260),rp=17600;a.pen=Math.round(a.pen*Math.exp(K/(rp*Math.pow(v0r/1000,2))-K/(rp*Math.pow(B.vx/1000,2))));}else a.pen=Math.round(a.pen*Math.pow(B.vx/v0r,1.4));}
+  const ke=a.type==="ke";a.vimp=B.vx*(1+dv0);if(ke){const v0r=B.v0-(B.dvT||0);if(a.key==="bops"&&B.vx>250&&v0r>250){const K=loK(260),rp=17600;a.pen=Math.round(a.pen*Math.exp(K/(rp*Math.pow(v0r/1000,2))-K/(rp*Math.pow(B.vx/1000,2))));}else a.pen=Math.round(a.pen*Math.pow(B.vx/v0r,1.4));}
   /* калиберные бронебойные и бетонобойные снаряды крупных калибров: пробитие по формуле Жакоб де Марра от скорости встречи и калибра */
   if(ke&&(a.key==="apbc"||a.key==="cp")&&g.cls!=="auto"&&g.cls!=="mg")a.pen=Math.round(188*Math.pow(B.vx/1000,1.43)*Math.pow(g.cal/100,1.07)*(a.key==="cp"?.8:1));
   const target=new THREE.Vector3(lx,ly,-S.T/2-.01);plate.localToWorld(target);target.x+=lead;
@@ -2360,6 +2390,10 @@ const FLF="uniform float uTime,uSeed,uI;uniform vec3 uTint;varying vec2 vUv;\n"+
 var FBP=[],FXQ=[],FLG=null;
 function fxOK(){return!!(THREE.ShaderMaterial&&THREE.PlaneGeometry)&&!reduce;}
 function fxLater(t,fn){FXQ.push({t,fn});}
+/* тряска камеры от попадания: рядом с целью — сразу; у орудия удар приходит со скоростью звука и ослаблен по давлению во фронте волны (Кинни–Грэм) —
+   бронебойная болванка за сотни метров камеру не трясёт, разрыв 125-мм снаряда за километр едва ощутим */
+function camJolt(k,W,dist){if(reduce||!(k>0))return;if((typeof lisFar==="function"&&lisFar())||!(dist>40)){S.cam=Math.max(S.cam||0,k);return;}
+  if(!(W>0))return;const ps=kgPs(dist/Math.cbrt(W)),a=k*Math.min(1,Math.sqrt(ps/.03));if(a<.02)return;fxLater(Math.min(9,dist/343),()=>{S.cam=Math.max(S.cam||0,a);});}
 function fireball(p,Rr,tau,o){if(!fxOK())return null;o=o||{};let f=FBP.find(x=>!x.on);
   if(!f){if(FBP.length>=8)f=FBP.reduce((a,b)=>a.age/a.tau>b.age/b.tau?a:b);else{const mat=new THREE.ShaderMaterial({uniforms:{uK:{value:0},uHeat:{value:1.3},uSoot:{value:.8},uSeed:{value:0},uOp:{value:1},uTime:{value:0}},vertexShader:BBV,fragmentShader:FBF,transparent:true,depthWrite:false});
     const m=new THREE.Mesh(FLG||(FLG=new THREE.PlaneGeometry(2,2)),mat);m.frustumCulled=false;m.renderOrder=4;m.raycast=()=>{};m.visible=false;scene.add(m);f={m,on:false};FBP.push(f);}}
@@ -2993,7 +3027,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
         if(stopIdx===layers.length-1&&(stopR>.8||m.br>.4&&stopR>.5))beh=1;}
       const left=Math.max(0,Math.round(rem/Math.max(1,pen)*100));
       if(ke)out.push(through?(broken?"Снаряд: разрушен, за броню прошли обломки":`Снаряд: прошёл насквозь, остаток длины сердечника ~${Math.max(5,left)}%`):`Снаряд: остановлен в слое ${stopIdx+1}, ${broken?"раздроблен":blunt?"смят и застрял":"сердечник сработался и застрял"}`);
-      if(heat&&!S.slatStop)out.push(through?`Струя: прошла насквозь, сохранилось ~${Math.max(5,left)}% глубины`:`Струя: израсходована в слое ${stopIdx+1}`);
+      if(heat&&!S.slatStop)out.push(through?`Струя: прошла насквозь, сохранилось ~${Math.min(100,Math.max(5,left))}% глубины`:`Струя: израсходована в слое ${stopIdx+1}`);
       S.slatStop=false;
       if(broken&&through){const bp=new THREE.Vector3(s.lx,s.ly,S.T/2+.05);plate.localToWorld(bp);emit(bp,new THREE.Vector3(0,.1,1),8,.6,10,false,false,brassMat);}
       if(firstBeh==="cer"&&!frontDecal&&!heat)frontDecal="shatter";
@@ -3068,7 +3102,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
       const sp=new THREE.Vector3(s.lx,s.ly,-S.T/2-.05+len/2);plate.localToWorld(sp);jg.position.copy(sp);jg.rotation.x=Math.PI/2+(pivot.rotation.x||0);scene.add(jg);glows.push({m:jg,t:0,life:.25});
       if(through){const bp=new THREE.Vector3(s.lx,s.ly,S.T/2+.05);plate.localToWorld(bp);emit(bp,new THREE.Vector3(0,.05,1),26,.22,16,true);}
       out.push(through?"Струя прошла пакет и вынесла за ним сноп расплавленного металла":"Струя израсходована внутри пакета, лицевой слой оплавлен");}
-    if(!reduce){if(!fxOK())ring(s.to,(he||hesh?1.4:.6)*cal/120);S.cam=Math.max(S.cam,(he||hesh?.5:.25)*Math.min(1.5,cal/120));
+    if(!reduce){if(!fxOK())ring(s.to,(he||hesh?1.4:.6)*cal/120);camJolt((he||hesh?.5:.25)*Math.min(1.5,cal/120),(he||hesh)?1.6*Math.pow(cal/100,3):0,s.B?s.B.x:0);
       if((he||hesh)&&!fxOK())for(let i=0;i<8;i++)puff(new THREE.Vector3(s.to.x+R(-1,1),R(.2,.8),s.to.z-R(.2,1.5)),i<3,.5*cal/120+.2,i<3?0x2a2622:0x9a8a66,new THREE.Vector3(R(-2,2),R(.5,2),R(-2,.5)),R(2,3.5));
       else if(kind!=="rico")for(let i=0;i<2;i++)puff(new THREE.Vector3(s.to.x,s.to.y,s.to.z-.1),false,.18*cal/120+.05,0x8f8a80,new THREE.Vector3(R(-.5,.5),R(0,.5),-R(.5,1.5)),R(1,1.8));}
     /* физический толчок: лист качается, стойка сдвигается */
@@ -3213,7 +3247,7 @@ function tickBody(t){
     else{const v=views[3];camera.position.lerp?camera.position.lerp(new THREE.Vector3(...v.p),Math.min(1,dt*2)):0;if(controls)controls.target.set(...v.t);}}
   try{camTick(dt);}catch(e){}try{if(typeof mdlAnimTick==="function")mdlAnimTick(dt);}catch(e){}if(controls)controls.update();
   let jit=null;if(S.cam>0&&!reduce){S.cam=Math.max(0,S.cam-dt*1.8);const k=(REDUCE_OS?.3:1)*S.cam*(views&&$("v2").getAttribute("aria-pressed")==="true"?.12:.04);jit=new THREE.Vector3(R(-k,k),R(-k,k),R(-k,k));camera.position.add(jit);}
-  try{shadowFit();shockTick(dtv);}catch(e){}
+  try{shadowFit();shockTick(dtv);}catch(e){}try{hazeTick(dtv);}catch(e){}
   renderFrame();try{postWatch(dt);}catch(e){}
   if(jit)camera.position.sub(jit);
 }
@@ -3305,7 +3339,7 @@ function wTerrainGeo(){const N=Math.round(170+70*WQ),H=5000,cx=0,cz=250,pos=[],u
   for(let j=0;j<N;j++)for(let i=0;i<N;i++){const a=j*(N+1)+i,b=a+1,c=a+N+1,d=c+1;idx.push(a,c,b,b,c,d);}
   const g=new THREE.BufferGeometry();g.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));g.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2));
   g.setIndex(N*N*6>65000?new THREE.Uint32BufferAttribute(idx,1):new THREE.Uint16BufferAttribute(idx,1));g.computeVertexNormals();return g;}
-function wTex(path,srgb,key){const pim=key&&typeof AI==="function"&&AI()&&AI()[key];let t;if(pim){t=new THREE.Texture(pim);t.needsUpdate=true;}else t=new THREE.TextureLoader().load(path);t.wrapS=t.wrapT=THREE.RepeatWrapping;if(srgb!==false&&THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy?renderer.capabilities.getMaxAnisotropy():4);return t;}
+function wTex(path,srgb,key){const pim=key&&typeof AI==="function"&&AI()&&AI()[key];let t;if(pim){t=new THREE.Texture(pim);t.needsUpdate=true;}else t=new THREE.TextureLoader().load((window.__EMB&&window.__EMB[path])||path);t.wrapS=t.wrapT=THREE.RepeatWrapping;if(srgb!==false&&THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;t.anisotropy=Math.min(ANISO,renderer.capabilities.getMaxAnisotropy?renderer.capabilities.getMaxAnisotropy():4);return t;}
 /* материал земли: трава двух масштабов (без видимого повтора), пятна грунта, вытоптанная полоса у огневого рубежа и мишени, колеи, склоны — грунт, сухие и сочные поля, тени облаков */
 function wGroundMat(W){const m=new THREE.MeshStandardMaterial({color:0xffffff,map:W.tGrass,normalMap:W.tGrassN,normalScale:new THREE.Vector2(.9,.9),roughness:.96,metalness:0});
   m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,{tMud:{value:W.tMud},tGrav:{value:W.tGrav},uCloud:W.U.cloud,uCov:W.U.cov,uSunW:W.U.sunW,uWet:W.U.wet,uSnow:W.U.snow});
@@ -3410,7 +3444,7 @@ function wTreeSpots(){const S3=[],add=(x,z,k,s)=>{if(Math.abs(x)<78&&z>-125&&z<6
     if(wFbm(x/700+11,z/700-4,3)<.52)continue;add(x,z,Math.random()<.72?"spruce":"birch",.9+Math.random()*.5);nf++;}
   return S3;}
 function wTrees(W){const all=wTreeSpots(),near=all.filter(s=>Math.hypot(s[0],s[1]-60)<300),far=all.filter(s=>Math.hypot(s[0],s[1]-60)>=300);return wTreeSet(W,near,true).concat(wTreeSet(W,far,false));}
-function wTreeSet(W,spots,shadow){kinds={birch:{h:[14,21],leafCol:[.62,.78,.42],bark:true},oak:{h:[12,19],leafCol:[.42,.55,.3],bark:false},spruce:{h:[16,28],leafCol:[.28,.38,.25],bark:false}};
+function wTreeSet(W,spots,shadow){const kinds={birch:{h:[14,21],leafCol:[.62,.78,.42],bark:true},oak:{h:[12,19],leafCol:[.42,.55,.3],bark:false},spruce:{h:[16,28],leafCol:[.28,.38,.25],bark:false}};
   const out=[];const o=new THREE.Object3D(),c=new THREE.Color();
   for(const k in kinds){const K=kinds[k],L=spots.filter(s=>s[2]===k);if(!L.length)continue;const G=wTreeGeos(k),lt=wLeafTex(k);
     const lm=wWindMat(new THREE.MeshStandardMaterial({map:lt,alphaTest:.42,side:THREE.DoubleSide,roughness:.92,metalness:0}),W,k==="spruce"?.012:.03,1);
@@ -3628,20 +3662,24 @@ visualFix();
 var POST=null;
 function postInit(){try{if(!renderer.capabilities||!renderer.capabilities.isWebGL2||!THREE.WebGLMultisampleRenderTarget||!THREE.ShaderMaterial)return null;
   const hf=renderer.extensions&&renderer.extensions.get("EXT_color_buffer_float")?THREE.HalfFloatType:THREE.UnsignedByteType,sz=new THREE.Vector2();renderer.getDrawingBufferSize(sz);
-  const rt=new THREE.WebGLMultisampleRenderTarget(sz.x,sz.y,{type:hf,format:THREE.RGBAFormat});rt.samples=4;
+  /* буфер глубины: без трафарета движок выделяет кадру со сглаживанием 16-битную глубину — на дальности дальше десятков метров
+     её шаг больше метра, и близкие поверхности (следы попаданий, тени у земли, дорога, вода) мерцают и «прорезают» друг друга.
+     С трафаретом выделяется 24 бита глубины — шаг в 256 раз мельче */
+  const rt=new THREE.WebGLMultisampleRenderTarget(sz.x,sz.y,{type:hf,format:THREE.RGBAFormat,stencilBuffer:true});rt.samples=4;
   const mk=(w,h)=>new THREE.WebGLRenderTarget(Math.max(4,w),Math.max(4,h),{type:hf,depthBuffer:false,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter});
   const a=mk(sz.x>>2,sz.y>>2),b=mk(sz.x>>2,sz.y>>2),a2=mk(sz.x>>3,sz.y>>3),b2=mk(sz.x>>3,sz.y>>3);
   const V="varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}";
   const SM=(u,f)=>new THREE.ShaderMaterial({uniforms:u,vertexShader:V,fragmentShader:f,depthTest:false,depthWrite:false});
   const bright=SM({t:{value:null},th:{value:1.05}},"uniform sampler2D t;uniform float th;varying vec2 vUv;vec3 sn(vec3 v){return(v==v)?min(max(v,vec3(0.)),vec3(60.)):vec3(0.);}void main(){vec3 c=sn(texture2D(t,vUv).rgb);float l=dot(c,vec3(.2126,.7152,.0722));gl_FragColor=vec4(c*smoothstep(th,th*2.2,l),1.);}");
   const blur=SM({t:{value:null},d:{value:new THREE.Vector2()}},"uniform sampler2D t;uniform vec2 d;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb*.227;c+=(texture2D(t,vUv+d*1.385).rgb+texture2D(t,vUv-d*1.385).rgb)*.316;c+=(texture2D(t,vUv+d*3.231).rgb+texture2D(t,vUv-d*3.231).rgb)*.07;gl_FragColor=vec4(c,1.);}");
-  const comp=SM({t:{value:null},px:{value:new THREE.Vector2(1/sz.x,1/sz.y)},sh:{value:.32},b1:{value:null},b2:{value:null},s:{value:.55},ex:{value:1},gr:{value:0},asp:{value:1},al:{value:null},key:{value:.18},aeMin:{value:.75},aeMax:{value:2.8},aeOn:{value:0},sw:{value:[new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4()]}},`uniform sampler2D t,b1,b2,al;uniform float s,ex,gr,asp,key,aeMin,aeMax,aeOn,sh;uniform vec2 px;uniform vec4 sw[4];varying vec2 vUv;
+  const comp=SM({t:{value:null},px:{value:new THREE.Vector2(1/sz.x,1/sz.y)},sh:{value:.32},b1:{value:null},b2:{value:null},s:{value:.55},ex:{value:1},gr:{value:0},asp:{value:1},al:{value:null},key:{value:.18},aeMin:{value:.75},aeMax:{value:2.8},aeOn:{value:0},sw:{value:[new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4(),new THREE.Vector4()]},hz:{value:[new THREE.Vector4(0,0,1,0),new THREE.Vector4(0,0,1,0)]},tm:{value:0}},`uniform sampler2D t,b1,b2,al;uniform float s,ex,gr,asp,key,aeMin,aeMax,aeOn,sh,tm;uniform vec2 px;uniform vec4 sw[4];uniform vec4 hz[2];varying vec2 vUv;
     vec3 sn(vec3 v){return(v==v)?min(max(v,vec3(0.)),vec3(60.)):vec3(0.);}
     vec3 gRrt(vec3 v){vec3 a=v*(v+.0245786)-.000090537;vec3 b=v*(.983729*v+.4329510)+.238081;return a/b;}
     vec3 gAces(vec3 c){const mat3 i=mat3(.59719,.07600,.02840,.35458,.90834,.13383,.04823,.01566,.83777);const mat3 o=mat3(1.60475,-.10208,-.00327,-.53108,1.10813,-.07276,-.07367,-.00605,1.07602);c=i*c;c=gRrt(c);return clamp(o*c,0.,1.);}
     vec3 gSrgb(vec3 c){return mix(c*12.92,1.055*pow(max(c,vec3(0.)),vec3(1./2.4))-.055,step(.0031308,c));}
     float gH(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233))+gr)*43758.5453);}
     void main(){vec2 uv=vUv;for(int i=0;i<4;i++){vec4 q4=sw[i];if(q4.w>0.){vec2 d=(uv-q4.xy)*vec2(asp,1.);float L=length(d);float x=(L-q4.z)/max(.003,q4.z*.12+.004);uv-=d/max(L,1e-4)*vec2(1./asp,1.)*q4.w*x*exp(-x*x);}}
+    for(int i=0;i<2;i++){vec4 h4=hz[i];if(h4.w>0.){vec2 e=(vUv-h4.xy)*vec2(asp,1.)/vec2(h4.z,h4.z*2.4);float m=exp(-dot(e,e))*h4.w;uv+=vec2(sin(vUv.y*310.+tm*11.)+sin(vUv.y*127.-tm*7.+vUv.x*43.),cos(vUv.x*190.+tm*9.)+sin(vUv.y*71.+tm*5.))*m*.0006;}}
     vec3 c0=sn(texture2D(t,uv).rgb),cn=sn(texture2D(t,uv+vec2(px.x,0.)).rgb)+sn(texture2D(t,uv-vec2(px.x,0.)).rgb)+sn(texture2D(t,uv+vec2(0.,px.y)).rgb)+sn(texture2D(t,uv-vec2(0.,px.y)).rgb);vec3 c=max(c0+(c0-cn*.25)*sh,vec3(0.))+(sn(texture2D(b1,uv).rgb)*.6+sn(texture2D(b2,uv).rgb)*.8)*s;float ae=1.;if(aeOn>.5){float Lm=exp(texture2D(al,vec2(.5)).r);ae=clamp(pow(key/max(Lm,1e-4),.55),aeMin,aeMax);}c*=ex/.6*ae;c=gAces(c);{float lu=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(lu),c,.95);c*=mix(vec3(.965,.99,1.04),vec3(1.045,1.01,.94),smoothstep(.12,.7,lu));c=clamp((c-.45)*1.05+.45,0.,1.);}vec2 q=vUv-.5;c*=1.-dot(q,q)*.42;c=sn(c);c=gSrgb(c);c+=(gH(vUv*913.)-.5)*.012;gl_FragColor=vec4(c,1.);}`);
   const cam=new THREE.OrthographicCamera(-1,1,1,-1,0,1),sc=new THREE.Scene(),quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2),bright);quad.frustumCulled=false;sc.add(quad);
   const ae=hf===THREE.HalfFloatType,t1=()=>new THREE.WebGLRenderTarget(1,1,{type:hf,depthBuffer:false,minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter});
@@ -3717,6 +3755,16 @@ function shockTick(dt){if(!POST||!POST.comp||!POST.comp.uniforms.sw)return;const
   for(let i=0;i<4;i++){const o=SHOCK[i],u=U.sw.value[i];if(!o){u.set(0,0,0,0);continue;}const dist=camera.position.distanceTo(o.p);v.copy(o.p).project(camera);
     if(v.z>1||dist<.5){u.set(0,0,0,0);continue;}const ru=o.r/(2*dist*th),ps=kgPs(o.r/o.W3);u.set(v.x*.5+.5,v.y*.5+.5,ru,Math.min(.03,ru*.18*Math.min(1,Math.sqrt(ps)*1.2)));}
   U.asp.value=camera.aspect||1;}
+/* марево: воздух над раскалённым стволом и над очагами огня нагрет неравномерно и преломляет свет — всё, что видно сквозь него, дрожит.
+   Ствол даёт марево после серии выстрелов (нагрев выше четверти шкалы), огонь — пока горит; два самых заметных источника уходят в шейдер кадра */
+function hazeTick(dt){if(!POST||!POST.comp||!POST.comp.uniforms.hz)return;const U=POST.comp.uniforms,H=U.hz.value;U.tm.value=(U.tm.value+dt)%600;
+  const src=[];if(POST.on&&!reduce&&!REDUCE_OS){
+    const h=((S.heat||0)-25)/60;if(h>0&&typeof muzzleWorld==="function"){const m=muzzleWorld();src.push({p:new THREE.Vector3(m.x*.62,m.y+.45,m.z*.62),r:1+G().cal/160,k:Math.min(1,h)});}
+    if(typeof WF!=="undefined")for(const f of WF){if(!f||!f.g||!f.g.parent||f.g.visible===false)continue;const p=new THREE.Vector3();f.g.getWorldPosition(p);const r=Math.max(.8,(f.r||1)*.9+(f.sz||1)*.8);p.y+=r*.9;src.push({p,r,k:1});}}
+  const th=Math.tan(camera.fov*Math.PI/360),v=new THREE.Vector3(),L=[];
+  for(const o of src){const dist=camera.position.distanceTo(o.p);if(!(dist>.3))continue;v.copy(o.p).project(camera);if(v.z>1||Math.abs(v.x)>1.5||Math.abs(v.y)>1.8)continue;
+    const ru=Math.min(.45,o.r/(2*dist*th));if(ru<.006)continue;L.push({x:v.x*.5+.5,y:v.y*.5+.5,ru,w:o.k*Math.max(.35,Math.min(1.6,ru*7))});}
+  L.sort((a,b)=>b.ru*b.w-a.ru*a.w);for(let i=0;i<2;i++){const o=L[i];if(o)H[i].set(o.x,o.y,o.ru,o.w);else H[i].set(0,0,1,0);}}
 /* износ краски: сколы до металла и грунта, потёки ржавчины, матовая пыль — в цвете и в картах шероховатости и металличности (G — шероховатость, B — металл) */
 function vehRM(kind){const key=kind+"_rm";if(VEHTX[key])return VEHTX[key];const t0=vehCamo(kind);if(!t0||!t0.image||!t0.image.getContext)return null;
   const cv=document.createElement("canvas");cv.width=cv.height=512;const c=cv.getContext("2d"),k=t0.image.width>512?document.createElement("canvas").getContext("2d"):t0.image.getContext("2d");if(!c||!c.fillRect||!k||!c.createRadialGradient)return null;
@@ -3735,7 +3783,7 @@ function vehRM(kind){const key=kind+"_rm";if(VEHTX[key])return VEHTX[key];const 
   for(let i=0;i<30;i++)chip(rnd()*512,rnd()*512,1.8+rnd()*2.2,rnd()<.25);
   for(let i=0;i<4;i++){const x=rnd()*512,y=rnd()*512;for(let j=0;j<7;j++)chip(x+(rnd()-.5)*36,y+(rnd()-.5)*20,1.2+rnd()*2.4,rnd()<.3);}
   t0.needsUpdate=true;
-  const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;if(renderer.capabilities)t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return VEHTX[key]=t;}
+  const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;if(renderer.capabilities)t.anisotropy=Math.min(ANISO,renderer.capabilities.getMaxAnisotropy());return VEHTX[key]=t;}
 /* ===== Покадровые эффекты из атласов 4×4: взрыв на грунте, вспышка с искрами и осколками, клуб дыма ===== */
 var FXA={tex:{},pool:[],live:[]};
 function fxaInit(){try{const A=AI()||{};["exp","spark","smoke"].forEach(k=>{const im=A["atlas_"+k];if(!im)return;const t=new THREE.Texture(im);t.needsUpdate=true;if(THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;t.minFilter=THREE.LinearMipmapLinearFilter;FXA.tex[k]=t;});}catch(e){}}
@@ -4504,7 +4552,7 @@ function vehCamo(kind){if(VEHTX[kind])return VEHTX[kind];const cv=document.creat
   const id=c.getImageData?c.getImageData(0,0,512,512):null;if(id){const d=id.data;for(let i=0;i<d.length;i+=4){const n=(rnd()-.5)*22;d[i]+=n;d[i+1]+=n;d[i+2]+=n*.8;}c.putImageData(id,0,0);}
   for(let i=0;i<260;i++){c.strokeStyle=`rgba(${rnd()<.5?"190,180,150":"30,28,22"},${.08+rnd()*.18})`;c.lineWidth=.6+rnd()*1.4;const x=rnd()*512,y=rnd()*512,l=3+rnd()*14,a=rnd()*6.283;c.beginPath();c.moveTo(x,y);c.lineTo(x+Math.cos(a)*l,y+Math.sin(a)*l);c.stroke();}
   for(let i=0;i<40;i++){const x=rnd()*512,y=rnd()*512,g=c.createLinearGradient(x,y,x,y+60+rnd()*80);g.addColorStop(0,"rgba(40,32,20,.18)");g.addColorStop(1,"rgba(40,32,20,0)");c.fillStyle=g;c.fillRect(x,y,2+rnd()*4,140);}
-  const t=new THREE.CanvasTexture(cv);if(THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;if(renderer.capabilities)t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());t.__P=P;VEHTX[kind]=t;vcHi(kind,t);return t;}
+  const t=new THREE.CanvasTexture(cv);if(THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;if(renderer.capabilities)t.anisotropy=Math.min(ANISO,renderer.capabilities.getMaxAnisotropy());t.__P=P;VEHTX[kind]=t;vcHi(kind,t);return t;}
 function vehTrackTx(){if(VEHTX.trk)return VEHTX.trk;const cv=document.createElement("canvas");cv.width=64;cv.height=64;const c=cv.getContext("2d");if(!c||!c.fillRect)return null;
   c.fillStyle="#2a2926";c.fillRect(0,0,64,64);c.fillStyle="#4a4740";c.fillRect(0,0,64,10);c.fillRect(0,32,64,10);c.fillStyle="#18171500";c.fillStyle="#181715";c.fillRect(28,10,8,22);c.fillRect(28,42,8,22);
   c.fillStyle="rgba(150,120,80,.25)";for(let i=0;i<40;i++)c.fillRect(Math.random()*64,Math.random()*64,2,2);
@@ -5083,7 +5131,7 @@ function heFrag(g,akey){const H=heW(g,akey),ce=akey==="vog"?30:akey==="fpvF"?70:
 const fragV=(V0,m,R)=>V0*Math.exp(-R/(289.5*Math.cbrt(m))),fragPen=(m,V)=>4.4e-4*Math.cbrt(m*1000)*Math.pow(Math.max(0,V),4/3),f1=(x,n)=>x.toFixed(n).replace(".",",");
 function zoneFragT(zone){let t=0;vehPack(zone).forEach(l=>{const m=MAT[l[0]];if(!m||l[0]==="gap")return;if(m.beh==="slat")return;t+=m.beh==="era"?6:l[1]*m.ap;});
   const P=(VEH&&VEH.patches||[]).filter(p=>p.zone===zone);const ang=P.length?P.reduce((s2,p)=>s2+p.ang*p.w*p.h,0)/Math.max(1e-3,P.reduce((s2,p)=>s2+p.w*p.h,0)):0;return t/Math.cos(Math.min(70,ang)*Math.PI/180);}
-function poisson(l){if(l<=0)return 0;if(l>30)return Math.max(0,Math.round(l+Math.sqrt(l)*gs()));let k=0,p=1;const L=Math.exp(-l);do{k++;p*=Math.random();}while(p>L);return k-1;}
+function poisson(l){if(l<=0)return 0;if(l>30)return Math.max(0,Math.round(l+Math.sqrt(l)*entGauss()));let k=0,p=1;const L=Math.exp(-l);do{k++;p*=Math.random();}while(p>L);return k-1;}
 function vehNear(s){if(!VEH||!s.a||s.fail)return;const mode=s.a.type;if(mode!=="he")return;const g=G(),v=VT[S.vt];if(!VS)vehReset();
   VEH.g.updateMatrixWorld(true);const lp=VEH.g.worldToLocal(s.to.clone()),hw=v.W/2,hl=v.L/2,top=v.top;
   const dx=Math.max(0,Math.abs(lp.x)-hw),dz=Math.max(0,Math.abs(lp.z)-hl),dy=Math.max(0,lp.y-top),Rs=Math.max(.15,Math.hypot(dx,dz,dy));if(Rs>70)return;
