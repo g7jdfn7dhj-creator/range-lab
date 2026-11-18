@@ -1009,6 +1009,7 @@ function tex(key,rep=1){if(TX[key])return TX[key];
   else if(key==="perf"){fill("#5b5e55");rnd(c,700,"#33352f",.5,1.5,.2,.5);for(let y=16;y<512;y+=32)for(let x=((y/32)%2?16:0)+8;x<512;x+=32){c.clearRect(x-9,y-9,0,0);c.save();c.globalCompositeOperation="destination-out";c.beginPath();c.arc(x,y,9,0,7);c.fill();c.restore();}}
   else if(key==="du"){fill("#2c2d2b");rnd(c,1200,"#46473f",.5,1.8,.2,.6);rnd(c,60,"#3d3a2a",8,30,.15,.3);streaks(c,200,"#6a6b63",40,.25);}
   else if(key==="slat"){c.clearRect(0,0,512,512);c.fillStyle="#55583f";for(let x=0;x<512;x+=64)c.fillRect(x,0,14,512);c.fillRect(0,0,512,20);c.fillRect(0,492,512,20);rnd(c,200,"#3a3c2b",.5,2,.4,.8);}
+  else if(key==="slatb"){fill("#55583f");rnd(c,900,"#3a3c2b",.5,2,.3,.7);rnd(c,70,"#6e6a50",4,16,.1,.25);rnd(c,40,"#7a4a2a",2,9,.2,.45);streaks(c,120,"#8a8c74",60,.25);}
   else if(key==="wood"){fill("#7a5a36");for(let i=0;i<260;i++){const y=Math.random()*512;c.strokeStyle=Math.random()<.5?"rgba(60,40,20,.35)":"rgba(170,130,80,.25)";c.lineWidth=.6+Math.random()*2;c.beginPath();c.moveTo(0,y);for(let x=0;x<=512;x+=16)c.lineTo(x,y+Math.sin(x*.015+i*.7)*4);c.stroke();}
     for(let i=0;i<7;i++){const x=Math.random()*512,y=Math.random()*512;c.fillStyle="rgba(55,35,18,.7)";c.beginPath();c.ellipse(x,y,6+Math.random()*8,4+Math.random()*4,0,0,7);c.fill();c.strokeStyle="rgba(60,40,22,.4)";for(let k=1;k<5;k++){c.beginPath();c.ellipse(x,y,8+k*7,5+k*3,0,0,7);c.stroke();}}}
   else if(key==="soil"){fill("#6b5a40");rnd(c,2500,"#4a3c28",.5,2.5,.3,.7);rnd(c,1500,"#9a8462",.5,2,.3,.6);rnd(c,40,"#5a4a32",10,40,.2,.4);}
@@ -1577,13 +1578,34 @@ function updGlows(dt){updGrow(dt);updHot(dt);for(let i=glows.length-1;i>=0;i--){
 function addPetals(li,x,y,r){const l=layers[li];if(!l||!l.mesh)return;const n=4+((Math.random()*3)|0),z=l.mesh.position.z+l.tv/2;
   for(let i=0;i<n;i++){const a=i/n*6.283+R(-.2,.2),pm=new THREE.Mesh(new THREE.BoxGeometry(r*.9,r*1.1,Math.min(.01,l.tv*.5)),l.mesh.material);
     pm.position.set(x+Math.cos(a)*r*1.05,y+Math.sin(a)*r*1.05,z+r*.35);pm.rotation.z=a+Math.PI/2;pm.rotation.x=0;pm.rotateX?pm.rotateX(-.9):0;hits.add(pm);}}
+/* v26: решётка из объёмных планок. Насыпная плотность слоя (MAT.slat.dens) задаёт долю стали: при шаге 90 мм планка 7,85 г/см³ × высота / шаг.
+   Глубина планки — толщина слоя (10 мм — лёгкая решётка, 50–80 мм — как на БТР и танках). По периметру — рамка из уголка 40 мм.
+   poly — контур уцелевшей части листа: тогда планки режутся на отрезки по 10 см и остаются только те, что внутри контура */
+function mergeBoxes(B){const pos=[],nor=[],uv=[],idx=[];let off=0;
+  B.forEach(([w,h,d,x,y,z])=>{const g=new THREE.BoxGeometry(w,h,d);g.translate(x,y,z);const p=g.attributes.position,n=g.attributes.normal,ix=g.index;
+    for(let i=0;i<p.count;i++){const px=p.getX(i),py=p.getY(i),pz=p.getZ(i),nx=n.getX(i),ny=n.getY(i);pos.push(px,py,pz);nor.push(nx,ny,n.getZ(i));
+      uv.push(Math.abs(nx)>.5?(pz+py)*1.3:(px+1)*1.2+pz,Math.abs(ny)>.5?(pz+px)*1.3:(py+.8)*1.2);}
+    if(ix)for(let i=0;i<ix.count;i++)idx.push(ix.getX(i)+off);off+=p.count;g.dispose();});
+  const G=new THREE.BufferGeometry();G.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));G.setAttribute("normal",new THREE.Float32BufferAttribute(nor,3));G.setAttribute("uv",new THREE.Float32BufferAttribute(uv,2));G.setIndex(idx);G.userData.slat=true;return G;}
+function slatGeo(tv,dens,poly){const pitch=.09,fw=.04,bh=Math.max(.006,Math.min(.05,pitch*Math.min(.6,Math.max(.05,(dens||.8)/7.85)))),B=[],seg=poly?.1:0,z0=0;
+  const inP=(x,y)=>!poly||PL.inside([x,y],poly);
+  const hBar=(x0,x1,y,h,d)=>{if(!seg){B.push([x1-x0,h,d,(x0+x1)/2,y,z0]);return;}for(let x=x0;x<x1-1e-6;x+=seg){const xe=Math.min(x1,x+seg);if(inP((x+xe)/2,y))B.push([xe-x,h,d,(x+xe)/2,y,z0]);}};
+  const vBar=(x,y0,y1,w,d)=>{if(!seg){B.push([w,y1-y0,d,x,(y0+y1)/2,z0]);return;}for(let y=y0;y<y1-1e-6;y+=seg){const ye=Math.min(y1,y+seg);if(inP(x,(y+ye)/2))B.push([w,ye-y,d,x,(y+ye)/2,z0]);}};
+  const n=Math.floor((1.6-2*fw)/pitch),y00=-((n-1)*pitch)/2;for(let i=0;i<n;i++)hBar(-1+fw,1-fw,y00+i*pitch,bh,tv*.94);
+  const fd=Math.max(tv,.012);hBar(-1,1,-.8+fw/2,fw,fd);hBar(-1,1,.8-fw/2,fw,fd);vBar(-1+fw/2,-.8+fw,.8-fw,fw,fd);vBar(1-fw/2,-.8+fw,.8-fw,fw,fd);
+  if(!B.length)B.push([.001,.001,.001,0,0,0]);return mergeBoxes(B);}
+/* v26: попадание в элементы крепления на лицевой стороне — прижимную планку струбцины и головки стяжных болтов */
+function mountHit(x,y){if(!mount||mount.visible===false||S.veh)return null;
+  if(Math.abs(x)<.6&&y>-.74&&y<-.62)return{mm:30,txt:"удар пришёлся в прижимную планку струбцины: сначала пробита сталь 30 мм"};
+  for(const c of mount.children){const p=c.userData&&c.userData.c;if(!p||!c.geometry||!c.geometry.parameters||c.geometry.parameters.radiusTop!==.04||c.position.z>0)continue;if(Math.hypot(x-p[0],y-p[1])<.04)return{mm:25,txt:"удар пришёлся в головку стяжного болта: сначала пробита сталь ≈25 мм"};}
+  return null;}
 function buildPlate(){
   clearHits();if(typeof fires!=="undefined")clearFires();layers.forEach(l=>{if(l.side){plate.remove(l.side);l.side=null;}if(l.mesh){plate.remove(l.mesh);l.mesh.geometry.dispose();l.mesh.material.dispose();}});
   let L=readLayers();if(!L.length)L=[{k:"rha",t:20}];
   let T=0;L.forEach(l=>{l.tv=MAT[l.k].col===null?l.t/1000:Math.max(.006,l.t/1000);T+=l.tv;});
   let z=-T/2;
   layers=L.map((l,li)=>{const m=MAT[l.k];let mesh=null;
-    if(m.col!==null){const tk=m.tx||l.k;derive(tk);const bg=new THREE.BoxGeometry(2,1.6,l.tv,64,52,1);edgeUV(bg,l.tv);
+    if(m.col!==null){const sl=l.k==="slat",tk=sl?"slatb":(m.tx||l.k);derive(tk);const bg=sl?slatGeo(l.tv,m.dens):new THREE.BoxGeometry(2,1.6,l.tv,64,52,1);if(!sl)edgeUV(bg,l.tv);
       mesh=new THREE.Mesh(bg,withHoles(M(0xffffff,Object.assign({map:tex(tk,1),roughnessMap:TXRG[tk]||null},TXN[tk]?{normalMap:TXN[tk],normalScale:new THREE.Vector2(.9,.9)}:{bumpMap:tex(tk,1),bumpScale:.012},{envMapIntensity:m.dens>4?.9:.5,transparent:["glass","alon","spinel"].includes(l.k),opacity:l.k==="glass"?.72:["alon","spinel"].includes(l.k)?.8:1,alphaTest:l.k==="slat"||l.k==="perf"||l.k==="net"?.5:0,metalness:m.dens>4?.55:l.k==="al"?.5:.1,roughness:l.k==="al"?.45:m.dens>4?.62:l.k==="rub"?.95:.8})),["steel","hard","soft","ti","du","hc"].includes(m.beh)?.55:0));
       mesh.position.z=z+l.tv/2;mesh.castShadow=mesh.receiveShadow=true;plate.add(mesh);if(mesh.material.userData.uLI)mesh.material.userData.uLI.value=li;}
     z+=l.tv;return Object.assign({},l,{mesh,spent:false});});
@@ -1614,6 +1636,10 @@ function weak(x,y){const ht=typeof hotAt==="function"?hotAt(x,y):0;let cw=1;try{
 /* прогиб считается для каждого слоя отдельно: слой, до которого снаряд не дошёл, не гнётся */
 const frontIdx=()=>{const i=layers.findIndex(l=>l.mesh&&l.mesh.visible!==false);return i<0?0:i;};
 const backIdx=()=>{for(let i=layers.length-1;i>=0;i--)if(layers[i].mesh)return i;return 0;};
+/* v26: первый несущий слой — решётка и сетка стоят на отстоянии, следы удара и трещины ложатся на броню за ними */
+const sfIdx=()=>{const i=layers.findIndex(l=>l.mesh&&l.mesh.visible!==false&&MAT[l.k].beh!=="slat");return i<0?frontIdx():i;};
+const sfZ=i=>{const l=layers[i];return l&&l.mesh?l.mesh.position.z-l.tv/2:-S.T/2;};
+const slatStopped=s=>!!(s&&s.stopIdx>=0&&layers[s.stopIdx]&&MAT[layers[s.stopIdx].k].beh==="slat");
 function dispAt(x,y,li){if(li===undefined)li=frontIdx();return S.marks.reduce((s,m)=>s+(m.dl?(m.dl[li]||0):m.d)*Math.exp(-((x-m.x)**2+(y-m.y)**2)/(2*m.sig*m.sig)),0);}
 function deform(x,y,dl,sig){
   if(S.flat)return;
@@ -2517,17 +2543,17 @@ function grow(i0,ang,L,o={}){
 }
 function drawCracks(){
   /* цвет трещины по материалу: в стекле и прозрачной керамике трещины светлые (рассеивают свет), в непрозрачной керамике — серо-бурые, в металле — чёрные с тонкой светлой кромкой */
-  try{const fl=layers[frontIdx()],m=fl&&MAT[fl.k];if(m){const gl=["glass","alon","spinel"].includes(fl.k);crackMat.color.setHex(gl?0xdfe6e8:m.beh==="cer"?0x2a241e:0x0c0907);crackMat.opacity=gl?.8:.92;lipMat.opacity=gl?.12:.28;}}catch(e){}
+  try{const fl=layers[sfIdx()],m=fl&&MAT[fl.k];if(m){const gl=["glass","alon","spinel"].includes(fl.k);crackMat.color.setHex(gl?0xdfe6e8:m.beh==="cer"?0x2a241e:0x0c0907);crackMat.opacity=gl?.8:.92;lipMat.opacity=gl?.12:.28;}}catch(e){}
   if(crackObj){plate.remove(crackObj);crackObj.geometry.dispose();crackObj=null;}
   if(crackLip){plate.remove(crackLip);crackLip.geometry.dispose();crackLip=null;}
-  const pos=[],lip=[],zf=-S.T/2-.004,zb=S.T/2+.004;
+  const pos=[],lip=[],zf=sfZ(sfIdx())-.004,zb=S.T/2+.004;
   const bi=backIdx();
   /* трещина рисуется лентой: ширина у места удара больше, к концу сходит на нет */
   const quad=(a,b,w,z,li)=>{const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1,nx=-dy/L*w/2,ny=dx/L*w/2;
     const za=z+dispAt(a[0],a[1],li)*(z<0?1:1),zb2=z+dispAt(b[0],b[1],li);
     pos.push(a[0]+nx,a[1]+ny,za,a[0]-nx,a[1]-ny,za,b[0]+nx*.7,b[1]+ny*.7,zb2,a[0]-nx,a[1]-ny,za,b[0]-nx*.7,b[1]-ny*.7,zb2,b[0]+nx*.7,b[1]+ny*.7,zb2);
     const ox=nx*1.6+ny*.0,oy=ny*1.6;lip.push(a[0]+nx+ox*.3,a[1]+ny+oy*.3,za,a[0]+nx,a[1]+ny,za,b[0]+nx*.7,b[1]+ny*.7,zb2,a[0]+nx+ox*.3,a[1]+ny+oy*.3,za,b[0]+nx*.7,b[1]+ny*.7,zb2,b[0]+nx*.7+ox*.2,b[1]+ny*.7+oy*.2,zb2);};
-  const fi=frontIdx();
+  const fi=sfIdx();
   CG.e.forEach(e=>{const A=CG.n[e[0]],B=CG.n[e[1]],w=e.w||.004;if(e.f!==false)quad([A.x,A.y],[B.x,B.y],w,zf,fi);if(e.b)quad([A.x,A.y],[B.x,B.y],w*.8,zb,bi);});
   S.decor.forEach(d=>quad(d[0],d[1],.0025,zf,fi));
   if(!pos.length)return;
@@ -2582,8 +2608,8 @@ function edgeColors(geo){const p=geo.attributes&&geo.attributes.position;if(!p||
   for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),orig=Math.abs(x)>.99||Math.abs(y)>.79,v=orig?.5:1;cols[i*3]=cols[i*3+1]=cols[i*3+2]=v;}geo.setAttribute("color",new THREE.Float32BufferAttribute(cols,3));}
 function rebuildPlate(){
   const shape=new THREE.Shape(S.poly.map(p=>new THREE.Vector2(p[0],p[1])));
-  layers.forEach(l=>{if(!l.mesh)return;const geo=new THREE.ExtrudeGeometry(shape,{depth:l.tv,bevelEnabled:false});geo.translate(0,0,-l.tv/2);l.mesh.geometry.dispose();l.mesh.geometry=geo;
-    if(l.side){plate.remove(l.side);}const sg=geo.clone?geo.clone():geo;edgeColors(sg);l.side=new THREE.Mesh(sg,[INVIS,fracMat(l.k)]);l.side.position.copy(l.mesh.position);l.side.castShadow=false;plate.add(l.side);});
+  layers.forEach(l=>{if(!l.mesh)return;const sl=l.k==="slat",geo=sl?slatGeo(l.tv,MAT[l.k].dens,S.poly):new THREE.ExtrudeGeometry(shape,{depth:l.tv,bevelEnabled:false});if(!sl)geo.translate(0,0,-l.tv/2);l.mesh.geometry.dispose();l.mesh.geometry=geo;
+    if(l.side){plate.remove(l.side);l.side=null;}if(sl)return;const sg=geo.clone?geo.clone():geo;edgeColors(sg);l.side=new THREE.Mesh(sg,[INVIS,fracMat(l.k)]);l.side.position.copy(l.mesh.position);l.side.castShadow=false;plate.add(l.side);});
   if(!S.flat){S.flat=true;S.marks.forEach(m=>{m.d=0;m.dl=null;});hits.children.forEach(h=>{const li=h.userData&&h.userData.li;if(li!=null&&layers[li]&&layers[li].mesh)h.position.z=layers[li].mesh.position.z;else h.position.z=h.position.z<0?-S.T/2-.003:S.T/2+.003;});}
 }
 /* отколотый кусок: тот же пакет слоёв, вырезанный по контуру трещины, падает с вращением */
@@ -2591,9 +2617,9 @@ function makePiece(poly,chip){
   const c=PL.centroid(poly),outer=new THREE.Group(),inner=new THREE.Group();outer.add(inner);inner.position.set(-c[0],-c[1],0);
   const wp=new THREE.Vector3(c[0],c[1],0);plate.localToWorld(wp);outer.position.copy(wp);outer.rotation.x=pivot.rotation.x;scene.add(outer);
   const shape=new THREE.Shape(poly.map(p=>new THREE.Vector2(p[0],p[1])));
-  const ls=chip?[layers.find(l=>l.mesh&&l.mesh.visible!==false)].filter(Boolean):layers.filter(l=>l.mesh);
-  ls.forEach(l=>{const d=chip?Math.min(l.tv,.025):l.tv,geo=new THREE.ExtrudeGeometry(shape,{depth:d,bevelEnabled:false});geo.translate(0,0,-d/2);
-    const m=new THREE.Mesh(geo,[l.mesh.material,fracMat(l.k)]);m.position.z=chip?-S.T/2+d/2:l.mesh.position.z;m.castShadow=true;inner.add(m);});
+  const ls=chip?[layers[sfIdx()]].filter(l=>l&&l.mesh):layers.filter(l=>l.mesh);
+  ls.forEach(l=>{const d=chip?Math.min(l.tv,.025):l.tv,sl=l.k==="slat"&&!chip,geo=sl?slatGeo(l.tv,MAT[l.k].dens,poly):new THREE.ExtrudeGeometry(shape,{depth:d,bevelEnabled:false});if(!sl)geo.translate(0,0,-d/2);
+    const m=new THREE.Mesh(geo,sl?l.mesh.material:[l.mesh.material,fracMat(l.k)]);m.position.z=chip?sfZ(sfIdx())+d/2:l.mesh.position.z;m.castShadow=true;inner.add(m);});
   if(!chip){hits.children.slice().forEach(h=>{if(PL.inside([h.position.x,h.position.y],poly)){hits.remove(h);inner.add(h);}});
     fires.slice().forEach(f=>{if(PL.inside([f.g.position.x,f.g.position.y],poly)){plate.remove(f.g);inner.add(f.g);}});}
   const a=PL.area(poly);
@@ -2724,7 +2750,7 @@ function meltFX(s,mode,a,kind){const T=hitT(mode,a),idx=[...new Set([frontIdx()]
   if(drip&&!reduce&&s.to)spkEmit(s.to.clone().add(new THREE.Vector3(0,-.03,0)),new THREE.Vector3(0,-1,-.15),Math.min(16,drip),.35,2.2,{hot:.85,life:2,w:1.6,drag:.25});
   return out;}
 function crackHit(s,kind,E,pbr,ductile,front){
-  const msgs=[];if(S.broken||kind==="rico")return msgs;
+  const msgs=[];if(S.broken||kind==="rico"||slatStopped(s))return msgs;
   const ht0=s.hot0!=null?s.hot0:0;if(ht0>.25){if(pbr>.5){E*=1+ht0;msgs.push("Удар по раскалённой зоне: термоудар, хрупкий слой трескается сильнее");}else msgs.push("Удар по раскалённой зоне: металл размягчён, сопротивление ниже");}
   const P=[s.lx,s.ly];if(!PL.inside(P,S.poly))return msgs;
   /* трещина на лицевой стороне есть всегда; на тыльной — только если снаряд или откол дошли до последнего слоя;
@@ -2735,7 +2761,7 @@ function crackHit(s,kind,E,pbr,ductile,front){
   CF.w=.003+.007*Math.min(1.2,E)*(.5+pbr);CF.wf=1;
   let opened=0;CG.e.forEach(e=>{const A=CG.n[e[0]],B=CG.n[e[1]],d=Math.hypot((A.x+B.x)/2-P[0],(A.y+B.y)/2-P[1]);if(d<.35&&E>.2){e.w=Math.min(.03,(e.w||.004)*(1+.6*E*(1-d/.35)));opened++;}});
   if(opened>6)msgs.push("Старые трещины рядом раскрылись шире");
-  const fm=layers[frontIdx()]?MAT[layers[frontIdx()].k]:null,ftx=fm?(fm.txt||fm.beh):"",fkk=layers[frontIdx()]?layers[frontIdx()].k:null,FLm=fkk?fracL(fkk):1,phf=fkk?phy(fkk):null;
+  const fm=layers[sfIdx()]?MAT[layers[sfIdx()].k]:null,ftx=fm?(fm.txt||fm.beh):"",fkk=layers[sfIdx()]?layers[sfIdx()].k:null,FLm=fkk?fracL(fkk):1,phf=fkk?phy(fkk):null;
   if(phf&&phf.K){const Ke=kEff(fkk);if(Ke<phf.K*.75)msgs.push(`Мороз: вязкость разрушения «${lc(fm.n)}» упала с ≈${Math.round(phf.K)} до ≈${Math.round(Ke)} МПа·√м — трещины бегут дальше`);else if(FLm>2.2&&E>.12)msgs.push(`Вязкость разрушения «${lc(fm.n)}» всего ≈${f1(phf.K,phf.K<2?2:1)} МПа·√м (у катаной стали ≈115): трещины разбегаются далеко`);}
   const c=cgNode(P[0],P[1]);let edge=0,join=0,radial=0;const tally=r=>{if(r.res==="edge")edge++;if(r.res==="join")join++;};
   const fib=fm&&(["ara","pe","rub","frp"].includes(fm.beh)||["pbo","nylon","pu","cfrp","basf","net"].includes(fkk)),wd=fkk==="wood";
@@ -2959,7 +2985,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
     }
     else{
       /* снаряд проходит слои по очереди; каждый слой и каждая граница слоёв меняют его */
-      let rem=pen,yaw=1,prev=null,broken=false,mush=false;const notes=[];const rod=a.key==="bops"||a.key==="apds",rodLO=ke&&a.key==="bops",blunt=a.key==="apbc"||a.key==="cp";s.ratio=Math.min(1.5,pen/Math.max(1,e));
+      let rem=pen,yaw=1,prev=null,broken=false,mush=false;const notes=[];{const MH=mountHit(s.lx,s.ly);if(MH){rem=Math.max(0,rem-MH.mm/cosA());notes.push(MH.txt);}}const rod=a.key==="bops"||a.key==="apds",rodLO=ke&&a.key==="bops",blunt=a.key==="apbc"||a.key==="cp";s.ratio=Math.min(1.5,pen/Math.max(1,e));
       const soft=["rub","pe","frp","ara"];let hn=0;if(rodLO&&g>25)notes.push("длинный сердечник: наклон брони «съедает» меньше, чем толщина по лучу (поправка Ланца–Одерматта)");
       for(let i=0;i<layers.length;i++){const l=layers[i];if(l.spent&&!l.fresh)continue;const m=MAT[l.k];
         if(l.k==="gap"){
@@ -3130,14 +3156,14 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
   if(s.B&&!S.lock)out.unshift(`${a.n} · дистанция ${s.B.x} м · скорость у цели ${Math.round(s.B.vx)} м/с · угол встречи ${Math.round(s.B.obl)}°`);
   try{sImpact(s,kind,mode,/Заброневое: (?!нет)/.test(out.join("\n")),eraHit,cal);}catch(e){}
   if(!S.lock)$("res").textContent=out.join("\n");
-  if(kind){setDC(frontIdx());const size={dent:.26,crack:.42,pen:.5,rico:.5}[kind]*(he&&kind!=="rico"?1.8*cal/120:cal/120);
-    const dz=dispAt(s.lx,s.ly),dzb=dispAt(s.lx,s.ly,backIdx());
-    const f=new THREE.Group();f.position.set(s.lx,s.ly,-S.T/2-.003+dz);f.rotation.y=Math.PI;
+  if(kind){const SFI=slatStopped(s)?frontIdx():sfIdx(),SFZ=sfZ(SFI);setDC(SFI);const size={dent:.26,crack:.42,pen:.5,rico:.5}[kind]*(he&&kind!=="rico"?1.8*cal/120:cal/120);
+    const dz=dispAt(s.lx,s.ly,SFI),dzb=dispAt(s.lx,s.ly,backIdx());
+    const f=new THREE.Group();f.position.set(s.lx,s.ly,SFZ-.003+dz);f.rotation.y=Math.PI;
     let fsz=Math.max(.07,size),fk=s.frontDecal||kind;
-    if(fk==="breach"){fsz=Math.max(holeBase(a,cal),.08*cal/120)*holeMul(frontIdx(),0)*256/44;}
+    if(fk==="breach"){fsz=Math.max(holeBase(a,cal),.08*cal/120)*holeMul(SFI,0)*256/44;}
     else if(fk==="blast"||fk==="scorch")fsz=Math.min(2.2,.75*cal/120+.15);
-    else if(kind==="pen"&&(fk==="pen"||fk==="petal")){const big2=s.breach||(s.through&&(he||hesh));let hr=holeBase(a,cal);if(big2)hr=Math.max(hr,.08*cal/120);hr*=holeMul(frontIdx(),0);fsz=hr*256/(he?40:26);s.decBig=he;}
-    f.add(decal(fk,fsz,he,{x:s.lx,y:s.ly,flip:true,mk:(layers[frontIdx()]||{}).k,mode,side:"f"}));hits.add(f);setDC(backIdx());
+    else if(kind==="pen"&&(fk==="pen"||fk==="petal")){const big2=s.breach||(s.through&&(he||hesh));let hr=holeBase(a,cal);if(big2)hr=Math.max(hr,.08*cal/120);hr*=holeMul(SFI,0);fsz=hr*256/(he?40:26);s.decBig=he;}
+    if(slatStopped(s))addHole(s.stopIdx,s.lx,s.ly,Math.min(.12,.05*cal/100),2);else{f.add(decal(fk,fsz,he,{x:s.lx,y:s.ly,flip:true,mk:(layers[SFI]||{}).k,mode,side:"f"}));hits.add(f);}setDC(backIdx());
     if(kind==="pen"&&s.through!==false){const b=new THREE.Group();b.position.set(s.lx,s.ly,S.T/2+.003+dzb);b.add(decal(s.breach?"exitBreach":"exit",(()=>{const big2=s.breach||(s.through&&(he||hesh));let hr=holeBase(a,cal);if(big2)hr=Math.max(hr,.08*cal/120);hr*=holeMul(backIdx(),1);return hr*256/(s.breach||he?52:36);})(),he,{x:s.lx,y:s.ly,flip:false,mk:(layers[backIdx()]||{}).k,mode,side:"b"}));hits.add(b);}
     else if(beh===1){const b=new THREE.Group();b.position.set(s.lx,s.ly,S.T/2+.003+dzb);b.add(decal(he?"crack":"dent",size*.8,false,{x:s.lx,y:s.ly,flip:false}));hits.add(b);}}
   if(kind&&kind!=="rico"&&a.type!=="smoke"){const hb=holeBase(a,cal),hTo=(kind==="pen"&&s.through!==false)?99:(s.stopIdx>=0?s.stopIdx:frontIdx());
@@ -3146,7 +3172,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
   if(kind==="pen"&&a.type!=="smoke"){
     const k=a.key,base=holeBase(a,cal);
     const big=s.breach||(s.through&&(he||hesh));let list=s.through!==false?layers.map((l,i)=>l.mesh?i:-1).filter(i=>i>=0):(s.passed||[]);
-    if(!s.through&&!(s.passed||[]).length)list=[frontIdx()];
+    if(!s.through&&!(s.passed||[]).length)list=[frontIdx()];if(!he&&!hesh)list=list.filter(li=>MAT[layers[li].k].beh!=="slat");
     list.forEach((li,j)=>{const m=MAT[layers[li].k];let r=big?Math.max(base,.08*cal/120):base;
       if(m.beh==="cer")r*=1.5+j*.3;else if(m.beh==="soft"||m.beh==="hc")r*=1.3;else if(["rub","frp","ara","pe"].includes(m.beh))r*=.8;else if(m.beh==="hard")r*=1.15;
       const jg=big?(["steel","soft","ti","du","hc"].includes(m.beh)?3:2):(m.beh==="hard"||m.beh==="cer")?1:0;
