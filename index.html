@@ -3145,8 +3145,10 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
     /* физический толчок: лист качается, стойка сдвигается */
     /* передача импульса: p = m·v·доля; угловой толчок = p·плечо / момент инерции листа на шарнире стойки */
     const mProj=20*Math.pow(cal/120,3)*({ke:(a.key==="apbc"||a.key==="cp")?1:.35,heat:.9,hesh:1,he:1}[mode]||1);
-    const frac=(kind==="pen"?.45*Math.pow(Math.min(1,Math.max(1,e)/Math.max(1,a.pen||1)),.8)+.03:kind==="rico"?.25:1)*(he?1:hesh?1:heat?.25:1)*Math.max(.3,S.curCosSaved||1);
-    const pBlast=(he||hesh)&&kind!=="rico"?1500*(s.fill?s.fill.im:1)*(s.prox?.15:1)*Math.pow(cal/120,3)*(kind==="pen"?.55:1)*(s.heDone&&!s.breach&&kind==="dent"?.8:1):0,pImp=mProj*s.vimp*frac+pBlast,Mp=Math.max(30,S.mass),Ix=Mp*(1.6*1.6/3),Iy=Mp*(2*2/12)+Mp*.05;
+    const frac=(kind==="pen"?.45*Math.pow(Math.min(1,Math.max(1,e)/Math.max(1,a.pen||1)),.8)+.03:kind==="rico"?.25:1)*(he?1:hesh?1:heat?.25:1)*Math.max(.3,S.curCosSaved||1)
+    /* v26: пакет из одних решёток и сеток: подкалиберный или струя проходят между планками почти без передачи импульса */
+    const scrOnly=!he&&!hesh&&kind==="pen"&&layers.every(l=>l.k==="gap"||MAT[l.k].beh==="slat");
+    const pBlast=(he||hesh)&&kind!=="rico"?1500*(s.fill?s.fill.im:1)*(s.prox?.15:1)*Math.pow(cal/120,3)*(kind==="pen"?.55:1)*(s.heDone&&!s.breach&&kind==="dent"?.8:1):0,pImp=mProj*s.vimp*frac*(scrOnly?.04:1)+pBlast,Mp=Math.max(30,S.mass),Ix=Mp*(1.6*1.6/3),Iy=Mp*(2*2/12)+Mp*.05;
     const imp=pImp/9000;
     S.tv+=pImp*(s.ly+.8)/Ix;S.yawV=(S.yawV||0)+pImp*s.lx/Iy*.6;S.slideV=(S.slideV||0)+pImp/(Mp+600);
     S.shake=Math.min(.6,pImp/(Mp*8));
