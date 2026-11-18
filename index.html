@@ -1198,9 +1198,9 @@ const MAT={
     i:["1,14","—","≈ 600–900 МПа","противоосколочные маты, старые бронежилеты"]},
   pu:{g:"Композиты и прослойки",n:"Полиуретановый эластомер (антиоткольное покрытие)",ap:.12,he:.5,heat:.5,br:0,rico:0,liner:.3,dens:1.2,col:0x3a3a36,beh:"rub",tx:"rub",burn:.4,def:2,
     i:["1,1–1,25","—","—","покрытия против откола, прослойки пакетов"]},
-  net:{g:"Конструктивные элементы",n:"Сетчатый экран (класса Tarian)",ap:.01,he:.15,heat:.02,br:0,rico:0,liner:0,dens:.25,col:0x4a4d3c,beh:"slat",tx:"net",burn:.1,def:0,
+  net:{g:"Конструктивные элементы",n:"Сетчатый экран (класса Tarian)",ap:.01,he:.15,heat:.02,br:0,rico:0,liner:0,dens:.25,col:0x4a4d3c,beh:"slat",tx:"net",txt:"net",burn:.1,def:0,
     i:["≈ 0,2–0,3 (по объёму)","—","—","сетка против гранат РПГ: легче решётки"]},
-  wood:{g:"Конструктивные элементы",n:"Древесина (сосна, брёвна, шпалы)",ap:.08,he:.35,heat:.2,br:.15,rico:0,liner:.1,dens:.5,col:0x8a6a3e,beh:"frp",tx:"wood",burn:.7,def:1.5,
+  wood:{g:"Конструктивные элементы",n:"Древесина (сосна, брёвна, шпалы)",ap:.08,he:.35,heat:.2,br:.15,rico:0,liner:.1,dens:.5,col:0x8a6a3e,beh:"frp",tx:"wood",txt:"wood",burn:.7,def:1.5,
     i:["0,45–0,55","—","≈ 40–50 МПа (вдоль волокон)","перекрытия блиндажей, кустарные экраны"]},
   soil:{g:"Конструктивные элементы",n:"Грунт, мешки с песком",ap:.1,he:.75,heat:.18,br:0,rico:0,liner:.2,dens:1.6,col:0x7a6646,beh:"frp",txt:"sand",tx:"soil",burn:0,def:1.6,
     i:["1,5–1,8","—","—","брустверы, засыпка, обваловка"]},
@@ -2717,7 +2717,7 @@ function crackW(x,y){if(typeof CG==="undefined"||!CG.e||!CG.e.length||!layers.le
 function isDU(){try{const g0=G();if(g0&&g0.custom)return!!(g0.duA&&g0.duA[S.a]);const r=(ROUNDS[G().n]||{})[S.a]||"";return S.a==="bops"&&/M833|M829|M900|M774|CHARM|Вакуум-1|Свинец-2|3БМ60|3БМ32|3БМ46/.test(r);}catch(e){return false;}}
 /* сила удара: КЕ — давление на контакте по модели Тейта ½ρp(v−u)²+Yp=½ρt·u²+Rt; струя — ½ρ·v² головной части; фугас и БФ — давление детонации,
    переход волны через границы слоёв (по акустическим импедансам ρc), затухание с толщиной и отражение от свободного тыла волной растяжения */
-function impactPhys(s,a,mode,cal,kind){const blk=[];for(let i=frontIdx();i<layers.length;i++){const l=layers[i];if(l.k==="gap"){if(blk.length)break;else continue;}if(l.spent&&!l.fresh)continue;if(isE(l.k))continue;blk.push(l);}
+function impactPhys(s,a,mode,cal,kind){const blk=[];for(let i=frontIdx();i<layers.length;i++){const l=layers[i];if(l.k==="gap"){if(blk.length)break;else continue;}if(MAT[l.k].beh==="slat"){if(blk.length)break;if(mode==="he"||mode==="hesh")return null;continue;}if(l.spent&&!l.fresh)continue;if(isE(l.k))continue;blk.push(l);}
   if(!blk.length)return null;const f0=blk[0],P0=phy(f0.k);if(!P0)return null;const nm=lc(MAT[f0.k].n);
   if(mode==="ke"){const key=a.key,du=isDU(),gn=G().n,rp=key==="bops"?(du?18.6:/2А20|Рапира/.test(gn)?9.5:17.6):key==="apds"?17.6:key==="cp"?7.85:(key==="mgap"||key==="mgapi")?(cal>=12?7.85:7.85):7.85,Yp=(key==="bops"||key==="apds")?(du?1.3:1.8):1.2;
     const v=(s.vimp||1000)/1000,d=key==="bops"?.22*cal:key==="apds"?.35*cal:(key==="mgap"||key==="mgapi")?.6*cal:cal,fu=u=>.5*rp*(v-u)*(v-u)+Yp-.5*P0.rho*u*u-P0.Rt;let u=0;
@@ -2730,7 +2730,7 @@ function impactPhys(s,a,mode,cal,kind){const blk=[];for(let i=frontIdx();i<layer
     let x=0,T=1;for(let i=0;i<blk.length;i++){const P=phy(blk[i].k);if(!P)continue;if(i>0){const Pp=phy(blk[i-1].k),z1=Pp.rho*Pp.c,z2=P.rho*P.c;T*=2*z2/(z1+z2);}x+=blk[i].t;}
     const lam=(mode==="hesh"?.6:.25)*cal,pb=pt*Math.min(1.5,T)*Math.exp(-x/lam),last=blk[blk.length-1],PL_=phy(last.k),soft=blk.some(l=>["rub","pe","ara","frp"].includes(MAT[l.k].beh));
     const msg=`Сила удара: давление детонации ${FILL[fk]?FILL[fk].n:"ВВ"} ≈ ${Math.round(pcj)} ГПа, в «${nm}» уходит ≈ ${Math.round(pt)} ГПа; до тыла доходит ≈ ${f1(pb,pb<1?2:1)} ГПа (прочность «${lc(MAT[last.k].n)}» на откол ≈ ${f1(PL_.sp,PL_.sp<1?2:1)} ГПа)${soft?" — мягкая прослойка отражает большую часть волны":""}`;
-    return{msg,spall:pb>PL_.sp&&kind!=="pen"?`Отражённая от тыла волна растяжения (≈${f1(pb,1)} ГПа) сильнее прочности на откол: с тыльной стороны откололись куски`:null};}
+    return{msg,spall:pb>PL_.sp&&kind!=="pen"&&!["sand","soil"].includes(last.k)?`Отражённая от тыла волна растяжения (≈${f1(pb,pb<1?2:1)} ГПа) сильнее прочности на откол: с тыльной стороны откололись куски`:null};}
   return null;}
 /* нагрев в точке удара: КЕ — адиабатический сдвиг (≈700–950 °C в тонком слое), струя — плавит, фугас — огненный шар ≈2000 °C, зажигательная пуля ≈2500 °C */
 function hitT(mode,a){return a&&a.key==="mgapi"?2500:mode==="heat"?1300:(mode==="he"||mode==="hesh")?2000:mode==="ke"?(a&&(a.key==="bops"||a.key==="apds")?950:700):400;}
@@ -2744,7 +2744,8 @@ function meltFX(s,mode,a,kind){const T=hitT(mode,a),idx=[...new Set([frontIdx()]
     else if((b==="pe"||l.k==="nylon")&&T>=p.Tm&&mode!=="ke"||(b==="pe"&&kind==="pen")){out.push(`${lc(m.n)} расплавился вокруг канала (плавится при ≈${Math.round(p.Tm)} °C): капли тянутся и капают`);drip+=6;}
     else if(b==="rub"&&T>=p.Tm)out.push(`${lc(m.n)}: поверхность обуглилась и вспучилась пузырями (разложение ≈${Math.round(p.Tm)} °C)`);
     else if(b==="ara"&&T>=p.Tm)out.push(`${lc(m.n)} обуглился у канала (разлагается при ≈${Math.round(p.Tm)} °C), но сам не горит: кислородный индекс выше 21 %`);
-    else if(b==="frp"&&T>=p.Tm&&mode!=="ke"&&!["sand","soil"].includes(l.k))out.push(`${lc(m.n)}: связующая смола выгорела у канала, волокна оголились`);
+    else if(l.k==="wood"&&T>=p.Tm&&mode!=="ke")out.push("древесина обуглилась по стенкам канала");
+    else if(b==="frp"&&T>=p.Tm&&mode!=="ke"&&!["sand","soil","wood"].includes(l.k))out.push(`${lc(m.n)}: связующая смола выгорела у канала, волокна оголились`);
     else if((b==="steel"||b==="hard"||b==="perf")&&mode==="heat")cu=true;});
   if(cu)out.push("Стенки канала оплавлены тонким слоем, вокруг — застывшие брызги меди облицовки");
   if(drip&&!reduce&&s.to)spkEmit(s.to.clone().add(new THREE.Vector3(0,-.03,0)),new THREE.Vector3(0,-1,-.15),Math.min(16,drip),.35,2.2,{hot:.85,life:2,w:1.6,drag:.25});
@@ -2887,8 +2888,18 @@ const TXT={
   conc:{p:"бетон пробит, крошка и пыль",s:r=>"бетон выкрошился воронкой"},
   perf:{p:"прошёл сквозь перфорацию, перемычки сорваны",s:r=>"перемычки задержали снаряд"},
   du:{p:"пробит, вспышка горящей урановой пыли",s:r=>r>.7?"надрыв, плотный слой выдержал":"вмятина, плотный слой выдержал"},
-  slat:{p:"прошёл между планками",s:r=>"решётка задержала"}
+  slat:{p:"прошёл между планками",s:r=>"решётка задержала"},
+  net:{p:"прошёл сквозь ячейку сетки",s:r=>"сетка задержала"},
+  wood:{p:"пробита: щепа, расщеплённые волокна у канала",s:r=>"древесина задержала: волокна смяты, снаряд застрял"}
 };
+/* v26: что пишет кумулятивная струя по слою — по виду материала, а не только «керамика / металл» */
+function heatTxt(m,pass){const t=m.txt||m.beh;if(m.beh==="slat")return pass?(TXT[t]||TXT.slat).p:(TXT[t]||TXT.slat).s(0);
+  if(t==="conc")return pass?"пробит струёй: узкий канал, вокруг выкрошились куски":"струя иссякла в толще, вокруг канала выкрошилась воронка";
+  if(t==="glass"||t==="tcer")return pass?"пробито струёй, вокруг канала паутина трещин":"растрескалось и остановило струю";
+  if(t==="sand")return pass?"струя прошла сквозь засыпку, песок осыпается из канала":"засыпка поглотила струю";
+  if(t==="wood")return pass?"прожжён канал, древесина обуглилась по кромке":"струя иссякла в древесине, канал обуглен";
+  if(m.beh==="cer")return pass?"керамика растрескалась, струя прошла":"керамика разрушила струю";
+  return pass?"прожжён струёй, кромки оплавлены":"струя иссякла в этом слое";}
 const FILL={tnt:{n:"тротил",br:1,im:1,fire:.1,soot:.85,d:"кислорода в молекуле мало — много сажи, чёрный дым"},
   compb:{n:"смесь гексогена с тротилом",br:1.25,im:1.15,fire:.12,soot:.55,d:"бризантнее тротила, дым серее"},
   pe:{n:"пластичное ВВ на основе гексогена",br:1.2,im:1.1,fire:.1,soot:.45,d:"растекается по броне перед подрывом"},
@@ -2944,8 +2955,8 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
          Лист ломает контактный взрыв и осколки корпуса; слои за зазором получают ослабленную волну и обломки */
       const L2=layers.map((l,i)=>({l,i})).filter(o=>!(o.l.spent&&!o.l.fresh)&&!isE(o.l.k));
       let q=cal*.72*Math.min(1,Math.pow(cal/100,.6))*(G().wh&&G().wh[a.key]?1:(.7+.3*cosA()))*R(.9,1.1);const front=[],rest=[];let gapMM=0,slatHit=false,seen=false;
-      for(const o of L2){if(o.l.k==="slat"){if(!front.length)slatHit=true;continue;}if(o.l.k==="gap"){if(front.length){seen=true;gapMM+=o.l.t;}continue;}(seen?rest:front).push(o);}
-      if(slatHit){q*=.4;out.push("Фугасное: взрыватель сработал на решётке — до листа дошли ослабленная волна и осколки");}
+      let slatK=null;for(const o of L2){if(MAT[o.l.k].beh==="slat"){if(!front.length){slatHit=true;slatK=slatK||o.l.k;}continue;}if(o.l.k==="gap"){if(front.length){seen=true;gapMM+=o.l.t;}continue;}(seen?rest:front).push(o);}
+      if(slatHit){q*=.4;out.push((slatK==="net"?"Фугасное: взрыватель сработал на сетке":"Фугасное: взрыватель сработал на решётке")+" — до листа дошли ослабленная волна и осколки");}
       if(eraHit)q*=.8;
       const FL=FILL[fillOf(a,G())];q*=FL.br*((AMMO[a.key]&&AMMO[a.key].qf)||1);s.fill=FL;if(G().custom&&G().heWkg)q*=Math.cbrt(G().heWkg/(1.6*Math.pow(cal/100,3)));{const w0=G().wh&&G().wh[a.key];if(w0)q*=Math.cbrt(w0.W/(1.6*Math.pow(cal/100,3)));}if(s.sto)q*=s.sto;out.push(`ВВ: ${FL.n} — ${FL.d}`);
       /* взрыватель: мгновенный — подрыв на поверхности; с замедлением — корпус пробивает тонкий лист и рвётся за ним; бесконтактный — подрыв в воздухе перед целью */
@@ -3001,11 +3012,11 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
               else notes.push("лёгкая ДЗ на подкалиберный почти не влияет");}
             else if(he||hesh)notes.push("взрыв блока ДЗ встретил заряд снаружи");}
           l.hit="p";prev=l;continue;}
-        if(heat&&prev&&soft.includes(m.beh)&&!soft.includes(MAT[prev.k].beh)){rem*=.88;notes.push("прослойка между листами выпучилась и сбила струю");}
+        if(heat&&prev&&soft.includes(m.beh)&&!soft.includes(MAT[prev.k].beh)&&MAT[prev.k].beh!=="slat"&&!isE(prev.k)&&!["sand","soil","wood"].includes(l.k)){rem*=.88;notes.push("прослойка между листами выпучилась и сбила струю");}
         if(m.beh==="perf"){if(ke){yaw*=.9;notes.push("кромки отверстий перфорированного листа изогнули сердечник");}if(heat){rem*=.92;notes.push("перфорация сместила точку подрыва, струя ослабла");}}
-        if(m.beh==="slat"){if(heat&&Math.random()<.5){l.hit="s";stopIdx=i;stopR=0;S.slatStop=true;notes.push("решётка смяла головку, взрыватель замкнуло, струя не сформировалась");break;}
-          if(he){notes.push("фугас сработал на решётке, до брони дошёл ослабленный взрыв");}l.hit="p";prev=l;continue;}
-        if(ke&&m.beh==="cer"&&m.ap>=1.5&&i===layers.findIndex(x=>!x.spent&&x.k!=="gap"&&x.k!=="slat")&&s.vimp<1350){rem*=.85;notes.push(`сердечник «растёкся» по поверхности слоя «${lc(m.n)}», прежде чем пробить его`);}
+        if(m.beh==="slat"){if(heat&&Math.random()<.5){l.hit="s";stopIdx=i;stopR=0;S.slatStop=true;notes.push(l.k==="net"?"сетка захлестнула головку и смяла её, взрыватель замкнуло, струя не сформировалась":"решётка смяла головку, взрыватель замкнуло, струя не сформировалась");break;}
+          if(he){notes.push(l.k==="net"?"фугас сработал на сетке, до брони дошёл ослабленный взрыв":"фугас сработал на решётке, до брони дошёл ослабленный взрыв");}l.hit="p";prev=l;continue;}
+        if(ke&&m.beh==="cer"&&m.ap>=1.5&&i===layers.findIndex(x=>!x.spent&&x.k!=="gap"&&MAT[x.k].beh!=="slat")&&s.vimp<1350){rem*=.85;notes.push(`сердечник «растёкся» по поверхности слоя «${lc(m.n)}», прежде чем пробить его`);}
         const hk=rodLO?loHard(l.k,s.vimp):1;if(hk>1.04&&!hn){hn=1;notes.push(`при скорости встречи ${Math.round(s.vimp)} м/с твёрдая сталь «${lc(m.n)}» держит лом на ${Math.round((hk-1)*100)}% лучше, чем при расчётной`);}
         let need=l.t*m[ck]/(rodLO?Math.pow(cosA(),.776):cosA())*w/yaw*hk;
         if(ke&&prev&&prev.k!=="gap"&&l.k!=="gap"&&!isE(l.k))need+=(rod?12:blunt?.12*cal:.08*cal)*(MAT[prev.k].dens>4&&m.dens>4?.4:1);
@@ -3029,7 +3040,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
       through=stopIdx<0;
       [...new Set(notes)].forEach(n=>out.push("  · "+n));
       layers.forEach((l,i)=>{if(!l.hit||l.k==="gap"||isE(l.k))return;const m=MAT[l.k],tx=TXT[m.txt||m.beh];
-        const txt=heat?(l.hit==="p"?(m.beh==="cer"?"керамика растрескалась, струя прошла":"прожжён струёй, кромки оплавлены"):(m.beh==="cer"?"керамика разрушила струю":"струя иссякла в этом слое")):(l.hit==="p"?tx.p:tx.s(stopR));
+        const txt=heat?heatTxt(m,l.hit==="p"):(l.hit==="p"?tx.p:tx.s(stopR));
         out.push(`Слой ${i+1}, ${lc(m.n)}: ${txt}${l.hit==="p"&&l.remP!=null?` · остаток ${Math.max(0,Math.round(l.remP*100))}%`:""}`);
         const lz=l.mesh?l.mesh.position.z:0,wp=new THREE.Vector3(s.lx,s.ly,lz);plate.localToWorld(wp);
         if(m.beh==="cer"){emit(wp,new THREE.Vector3(0,.2,-1),heat?10:26,1.2,4,false,false,cerMat);S.marks.push({x:s.lx,y:s.ly,r:.18,sig:.05,d:0,sev:heat?.25:.45});}
@@ -3037,7 +3048,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
         if(m.beh==="hard"&&l.hit==="s"&&stopR>.55)emit(wp,new THREE.Vector3(0,.3,-1),10,.8,5,false);
         if(m.burn>0&&Math.random()<m.burn*(he?1.6:heat?1.5:a.key==="mgapi"?6:.3)*(l.hit==="p"?1:.5)*Math.min(1,Math.pow(cal/110,1.5))*ignK(l.k)*(isDU()?1.5:1)&&fires.length<6){const dur=R(6,14)*(m.beh==="rub"||m.beh==="pe"?1.6:1);
           ignite(s.lx,s.ly,i===0?-S.T/2-.01:(l.hit==="p"&&i===layers.length-1?S.T/2+.01:-S.T/2-.01),m.beh==="ti"?.6:1,dur,m.beh==="rub"||m.beh==="pe",l.k);
-          out.push(`  → ${m.beh==="ti"?"горящие частицы титана":m.beh==="du"?"вспыхнула урановая пыль (пирофорна)":m.beh==="rub"?"резина загорелась, чёрный дым":m.beh==="pe"?"полиэтилен горит и капает":m.beh==="soft"?"воспламенилась стружка":m.beh==="ara"?"арамид обуглился у канала — сам не горит, тлеет и гаснет":m.beh==="frp"?"связующая смола тлеет и горит":"слой тлеет и горит"}`);
+          out.push(`  → ${m.beh==="ti"?"горящие частицы титана":m.beh==="du"?"вспыхнула урановая пыль (пирофорна)":m.beh==="rub"?"резина загорелась, чёрный дым":m.beh==="pe"?"полиэтилен горит и капает":m.beh==="soft"?"воспламенилась стружка":m.beh==="ara"?"арамид обуглился у канала — сам не горит, тлеет и гаснет":l.k==="wood"?"древесина обуглилась у канала и тлеет":m.beh==="frp"?"связующая смола тлеет и горит":"слой тлеет и горит"}`);
           if(i===0)frontDecal="burn";}
       });
       s.passed=layers.map((l,i)=>l.hit==="p"&&l.mesh?i:-1).filter(i=>i>=0);
