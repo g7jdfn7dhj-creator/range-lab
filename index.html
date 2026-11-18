@@ -2738,7 +2738,7 @@ function wetK(){const v=$("wx")?$("wx").value:"clear";return v==="rain"?1:v==="s
 /* воспламенение по химии: выше температуры воспламенения шанс растёт, мокрая поверхность (дождь, снег) гасит */
 function ignK(k){const p=phy(k);if(!p||!p.Ti)return 1;const T=S.hitT||900;return Math.max(.25,Math.min(1.5,.75+(T-p.Ti)/900))*(1-.55*wetK());}
 /* плавление и обугливание по материалу: алюминий течёт каплями, полиэтилен плавится и горит каплями, резина пузырится, арамид обугливается и гаснет сам */
-function meltFX(s,mode,a,kind){const T=hitT(mode,a),idx=[...new Set([frontIdx()].concat(kind==="pen"?(s.passed||[]):[]))],out=[];let drip=0,cu=false;
+function meltFX(s,mode,a,kind){const T=hitT(mode,a),idx=[...new Set([slatStopped(s)?frontIdx():sfIdx()].concat(kind==="pen"?(s.passed||[]):[]))],out=[];let drip=0,cu=false;
   idx.forEach(i=>{const l=layers[i];if(!l||l.k==="gap")return;const m=MAT[l.k],p=phy(l.k);if(!m||!p)return;const b=m.beh;
     if(b==="soft"&&T>=p.Tm&&(mode==="heat"||mode==="ke"&&kind==="pen")){out.push(`${l.k==="mag"?"Магниевый сплав":"Алюминиевый сплав"} оплавлен по кромке канала (плавится при ≈${Math.round(p.Tm)} °C): капли металла стекают вниз`);drip+=8;}
     else if((b==="pe"||l.k==="nylon")&&T>=p.Tm&&mode!=="ke"||(b==="pe"&&kind==="pen")){out.push(`${lc(m.n)} расплавился вокруг канала (плавится при ≈${Math.round(p.Tm)} °C): капли тянутся и капают`);drip+=6;}
@@ -2751,7 +2751,7 @@ function meltFX(s,mode,a,kind){const T=hitT(mode,a),idx=[...new Set([frontIdx()]
   if(drip&&!reduce&&s.to)spkEmit(s.to.clone().add(new THREE.Vector3(0,-.03,0)),new THREE.Vector3(0,-1,-.15),Math.min(16,drip),.35,2.2,{hot:.85,life:2,w:1.6,drag:.25});
   return out;}
 function crackHit(s,kind,E,pbr,ductile,front){
-  const msgs=[];if(S.broken||kind==="rico"||slatStopped(s))return msgs;
+  const msgs=[];if(S.broken||kind==="rico"||slatStopped(s)||(l0=>l0&&MAT[l0.k]&&MAT[l0.k].beh==="slat")(layers[sfIdx()]))return msgs;
   const ht0=s.hot0!=null?s.hot0:0;if(ht0>.25){if(pbr>.5){E*=1+ht0;msgs.push("Удар по раскалённой зоне: термоудар, хрупкий слой трескается сильнее");}else msgs.push("Удар по раскалённой зоне: металл размягчён, сопротивление ниже");}
   const P=[s.lx,s.ly];if(!PL.inside(P,S.poly))return msgs;
   /* трещина на лицевой стороне есть всегда; на тыльной — только если снаряд или откол дошли до последнего слоя;
@@ -3041,7 +3041,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
       [...new Set(notes)].forEach(n=>out.push("  · "+n));
       layers.forEach((l,i)=>{if(!l.hit||l.k==="gap"||isE(l.k))return;const m=MAT[l.k],tx=TXT[m.txt||m.beh];
         const txt=heat?heatTxt(m,l.hit==="p"):(l.hit==="p"?tx.p:tx.s(stopR));
-        out.push(`Слой ${i+1}, ${lc(m.n)}: ${txt}${l.hit==="p"&&l.remP!=null?` · остаток ${Math.max(0,Math.round(l.remP*100))}%`:""}`);
+        out.push(`Слой ${i+1}, ${lc(m.n)}: ${txt}${l.hit==="p"&&l.remP!=null?` · остаток ${Math.max(0,Math.min(100,Math.round(l.remP*100)))}%`:""}`);
         const lz=l.mesh?l.mesh.position.z:0,wp=new THREE.Vector3(s.lx,s.ly,lz);plate.localToWorld(wp);
         if(m.beh==="cer"){emit(wp,new THREE.Vector3(0,.2,-1),heat?10:26,1.2,4,false,false,cerMat);S.marks.push({x:s.lx,y:s.ly,r:.18,sig:.05,d:0,sev:heat?.25:.45});}
         if(m.beh==="ti")emit(wp,new THREE.Vector3(0,.5,-1),30,1,12,true);
@@ -8560,7 +8560,7 @@ const MX_E={steel:12900,hard:12900,perf:12900,era:12900,slat:12900,soft:17000,ti
 const MX_A={steel:1.2e-5,hard:1.1e-5,perf:1.2e-5,soft:5e-5,ti:2.9e-6,du:1.1e-5,cer:9e-6,frp:2e-7,ara:2e-7,pe:2e-7,rub:1e-7};
 const MX_TS={cer:[350,8e-6,.22],glass:[50,9e-6,.22],sic:[400,4e-6,.14],b4c:[350,5e-6,.17],tib2:[400,7e-6,.1],alon:[300,6e-6,.24],spinel:[250,7e-6,.26]};
 const MX_EC=[[20,1],[400,1],[500,.78],[600,.47],[700,.23],[800,.11],[900,.06],[1000,.04],[1200,.02]];
-function mxF(){const i=frontIdx(),l=layers[i];return l&&l.k!=="gap"&&MAT[l.k]?{i,l,m:MAT[l.k],p:phy(l.k)}:null;}
+function mxF(){const i=sfIdx(),l=layers[i];return l&&l.k!=="gap"&&MAT[l.k]&&MAT[l.k].beh!=="slat"?{i,l,m:MAT[l.k],p:phy(l.k)}:null;}
 function mxEff(k){return k==="glass"?1450:k==="wood"?400:MX_E[MAT[k].beh]||12900;}
 function mxAl(k){return k==="glass"?5e-7:k==="wood"?1.5e-7:MX_A[MAT[k].beh]||1.2e-5;}
 const mxF1=(x,n)=>(+x).toFixed(n||0).replace(".",",");
@@ -8627,7 +8627,7 @@ function mxThermal(Q,tf,msgs,P){const f=mxF();if(!f||!f.p||Q<5)return;const e=mx
 function mxHeatTick(dt){if(S.veh||S.bld||S.broken||!S.hot||!S.hot.length)return;const f=mxF();if(!f||!f.p||!f.p.Tm)return;
   for(const h of S.hot){const T=20+h.k*1280;if(h.mx||T<f.p.Tm)continue;h.mx=1;const r=Math.min(.14,Math.max(.03,h.r*.7));try{addHole(f.i,h.x,h.y,r,2);}catch(e){}
     const w=new THREE.Vector3(h.x,h.y-r,-S.T/2);plate.localToWorld(w);if(!reduce)try{spkEmit(w,new THREE.Vector3(0,-1,0),24,.3,1.6,{hot:.95,life:2.4,w:1.8,drag:.3});}catch(e){}
-    const poly=["frp","ara","pe","rub"].includes(f.m.beh);if(!S.lock)$("res").textContent+=`\n${poly?"Расплав":"Проплавление"}: «${lc(f.m.n)}» нагрет до ≈${Math.round(T)} °C — выше ${poly?"разложения":"плавления"} ≈${f.p.Tm} °C: ${poly?"слой потёк и выгорел":"металл расплавился, капли стекают вниз"}, дыра Ø≈${Math.round(r*200)} см`;
+    const poly=["frp","ara","pe","rub"].includes(f.m.beh);if(!S.lock)$("res").textContent+=`\n${poly?"Расплав":"Проплавление"}: «${lc(f.m.n)}» нагрет до ≈${Math.round(T)} °C — выше ${poly?"разложения":"плавления"} ≈${f.p.Tm} °C: ${poly?(f.l&&f.l.k==="wood"?"древесина обуглилась и прогорела":"слой потёк и выгорел"):"металл расплавился, капли стекают вниз"}, дыра Ø≈${Math.round(r*200)} см`;
     if(f.p.Ti&&T>=f.p.Ti&&!fires.some(q=>q.g.parent===plate&&Math.hypot(q.g.position.x-h.x,q.g.position.y-h.y)<.1))try{ignite(h.x,h.y,-S.T/2-.01,1,R(10,25),true,f.l.k);}catch(e){}}}
 
 /* ===== v70: ПВО и ПРО — свои комплексы на карте, обнаружение и перехват =====
