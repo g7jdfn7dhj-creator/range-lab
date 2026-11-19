@@ -1514,7 +1514,10 @@ const mount=new THREE.Group();plate.add(mount);
 const mountMat=M(0x30352a,{metalness:.3,roughness:.7}),boltMat=M(0x8a8c84,{metalness:.8,roughness:.35});
 function buildMount(T){
   while(mount.children.length){const c=mount.children[0];mount.remove(c);if(c.geometry)c.geometry.dispose();}
-  const clamp=new THREE.Mesh(new THREE.BoxGeometry(1.2,.16,T+.08),mountMat);clamp.position.set(0,-.8+.04,0);clamp.castShadow=true;mount.add(clamp);
+  /* v27: струбцина — опорная полоса под всем пакетом и губки на каждой группе листов; в зазоре — пусто, только втулки на болтах */
+  {const base=new THREE.Mesh(new THREE.BoxGeometry(1.2,.04,T+.08),mountMat);base.position.set(0,-.82,0);base.castShadow=true;mount.add(base);
+   const grp=[];let z0=-T/2,g0=null;layers.forEach(l=>{if(l.k==="gap"){if(g0!=null){grp.push([g0,z0]);g0=null;}}else if(g0==null)g0=z0;z0+=l.tv;});if(g0!=null)grp.push([g0,z0]);
+   grp.forEach(([a,b])=>{const j=new THREE.Mesh(new THREE.BoxGeometry(1.2,.12,b-a+.08),mountMat);j.position.set(0,-.74,(a+b)/2);j.castShadow=true;mount.add(j);});}
   const lip=new THREE.Mesh(new THREE.BoxGeometry(1.2,.12,.03),mountMat);lip.position.set(0,-.68,-T/2-.025);mount.add(lip);
   const lip2=lip.clone();lip2.position.z=T/2+.025;mount.add(lip2);
   [[-.9,.7],[.9,.7],[-.9,-.62],[.9,-.62]].forEach(([x,y])=>{
