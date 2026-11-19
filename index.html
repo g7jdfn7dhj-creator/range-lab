@@ -1604,7 +1604,7 @@ function mountHit(x,y){if(!mount||mount.visible===false||S.veh)return null;
   return null;}
 function buildPlate(){
   clearHits();if(typeof fires!=="undefined")clearFires();layers.forEach(l=>{if(l.side){plate.remove(l.side);l.side=null;}if(l.mesh){plate.remove(l.mesh);l.mesh.geometry.dispose();l.mesh.material.dispose();}});
-  let L=readLayers();if(!L.some(l=>MAT[l.k].col!==null))L=[{k:"rha",t:20}];
+  let L=readLayers();S.dflt=!L.some(l=>MAT[l.k].col!==null)&&L.length>0;if(!L.some(l=>MAT[l.k].col!==null))L=[{k:"rha",t:20}];
   /* v27: зазор перед первым или за последним листом — просто воздух полигона: глубины пакету не даёт, на стойке не строится */
   {const sol=L.map(l=>MAT[l.k].col!==null),a=sol.indexOf(true),b=sol.lastIndexOf(true);L.forEach((l,i)=>{l.edge=l.k==="gap"&&(i<a||i>b);});}
   let T=0;L.forEach(l=>{l.tv=l.edge?0:MAT[l.k].col===null?l.t/1000:Math.max(.006,l.t/1000);T+=l.tv;});
@@ -1626,7 +1626,7 @@ function updPlate(){
   const g=angV();S.base=g*Math.PI/180;$("angTxt").textContent=$("ang").value+"°";S.yawBase=(yawV()||0)*Math.PI/180;
   [0,1,2,3,4,5,6,7,8,9].forEach(i=>$("tv"+i).textContent=$("m"+i).value==="none"?"—":$("t"+i).value+" мм");
   const arm=layers.reduce((s,l)=>s+(l.k==="gap"?0:l.t),0),air=layers.reduce((s,l)=>s+(l.k==="gap"&&!l.edge?l.t:0),0),edg=layers.reduce((s,l)=>s+(l.edge?l.t:0),0);
-  $("sumTxt").textContent=`Всего ${arm+air} мм`+(air?` (броня ${arm} + воздух ${air})`:"")+` · масса листа ${(S.mass/1000).toFixed(1)} т`+(edg?` · зазор ${edg} мм снаружи пакета не учитывается`:"");
+  $("sumTxt").textContent=`Всего ${arm+air} мм`+(air?` (броня ${arm} + воздух ${air})`:"")+` · масса листа ${(S.mass/1000).toFixed(1)} т`+(edg?` · зазор ${edg} мм снаружи пакета не учитывается`:"")+(S.dflt?" · в пакете один воздух — на стойке лист по умолчанию 20 мм":"");
 }
 let matOpts='<option value="none">— нет —</option>'+[...new Set(Object.values(MAT).map(m=>m.g))].map(g=>`<optgroup label="${g}">`+Object.entries(MAT).filter(([k,m])=>m.g===g).map(([k,m])=>`<option value="${k}">${m.n}</option>`).join("")+"</optgroup>").join("");
 if(false)$("matRef").innerHTML='<table class="ref"><thead><tr><th>Материал</th><th>Плотность, г/см³</th><th>Твёрдость</th><th>Прочность</th><th>Где применяется</th></tr></thead><tbody>'+
