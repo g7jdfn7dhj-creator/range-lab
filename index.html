@@ -1625,8 +1625,8 @@ function buildPlate(){
 function updPlate(){
   const g=angV();S.base=g*Math.PI/180;$("angTxt").textContent=$("ang").value+"°";S.yawBase=(yawV()||0)*Math.PI/180;
   [0,1,2,3,4,5,6,7,8,9].forEach(i=>$("tv"+i).textContent=$("m"+i).value==="none"?"—":$("t"+i).value+" мм");
-  const tot=layers.reduce((s,l)=>s+l.t,0);
-  $("sumTxt").textContent=`Всего ${tot} мм · масса листа ${(S.mass/1000).toFixed(1)} т`;
+  const arm=layers.reduce((s,l)=>s+(l.k==="gap"?0:l.t),0),air=layers.reduce((s,l)=>s+(l.k==="gap"&&!l.edge?l.t:0),0),edg=layers.reduce((s,l)=>s+(l.edge?l.t:0),0);
+  $("sumTxt").textContent=`Всего ${arm+air} мм`+(air?` (броня ${arm} + воздух ${air})`:"")+` · масса листа ${(S.mass/1000).toFixed(1)} т`+(edg?` · зазор ${edg} мм снаружи пакета не учитывается`:"");
 }
 let matOpts='<option value="none">— нет —</option>'+[...new Set(Object.values(MAT).map(m=>m.g))].map(g=>`<optgroup label="${g}">`+Object.entries(MAT).filter(([k,m])=>m.g===g).map(([k,m])=>`<option value="${k}">${m.n}</option>`).join("")+"</optgroup>").join("");
 if(false)$("matRef").innerHTML='<table class="ref"><thead><tr><th>Материал</th><th>Плотность, г/см³</th><th>Твёрдость</th><th>Прочность</th><th>Где применяется</th></tr></thead><tbody>'+
