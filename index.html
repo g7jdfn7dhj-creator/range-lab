@@ -1520,7 +1520,7 @@ function buildMount(T){
   [[-.9,.7],[.9,.7],[-.9,-.62],[.9,-.62]].forEach(([x,y])=>{
     const rod=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,T+.06,10),boltMat);rod.rotation.x=Math.PI/2;rod.position.set(x,y,0);rod.userData.c=[x,y];mount.add(rod);
     [-1,1].forEach(sd=>{const h=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,.025,6),boltMat);h.rotation.x=Math.PI/2;h.position.set(x,y,sd*(T/2+.015));h.userData.c=[x,y];mount.add(h);});
-    let z=-T/2;layers.forEach(l=>{if(l.k==="gap"){const sp=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,l.tv,12),mountMat);sp.rotation.x=Math.PI/2;sp.position.set(x,y,z+l.tv/2);sp.userData.c=[x,y];mount.add(sp);}z+=l.tv;});});
+    let z=-T/2;layers.forEach(l=>{if(l.k==="gap"&&l.tv>0){const sp=new THREE.Mesh(new THREE.CylinderGeometry(.045,.045,l.tv,12),mountMat);sp.rotation.x=Math.PI/2;sp.position.set(x,y,z+l.tv/2);sp.userData.c=[x,y];mount.add(sp);}z+=l.tv;});});
 }
 function trimMount(){mount.children.slice().forEach(c=>{const p=c.userData.c;if(p&&!PL.inside(p,S.poly)){mount.remove(c);}});}
 /* сквозные отверстия: у каждого слоя свой список дыр, шейдер вырезает их с рваным краем и затемняет кромку */
@@ -1601,8 +1601,10 @@ function mountHit(x,y){if(!mount||mount.visible===false||S.veh)return null;
   return null;}
 function buildPlate(){
   clearHits();if(typeof fires!=="undefined")clearFires();layers.forEach(l=>{if(l.side){plate.remove(l.side);l.side=null;}if(l.mesh){plate.remove(l.mesh);l.mesh.geometry.dispose();l.mesh.material.dispose();}});
-  let L=readLayers();if(!L.length)L=[{k:"rha",t:20}];
-  let T=0;L.forEach(l=>{l.tv=MAT[l.k].col===null?l.t/1000:Math.max(.006,l.t/1000);T+=l.tv;});
+  let L=readLayers();if(!L.some(l=>MAT[l.k].col!==null))L=[{k:"rha",t:20}];
+  /* v27: зазор перед первым или за последним листом — просто воздух полигона: глубины пакету не даёт, на стойке не строится */
+  {const sol=L.map(l=>MAT[l.k].col!==null),a=sol.indexOf(true),b=sol.lastIndexOf(true);L.forEach((l,i)=>{l.edge=l.k==="gap"&&(i<a||i>b);});}
+  let T=0;L.forEach(l=>{l.tv=l.edge?0:MAT[l.k].col===null?l.t/1000:Math.max(.006,l.t/1000);T+=l.tv;});
   let z=-T/2;
   layers=L.map((l,li)=>{const m=MAT[l.k];let mesh=null;
     if(m.col!==null){const sl=l.k==="slat",tk=sl?"slatb":(m.tx||l.k);derive(tk);const bg=sl?slatGeo(l.tv,m.dens):new THREE.BoxGeometry(2,1.6,l.tv,64,52,1);if(!sl)edgeUV(bg,l.tv);
@@ -2928,7 +2930,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
   const solidMM=Math.max(5,live.reduce((t,l)=>t+l.t,0));
   const ricoB=Math.max(0,...live.map(l=>MAT[l.k].rico)),br=Math.max(0,...live.map(l=>brOf(l.k)));
   const liner=layers.reduce((t,l)=>t+(l.t>=10?MAT[l.k].liner:0),0);
-  const gapIdx=layers.findIndex(l=>l.k==="gap");
+  const gapIdx=layers.findIndex(l=>l.k==="gap"&&!l.edge);
   if(a.type==="smoke"){out.push("Дымовой: мишень скрыта, повреждений нет");smoke.position.copy(s.to);smoke.material.opacity=.48;smoke.scale.setScalar(2);}
   else{const pen=a.pen*R(.92,1.08),rico=a.rico-ricoB;
     if(w<.95)out.push("Попал в ослабленную зону рядом с прошлыми попаданиями");{let cw=1;try{cw=crackW(s.lx,s.ly);}catch(e){}if(cw<.93)out.push(`Попадание в трещину: сплошность металла нарушена, слой держит слабее на ≈${Math.round((1-cw)*100)} %`);}
@@ -2940,7 +2942,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
       /* головка расплющивается по броне; ударная волна идёт сквозь однородный металл и откалывает тыльную сторону */
       const idx=layers.indexOf(fl),homo=fl&&["steel","hard","ti","soft"].includes(MAT[fl.k].beh);
       const screened=idx>0&&layers.slice(0,idx).some(l=>!l.spent||l.fresh);
-      const caught=layers.slice(idx+1).some(l=>l.k!=="gap"||l.t>=20);
+      const caught=layers.slice(idx+1).some(l=>!l.edge&&(l.k!=="gap"||l.t>=20));
       const ft=fl?fl.t/cosA():999,hK=(G().custom&&G().heshK)||1;
       out.push(`Бронебойно-фугасное: заряд (${FILL.pe.n}) расплющился по броне и подорван`);
       if(screened){kind="dent";out.push("Заряд расплющился и подорван на экране впереди — до основного листа дошла ослабленная ударная волна, откола нет");}
@@ -2953,7 +2955,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
     else if(he){
       /* ОФ снаряд с ударным взрывателем не пробивает как болванка — он рвётся на поверхности.
          Лист ломает контактный взрыв и осколки корпуса; слои за зазором получают ослабленную волну и обломки */
-      const L2=layers.map((l,i)=>({l,i})).filter(o=>!(o.l.spent&&!o.l.fresh)&&!isE(o.l.k));
+      const L2=layers.map((l,i)=>({l,i})).filter(o=>!(o.l.spent&&!o.l.fresh)&&!isE(o.l.k)&&!o.l.edge);
       let q=cal*.72*Math.min(1,Math.pow(cal/100,.6))*(G().wh&&G().wh[a.key]?1:(.7+.3*cosA()))*R(.9,1.1);const front=[],rest=[];let gapMM=0,slatHit=false,seen=false;
       let slatK=null;for(const o of L2){if(MAT[o.l.k].beh==="slat"){if(!front.length){slatHit=true;slatK=slatK||o.l.k;}continue;}if(o.l.k==="gap"){if(front.length){seen=true;gapMM+=o.l.t;}continue;}(seen?rest:front).push(o);}
       if(slatHit){q*=.4;out.push((slatK==="net"?"Фугасное: взрыватель сработал на сетке":"Фугасное: взрыватель сработал на решётке")+" — до листа дошли ослабленная волна и осколки");}
@@ -2999,7 +3001,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
       let rem=pen,yaw=1,prev=null,broken=false,mush=false;const notes=[];{const MH=mountHit(s.lx,s.ly);if(MH){rem=Math.max(0,rem-MH.mm/cosA());notes.push(MH.txt);}}const rod=a.key==="bops"||a.key==="apds",rodLO=ke&&a.key==="bops",blunt=a.key==="apbc"||a.key==="cp";s.ratio=Math.min(1.5,pen/Math.max(1,e));
       const soft=["rub","pe","frp","ara"];let hn=0;if(rodLO&&g>25)notes.push("длинный сердечник: наклон брони «съедает» меньше, чем толщина по лучу (поправка Ланца–Одерматта)");
       for(let i=0;i<layers.length;i++){const l=layers[i];if(l.spent&&!l.fresh)continue;const m=MAT[l.k];
-        if(l.k==="gap"){
+        if(l.k==="gap"){if(l.edge)continue;
           if(heat){const G=l.t/Math.max(20,cal);if(G<=4){rem*=1+.035*G;if(G>1)notes.push("зазор дал струе вытянуться — пробивает глубже");}else{rem*=Math.max(.55,1.14-.06*(G-4));notes.push("в большом зазоре струя распалась на частицы и ослабла");}}
           if(ke&&prev&&(g>=20||isE(prev.k))&&l.t>=40){yaw*=.88;notes.push("после косого слоя и зазора сердечник получил рысканье");}
           l.hit="p";continue;}
