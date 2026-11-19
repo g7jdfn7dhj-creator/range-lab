@@ -3001,13 +3001,15 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
     }
     else{
       /* снаряд проходит слои по очереди; каждый слой и каждая граница слоёв меняют его */
-      let rem=pen,yaw=1,prev=null,broken=false,mush=false;const notes=[];{const MH=mountHit(s.lx,s.ly);if(MH){rem=Math.max(0,rem-MH.mm/cosA());notes.push(MH.txt);}}const rod=a.key==="bops"||a.key==="apds",rodLO=ke&&a.key==="bops",blunt=a.key==="apbc"||a.key==="cp";s.ratio=Math.min(1.5,pen/Math.max(1,e));
+      let rem=pen,yaw=1,prev=null,broken=false,mush=false;const notes=[];let jetOn=false,gapCD=0;{const MH=mountHit(s.lx,s.ly);if(MH){rem=Math.max(0,rem-MH.mm/cosA());notes.push(MH.txt);}}const rod=a.key==="bops"||a.key==="apds",rodLO=ke&&a.key==="bops",blunt=a.key==="apbc"||a.key==="cp";s.ratio=Math.min(1.5,pen/Math.max(1,e));
       const soft=["rub","pe","frp","ara"];let hn=0;if(rodLO&&g>25)notes.push("длинный сердечник: наклон брони «съедает» меньше, чем толщина по лучу (поправка Ланца–Одерматта)");
       for(let i=0;i<layers.length;i++){const l=layers[i];if(l.spent&&!l.fresh)continue;const m=MAT[l.k];
         if(l.k==="gap"){if(l.edge)continue;
-          if(heat){const G=l.t/Math.max(20,cal);if(G<=4){rem*=1+.035*G;if(G>1)notes.push("зазор дал струе вытянуться — пробивает глубже");}else{rem*=Math.max(.55,1.14-.06*(G-4));notes.push("в большом зазоре струя распалась на частицы и ослабла");}}
+          /* v27: отстояние считается по сумме зазоров от точки подрыва (первый сплошной слой или ДЗ); пока головка не сработала — зазор ничего не меняет */
+          if(heat&&jetOn){const sf=x=>x<=4?1+.035*x:Math.max(.55,1.14-.06*(x-4)),c0=gapCD;gapCD+=l.t/Math.max(20,cal);const k=sf(gapCD)/sf(c0);rem*=k;if(k<1)notes.push("в большом зазоре струя распалась на частицы и ослабла");else if(gapCD>1)notes.push("зазор дал струе вытянуться — пробивает глубже");}
           if(ke&&prev&&(g>=20||isE(prev.k))&&l.t>=40){yaw*=.88;notes.push("после косого слоя и зазора сердечник получил рысканье");}
           l.hit="p";continue;}
+        if(m.beh!=="slat")jetOn=true;
         if(isE(l.k)){if(l.fresh){const E=ERA[l.k],af=eraAng(g);
             if(heat){const tand=(AMMO[a.key]&&AMMO[a.key].tandem)||(a.key==="heat"&&!!G().heatT);let cut=(1-E.heat)*af;
               if(tand){cut*=E.anti;notes.push(E.anti>.3?"лидирующий заряд подорвал первую секцию, вторая успела сработать по основной струе":"лидирующий заряд тандемной БЧ подорвал ДЗ — основная струя прошла по чистой броне");}
