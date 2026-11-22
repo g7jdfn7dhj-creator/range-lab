@@ -3362,7 +3362,7 @@ function heroModel(){const G=new THREE.Group();
         [-1,1].forEach(k=>{const q=p.clone().addScaledVector(tan,k*w/2);K.v(q.x,q.y,q.z,k<0?0:1,1-u,[1,1,1],ws);});}
       for(let i=0;i<N;i++){const a=base+i*2;K.ix.push(a,a+2,a+1,a+1,a+2,a+3);}};
     for(let lay=0;lay<2;lay++)for(let i=0;i<22;i++){const s=i%2?1:-1,k=(i>>1)/10+(lay?.05:0),a=s*(1.0+k*(Math.PI-1.0)),sa=Math.sin(a),ca=Math.cos(a),j=(rnd()-.5)*.012,L=1.645-.72-rnd()*.06-(lay?.03:0),o=lay*.006;
-      const p=[[s*.004,.12+o,.02-k*.09],[sa*(.064+o),.096+o,ca*(.072+o)-.01],[sa*(.084+o),.035,ca*(.092+o)-.012],[sa*(.088+o),-.04,ca*(.09+o)-.015]].map(q=>new THREE.Vector3(C0[0]+q[0],C0[1]+q[1],C0[2]+q[2]));
+      const p=[[s*.006,.108+o,.02-k*.09],[sa*(.064+o),.096+o,ca*(.072+o)-.01],[sa*(.084+o),.035,ca*(.092+o)-.012],[sa*(.088+o),-.04,ca*(.09+o)-.015]].map(q=>new THREE.Vector3(C0[0]+q[0],C0[1]+q[1],C0[2]+q[2]));
       if(k<.38){const x0=s*(.07+k*.13)+j;[[1.5,0],[1.36,.008],[1.2,.014],[1.05,.018],[L,.022]].forEach(([y,dx])=>{const x=x0+s*dx;p.push(new THREE.Vector3(x,y,cz(y,x,true)+o));});}
       else{const x0=sa*.15+j;[[1.5,.95],[1.36,1],[1.2,1],[1.05,1.02],[L,1.04]].forEach(([y,m])=>{const x=x0*m;p.push(new THREE.Vector3(x,y,cz(y,x,false)-o-(y>1.45?.0:.004)));});}
       strand(p,.07+rnd()*.012,.05,lay+i*.37);}
@@ -3433,8 +3433,8 @@ function heroTick(dt){if(HERO.g&&HERO.g.userData.lb){const u=HERO.g.userData.lb;
     if(P.y<-50){const p=heroDefault();P.set(p.x,p.y,p.z);}
     H.g.rotation.y=H.yaw;
     /* камера за плечом: плавно догоняет, не уходит в стены */
-    const ak=WP.aimK,fwd=new THREE.Vector3(Math.sin(H.cy),0,Math.cos(H.cy)),rt=new THREE.Vector3(-fwd.z,0,fwd.x),cd=H.cd*(H.spd>3?1.12:1)*(1-ak)+(WPN[WP.sel].scope?.9:1.7)*ak,cpE=H.cp-.25*ak;
-    if(H.mob===undefined)H.mob=matchMedia("(pointer:coarse)").matches;const tg=P.clone().add(new THREE.Vector3(0,1.5+.12*ak,0)).addScaledVector(rt,(H.mob?-.1:-.38)*(1-ak)+(H.mob?-.42:-.55)*ak);/* на телефоне героиня правее и выше джойстика */
+    const ak=WP.aimK,fwd=new THREE.Vector3(Math.sin(H.cy),0,Math.cos(H.cy)),rt=new THREE.Vector3(-fwd.z,0,fwd.x),cd=H.cd*(H.spd>3?1.12:1)*(1-ak)+(WPN[WP.sel].scope?.9:(H.mob?2.1:1.7))*ak,cpE=H.cp-.25*ak;
+    if(H.mob===undefined)H.mob=matchMedia("(pointer:coarse)").matches;const tg=P.clone().add(new THREE.Vector3(0,1.5+.12*ak,0)).addScaledVector(rt,(H.mob?-.1:-.38)*(1-ak)+(H.mob?-.22:-.55)*ak);/* на телефоне героиня правее и выше джойстика */
     const back=new THREE.Vector3(-fwd.x*Math.cos(cpE),Math.sin(cpE),-fwd.z*Math.cos(cpE));let dist=cd;const hc=heroCast(tg,back,cd+.25);if(hc)dist=Math.max(.6,hc.distance-.25);
     const want=tg.clone().addScaledVector(back,dist);const gy=heroTerrain(want.x,want.z)+.3;if(want.y<gy)want.y=gy;
     if(!H.camP)H.camP=want.clone();else H.camP.lerp(want,1-Math.exp(-dt*(hc?20:9)));camera.position.copy(H.camP);camera.lookAt(tg.clone().addScaledVector(fwd,2).add(_hv.set(0,H.mob?-.75:0,0)).lerp(tg.clone().addScaledVector(back,-20),ak));}
@@ -3471,7 +3471,7 @@ function heroTick(dt){if(HERO.g&&HERO.g.userData.lb){const u=HERO.g.userData.lb;
 const WPN=[{id:"none",name:"Без оружия",ttx:"руки свободны"}];
 (function(){const V=THREE.Vector3;
   const M=(c,r,m)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m||0});
-  const poly=M(0x1d1e21,.62),met=M(0x2b2d31,.38,.65),blk=M(0x0b0b0c,.5,.3),plum=M(0x4a2a2b,.55),wood=M(0x7a4325,.5),rub=M(0x151515,.9),glass=M(0x1b2a3a,.05,.4);
+  const poly=M(0x1d1e21,.62),met=M(0x2b2d31,.38,.65),blk=M(0x0b0b0c,.5,.3),plum=M(0x4a2a2b,.55),wood=M(0x5c3320,.55),rub=M(0x151515,.9),glass=M(0x1b2a3a,.05,.4);
   const ext=(pts,d,bv,mat,holes)=>{const sh=new THREE.Shape(),dr=(P,a)=>a.forEach((p,i)=>{if(p[0]==="q")P.quadraticCurveTo(p[1],p[2],p[3],p[4]);else if(i)P.lineTo(p[0],p[1]);else P.moveTo(p[0],p[1]);});
     dr(sh,pts);(holes||[]).forEach(h=>{const H=new THREE.Path();dr(H,h);sh.holes.push(H);});
     const g=new THREE.ExtrudeGeometry(sh,{depth:d,bevelEnabled:bv>0,bevelThickness:bv,bevelSize:bv,bevelSegments:2,curveSegments:8});g.translate(0,0,-d/2);g.rotateY(-Math.PI/2);const m=new THREE.Mesh(g,mat);m.castShadow=true;return m;};
