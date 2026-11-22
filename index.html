@@ -3345,7 +3345,7 @@ function heroModel(){const G=new THREE.Group();
     for(let i=0;i<150;i++){const px=8+Math.random()*(w-16),end=h*(.86+Math.random()*.14),c=cols[Math.random()*cols.length|0];x.strokeStyle=c;x.globalAlpha=.75+Math.random()*.25;x.lineWidth=1+Math.random()*2.6;
       x.beginPath();x.moveTo(px,0);for(let y=0;y<end;y+=32)x.lineTo(px+Math.sin(y*.01+i)*1.5,y);x.stroke();}x.globalAlpha=1;
     const g=x.createLinearGradient(0,0,0,40);g.addColorStop(0,"rgba(200,192,175,.4)");g.addColorStop(1,"rgba(200,192,175,0)");x.globalCompositeOperation="source-atop";x.fillStyle=g;x.fillRect(0,0,w,40);});
-  const hairM2=new THREE.MeshStandardMaterial({map:strandTex,alphaTest:.4,side:THREE.DoubleSide,roughness:.38,metalness:.05,skinning:true});
+  const hairM2=new THREE.MeshStandardMaterial({color:0xe2dbcc,map:strandTex,alphaTest:.4,side:THREE.DoubleSide,roughness:.38,metalness:.05,skinning:true});
   /* шапка волос: ось сферы вдоль z, волоски идут от пробора вниз к вискам */
   const ps=Math.PI-.75,pl=Math.PI+1.5,uPart=(1.5*Math.PI-ps)/pl;
   const scalpTex=cTex(512,256,(x,w,h)=>{x.fillStyle="#e2dccd";x.fillRect(0,0,w,h);const cols=["#f3eee4","#d6cebd","#e9e3d6","#fffaf0","#cbc2b0"];
@@ -3415,7 +3415,7 @@ function heroUI(){const h=$("heroHud");if(!h)return;h.hidden=!(HERO.on||HERO.pla
 function heroOn(on){const was=HERO.on;HERO.on=!!on;HERO.keys={};HERO.joy.x=HERO.joy.y=0;
   if(on&&!was){HERO.save={p:camera.position.clone(),t:controls?controls.target.clone():null};if(controls)controls.enabled=false;HERO.cy=HERO.yaw;HERO.camP=null;
     $("res").textContent="Героиня на месте. "+(matchMedia&&matchMedia("(pointer:coarse)").matches?"Джойстик слева — идти, перетаскивание справа — камера, кнопки «Бег» и «Прыжок».":"WASD — идти, Shift — бег, Пробел — прыжок, мышь с зажатой кнопкой — камера, колесо — дальше/ближе, Esc — выход.");}
-  if(!on&&was){if(controls){controls.enabled=true;if(HERO.g)controls.target.copy(HERO.g.position).add(new THREE.Vector3(0,1,0));controls.update();}}
+  if(!on&&was){try{WP.aim=false;WP.trig=false;WP.aimK=0;if(WP.fov0!=null){camera.fov=WP.fov0;camera.updateProjectionMatrix();WP.fov0=null;}}catch(e){}if(controls){controls.enabled=true;if(HERO.g)controls.target.copy(HERO.g.position).add(new THREE.Vector3(0,1,0));controls.update();}}
   heroUI();}
 function heroExit(){HERO.place=false;heroOn(false);if(HERO.g)HERO.g.visible=true;}
 function heroTick(dt){if(HERO.g&&HERO.g.userData.lb){const u=HERO.g.userData.lb;u.visible=!HERO.on;u.quaternion.copy(HERO.g.quaternion).invert().multiply(camera.quaternion);}const H=HERO;if(!H.g||!H.g.visible)return;const U=H.g.userData;
@@ -3433,11 +3433,11 @@ function heroTick(dt){if(HERO.g&&HERO.g.userData.lb){const u=HERO.g.userData.lb;
     if(P.y<-50){const p=heroDefault();P.set(p.x,p.y,p.z);}
     H.g.rotation.y=H.yaw;
     /* камера за плечом: плавно догоняет, не уходит в стены */
-    const ak=WP.aimK,fwd=new THREE.Vector3(Math.sin(H.cy),0,Math.cos(H.cy)),rt=new THREE.Vector3(-fwd.z,0,fwd.x),cd=H.cd*(H.spd>3?1.12:1)*(1-ak)+(WPN[WP.sel].scope?.9:1.25)*ak,cpE=H.cp-.25*ak;
-    if(H.mob===undefined)H.mob=matchMedia("(pointer:coarse)").matches;const tg=P.clone().add(new THREE.Vector3(0,1.5+.1*ak,0)).addScaledVector(rt,(H.mob?.42:-.38)*(1-ak)+(H.mob?.38:-.42)*ak);/* на телефоне героиня правее и выше джойстика */
+    const ak=WP.aimK,fwd=new THREE.Vector3(Math.sin(H.cy),0,Math.cos(H.cy)),rt=new THREE.Vector3(-fwd.z,0,fwd.x),cd=H.cd*(H.spd>3?1.12:1)*(1-ak)+(WPN[WP.sel].scope?.9:1.7)*ak,cpE=H.cp-.25*ak;
+    if(H.mob===undefined)H.mob=matchMedia("(pointer:coarse)").matches;const tg=P.clone().add(new THREE.Vector3(0,1.5+.12*ak,0)).addScaledVector(rt,(H.mob?-.1:-.38)*(1-ak)+(H.mob?-.42:-.55)*ak);/* на телефоне героиня правее и выше джойстика */
     const back=new THREE.Vector3(-fwd.x*Math.cos(cpE),Math.sin(cpE),-fwd.z*Math.cos(cpE));let dist=cd;const hc=heroCast(tg,back,cd+.25);if(hc)dist=Math.max(.6,hc.distance-.25);
     const want=tg.clone().addScaledVector(back,dist);const gy=heroTerrain(want.x,want.z)+.3;if(want.y<gy)want.y=gy;
-    if(!H.camP)H.camP=want.clone();else H.camP.lerp(want,1-Math.exp(-dt*(hc?20:9)));camera.position.copy(H.camP);camera.lookAt(tg.clone().addScaledVector(fwd,2).add(_hv.set(0,H.mob?-.5:0,0)).lerp(tg.clone().addScaledVector(back,-20),ak));}
+    if(!H.camP)H.camP=want.clone();else H.camP.lerp(want,1-Math.exp(-dt*(hc?20:9)));camera.position.copy(H.camP);camera.lookAt(tg.clone().addScaledVector(fwd,2).add(_hv.set(0,H.mob?-.75:0,0)).lerp(tg.clone().addScaledVector(back,-20),ak));}
   /* анимация: шаг с покачиванием бёдер, встречный поворот плеч, перекат стопы; бег, прыжок, дыхание в покое */
   const t=performance.now()/1000,v=H.on?H.spd:0,run=v>2.6;H.ph+=dt*Math.PI*2*v/(run?2.4:1.3);
   const A=H.air?0:Math.min(1,v/1.3),am=run?1:.6,s=Math.sin(H.ph),c=Math.cos(H.ph),Bn=U.B,L=U.leg,R=U.arm,I=1-A,k=Math.min(1,dt*12),ld=(o,p,v2)=>{o[p]+=(v2-o[p])*k;};
