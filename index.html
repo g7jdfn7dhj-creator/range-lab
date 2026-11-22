@@ -3208,6 +3208,145 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
       if(eraHit)boom(s.to,.6,{surf:true,fill:"pe",n:pn});}}}catch(e){}
 }
 
+/* ===== v32: Героиня — свой процедурный персонаж (взрослая женщина ≈1,70 м, светлые волосы, летний наряд), ставится на карту, управление от третьего лица ===== */
+const HERO={on:false,place:false,g:null,v:new THREE.Vector3(),vy:0,yaw:0,ph:0,spd:0,air:false,cy:0,cp:.28,cd:3.4,keys:{},joy:{x:0,y:0},run:false,jumpQ:false,save:null,col:[],colT:0,camP:null};
+S.hero=HERO;
+function heroModel(){const G=new THREE.Group(),Mt=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7},o||{}));
+  const skin=Mt(0xe9b998,{roughness:.62}),hair=Mt(0xead29a,{roughness:.5,metalness:.05}),hair2=Mt(0xd8b979,{roughness:.55}),top=Mt(0xff5b8d,{roughness:.75}),jean=Mt(0x4b7db8,{roughness:.9}),
+    shoe=Mt(0xf4f4f2,{roughness:.6}),sole=Mt(0x2fd3e0,{roughness:.6}),dark=Mt(0x0f1014,{roughness:.15,metalness:.6}),gold=Mt(0xe8c25a,{roughness:.25,metalness:1}),lip=Mt(0xc8576b,{roughness:.45});
+  const mk=(geo,m,x,y,z,par)=>{const o=new THREE.Mesh(geo,m);o.position.set(x||0,y||0,z||0);o.castShadow=true;o.receiveShadow=true;o.raycast=()=>{};(par||G).add(o);return o;};
+  const lathe=(pts,s)=>{const g=new THREE.LatheGeometry(pts.map(([r,y])=>new THREE.Vector2(r*(s||1),y)),28);g.scale(1,1,.72);return g;};
+  const body=new THREE.Group();G.add(body);
+  /* туловище: бёдра шире талии, грудь, плечи; глубина 0,72 от ширины */
+  const T=[[0,.86],[.1,.87],[.152,.92],[.162,.97],[.148,1.03],[.122,1.1],[.126,1.16],[.145,1.23],[.152,1.3],[.15,1.36],[.152,1.41],[.12,1.46],[.065,1.495],[.047,1.51]];
+  mk(lathe(T),skin,0,0,0,body);
+  const sub=(a,b,d)=>T.filter(p=>p[1]>=a&&p[1]<=b).map(([r,y])=>[r+d,y]);
+  mk(lathe([[0,1.165]].concat(sub(1.165,1.405,.007)).concat([[.11,1.43]])),top,0,0,0,body);/* топ на бретелях */
+  [-1,1].forEach(s=>{mk(new THREE.SphereGeometry(.066,16,12),top,s*.058,1.295,.062,body).scale.set(1,.9,.8);mk(bevelBoxGeo(.022,.12,.03,.008),top,s*.085,1.45,.035,body).rotation.z=s*.15;mk(bevelBoxGeo(.022,.12,.03,.008),top,s*.085,1.45,-.035,body).rotation.z=s*.15;});
+  mk(lathe([[0,.84]].concat(sub(.86,1.045,.008)).concat([[.152,1.05]])),jean,0,0,0,body);/* джинсовые шорты */
+  mk(new THREE.TorusGeometry(.149,.008,6,32).scale(1,.72,1).rotateX(Math.PI/2),Mt(0x6b4a2b),0,1.04,0,body);/* ремень */
+  /* шея и голова */
+  mk(new THREE.CylinderGeometry(.042,.048,.1,14),skin,0,1.53,0,body);
+  const head=new THREE.Group();head.position.set(0,1.6,0);body.add(head);
+  mk(new THREE.SphereGeometry(.1,28,20),skin,0,0,0,head).scale.set(.86,1.08,.95);
+  mk(new THREE.SphereGeometry(.05,16,12),skin,0,-.05,.035,head).scale.set(1.15,.8,1);/* подбородок и скулы */
+  mk(new THREE.ConeGeometry(.013,.035,10).rotateX(Math.PI/2.4),skin,0,-.005,.098,head);
+  mk(new THREE.SphereGeometry(.018,12,8),lip,0,-.042,.084,head).scale.set(1.25,.45,.6);
+  [-1,1].forEach(s=>{mk(new THREE.SphereGeometry(.018,10,8),skin,s*.085,0,0,head).scale.set(.5,1,.8);mk(new THREE.TorusGeometry(.012,.0025,6,16),gold,s*.088,-.03,.005,head).rotation.y=Math.PI/2;
+    mk(new THREE.CylinderGeometry(.027,.027,.008,18).rotateX(Math.PI/2),dark,s*.036,.02,.093,head);});
+  mk(new THREE.BoxGeometry(.03,.006,.006),gold,0,.026,.098,head);[-1,1].forEach(s=>mk(new THREE.BoxGeometry(.004,.006,.08),gold,s*.064,.024,.058,head));
+  /* длинные светлые волосы: шапка, пряди по бокам, волна за спиной */
+  mk(new THREE.SphereGeometry(.106,28,16,0,Math.PI*2,0,Math.PI*.56),hair,0,.012,-.006,head).scale.set(.9,1.08,1);
+  mk(new THREE.SphereGeometry(.104,20,14,Math.PI*.15,Math.PI*.7,Math.PI*.3,Math.PI*.4),hair,0,.005,-.012,head).scale.set(.92,1.1,1.02);
+  mk(capsuleGeo(.098,.2,20,.07),hair2,0,-.2,-.06,head).scale.set(1,1,.5);
+  [-1,1].forEach(s=>{const l=mk(capsuleGeo(.03,.2,10,.02),hair,s*.078,-.13,.025,head);l.rotation.z=s*.12;l.rotation.x=-.12;});
+  mk(capsuleGeo(.04,.05,12,.03),hair,.03,.085,.05,head).rotation.set(1.1,0,-.9);
+  /* руки */
+  const arm=s=>{const sh=new THREE.Group();sh.position.set(s*.19,1.405,0);body.add(sh);mk(new THREE.SphereGeometry(.05,14,10),skin,0,0,0,sh);
+    mk(capsuleGeo(.044,.2,14,.037),skin,0,-.14,0,sh);const el=new THREE.Group();el.position.y=-.28;sh.add(el);
+    mk(capsuleGeo(.036,.18,14,.029),skin,0,-.12,0,el);mk(new THREE.SphereGeometry(.038,12,10),skin,0,-.265,.008,el).scale.set(.7,1.25,1);
+    if(s<0)mk(new THREE.TorusGeometry(.034,.006,6,18).rotateX(Math.PI/2),gold,0,-.2,0,el);sh.rotation.z=s*.06;return{sh,el};};
+  const aL=arm(1),aR=arm(-1);
+  /* ноги */
+  const leg=s=>{const hp=new THREE.Group();hp.position.set(s*.085,.9,0);body.add(hp);
+    mk(capsuleGeo(.074,.34,16,.054),skin,0,-.21,0,hp);mk(new THREE.CylinderGeometry(.086,.082,.07,16),jean,0,-.07,0,hp);
+    const kn=new THREE.Group();kn.position.y=-.42;hp.add(kn);mk(capsuleGeo(.052,.3,14,.037),skin,0,-.19,0,kn);
+    const ft=new THREE.Group();ft.position.y=-.38;kn.add(ft);mk(bevelBoxGeo(.092,.075,.25,.03),shoe,0,-.035,.045,ft);mk(bevelBoxGeo(.096,.022,.255,.008),sole,0,-.07,.045,ft);
+    return{hp,kn,ft};};
+  const lL=leg(1),lR=leg(-1);
+  /* подпись над головой */
+  const c=document.createElement("canvas");c.width=256;c.height=64;const x=c.getContext("2d");x.font="600 34px 'UI Mono', monospace";x.textAlign="center";x.textBaseline="middle";
+  x.fillStyle="rgba(10,14,10,.62)";x.fillRect(18,8,220,48);x.strokeStyle="#ff5b8d";x.lineWidth=3;x.strokeRect(18,8,220,48);x.fillStyle="#ffe6f0";x.fillText("Героиня",128,33);
+  const tx=new THREE.CanvasTexture(c);if(THREE.sRGBEncoding!==undefined)tx.encoding=THREE.sRGBEncoding;
+  const lb=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,depthTest:false,transparent:true}));lb.scale.set(.6,.15,1);lb.position.y=1.95;lb.renderOrder=5;lb.raycast=()=>{};G.add(lb);
+  G.userData={body,head,aL,aR,lL,lR,lb};return G;}
+/* высота земли: рельеф мира (с выравниванием площадки здания), сверху — полы, тротуары, ступени здания и стойка */
+function heroTerrain(x,z){let h;try{h=wH(x,z);}catch(e){h=0;}
+  if(S.bld&&typeof bSiteRect==="function"){const r=bSiteRect(),m=34,dx=Math.max(r.x0-x,0,x-r.x1),dz=Math.max(r.z0-z,0,z-r.z1),d=Math.hypot(dx,dz);if(d<m){const k=d/m,s=k*k*(3-2*k);h=-.05+(h+.05)*s;}}
+  if(Math.abs(x)<40&&z>-60&&z<560)h=Math.max(h,0);return h;}
+const heroRC=new THREE.Raycaster();heroRC.camera=camera;
+function heroRoots(){const R=[];if(S.bld&&typeof BLD!=="undefined"&&BLD&&BLD.g.visible)R.push(BLD.g);if(!S.bld&&!S.veh&&typeof stand!=="undefined"&&stand.visible)R.push(stand);if(S.veh&&typeof VEH!=="undefined"&&VEH&&VEH.g.visible)R.push(VEH.g);return R;}
+function heroCast(o,d,far){heroRC.set(o,d);heroRC.near=0;heroRC.far=far;let best=null;for(const r of heroRoots()){const h=heroRC.intersectObject(r,true);for(const q of h){let ok=q.object.visible,p=q.object;while(ok&&p){if(p.visible===false||(p.userData&&p.userData.decor&&p!==r))ok=false;p=p.parent;}if(ok){if(!best||q.distance<best.distance)best=q;break;}}}return best;}
+const _hv=new THREE.Vector3(),_hd=new THREE.Vector3();
+function heroGround(x,y,z){let g=heroTerrain(x,z);_hv.set(x,y+.55,z);_hd.set(0,-1,0);const h=heroCast(_hv,_hd,3);if(h&&h.point.y>g)g=h.point.y;return g;}
+function heroSpawn(p){if(!HERO.g){HERO.g=heroModel();scene.add(HERO.g);}HERO.g.visible=true;HERO.g.position.set(p.x,heroGround(p.x,p.y+.3,p.z),p.z);HERO.vy=0;HERO.air=false;HERO.spd=0;
+  const cw=new THREE.Vector3();camera.getWorldDirection(cw);HERO.yaw=Math.atan2(-cw.x,-cw.z);HERO.g.rotation.y=HERO.yaw;HERO.place=false;heroOn(true);}
+/* точка на земле под пальцем: шагаем по лучу до пересечения с рельефом, здания/стойка — по мешам */
+function heroPick(cx,cy){const el=renderer.domElement,r=el.getBoundingClientRect(),m=new THREE.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1);heroRC.setFromCamera(m,camera);
+  const o=heroRC.ray.origin.clone(),d=heroRC.ray.direction.clone();const hit=heroCast(o,d,400);let tp=null;
+  let prev=0;for(let t=.5;t<400;t*=1.04){const p=o.clone().addScaledVector(d,t);if(p.y<heroTerrain(p.x,p.z)){let a=prev,b=t;for(let k=0;k<20;k++){const mid=(a+b)/2,q=o.clone().addScaledVector(d,mid);if(q.y<heroTerrain(q.x,q.z))b=mid;else a=mid;}tp=o.clone().addScaledVector(d,(a+b)/2);break;}prev=t;}
+  if(hit&&(!tp||hit.distance<o.distanceTo(tp))){const n=hit.face?hit.face.normal.clone().transformDirection(hit.object.matrixWorld):new THREE.Vector3(0,1,0);if(n.y>.5)return hit.point;}
+  return tp;}
+function heroDefault(){const d=new THREE.Vector3();camera.getWorldDirection(d);d.y=0;if(d.lengthSq()<1e-6)d.set(0,0,1);d.normalize();const p=camera.position.clone().addScaledVector(d,7);p.y=heroTerrain(p.x,p.z);return p;}
+function heroUI(){const h=$("heroHud");if(!h)return;h.hidden=!(HERO.on||HERO.place);document.body.classList.toggle("heroOn",HERO.on);$("heroPlaceTxt").hidden=!HERO.place;
+  $("heroBtn").setAttribute("aria-pressed",HERO.on||HERO.place);$("hRun").setAttribute("aria-pressed",HERO.run);["heroJoy","hRun","hJump","hCam"].forEach(i=>{if($(i))$(i).hidden=!HERO.on;});}
+function heroOn(on){const was=HERO.on;HERO.on=!!on;HERO.keys={};HERO.joy.x=HERO.joy.y=0;
+  if(on&&!was){HERO.save={p:camera.position.clone(),t:controls?controls.target.clone():null};if(controls)controls.enabled=false;HERO.cy=HERO.yaw;HERO.camP=null;
+    $("res").textContent="Героиня на месте. "+(matchMedia&&matchMedia("(pointer:coarse)").matches?"Джойстик слева — идти, перетаскивание справа — камера, кнопки «Бег» и «Прыжок».":"WASD — идти, Shift — бег, Пробел — прыжок, мышь с зажатой кнопкой — камера, колесо — дальше/ближе, Esc — выход.");}
+  if(!on&&was){if(controls){controls.enabled=true;if(HERO.g)controls.target.copy(HERO.g.position).add(new THREE.Vector3(0,1,0));controls.update();}}
+  heroUI();}
+function heroExit(){HERO.place=false;heroOn(false);if(HERO.g)HERO.g.visible=true;}
+function heroTick(dt){const H=HERO;if(!H.g||!H.g.visible)return;const U=H.g.userData;
+  if(H.on){const k=H.keys;let ix=(k.KeyD||k.ArrowRight?1:0)-(k.KeyA||k.ArrowLeft?1:0),iz=(k.KeyW||k.ArrowUp?1:0)-(k.KeyS||k.ArrowDown?1:0);
+    if(Math.abs(H.joy.x)+Math.abs(H.joy.y)>.08){ix=H.joy.x;iz=-H.joy.y;}const mag=Math.min(1,Math.hypot(ix,iz));
+    const run=(k.ShiftLeft||k.ShiftRight||H.run||mag>.97&&H.joy.r)&&mag>.1,tgt=mag*(run?5.2:1.6);H.spd+=(tgt-H.spd)*Math.min(1,dt*(tgt>H.spd?6:9));
+    if(mag>.05){const fx=Math.sin(H.cy),fz=Math.cos(H.cy),dx=fx*iz-fz*ix,dz=fz*iz+fx*ix,ty=Math.atan2(dx,dz);let d=ty-H.yaw;d=Math.atan2(Math.sin(d),Math.cos(d));H.yaw+=d*Math.min(1,dt*10);}
+    const P=H.g.position,mv=H.spd*dt;
+    if(mv>1e-4){const dir=new THREE.Vector3(Math.sin(H.yaw),0,Math.cos(H.yaw));let blocked=false;
+      for(const y of [.45,1.2]){_hv.set(P.x,P.y+y,P.z);const h=heroCast(_hv,dir,.32+mv);if(h){blocked=true;break;}}
+      if(!blocked){const nx=P.x+dir.x*mv,nz=P.z+dir.z*mv,g=heroGround(nx,P.y,nz);if(g-P.y<.5||H.air){P.x=nx;P.z=nz;}else H.spd*=.3;}else{/* скольжение вдоль стены */const sd=new THREE.Vector3(dir.z,0,-dir.x);for(const s of[1,-1]){const t=sd.clone().multiplyScalar(s);_hv.set(P.x,P.y+.45,P.z);if(!heroCast(_hv,t,.35)&&!heroCast(_hv.set(P.x,P.y+1.2,P.z),t,.35)){const q=dir.clone().add(t).normalize();_hv.set(P.x,P.y+.45,P.z);if(!heroCast(_hv,q,.35+mv)){P.x+=q.x*mv*.6;P.z+=q.z*mv*.6;break;}}}H.spd*=.85;}}
+    const g=heroGround(P.x,P.y,P.z);
+    if(H.jumpQ&&!H.air){H.vy=4.2;H.air=true;}H.jumpQ=false;
+    if(H.air||P.y>g+.04){H.air=true;H.vy-=9.8*dt;P.y+=H.vy*dt;if(P.y<=g){P.y=g;H.vy=0;H.air=false;}}else{P.y+=(g-P.y)*Math.min(1,dt*18);}
+    if(P.y<-50){const p=heroDefault();P.set(p.x,p.y,p.z);}
+    H.g.rotation.y=H.yaw;
+    /* камера за плечом: плавно догоняет, не уходит в стены */
+    const fwd=new THREE.Vector3(Math.sin(H.cy),0,Math.cos(H.cy)),rt=new THREE.Vector3(-fwd.z,0,fwd.x),cd=H.cd*(H.spd>3?1.12:1);
+    const tg=P.clone().add(new THREE.Vector3(0,1.5,0)).addScaledVector(rt,.38);
+    const back=new THREE.Vector3(-fwd.x*Math.cos(H.cp),Math.sin(H.cp),-fwd.z*Math.cos(H.cp));let dist=cd;const hc=heroCast(tg,back,cd+.25);if(hc)dist=Math.max(.6,hc.distance-.25);
+    const want=tg.clone().addScaledVector(back,dist);const gy=heroTerrain(want.x,want.z)+.3;if(want.y<gy)want.y=gy;
+    if(!H.camP)H.camP=want.clone();else H.camP.lerp(want,1-Math.exp(-dt*(hc?20:9)));camera.position.copy(H.camP);camera.lookAt(tg.clone().addScaledVector(fwd,2));}
+  /* анимация: шаг, бег, прыжок, покой */
+  const t=performance.now()/1000,v=H.on?H.spd:0,run=v>2.6;H.ph+=dt*Math.PI*2*v/(run?2.2:1.35);
+  const A=H.air?0:Math.min(1,v/1.6)*(run?.95:.5),s=Math.sin(H.ph);
+  if(H.air){U.lL.hp.rotation.x=-.65;U.lL.kn.rotation.x=1.1;U.lR.hp.rotation.x=-.2;U.lR.kn.rotation.x=.5;U.aL.sh.rotation.x=-.9;U.aR.sh.rotation.x=-.9;U.aL.el.rotation.x=U.aR.el.rotation.x=-.6;U.body.position.y=0;U.body.rotation.x=.05;}
+  else{U.lL.hp.rotation.x=-s*A;U.lR.hp.rotation.x=s*A;U.lL.kn.rotation.x=Math.max(0,Math.sin(H.ph-1.3))*A*1.5+.03;U.lR.kn.rotation.x=Math.max(0,-Math.sin(H.ph-1.3))*A*1.5+.03;
+    U.lL.ft.rotation.x=-U.lL.kn.rotation.x*.3;U.lR.ft.rotation.x=-U.lR.kn.rotation.x*.3;
+    U.aL.sh.rotation.x=s*A*.8+(v<.1?Math.sin(t*1.3)*.03:0);U.aR.sh.rotation.x=-s*A*.8-(v<.1?Math.sin(t*1.3)*.03:0);U.aL.el.rotation.x=U.aR.el.rotation.x=-(.15+(run?.95:.25)*Math.min(1,v));
+    U.body.position.y=Math.abs(Math.cos(H.ph))*.035*A;U.body.rotation.x=run?.16:.02*A;U.body.rotation.y=-s*A*.12;
+    U.body.scale.y=1+(v<.1?Math.sin(t*2.1)*.004:0);U.head.rotation.y=(v<.1?Math.sin(t*.4)*.25:0);U.head.rotation.x=-U.body.rotation.x*.6;}}
+/* интерфейс: кнопка в доке, панель с джойстиком и кнопками, клавиатура, мышь */
+try{(function(){const modes=document.querySelector(".modes");if(!modes)return;const b=document.createElement("button");b.id="heroBtn";b.className="mode";b.setAttribute("aria-pressed","false");
+  b.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2.6"/><path d="M12 8v7M8 11l4-2 4 2M9.5 21l2.5-6 2.5 6"/></svg><span>Героиня</span>';const tk=$("taskBtn");modes.insertBefore(b,tk||null);
+  const st=document.createElement("style");st.textContent=`#heroHud{position:fixed;inset:0;z-index:30;pointer-events:none;font-family:var(--mono,monospace)}#heroHud[hidden]{display:none!important}
+#heroHud .hb{pointer-events:auto;min-width:64px;height:52px;padding:0 12px;border-radius:14px;border:1px solid rgba(255,91,141,.55);background:rgba(16,14,22,.72);color:#ffe6f0;font:600 13px var(--mono,monospace);letter-spacing:.04em;touch-action:none;user-select:none;-webkit-user-select:none}
+#heroHud .hb[aria-pressed="true"]{background:rgba(255,91,141,.42);color:#fff}#heroTop{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:max(10px,env(safe-area-inset-right,0px));display:flex;gap:8px}
+#heroPlaceTxt{position:absolute;top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:86vw;text-align:center;padding:8px 14px;border-radius:12px;background:rgba(16,14,22,.78);color:#ffe6f0;font-size:13px;border:1px solid rgba(255,91,141,.5)}
+#heroJoy{position:absolute;left:max(18px,env(safe-area-inset-left,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));width:132px;height:132px;border-radius:50%;border:2px solid rgba(255,91,141,.55);background:rgba(16,14,22,.38);pointer-events:auto;touch-action:none}
+#heroJoy i{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px 0 0 -28px;border-radius:50%;background:rgba(255,91,141,.6);border:2px solid #ffe6f0}
+#heroAct{position:absolute;right:max(18px,env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+#heroAct .hb{width:84px;height:62px}body.heroOn .dock,body.heroOn .rail,body.heroOn #logCard,body.heroOn .hud.bottom>.sheet{visibility:hidden!important}
+@media (hover:hover) and (pointer:fine){#heroJoy{display:none}#heroAct{display:none}}`;document.head.appendChild(st);
+  const h=document.createElement("div");h.id="heroHud";h.hidden=true;h.innerHTML='<div id="heroTop"><button class="hb" id="hPlace">Поставить</button><button class="hb" id="hHere">Сюда</button><button class="hb" id="hExit">Выход</button></div><div id="heroPlaceTxt">Коснитесь земли, чтобы поставить героиню, или нажмите «Сюда»</div><div id="heroJoy"><i></i></div><div id="heroAct"><button class="hb" id="hCam" hidden>Камера</button><button class="hb" id="hJump">Прыжок</button><button class="hb" id="hRun" aria-pressed="false">Бег</button></div>';document.body.appendChild(h);
+  b.onclick=()=>{if(HERO.on||HERO.place){heroExit();return;}HERO.place=true;try{if(typeof closeSheet==="function")closeSheet();}catch(e){}heroUI();$("res").textContent="Коснитесь земли, чтобы поставить героиню.";};
+  $("hExit").onclick=heroExit;$("hHere").onclick=()=>{heroSpawn(HERO.on&&HERO.g?HERO.g.position.clone():heroDefault());};$("hPlace").onclick=()=>{HERO.place=true;if(HERO.on)heroOn(false);heroUI();};
+  $("hJump").addEventListener("pointerdown",e=>{HERO.jumpQ=true;e.preventDefault();});$("hRun").addEventListener("pointerdown",e=>{HERO.run=!HERO.run;heroUI();e.preventDefault();});
+  /* джойстик */
+  const J=$("heroJoy"),kn=J.querySelector("i");let jid=null;const jset=e=>{const r=J.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,R=r.width/2;let x=(e.clientX-cx)/R,y=(e.clientY-cy)/R;const m=Math.hypot(x,y);if(m>1){x/=m;y/=m;}HERO.joy.x=x;HERO.joy.y=y;HERO.joy.r=m>1.15;kn.style.transform=`translate(${x*R*.62}px,${y*R*.62}px)`;};
+  J.addEventListener("pointerdown",e=>{jid=e.pointerId;try{J.setPointerCapture(jid);}catch(_){}jset(e);e.preventDefault();});J.addEventListener("pointermove",e=>{if(e.pointerId===jid)jset(e);});
+  ["pointerup","pointercancel"].forEach(ev=>J.addEventListener(ev,e=>{if(e.pointerId!==jid)return;jid=null;HERO.joy.x=HERO.joy.y=0;kn.style.transform="";}));
+  /* камера: перетаскивание по сцене (мышь или палец справа), колесо — расстояние; касание земли в режиме установки ставит героиню */
+  const el=renderer.domElement;let cam=null,dn=null;
+  el.addEventListener("pointerdown",e=>{dn={x:e.clientX,y:e.clientY,t:performance.now()};if(HERO.on){cam={id:e.pointerId,x:e.clientX,y:e.clientY};}});
+  el.addEventListener("pointermove",e=>{if(!HERO.on||!cam||e.pointerId!==cam.id)return;HERO.cy-=(e.clientX-cam.x)*.006;HERO.cp=Math.max(-.25,Math.min(1.1,HERO.cp+(e.clientY-cam.y)*.004));cam.x=e.clientX;cam.y=e.clientY;});
+  el.addEventListener("pointerup",e=>{if(cam&&e.pointerId===cam.id)cam=null;if(HERO.place&&dn&&Math.hypot(e.clientX-dn.x,e.clientY-dn.y)<10){const p=heroPick(e.clientX,e.clientY);if(p)heroSpawn(p);else $("res").textContent="Здесь нет земли — коснитесь поверхности.";}dn=null;});
+  el.addEventListener("pointercancel",()=>{cam=null;dn=null;});
+  el.addEventListener("wheel",e=>{if(!HERO.on)return;HERO.cd=Math.max(1.6,Math.min(8,HERO.cd*(e.deltaY>0?1.1:.9)));e.preventDefault();e.stopImmediatePropagation();},{passive:false,capture:true});
+  addEventListener("keydown",e=>{if(!HERO.on)return;if(e.target&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;if(e.code==="Escape"){heroExit();return;}if(e.code==="Space"){if(!e.repeat)HERO.jumpQ=true;e.preventDefault();return;}
+    if(/^(Key[WASD]|Arrow\w+|Shift\w+)$/.test(e.code)){HERO.keys[e.code]=true;e.preventDefault();e.stopImmediatePropagation();}},true);
+  addEventListener("keyup",e=>{if(HERO.keys[e.code]){HERO.keys[e.code]=false;}},true);addEventListener("blur",()=>{HERO.keys={};});
+})();}catch(e){console.error("hero ui",e);}
+
 let last=performance.now();
 let tickErr=0;
 function tick(t){requestAnimationFrame(tick);try{tickBody(t);}catch(e){if(++tickErr<=5)console.error("tick error ("+tickErr+")",e);}}
@@ -3293,6 +3432,7 @@ function tickBody(t){
     else{const v=views[3];camera.position.lerp?camera.position.lerp(new THREE.Vector3(...v.p),Math.min(1,dt*2)):0;if(controls)controls.target.set(...v.t);}}
   try{camTick(dt);}catch(e){}try{if(typeof mdlAnimTick==="function")mdlAnimTick(dt);}catch(e){}if(controls)controls.update();
   let jit=null;if(S.cam>0&&!reduce){S.cam=Math.max(0,S.cam-dt*1.8);const k=(REDUCE_OS?.3:1)*S.cam*(views&&$("v2").getAttribute("aria-pressed")==="true"?.12:.04);jit=new THREE.Vector3(R(-k,k),R(-k,k),R(-k,k));camera.position.add(jit);}
+  try{heroTick(dt);}catch(e){if(!HERO.er){HERO.er=1;console.error("hero",e);}}
   try{shadowFit();shockTick(dtv);}catch(e){}try{hazeTick(dtv);}catch(e){}
   renderFrame();try{postWatch(dt);}catch(e){}
   if(jit)camera.position.sub(jit);
@@ -8309,7 +8449,7 @@ function bldBoot(){const sel=$("bldAim");if(!sel)return;sel.innerHTML='<option v
   if($("bldTest"))$("bldTest").innerHTML=bMatTest();
   /* касание здания на экране ставит точку прицеливания (короткое касание без сдвига; вращение камеры не мешает) */
   const el=renderer.domElement;let dn=null;if(el.addEventListener){el.addEventListener("pointerdown",e=>{dn={x:e.clientX,y:e.clientY,t:performance.now()};});
-    el.addEventListener("pointerup",e=>{if(!dn||!S.bld||S.pvoPlace){dn=null;return;}const mv=Math.hypot(e.clientX-dn.x,e.clientY-dn.y),dtp=performance.now()-dn.t;dn=null;if(mv>8||dtp>400)return;try{bldPick(e.clientX,e.clientY);}catch(er){console.error(er);}});}}
+    el.addEventListener("pointerup",e=>{if(!dn||!S.bld||S.pvoPlace||(S.hero&&(S.hero.on||S.hero.place))){dn=null;return;}const mv=Math.hypot(e.clientX-dn.x,e.clientY-dn.y),dtp=performance.now()-dn.t;dn=null;if(mv>8||dtp>400)return;try{bldPick(e.clientX,e.clientY);}catch(er){console.error(er);}});}}
 try{bldBoot();}catch(e){console.error(e);}
 
 /* ===== v65: крылатые ракеты и дроны самолётного типа =====
