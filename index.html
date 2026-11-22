@@ -8084,7 +8084,7 @@ function bWallFall(e){const n=e.k==="w"?(e.side==="R"||e.side==="core"?(()=>{con
   if(e.win!=null){const g=BLD.E[e.win];if(g){if(g.st!==2)bGlass(g,n,2,"blast");bFrames(g);}}}
 /* ---------- кадр: обломки, падающие плиты, лифты, фонтан, дым ---------- */
 let _bE=null,_bQ2=null;
-function bldTick(dt){if(!BLD||!BLD.g.visible)return;try{anxTick();pplTick(dt);}catch(e){}dt=Math.min(.05,dt);BLD.t+=dt;
+function bldTick(dt){if(!BLD||!BLD.g.visible)return;try{anxTick();pplTick(dt);vcFlagTick();}catch(e){}dt=Math.min(.05,dt);BLD.t+=dt;
   BLD.supT=(BLD.supT||0)+dt;if(BLD.supT>.5){BLD.supT=0;try{bSupportCheck();}catch(e){}}
   for(let i=BLD.deb.length-1;i>=0;i--){const o=BLD.deb[i];if(o.rest)continue;o.t+=dt;o.v[1]-=9.8*dt;const fy0=bFloorY(o.p[0],o.p[2],o.p[1]+.05);for(let a=0;a<3;a++){o.p[a]+=o.v[a]*dt;o.r[a]+=o.w[a]*dt;}
     const fl=Math.max(fy0,bFloorY(o.p[0],o.p[2],o.p[1]+o.s))+o.s*(o.flat?.08:.4);
@@ -9393,7 +9393,7 @@ function anxBuild(){const A=ANX,P=BLD.P,M=BLD.M,box=B_GEO&&B_GEO.box||new THREE.
   bBox(GM,"lawn",196,-.4,A.z0-7,208,.16,A.z0-1);bMeshes(GM,["steel"]);
   const cars=[[189,-40,0],[192,-40,0],[195,-40,0],[199,-44,Math.PI/2],[170,-33.6,Math.PI/2],[207,-33.6,Math.PI/2],[212,-33.6,-Math.PI/2]];
   try{cars.forEach(([x,z,ry])=>{const c=[[.75,.74,.7],[.15,.15,.16],[.62,.6,.55],[.1,.1,.12]][(Math.random()*4)|0];carBuild(P,x,.12,z,ry+Math.PI/2,c,Math.random()<.6?0:2);});}catch(e){}
-  try{anxBillboard();}catch(e){console.error("billboard",e);}try{pplBuild();}catch(e){console.error("ppl",e);}
+  try{anxBillboard();}catch(e){console.error("billboard",e);}try{vcFlags();}catch(e){console.error("vcflags",e);}try{pplBuild();}catch(e){console.error("ppl",e);}
   BLD.colsAll=BLD.E.filter(e=>e.k==="c");}
 /* билборд 3,6 × 4,8 м (вертикальный, 3:4) у дороги рядом с домом: двусторонний, на одной опоре; фото вписано целиком, поля — его же размытая копия.
    Щит на вольфрамовой бронеплите 500 мм — в расчёте разрушения не участвует (неуязвим) */
@@ -9436,21 +9436,49 @@ try{_anxAims.forEach(a=>{if(!B_AIMS.some(b=>b[0]===a[0]))B_AIMS.push(a);});const
    Стоят группами и патрулируют. Поражение — по разрыву: зона сплошного поражения осколками и волной R≈5·W^0,4 м (W — масса ВВ, кг),
    ранение — до 2R; упавшие остаются лежать. Без натурализма: фигурка просто падает. */
 const PPL={L:[],tex:null,log:0};
-function pplTex(){if(PPL.tex)return PPL.tex;const c=document.createElement("canvas");c.width=256;c.height=256;const g=c.getContext("2d");
-  g.fillStyle="#c4161c";g.beginPath();g.moveTo(128,8);g.lineTo(236,48);g.lineTo(226,150);g.quadraticCurveTo(200,220,128,250);g.quadraticCurveTo(56,220,30,150);g.lineTo(20,48);g.closePath();g.fill();
-  g.strokeStyle="#ffffff";g.lineWidth=8;g.stroke();g.fillStyle="#ffffff";g.font="bold 120px Arial, sans-serif";g.textAlign="center";g.textBaseline="middle";g.fillText("E",128,104);
-  g.font="bold 46px Arial, sans-serif";g.fillText("LIGA",128,186);const t=new THREE.CanvasTexture(c);if(THREE.sRGBEncoding!==undefined)t.encoding=THREE.sRGBEncoding;PPL.tex=t;return t;}
-function pplFlagTex(){if(PPL.ft)return PPL.ft;const c=document.createElement("canvas");c.width=512;c.height=320;const g=c.getContext("2d");g.fillStyle="#c4161c";g.fillRect(0,0,512,320);
-  g.fillStyle="#7d0d11";g.fillRect(0,0,512,22);g.fillRect(0,298,512,22);g.drawImage(pplTex().image,40,62,190,190);
-  g.fillStyle="#fff";g.font="bold 92px Arial, sans-serif";g.textAlign="left";g.textBaseline="middle";g.fillText("E-LIGA",236,160);
-  const t=new THREE.CanvasTexture(c);if(THREE.sRGBEncoding!==undefined)t.encoding=THREE.sRGBEncoding;PPL.ft=t;return t;}
+/* Vice City: закат, пальмы, неоновая надпись — для флагов и нашивок бойцов (оригинальный рисунок) */
+function vcPaint(g,W,H,o){o=o||{};const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#1b0a3c");bg.addColorStop(.35,"#5a1a7a");bg.addColorStop(.62,"#e8367f");bg.addColorStop(.8,"#ff7a45");bg.addColorStop(1,"#ffb347");
+  g.fillStyle=bg;g.fillRect(0,0,W,H);const hz=H*(o.hz||.74),r=Math.min(W,H)*(o.sr||.3),sx=W*(o.sx||.5);
+  const sg=g.createLinearGradient(0,hz-r,0,hz);sg.addColorStop(0,"#fff27a");sg.addColorStop(.55,"#ffb03d");sg.addColorStop(1,"#ff3d8b");g.fillStyle=sg;g.beginPath();g.arc(sx,hz,r,Math.PI,0);g.fill();
+  g.fillStyle=bg;for(let i=0;i<5;i++){const y=hz-r*(.08+i*.17),hh=r*(.025+i*.012);g.fillRect(sx-r,y-hh,2*r,hh*2);}
+  const sea=g.createLinearGradient(0,hz,0,H);sea.addColorStop(0,"#3a0f5c");sea.addColorStop(1,"#12052a");g.fillStyle=sea;g.fillRect(0,hz,W,H-hz);
+  g.strokeStyle="rgba(255,120,190,.55)";g.lineWidth=Math.max(1,H/110);for(let i=1;i<6;i++){const y=hz+(H-hz)*i/6,w=r*(1.1-i*.15);g.beginPath();g.moveTo(sx-w,y);g.lineTo(sx+w,y);g.stroke();}
+  (o.palms||[]).forEach(([px,ph,s])=>vcPalm(g,px*W,hz+H*.02,ph*H,s));}
+function vcPalm(g,x,y,h,s){g.save();g.strokeStyle=g.fillStyle="#14051f";g.lineCap="round";const tx=x+h*.22*s,ty=y-h;
+  g.lineWidth=h*.055;g.beginPath();g.moveTo(x,y);g.quadraticCurveTo(x+h*.02*s,y-h*.6,tx,ty);g.stroke();
+  for(let k=0;k<7;k++){const a=-Math.PI*(.05+k*.15),dx=Math.cos(a),dy=Math.sin(a),L=h*(.42+.08*Math.sin(k*1.7)),ex=tx+dx*L,ey=ty+dy*L*.55+L*.35;
+    g.lineWidth=h*.035;g.beginPath();g.moveTo(tx,ty);g.quadraticCurveTo(tx+dx*L*.5,ty+dy*L*.7-h*.04,ex,ey);g.stroke();}
+  g.restore();}
+function vcText(g,txt,x,y,px,col,glow){g.save();g.font=`italic 900 ${px}px 'Arial Black', Arial, Helvetica, sans-serif`;g.textAlign="center";g.textBaseline="middle";
+  g.shadowColor=glow;g.shadowBlur=px*.35;g.lineWidth=px*.09;g.strokeStyle=glow;g.strokeText(txt,x,y);g.shadowBlur=px*.15;g.fillStyle=col;g.fillText(txt,x,y);g.restore();}
+function vcFlagCanvas(){const c=document.createElement("canvas");c.width=512;c.height=320;const g=c.getContext("2d");
+  vcPaint(g,512,320,{hz:.76,sr:.34,sx:.5,palms:[[.08,.52,1],[.18,.4,1],[.92,.55,-1]]});
+  vcText(g,"VICE",256,108,112,"#ffffff","#ff3fc8");vcText(g,"CITY",256,190,64,"#e9fbff","#2fe6ff");return c;}
+function vcPatchCanvas(){const c=document.createElement("canvas");c.width=256;c.height=256;const g=c.getContext("2d");
+  const sh=()=>{g.beginPath();g.moveTo(128,8);g.lineTo(236,48);g.lineTo(226,150);g.quadraticCurveTo(200,220,128,250);g.quadraticCurveTo(56,220,30,150);g.lineTo(20,48);g.closePath();};
+  g.save();sh();g.clip();vcPaint(g,256,256,{hz:.7,sr:.3,sx:.5,palms:[[.2,.5,1],[.84,.44,-1]]});g.restore();
+  sh();g.lineWidth=12;g.strokeStyle="#ff3fc8";g.shadowColor="#ff3fc8";g.shadowBlur=10;g.stroke();g.shadowBlur=0;g.lineWidth=4;g.strokeStyle="#ffe6fb";g.stroke();
+  vcText(g,"VICE",128,92,70,"#ffffff","#ff3fc8");vcText(g,"CITY",128,150,44,"#e9fbff","#2fe6ff");return c;}
+function pplTex(){if(PPL.tex)return PPL.tex;const t=new THREE.CanvasTexture(vcPatchCanvas());if(THREE.sRGBEncoding!==undefined)t.encoding=THREE.sRGBEncoding;t.anisotropy=4;PPL.tex=t;return t;}
+function pplFlagTex(){if(PPL.ft)return PPL.ft;const t=new THREE.CanvasTexture(vcFlagCanvas());if(THREE.sRGBEncoding!==undefined)t.encoding=THREE.sRGBEncoding;t.anisotropy=4;PPL.ft=t;return t;}
+/* флаги Vice City на флагштоках у фасадов: полотнище 1,8 × 1,125 м колышется по ветру */
+const VCF=[];
+function vcFlags(){if(!BLD)return;const g=new THREE.Group();g.userData.decor=true;BLD.g.add(g);
+  const pm=new THREE.MeshStandardMaterial({color:0xd8dbde,roughness:.3,metalness:.85}),fm=new THREE.MeshStandardMaterial({map:pplFlagTex(),side:THREE.DoubleSide,roughness:.9});
+  const pg=new THREE.CylinderGeometry(.045,.06,8,10),bg=new THREE.CylinderGeometry(.18,.22,.2,12),kg=new THREE.SphereGeometry(.08,10,8);
+  [[68,-3],[72,-3],[76,-3],[184,-31.6],[189,-31.6]].forEach(([x,z],i)=>{const q=new THREE.Group();q.position.set(x,0,z);g.add(q);
+    const add=(geo,m,y)=>{const o=new THREE.Mesh(geo,m);o.position.y=y;o.castShadow=true;o.raycast=()=>{};q.add(o);return o;};add(bg,pm,.1);add(pg,pm,4);add(kg,pm,8.05);
+    const geo=new THREE.PlaneGeometry(1.8,1.125,16,1);geo.translate(.9,0,0);const f=new THREE.Mesh(geo,fm);f.position.set(.05,7.35,0);f.rotation.y=Math.PI/2;f.castShadow=true;f.raycast=()=>{};q.add(f);
+    VCF.push({f,b:Float32Array.from(geo.attributes.position.array),ph:i*1.3});});}
+function vcFlagTick(){if(!VCF.length)return;const t=performance.now()/1000,w=+(($("wind")||{}).value)||3;
+  VCF.forEach(F=>{const a=F.f.geometry.attributes.position,b=F.b;for(let i=0;i<a.count;i++){const x=b[i*3];a.setZ(i,Math.sin(x*3.2-t*(3+Math.abs(w)*.25)+F.ph)*.12*x);}a.needsUpdate=true;});}
 /* флаг группировки на древке в руках: полотнище 1,2 × 0,75 м колышется */
 function pplFlag(G){const pole=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,2.6,8),PPL.mG);pole.position.set(.32,2.0,.25);pole.castShadow=true;pole.raycast=()=>{};G.add(pole);
   const geo=new THREE.PlaneGeometry(1.2,.75,12,1);geo.translate(.6,0,0);const m=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:pplFlagTex(),side:THREE.DoubleSide,roughness:.9}));
   m.position.set(.34,2.9,.25);m.castShadow=true;m.raycast=()=>{};G.add(m);G.userData.flag=m;G.userData.fx0=Float32Array.from(geo.attributes.position.array);}
 function pplMan(v,role){v=v||0;role=role||"rifle";const G=new THREE.Group(),sm=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.9},o||{})),MC=PPL.mc||(PPL.mc={}),cm=(c,o)=>MC[c]||(MC[c]=sm(c,o));
   const JK=[0x1c1d1f,0x2c3a2a,0x4a4a3c,0x232a38,0x3a2f28][v%5],PT=[0x3b3f2e,0x2e3330,0x4b4636,0x262b34][(v>>1)%4],SK=[0xd9a98a,0xc89572,0xe2b99b,0x9a6b4d][(v*3)%4];
-  const blk=cm(JK),ol=cm(0x3b3f2e),pants=cm(PT),skin=cm(SK,{roughness:.75}),boot=cm(0x15120f,{roughness:.6}),red=PPL.mR||(PPL.mR=sm(0xc4161c,{roughness:.7})),gun=PPL.mG||(PPL.mG=sm(0x161616,{metalness:.5,roughness:.5})),
+  const blk=cm(JK),ol=cm(0x3b3f2e),pants=cm(PT),skin=cm(SK,{roughness:.75}),boot=cm(0x15120f,{roughness:.6}),red=PPL.mR||(PPL.mR=sm(0xc2287f,{roughness:.7})),vfl=PPL.mF||(PPL.mF=new THREE.MeshStandardMaterial({map:pplFlagTex(),roughness:.85})),gun=PPL.mG||(PPL.mG=sm(0x161616,{metalness:.5,roughness:.5})),
     em=PPL.mE||(PPL.mE=new THREE.MeshStandardMaterial({map:pplTex(),transparent:true,alphaTest:.3,roughness:.8}));
   const GE=PPL.ge||(PPL.ge={leg:capsuleGeo(.082,.62,10,.062),boot:bevelBoxGeo(.17,.1,.3,.04),pel:new THREE.SphereGeometry(.16,14,10),tor:capsuleGeo(.16,.3,14,.14),vest:bevelBoxGeo(.47,.3,.3,.08),neck:new THREE.CylinderGeometry(.05,.06,.1,10),head:new THREE.SphereGeometry(.115,16,12),helm:new THREE.SphereGeometry(.135,16,10,0,Math.PI*2,0,Math.PI/2),arm:capsuleGeo(.052,.46,10,.042),hand:new THREE.SphereGeometry(.05,10,8),band:bevelBoxGeo(.14,.1,.15,.03),rifle:bevelBoxGeo(.06,.1,.85,.02),mag:bevelBoxGeo(.05,.18,.06,.015),sh:new THREE.SphereGeometry(.07,10,8),
     mgR:bevelBoxGeo(.07,.12,.58,.02),mgB:new THREE.CylinderGeometry(.016,.016,.52,8).rotateX(Math.PI/2),mgJ:new THREE.CylinderGeometry(.03,.03,.16,8).rotateX(Math.PI/2),mgS:bevelBoxGeo(.05,.11,.26,.02),mgA:bevelBoxGeo(.13,.12,.1,.02),mgBp:new THREE.CylinderGeometry(.008,.008,.3,5),
@@ -9463,7 +9491,7 @@ function pplMan(v,role){v=v||0;role=role||"rifle";const G=new THREE.Group(),sm=(
   add(GE.neck,skin,0,1.5,0);const hd=add(GE.head,skin,0,1.64,0);hd.scale.set(.95,1.15,1);const hm=add(GE.helm,ol,0,1.68,0);hm.scale.set(1,.95,1.05);
   add(GE.sh,blk,-.27,1.38,0);add(GE.sh,blk,.27,1.38,0);
   const armL=add(GE.arm,blk,-.29,1.2,.15),armR=add(GE.arm,blk,.29,1.2,.15);armL.rotation.x=-.9;armR.rotation.x=-.9;add(GE.hand,skin,0,-.29,0,armL);add(GE.hand,skin,0,-.29,0,armR);
-  add(GE.band,red,.29,1.4,.04);
+  add(GE.band,red,.29,1.4,.04);{const p=add(PPL.gF||(PPL.gF=new THREE.PlaneGeometry(.14,.0875)),vfl,.362,1.4,.04);p.rotation.y=Math.PI/2;}/* нашивка-флаг Vice City на рукаве */
   const r=add(GE.rifle,gun,.05,1.3,.42);r.rotation.x=-.12;const mg0=add(GE.mag,gun,.05,1.2,.32);const wgs={};
   if(role==="mg"||role==="mp"){r.visible=false;mg0.visible=false;}
   if(role==="mg"){/* ПКМ-подобный пулемёт: ствол с кожухом, ствольная коробка, приклад, сошки, патронная коробка */
