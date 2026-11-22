@@ -9395,33 +9395,27 @@ function anxBuild(){const A=ANX,P=BLD.P,M=BLD.M,box=B_GEO&&B_GEO.box||new THREE.
   try{cars.forEach(([x,z,ry])=>{const c=[[.75,.74,.7],[.15,.15,.16],[.62,.6,.55],[.1,.1,.12]][(Math.random()*4)|0];carBuild(P,x,.12,z,ry+Math.PI/2,c,Math.random()<.6?0:2);});}catch(e){}
   try{anxBillboard();}catch(e){console.error("billboard",e);}try{pplBuild();}catch(e){console.error("ppl",e);}
   BLD.colsAll=BLD.E.filter(e=>e.k==="c");}
-/* билборд 3 × 6 м у дороги рядом с домом: двусторонний, на одной опоре; фото вписано целиком, поля — его же размытая копия.
+/* билборд 3,6 × 4,8 м (вертикальный, 3:4) у дороги рядом с домом: двусторонний, на одной опоре; фото вписано целиком, поля — его же размытая копия.
    Щит на вольфрамовой бронеплите 500 мм — в расчёте разрушения не участвует (неуязвим) */
 function anxBillboard(){const g=new THREE.Group();g.userData.decor=true;g.position.set(160,0,-33.2);BLD.g.add(g);BLD.bb=g;
+  const FW=3.6,FH=4.8,FB=5.05,CY=FB+FH/2,TOP=FB+FH;/* полотно: ширина, высота, низ над землёй */
   const st=new THREE.MeshStandardMaterial({color:0x6f7377,roughness:.5,metalness:.7}),wM=new THREE.MeshStandardMaterial({color:0x8b8f93,roughness:.35,metalness:.9});
   const add=(geo,m,x,y,z)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;o.raycast=()=>{};g.add(o);return o;};
   add(new THREE.CylinderGeometry(.28,.34,5.4,16),st,0,2.7,0);add(new THREE.BoxGeometry(1.4,.25,1.4),st,0,.12,0);
-  add(new THREE.BoxGeometry(6.3,3.3,.5),wM,0,6.55,0);/* вольфрамовая плита 500 мм за полотном */
-  add(new THREE.BoxGeometry(6.4,.12,.12),st,0,8.23,.3);add(new THREE.BoxGeometry(6.4,.12,.12),st,0,4.87,.3);add(new THREE.BoxGeometry(6.4,.12,.12),st,0,8.23,-.3);add(new THREE.BoxGeometry(6.4,.12,.12),st,0,4.87,-.3);
-  add(new THREE.BoxGeometry(6.4,.06,.9),st,0,4.05,.55);for(let x=-3;x<=3;x+=1)add(new THREE.BoxGeometry(.03,1,.03),st,x,4.55,.97);
-  for(const sx of[-2.2,0,2.2])[-1,1].forEach(sz=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(.05,.07,.5,8),st);l.position.set(sx,8.45,sz*.5);l.rotation.x=sz*.6;g.add(l);const h=new THREE.Mesh(new THREE.BoxGeometry(.3,.12,.18),new THREE.MeshBasicMaterial({color:0xfff6dc}));h.position.set(sx,8.7,sz*.7);g.add(h);});
-  const cv=document.createElement("canvas");cv.width=2048;cv.height=1024;const c=cv.getContext("2d");c.fillStyle="#111";c.fillRect(0,0,2048,1024);
+  add(new THREE.BoxGeometry(FW+.3,FH+.3,.5),wM,0,CY,0);/* вольфрамовая плита 500 мм за полотном */
+  [.3,-.3].forEach(z=>{add(new THREE.BoxGeometry(FW+.4,.12,.12),st,0,TOP+.18,z);add(new THREE.BoxGeometry(FW+.4,.12,.12),st,0,FB-.18,z);
+    [-1,1].forEach(sx=>add(new THREE.BoxGeometry(.12,FH+.48,.12),st,sx*(FW/2+.2),CY,z));});
+  add(new THREE.BoxGeometry(FW+.4,.06,.9),st,0,4.05,.55);for(let x=-FW/2;x<=FW/2+.01;x+=FW/6)add(new THREE.BoxGeometry(.03,1,.03),st,x,4.55,.97);add(new THREE.BoxGeometry(FW+.06,.04,.04),st,0,5.04,.97);
+  for(const sx of[-FW/4,FW/4])[-1,1].forEach(sz=>{const l=new THREE.Mesh(new THREE.CylinderGeometry(.05,.07,.5,8),st);l.position.set(sx,TOP+.4,sz*.5);l.rotation.x=sz*.6;g.add(l);const h=new THREE.Mesh(new THREE.BoxGeometry(.3,.12,.18),new THREE.MeshBasicMaterial({color:0xfff6dc}));h.position.set(sx,TOP+.65,sz*.7);g.add(h);});
+  const CW=1536,CH=2048,cv=document.createElement("canvas");cv.width=CW;cv.height=CH;const c=cv.getContext("2d");c.fillStyle="#111";c.fillRect(0,0,CW,CH);
   const tex=new THREE.CanvasTexture(cv);if(THREE.sRGBEncoding!==undefined)tex.encoding=THREE.sRGBEncoding;tex.anisotropy=4;
   const img=new Image();img.onload=()=>{const W=img.width,H=img.height;
     /* поля: та же фотография, растянутая на всё полотно и размытая (через уменьшение — работает и на старых телефонах), притемнённая */
-    const sm=document.createElement("canvas");sm.width=48;sm.height=24;const s2=sm.getContext("2d"),k=Math.max(48/W,24/H);s2.drawImage(img,(48-W*k)/2,(24-H*k)/2,W*k,H*k);
-    c.imageSmoothingEnabled=true;c.drawImage(sm,0,0,2048,1024);c.fillStyle="rgba(0,0,0,.35)";c.fillRect(0,0,2048,1024);
-    const kk=Math.min(2048/W,1024/H),w=W*kk,h=H*kk;c.drawImage(img,(2048-w)/2,(1024-h)/2,w,h);tex.needsUpdate=true;};img.src=ANX_BB_IMG;
+    const sm=document.createElement("canvas");sm.width=24;sm.height=32;const s2=sm.getContext("2d"),k=Math.max(24/W,32/H);s2.drawImage(img,(24-W*k)/2,(32-H*k)/2,W*k,H*k);
+    c.imageSmoothingEnabled=true;c.drawImage(sm,0,0,CW,CH);c.fillStyle="rgba(0,0,0,.35)";c.fillRect(0,0,CW,CH);
+    const kk=Math.min(CW/W,CH/H),w=W*kk,h=H*kk;c.drawImage(img,(CW-w)/2,(CH-h)/2,w,h);tex.needsUpdate=true;};img.src=ANX_BB_IMG;
   const face=new THREE.MeshStandardMaterial({map:tex,roughness:.55,metalness:0,emissive:0xffffff,emissiveMap:tex,emissiveIntensity:.18});
-  /* под фото — отдельная стальная пластина во всю длину с надписью */
-  const pc=document.createElement("canvas");pc.width=2048;pc.height=192;const p2=pc.getContext("2d"),gr=p2.createLinearGradient(0,0,0,192);gr.addColorStop(0,"#c9ccce");gr.addColorStop(.5,"#9ea2a5");gr.addColorStop(1,"#c3c6c8");
-  p2.fillStyle=gr;p2.fillRect(0,0,2048,192);for(let i=0;i<900;i++){p2.fillStyle=`rgba(255,255,255,${Math.random()*.08})`;p2.fillRect(Math.random()*2048,Math.random()*192,Math.random()*300,1);}
-  p2.strokeStyle="#6d7174";p2.lineWidth=6;p2.strokeRect(6,6,2036,180);[[40,40],[2008,40],[40,152],[2008,152]].forEach(([x,y])=>{p2.fillStyle="#7a7e81";p2.beginPath();p2.arc(x,y,12,0,7);p2.fill();});
-  p2.font="bold 120px Georgia, 'Times New Roman', serif";p2.textAlign="center";p2.textBaseline="middle";p2.fillStyle="rgba(255,255,255,.55)";p2.fillText("Риэлтор Года",1026,102);p2.fillStyle="#1d2023";p2.fillText("Риэлтор Года",1024,98);
-  const ptex=new THREE.CanvasTexture(pc);if(THREE.sRGBEncoding!==undefined)ptex.encoding=THREE.sRGBEncoding;ptex.anisotropy=4;const pm=new THREE.MeshStandardMaterial({map:ptex,roughness:.35,metalness:.75});
-  add(new THREE.BoxGeometry(6.3,.62,.5),wM,0,4.62,0);[1,-1].forEach(sd=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(6.2,.58),pm);m.position.set(0,4.62,sd*.26);if(sd<0)m.rotation.y=Math.PI;m.raycast=()=>{};g.add(m);});
-  [1,-1].forEach(sd=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(6,3),face);m.position.set(0,6.55,sd*.26);if(sd<0)m.rotation.y=Math.PI;m.raycast=()=>{};g.add(m);});}
-/* кровля восточного крыла лежит на плитах: рухнули — исчезает и она */
+  [1,-1].forEach(sd=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(FW,FH),face);m.position.set(0,CY,sd*.26);if(sd<0)m.rotation.y=Math.PI;m.raycast=()=>{};g.add(m);});}
 function anxTick(){if(!BLD)return;
   for(const o of BLD.anxSeg||[]){if(!o.g.visible)continue;if(o.cells.some(c=>c.st===2||c.falling||(c.st===1&&bAlive(c)<.5))){o.g.visible=false;for(let i=0;i<6;i++)bDeb([R(o.x0,o.x1),ANX.par+1,R(o.z0,o.z1)],[R(-2,2),R(-1,2),R(-2,2)],R(.3,.7),0x7d2620,"steel");}}
   return;const n=BLD.anxRoofCells.filter(s=>s.st===2||s.falling).length;if(n>=Math.max(2,BLD.anxRoofCells.length*.3)){BLD.anxRoof.visible=false;
