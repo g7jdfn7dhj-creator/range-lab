@@ -3208,7 +3208,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
       if(eraHit)boom(s.to,.6,{surf:true,fill:"pe",n:pn});}}}catch(e){}
 }
 
-/* ===== v32: Героиня — свой процедурный персонаж (взрослая женщина ≈1,70 м, светлые волосы, летний наряд), ставится на карту, управление от третьего лица ===== */
+/* ===== v32: Героиня — процедурный персонаж по фото (≈1,70 м, длинные платиновые волосы, чёрный комбинезон, белый длинный кардиган, белые кроссовки), ставится на карту, управление от третьего лица ===== */
 const HERO={on:false,place:false,g:null,v:new THREE.Vector3(),vy:0,yaw:0,ph:0,spd:0,air:false,cy:0,cp:.28,cd:3.4,keys:{},joy:{x:0,y:0},run:false,jumpQ:false,save:null,col:[],colT:0,camP:null};
 S.hero=HERO;
 function heroModel(){const G=new THREE.Group(),Mt=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7},o||{}));
@@ -3234,14 +3234,14 @@ function heroModel(){const G=new THREE.Group(),Mt=(c,o)=>new THREE.MeshStandardM
   /* голова */
   const head=new THREE.Group();head.position.set(0,1.64,0);body.add(head);
   mk(new THREE.CylinderGeometry(.04,.045,.08,14),skin,0,-.07,0,head);
-  mk(new THREE.SphereGeometry(.102,32,24),skin,0,0,0,head).scale.set(.83,1.1,.95);
-  mk(new THREE.SphereGeometry(.052,20,14),skin,0,-.052,.03,head).scale.set(1.1,.82,1.02);/* скулы, подбородок */
-  mk(new THREE.ConeGeometry(.012,.038,12).rotateX(Math.PI/2.5),skin,0,-.006,.098,head);mk(new THREE.SphereGeometry(.011,10,8),skin,0,-.022,.104,head);
-  mk(new THREE.SphereGeometry(.019,14,10),lip,0,-.042,.089,head).scale.set(1.15,.36,.55);mk(new THREE.SphereGeometry(.019,14,10),lip,0,-.05,.087,head).scale.set(1.05,.42,.55);
+  mk(new THREE.SphereGeometry(.102,32,24),skin,0,0,0,head).scale.set(.8,1.1,.95);
+  mk(new THREE.SphereGeometry(.05,20,14),skin,0,-.054,.028,head).scale.set(.98,.8,1.02);/* скулы, подбородок */
+  mk(new THREE.ConeGeometry(.0085,.03,12).rotateX(Math.PI/2.3),skin,0,-.004,.094,head);mk(new THREE.SphereGeometry(.0085,10,8),skin,0,-.018,.099,head).scale.set(1.2,.9,1);
+  mk(new THREE.SphereGeometry(.019,14,10),lip,0,-.039,.088,head).scale.set(1.05,.3,.5);mk(new THREE.SphereGeometry(.019,14,10),lip,0,-.047,.086,head).scale.set(.95,.38,.5);
   [-1,1].forEach(s=>{const e=mk(new THREE.SphereGeometry(.014,14,10),white,s*.032,.018,.084,head);e.scale.set(1.25,.6,.5);e.rotation.z=s*.12;
     mk(new THREE.CircleGeometry(.0075,14),iris,s*.032,.018,.0915,head).rotation.y=s*.15;
     const l=mk(capsuleGeo(.0022,.03,6,.0022),lash,s*.032,.026,.0905,head);l.rotation.z=Math.PI/2+s*.18;
-    const b=mk(capsuleGeo(.0042,.034,6,.003),brow,s*.035,.044,.088,head);b.rotation.z=Math.PI/2+s*.16;b.scale.set(1,1,.6);
+    const b=mk(capsuleGeo(.0034,.034,6,.0024),brow,s*.035,.046,.088,head);b.rotation.z=Math.PI/2-s*.07;b.scale.set(1,1,.6);
     mk(new THREE.SphereGeometry(.018,10,8),skin,s*.083,-.004,-.004,head).scale.set(.45,1,.75);/* уши */
     mk(new THREE.TorusGeometry(.0085,.0018,6,14),silver,s*.088,.004,-.004,head).rotation.y=Math.PI/2;mk(new THREE.TorusGeometry(.007,.0018,6,14),silver,s*.088,-.018,.002,head).rotation.y=Math.PI/2;});
   /* волосы: шапка с прямым пробором */
