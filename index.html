@@ -2033,6 +2033,7 @@ function fireOne(){
   const ke=a.type==="ke";a.vimp=B.vx*(1+dv0);if(ke){const v0r=B.v0-(B.dvT||0);if(a.key==="bops"&&B.vx>250&&v0r>250){const K=loK(260),rp=17600;a.pen=Math.round(a.pen*Math.exp(K/(rp*Math.pow(v0r/1000,2))-K/(rp*Math.pow(B.vx/1000,2))));}else a.pen=Math.round(a.pen*Math.pow(B.vx/v0r,1.4));}
   /* калиберные бронебойные и бетонобойные снаряды крупных калибров: пробитие по формуле Жакоб де Марра от скорости встречи и калибра */
   if(ke&&(a.key==="apbc"||a.key==="cp")&&g.cls!=="auto"&&g.cls!=="mg")a.pen=Math.round(188*Math.pow(B.vx/1000,1.43)*Math.pow(g.cal/100,1.07)*(a.key==="cp"?.8:1));
+  try{if(typeof rzPen==="function")rzPen(a,g,B);}catch(e){console.error(e);}
   const target=new THREE.Vector3(lx,ly,-S.T/2-.01);plate.localToWorld(target);target.x+=lead;
   const own=!gd&&!auto&&a.type!=="illum"&&!reduce;const tr=(CM_FW(g)&&!reduce)?cmMesh(g):gd?(g.cls==="drone"?droneM:mslM):own?projMesh(a,g):tracers[ti++%tracers.length];if(own){scene.add(tr);try{shellGlow(tr,a,g);}catch(e){}}tr.visible=true;if(!gd&&!own)tr.scale.set(auto?.6:1,auto?.6:1,1);
   if(own&&(a.key==="bops"||a.key==="apds")){const mz=muzzleWorld(),dir=new THREE.Vector3(0,0,1);sabot(mz,dir,g.cal);}
@@ -3001,7 +3002,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
     }
     else{
       /* снаряд проходит слои по очереди; каждый слой и каждая граница слоёв меняют его */
-      let rem=pen,yaw=1,prev=null,broken=false,mush=false;const notes=[];let jetOn=false,gapCD=0;{const MH=mountHit(s.lx,s.ly);if(MH){rem=Math.max(0,rem-MH.mm/cosA());notes.push(MH.txt);}}const rod=a.key==="bops"||a.key==="apds",rodLO=ke&&a.key==="bops",blunt=a.key==="apbc"||a.key==="cp";s.ratio=Math.min(1.5,pen/Math.max(1,e));
+      if(typeof rzBegin==="function")rzBegin(s,pen);let rem=pen,yaw=1,prev=null,broken=false,mush=false;const notes=[];let jetOn=false,gapCD=0;{const MH=mountHit(s.lx,s.ly);if(MH){rem=Math.max(0,rem-MH.mm/cosA());notes.push(MH.txt);}}const rod=a.key==="bops"||a.key==="apds",rodLO=ke&&a.key==="bops",blunt=a.key==="apbc"||a.key==="cp";s.ratio=Math.min(1.5,pen/Math.max(1,e));
       const soft=["rub","pe","frp","ara"];let hn=0;if(rodLO&&g>25)notes.push("длинный сердечник: наклон брони «съедает» меньше, чем толщина по лучу (поправка Ланца–Одерматта)");
       for(let i=0;i<layers.length;i++){const l=layers[i];if(l.spent&&!l.fresh)continue;const m=MAT[l.k];
         if(l.k==="gap"){if(l.edge)continue;
@@ -3011,11 +3012,11 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
           l.hit="p";continue;}
         if(m.beh!=="slat")jetOn=true;
         if(isE(l.k)){if(l.fresh){const E=ERA[l.k],af=eraAng(g);
-            if(heat){const tand=(AMMO[a.key]&&AMMO[a.key].tandem)||(a.key==="heat"&&!!G().heatT);let cut=(1-E.heat)*af;
+            if(heat){const tand=(AMMO[a.key]&&AMMO[a.key].tandem)||(a.key==="heat"&&!!G().heatT);let cut=Math.min(.97,(1-E.heat)*af*(typeof rzEraK==="function"?rzEraK(l.k,"heat"):1));
               if(tand){cut*=E.anti;notes.push(E.anti>.3?"лидирующий заряд подорвал первую секцию, вторая успела сработать по основной струе":"лидирующий заряд тандемной БЧ подорвал ДЗ — основная струя прошла по чистой броне");}
               else notes.push(af<.6?"ДЗ сработала, но удар почти по нормали — пластины задели струю лишь частично":"метательные пластины ДЗ разрезали кумулятивную струю");
               rem*=1-cut;}
-            else if(ke){const cut=(1-E.ke)*af*(a.key==="bops"&&G().keEraK?G().keEraK:1);rem*=1-cut;if(cut>.08){yaw*=1-.6*cut;if(rod&&Math.random()<cut*1.4){broken=true;rem*=.8;notes.push("пластина ДЗ переломила сердечник");}else notes.push("пластина ДЗ ударила по сердечнику сбоку и сбила его с оси");}
+            else if(ke){const cut=Math.min(.97,(1-E.ke)*af*(a.key==="bops"&&G().keEraK?G().keEraK:1)*(typeof rzEraK==="function"?rzEraK(l.k,"ke"):1));rem*=1-cut;if(cut>.08){yaw*=1-.6*cut;if(rod&&Math.random()<cut*1.4){broken=true;rem*=.8;notes.push("пластина ДЗ переломила сердечник");}else notes.push("пластина ДЗ ударила по сердечнику сбоку и сбила его с оси");}
               else notes.push("лёгкая ДЗ на подкалиберный почти не влияет");}
             else if(he||hesh)notes.push("взрыв блока ДЗ встретил заряд снаружи");}
           l.hit="p";prev=l;continue;}
@@ -3038,13 +3039,14 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
           if(blunt&&(m.beh==="hard"||(m.beh==="cer"&&m.ap>=1.5))&&rem>need*.5&&Math.random()<.4){broken=true;rem*=.65;notes.push(`болванка раскололась о слой «${lc(m.n)}»`);}
           else if(rod&&yaw<.88&&Math.random()<.4){broken=true;rem*=.6;notes.push("сердечник переломился от рысканья, дальше идут обломки");}
           else if(blunt&&!mush&&m.beh==="steel"&&l.t>=40){mush=true;rem*=.95;notes.push("головная часть болванки сплющилась грибом");}}
+        if(typeof rzNeed==="function")need=rzNeed(s,i,l,need,rem,mode,a);
         if(rem>=need){rem-=need;l.hit="p";l.remP=rem/Math.max(1,pen);
           if(ke&&m.beh==="cer"&&m.ap>=1.5){rem*=.92;notes.push(`сердечник стёрся о слой «${lc(m.n)}»`);}
           if(ke&&m.beh==="ti"&&l.t>=25)notes.push("титан пробит срезом пробки по полосам адиабатического сдвига");
           if(ke&&m.beh==="steel"&&l.t/cosA()<pen*.12)notes.push(`слой ${i+1} тонкий: выбита пробка целиком`);}
         else{l.hit="s";stopIdx=i;stopR=rem/need;rem=0;break;}
         prev=l;}
-      through=stopIdx<0;
+      through=stopIdx<0;if(typeof rzEnd==="function")rzEnd(s,rem,pen,broken);
       [...new Set(notes)].forEach(n=>out.push("  · "+n));
       layers.forEach((l,i)=>{if(!l.hit||l.k==="gap"||isE(l.k))return;const m=MAT[l.k],tx=TXT[m.txt||m.beh];
         const txt=heat?heatTxt(m,l.hit==="p"):(l.hit==="p"?tx.p:tx.s(stopR));
@@ -3088,6 +3090,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
     try{if(kind&&kind!=="rico")out.push(...meltFX(s,mode,a,kind));}catch(e){}
     if(beh&&liner>0){const nb=Math.max(s.through&&kind==="pen"?2:0,beh-Math.round(liner*2));if(nb<beh)out.push("Подбой задержал часть осколков");beh=nb;}
     out.push("Заброневое: "+BEH[beh]);
+    try{if(typeof rzReport==="function")rzReport(s,a,mode,kind,out);}catch(e){console.error(e);}
     /* прогиб металла и ослабление зоны */
     const sig=.07*(cal/120)*(he?2.2:1);
     let d={dent:.012,crack:.025,pen:.035,rico:.004}[kind]*(cal/120)*(he?2:hesh?1.6:heat?.25:1)*Math.min(3,Math.max(.25,120/solidMM));
@@ -3122,7 +3125,7 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
       emit(s.to,new THREE.Vector3(0,.2,1),18,.6,6,false,true);}
     else if(ductile&&kind!=="rico"&&dispAt(s.lx,s.ly)>.11&&kind!=="pen"){kind="pen";s.through=true;s.frontDecal="petal";beh=Math.max(beh,1);out.push("Разрыв: металл вытянулся и лопнул по краю вмятины");}
     s.E=f*Math.min(2,Math.pow(cal/120,1.5))*(he?1.3:hesh?1.2:heat?.5:1);s.pbr=pbr;s.ductile=ductile;
-    {const cold=solidL.filter(l=>brOf(l.k)>MAT[l.k].br+.05);if(cold.length&&(kind==="pen"||kind==="crack"))out.push(`Мороз ${$("temp").value} °C: сталь «${lc(MAT[cold[0].k].n)}» ниже порога хладноломкости — разрушение хрупкое, трещин и сколов больше`);}
+    {const cold=solidL.filter(l=>brOf(l.k)>MAT[l.k].br+.05);if(cold.length&&(kind==="pen"||kind==="crack"))out.push(`${typeof rzPlateT==="function"&&rzPlateT()!==rzAirT()?"Холодный лист":"Мороз"} ${typeof rzPlateT==="function"?Math.round(rzPlateT()):$("temp").value} °C: сталь «${lc(MAT[cold[0].k].n)}» ниже порога хладноломкости — разрушение хрупкое, трещин и сколов больше`);}
     if(S.integrity<.6&&S.integrity>.1)out.push(`Состояние листа: ${S.integrity<.3?"на грани разрушения":"сильно повреждён"}`);
     try{if(LIT&&!reduce&&kind!=="rico"&&a.type!=="smoke")LIT.flash(s.to,he||hesh?Math.min(16,4+cal/12):ke?3:5,he?0xffa040:0xfff0d0,he?5:10);}catch(e){}
     if(!reduce&&a.type!=="smoke"&&!he&&!hesh){if(spkOK()){impactFlash(s.to,cal,kind==="rico"?"rico":heat?"heat":"ke");impactSparks(s,kind,cal,heat?"heat":"ke");}
@@ -3207,6 +3210,363 @@ function impact(s){S.lastBlast=null;if(s.a.type==="illum"){illumAt(s);return;}
       if(heat){const sp=s.to.clone().addScaledVector(pn,Math.min(.6,.15+cal/1000*1.5));boom(sp,Math.min(12,.8*Math.pow(cal/100,3)),{surf:true,fill:"compb",n:pn});}
       if(eraHit)boom(s.to,.6,{surf:true,fill:"pe",n:pn});}}}catch(e){}
 }
+
+/* ===== v35: Реализм — физика, химия и материалы для режима «лист брони на стойке» =====
+   Модуль дополняет (а не заменяет) игровую модель пробития: слои, коэффициенты стойкости MAT.ap/heat,
+   поправка Ланца–Одерматта на наклон (cos^0,776), твёрдость loHard, зазоры v27, хладноломкость brOf,
+   трещины по K_IC (kEff/fracL), нагретые зоны (S.hot) — всё остаётся как было. Сверху добавлено:
+   1) база свойств материалов (ρ, HB, σт / ПУГ, KCV, порог хладноломкости, Tпл) и температура листа −40…+50 °C;
+   2) пробитие подкалиберных по Ланцу–Одерматту от реальных L, D, ρ и скорости встречи; остаток длины и скорости по слоям;
+   3) кумулятивная струя: ВВ (D, Pcj, √2E), облицовка (ρ), скорость головной части, растяжение и распад струи, кривая отстояния;
+   4) ДЗ: скорость метаемой пластины по Гёрни для выбранного ВВ; 5) БФС: масса и скорость откола; 6) визуал: цвет каления, брызги, конус осколков.
+   Источники:
+   [LO]  W. Lanz, W. Odermatt, «Penetration limits of conventional large caliber anti tank guns / kinetic energy projectiles»,
+         13th Int. Symp. on Ballistics, Stockholm 1992; W. Odermatt, «Long rod penetrators — perforation equation» (2000), коэффициенты для W.
+   [TA]  A. Tate, J. Mech. Phys. Solids 15 (1967) 387; V.P. Alekseevskii, Combust. Expl. Shock Waves 2 (1966) 63 — торможение стержня Y/(ρL).
+   [dM]  формула Жакоб де Марра (1886): в игре уже калибрована как 188·v^1,43·(d/100)^1,07 (мм, км/с) — сохранена без изменений.
+   [LJ]  J.P. Lambert, G.H. Jonas, BRL-R-1852 (1976) — остаточная скорость vr=(v^p−vbl^p)^(1/p).
+   [DSM] R. DiPersio, J. Simon, A. Merendino, BRL-R-1296 (1965); Birkhoff, MacDougall, Pugh, Taylor, J. Appl. Phys. 19 (1948) 563 —
+         P = L·√(ρj/ρt), струя растягивается и распадается через t_b ≈ (1…1,5 мкс)·(диаметр заряда в мм).
+   [G]   R.W. Gurney, BRL-405 (1943); J.E. Kennedy (1970); P.W. Cooper, «Explosives Engineering» (1996) — √2E для ВВ, формула «сэндвич».
+   [LLNL] B.M. Dobratz, P.C. Crawford, LLNL Explosives Handbook UCRL-52997 (1985) — D и Pcj.
+   [MIL] MIL-DTL-12560K (RHA), MIL-DTL-46100E (HHA), MIL-A-11356 (литая), MIL-DTL-46027/46063 (Al 5083/7039), MIL-DTL-46077G (Ti-6Al-4V);
+         ASM Handbook vol. 1, 2; техлисты SSAB (Armox, Hardox). Керамика: D.E. Grady, Sandia SAND94-3266 (1998) — пределы упругости Гюгонио.
+   [JC]  G.R. Johnson, W.H. Cook (1983) — тепловое разупрочнение (1−T*^m).
+   [H]   M. Held, «Disturbance of shaped charge jets by bulging armour», Propellants Explos. Pyrotech. 26 (2001); Hauver et al. (2005) — керамика vs струя.
+   [VH]  W.G. von Holle, J.J. Trimble, J. Appl. Phys. 47 (1976) 2391 — температура медной струи ≈ 400–500 °C (ИК-пирометрия).
+   Проверка (таблица «Сверка» в панели): 3БМ42 на 2 км ≈ 500 мм (открытые данные: ≈ 500–520 мм), 3БК29 ≈ 700 мм, ПГ-7ВЛ ≈ 500 мм. */
+var RZ=(function(){const o={on:true,air:true,Tp:20,ke:"auto",L:600,D:24,mat:"W",v0:1700,ex:"def",ln:"cu",so:0,era:"def",open:false};
+  try{Object.assign(o,JSON.parse(localStorage.getItem("grom.rz")||"{}"));}catch(e){}return o;})();
+function rzSave(){try{const o={};["on","air","Tp","ke","L","D","mat","v0","ex","ln","so","era"].forEach(k=>o[k]=RZ[k]);localStorage.setItem("grom.rz",JSON.stringify(o));}catch(e){}}
+function rzAirT(){const v=typeof $==="function"&&$("temp")?parseFloat($("temp").value):NaN;return isNaN(v)?15:v;}
+/* температура листа: «как воздух» (по умолчанию — прежнее поведение игры) или задана отдельно (лист из тёплого бокса на мороз, нагретый солнцем) */
+function rzPlateT(){try{if(typeof RZ!=="undefined"&&RZ&&RZ.on&&!RZ.air)return +RZ.Tp;}catch(e){}return rzAirT();}
+const rzF=(x,n)=>(+x).toFixed(n==null?0:n).replace(".",",").replace("-","−");
+const rzCl=(x,a,b)=>Math.max(a,Math.min(b,x));
+
+/* ---------- 1. Материалы ---------- */
+/* класс поведения при температуре: ОЦК-стали (хладноломкость), ГЦК (Al, ВЭС — без порога), ГПУ (Ti, Mg), тяжёлые (W, U), керамика, полимеры */
+const RZCL={steel:"bcc",hard:"bcc",perf:"bcc",dual:"bcc",hc:"bcc",era:"bcc",slat:"bcc",soft:"fcc",ti:"hcp",du:"w",cer:"cer",frp:"poly",ara:"poly",pe:"poly",rub:"rub"};
+/* sy — предел текучести σ0,2, МПа; hel — предел упругости Гюгонио, ГПа (керамика); kcv — ударная вязкость KCV при +20 °C, Дж (верхняя полка);
+   Tm — температура плавления/разложения, °C; c — теплоёмкость, Дж/(кг·К); src — источник */
+const RZM={
+  rha:{sy:950,kcv:75,c:460,src:"MIL-DTL-12560K: 241–331 HB (кл. 1, по толщине), σт ≥ 900 МПа, KCV(−40 °C) ≥ 27–60 Дж"},
+  s44:{sy:950,kcv:65,c:460,src:"броня 44С-св-Ш (корпуса Т-72/Т-90), открытые данные НИИ Стали"},
+  cast:{sy:760,kcv:40,c:460,src:"MIL-A-11356; литая броня ≈ 0,9 от катаной (ASM Handbook v.1)"},
+  hh:{sy:1300,kcv:30,c:460,src:"MIL-DTL-46100E: 477–534 HB, KCV(−40 °C) ≥ 16 Дж"},
+  br2p:{sy:1300,kcv:28,c:460,src:"броня 2П, оценка по аналогии с HHA"},
+  hardox:{sy:1250,kcv:30,c:460,src:"SSAB Hardox 500, техлист: σ0,2 ≈ 1250–1400 МПа, KCV(−40 °C) 30 Дж"},
+  uhh:{sy:1650,kcv:16,c:460,src:"MIL-DTL-32332 (UHH): 570–640 HB"},
+  armox:{sy:1500,kcv:15,c:460,src:"SSAB Armox 600T, техлист: σ0,2 ≈ 1500 МПа, KCV(−40 °C) ≥ 12 Дж"},
+  bain:{sy:1450,kcv:30,c:460,src:"Tata Super Bainite, техлист"},
+  dual:{sy:1500,kcv:15,c:460,src:"двухтвёрдостная сталь (MIL-DTL-46099)"},
+  perf:{sy:1500,kcv:15,c:460,src:"перфорированная HHA (MIL-DTL-32332)"},
+  marag:{sy:1850,kcv:25,c:450,src:"мартенситно-стареющая 18Ni(300), ASM Handbook v.1"},
+  hea:{sy:410,kcv:250,c:450,tt:-273,src:"CoCrFeMnNi: Gludovatz et al., Science 345 (2014) — ГЦК, хладноломкости нет, вязкость на холоде растёт"},
+  wha:{sy:1000,kcv:30,c:150,src:"W-Ni-Fe 93 %, ASM Handbook v.7"},
+  al:{sy:255,kcv:25,c:900,src:"Al 5083-H131: MIL-DTL-46027, ASTM B209"},
+  al5059:{sy:300,kcv:25,c:900,src:"Al 5059-H131 (Alustar)"},
+  al7:{sy:380,kcv:12,c:880,src:"Al 7039-T64: MIL-DTL-46063"},
+  al7017:{sy:420,kcv:12,c:880,src:"Al 7017-T651"},
+  al2519:{sy:400,kcv:15,c:880,src:"Al 2519-T87: MIL-DTL-46192"},
+  mmc:{sy:350,kcv:5,c:850,src:"Al–SiC MMC, оценка"},
+  mag:{sy:200,kcv:6,c:1000,src:"Mg AZ31B, ASM Handbook v.2"},
+  ti:{sy:880,kcv:24,c:560,src:"Ti-6Al-4V: MIL-DTL-46077G, 30–36 HRC"},
+  tilc:{sy:830,kcv:22,c:560,src:"Ti-6Al-4V EBM (дешёвый), оценка"},
+  du:{sy:900,kcv:20,c:120,src:"U-0,75Ti: Magness (1994)"},
+  cer:{hel:6.5,c:780,src:"Al2O3 99,5 %: HEL 6–7 ГПа (Grady 1998)"},
+  zta:{hel:7,c:700,src:"ZTA: HEL ≈ 7 ГПа"},
+  sic:{hel:12,c:700,src:"SiC: HEL 11–15 ГПа (Grady 1998)"},
+  rbsic:{hel:9,c:700,src:"RB-SiC: HEL ≈ 9 ГПа"},
+  b4c:{hel:16,c:950,src:"B4C: HEL 15–19 ГПа; аморфизация выше ≈ 20 ГПа (Chen et al., Science 299, 2003)"},
+  tib2:{hel:5,c:620,src:"TiB2: HEL 4–8 ГПа"},
+  si3n4:{hel:11,c:700,src:"Si3N4: HEL ≈ 11 ГПа"},
+  wc:{hel:5,c:200,src:"WC-Co: HEL ≈ 4–6 ГПа"},
+  alon:{hel:11,c:800,src:"AlON: HEL ≈ 11 ГПа"},
+  spinel:{hel:10,c:800,src:"MgAl2O4: HEL ≈ 10 ГПа"},
+  glass:{hel:6,c:840,src:"натриево-кальциевое стекло: HEL ≈ 6 ГПа"},
+  glcer:{hel:6,c:800,src:"стеклокерамика LAS: HEL ≈ 6 ГПа"},
+  stb:{sy:300,c:1100,Tg:130,src:"стеклотекстолит (эпоксид, Tg ≈ 120–150 °C)"},
+  frp:{sy:600,c:1100,Tg:130,src:"S-стеклопластик (Tg связующего ≈ 130 °C)"},
+  cfrp:{sy:1700,c:900,Tg:150,src:"углепластик"},
+  basf:{sy:900,c:1000,Tg:130,src:"базальтопластик"},
+  ara:{sy:3000,c:1400,src:"арамид Kevlar 29 (волокно), разложение ≈ 450 °C"},
+  pbo:{sy:5800,c:1400,src:"PBO (Zylon)"},
+  pe:{sy:3500,c:1850,src:"СВМПЭ Dyneema: плавится ≈ 145 °C, на +50 °C прочность ≈ −20 %"},
+  nylon:{sy:800,c:1700,src:"баллистический нейлон"},
+  rub:{sy:20,c:1900,Tg:-60,src:"резина (NR/SBR): стеклование −55…−70 °C, на морозе дубеет"},
+  pu:{sy:40,c:1800,Tg:-45,src:"полиуретановый эластомер: Tg ≈ −40…−50 °C"}};
+/* порог хладноломкости — тот же, что в brOf (сохраняем калибровку игры) */
+function rzTT(k){const m=MAT[k];if(!m)return null;if(m.tt!=null)return m.tt;if(RZM[k]&&RZM[k].tt!=null)return RZM[k].tt;return k==="cast"?-20:{steel:-45,hard:-15,hc:-25,dual:-20}[m.beh];}
+function rzMat(k){const m=MAT[k]||{},r=RZM[k]||{},p=(typeof phy==="function"&&phy(k))||{};
+  return {k,n:m.n||k,beh:m.beh,cl:RZCL[m.beh]||"bcc",rho:m.dens||7.85,hb:(typeof bhnOf==="function"?bhnOf(k):0)||0,sy:r.sy,hel:r.hel,kcv:r.kcv,K:p.K,Tm:r.Tm||p.Tm||1480,c:r.c||460,Tg:r.Tg,tt:rzTT(k),src:r.src||""};}
+/* прочность от температуры (к +20 °C): ОЦК-сталь на холоде ≈ +0,11 %/°C (Peierls), выше — разупрочнение Джонсона–Кука m=1 [JC];
+   ГЦК Al ≈ +0,04 %/°C; Ti ≈ +0,18 %/°C; полимеры — сильная зависимость (СВМПЭ, связующие); резина на морозе твердеет */
+function rzSig(k,T){const q=rzMat(k),d=20-T;
+  if(q.cl==="cer")return 1;
+  if(q.cl==="poly"){let f=d>0?1+.004*d:1-.006*(-d);if(k==="pe"&&T>20)f=1-.0075*(T-20);return rzCl(f,.6,1.3);}
+  if(q.cl==="rub"){return rzCl(d>0?1+.012*d+(T<(q.Tg||-60)+15?.6:0):1-.004*(-d),.8,2.2);}
+  const a={bcc:.0011,fcc:.0004,hcp:.0018,w:.0007}[q.cl]||.001;
+  if(d>0)return 1+a*d;return Math.max(.5,1-(T-20)/Math.max(200,q.Tm-20));}
+/* доля ударной вязкости (переходная кривая Шарпи tanh, нижняя полка 0,1) — только ОЦК; ГЦК/ВЭС не охрупчиваются */
+function rzTough(k,T){const q=rzMat(k);
+  if(q.cl==="bcc"&&q.tt!=null&&q.tt>-200){const T0=q.tt-12;return .1+.9*(.5+.5*Math.tanh((T-T0)/16));}
+  if(k==="hea")return Math.min(1.25,1+.002*(20-T));
+  if(q.cl==="hcp")return rzCl(1-.002*(20-T),.8,1.05);
+  if(q.cl==="poly")return rzCl(1-.004*Math.max(0,20-T),.7,1);
+  if(q.cl==="rub")return T<(q.Tg||-60)+15?.35:1;
+  return 1;}
+/* поправка сопротивления слоя от температуры листа.
+   KE длинный стержень: в формуле [LO] прочность цели входит через BHN в экспоненте, поэтому меняем BHN на BHN·σ(T)/σ(20) и берём отношение пробитий;
+   калиберный тупой снаряд: сопротивление ∝ σ^0,6 (де Марр — прочностной режим);  струя: гидродинамика, прочность почти не важна (Rt ≈ +8 % на 100 % σ) */
+function rzTK(k,T,ke,rod,v){const s=rzSig(k,T);if(Math.abs(s-1)<.002)return 1;
+  if(ke&&rod&&typeof loK==="function"){const H=Math.max(80,rzMat(k).hb||260),rp=17600,vv=Math.pow(Math.max(.6,(v||1600)/1000),2);return Math.exp((loK(H*s)-loK(H))/(rp*vv));}
+  if(ke)return Math.pow(s,.6);
+  return 1+.08*(s-1);}
+
+/* ---------- 2. Кинетические: Ланц–Одерматт ---------- */
+/* P/L = a·(1/tanh(b0+b1·L/D))·cos^m(θ)·√(ρp/ρt)·exp(−(c0+c1·BHN)·BHN/(ρp·v²)); a=0,994; b0=0,283; b1=0,0656; c0=134,5; c1=−0,148; m=−0,224 (W) [LO]
+   ρ в г/см³ ×1000 (кг/м³), v в км/с; для обеднённого урана a≈0,994·1,08 (самозатачивание, Magness 1994) */
+const RZ_LO={a:.994,b0:.283,b1:.0656,c0:134.5,c1:-.148,m:-.224};
+function rzLO(L,D,rho,v,bhn,rhoT,th,du){const c=RZ_LO,H=Math.min(480,bhn||260);
+  return L*c.a*(du?1.08:1)/Math.tanh(c.b0+c.b1*L/D)*Math.pow(Math.max(.05,Math.cos((th||0)*Math.PI/180)),c.m)*Math.sqrt(rho/(rhoT||7.85))*Math.exp(-(c.c0+c.c1*H)*H/(rho*1000*Math.pow(Math.max(.3,v),2)));}
+/* сердечники: открытые данные (Википедия «125 mm smoothbore ammunition», btvt.info, Lanz/Odermatt longrods.ch); D — по массе, «≈» — оценка */
+const RZKE={
+  "3БМ42":{L:532,D:25.7,mat:"W",v0:1700,src:"«Манго»: 2 сердечника W в стальной рубашке, 4,85 кг; D по массе"},
+  "3БМ42 «Манго»":{L:532,D:25.7,mat:"W",v0:1700,src:"4,85 кг; D по массе"},
+  "3БМ59 «Свинец-1»":{L:640,D:22,mat:"DU",v0:1660,src:"U-сплав, L≈640, L/D≈29 (≈)"},
+  "3БМ60 «Свинец-2»":{L:640,D:22,mat:"W",v0:1660,src:"W-сплав, L≈640 (≈)"},
+  "3БМ69 «Вакуум-1»":{L:900,D:24,mat:"DU",v0:1660,src:"U-сплав, L≈900 (≈)"},
+  "M829":{L:513,D:27,mat:"DU",v0:1670,src:"120 мм, DU (Magier, WITU)"},
+  "DM53":{L:570,D:24,mat:"W",v0:1670,src:"≈, W, L/D≈24 (оценка)"}};
+const RZ_RHO={W:17.6,DU:18.6,WC:14.8,ST:7.85};
+const RZ_YP={W:1.8e9,DU:1.6e9,WC:2.5e9,ST:1.2e9}; /* динамический предел текучести материала сердечника, Па [TA] */
+function rzRod(a,g){if(!a||a.key!=="bops")return null;
+  if(RZ.ke==="custom")return {nm:"свой сердечник",L:+RZ.L,D:+RZ.D,mat:RZ.mat,v0:+RZ.v0,own:true,src:"задан в панели"};
+  if(RZ.ke!=="auto"&&RZKE[RZ.ke])return Object.assign({nm:RZ.ke,own:true},RZKE[RZ.ke]);
+  const nm=(typeof ROUNDS!=="undefined"&&ROUNDS[g.n]||{}).bops;if(nm&&RZKE[nm])return Object.assign({nm,own:false,known:true},RZKE[nm]);
+  /* оценка для прочих орудий: D≈0,19 калибра, L/D≈22 (современные «ломы»), W */
+  const D=Math.max(10,.19*g.cal);return {nm:nm||"БОПС",L:Math.round(D*22),D:+D.toFixed(1),mat:"W",v0:0,est:true,src:"оценка: D≈0,19 калибра, L/D≈22"};}
+function rzRodMass(r){return (RZ_RHO[r.mat]||17.6)*1000*Math.PI/4*Math.pow(r.D/1000,2)*(r.L/1000);}
+
+/* ---------- 3. Кумулятивная струя ---------- */
+/* ВВ: D — скорость детонации, км/с; P — давление Чепмена–Жуге, ГПа; g2e — постоянная Гёрни √2E, км/с; rho — плотность [LLNL], [G] */
+const RZEX={
+  tnt:{n:"ТНТ (тротил)",D:6.9,P:19,g2e:2.44,rho:1.63},
+  tg50:{n:"ТГ-50 (тротил/гексоген 50/50)",D:7.65,P:27,g2e:2.65,rho:1.68},
+  compb:{n:"Comp B / ТГ-40 (гексоген 60 %)",D:7.98,P:29.5,g2e:2.70,rho:1.72},
+  okfol:{n:"ОКФОЛ (октоген флегм. 95 %)",D:8.67,P:34,g2e:2.90,rho:1.77},
+  pvv5:{n:"ПВВ-5А (пластичное, гексоген)",D:7.6,P:24,g2e:2.55,rho:1.5}};
+/* облицовка: rho г/см³; k — vtip/√2E; tb — время распада, мкс на мм диаметра заряда; ef — КПД (тантал: худшее формирование, Walters & Zukas «Fundamentals of shaped charges» 1989) */
+const RZLN={cu:{n:"медь",rho:8.96,k:3.30,tb:1.15,ef:1},ta:{n:"тантал",rho:16.65,k:2.65,tb:1.5,ef:.88},st:{n:"сталь",rho:7.85,k:3.2,tb:.95,ef:1}};
+/* модель [DSM]: струя от виртуального начала (z0 калибров перед зарядом), элемент со скоростью v растягивается до момента распада t_b,
+   пробивает dP = dl/γ, γ=√(ρt/ρj) (Бирхофф); после распада частицы рассеиваются — КПД падает. Возвращает {P, мм; arr — [глубина, скорость]} */
+function rzJet(cd,exk,lnk,soCD,rt){const E=RZEX[exk]||RZEX.compb,Ln=RZLN[lnk]||RZLN.cu,vt=E.g2e*Ln.k,vc=2.3,gam=Math.sqrt((rt||7.85)/Ln.rho),tb=Ln.tb*cd,Z=(soCD+1.2)*cd;
+  let v=vt,t=Z/vt,B=Z;const N=200,dv=(vt-vc)/N,arr=[[0,vt]];
+  for(let i=0;i<N;i++){const tt=Math.min(t,tb),eta=t<tb?1:Math.max(.25,1-.25*(t-tb)/tb);B+=dv*tt/gam*eta;v-=dv;t=B/v;arr.push([(B-Z)*Ln.ef,v]);}
+  return {P:(B-Z)*Ln.ef,arr,vt,tb,gam};}
+function rzJetV(J,d){const A=J.arr;if(d<=0)return A[0][1];for(let i=1;i<A.length;i++)if(A[i][0]>=d){const f=(d-A[i-1][0])/Math.max(1e-6,A[i][0]-A[i-1][0]);return A[i-1][1]+(A[i][1]-A[i-1][1])*f;}return A[A.length-1][1];}
+/* штатное отстояние головки ≈ 2,5 калибра (обтекатель/штырь взрывателя); при выборе другого — пересчёт по кривой */
+const RZ_SO0=2.5;
+function rzHeatSel(){return {ex:RZ.ex==="def"?"compb":RZ.ex,ln:RZ.ln||"cu",so:+RZ.so>0?+RZ.so:RZ_SO0};}
+
+/* ---------- 4. ДЗ: метание пластин по Гёрни ---------- */
+/* симметричный «сэндвич»: V = √2E·(M/C + 1/3)^−½ ; M/C — масса пластин к массе ВВ (оценки по открытым описаниям блоков) */
+const RZERA={era:{n:"Контакт-1 (4С20)",MC:4,ex:"pvv5"},era5:{n:"Контакт-5 (4С22)",MC:14,ex:"pvv5"},relikt:{n:"Реликт (4С23)",MC:8,ex:"pvv5"},malakhit:{n:"Малахит",MC:7,ex:"pvv5"},
+  nozh:{n:"Нож (удлинённые заряды)",MC:2,ex:"pvv5"},duplet:{n:"Дуплет",MC:7,ex:"pvv5"},blazer:{n:"Blazer",MC:4,ex:"compb"},arat:{n:"ARAT",MC:4,ex:"compb"}};
+function rzGurney(g2e,MC){return g2e*Math.pow(MC+1/3,-.5);}
+function rzEraV(k,sel){const e=RZERA[k]||RZERA.era,ex=RZEX[sel&&sel!=="def"?sel:e.ex]||RZEX.pvv5;return rzGurney(ex.g2e,e.MC);}
+/* взаимодействие пластины со струёй/стержнем ∝ скорости пластины (Mayseless, Int. J. Impact Eng. 2011): множитель к «срезу» ДЗ */
+function rzEraK(k,mode){try{if(!RZ.on||RZ.era==="def"||!RZERA[k])return 1;const r=rzEraV(k,RZ.era)/rzEraV(k,"def");
+  const s=rzCl(mode==="ke"?Math.pow(r,.8):r,.6,1.35);const c=RZ.cur;if(c){c.rzEra=c.rzEra||[];c.rzEra.push({k,mode,v:rzEraV(k,RZ.era),v0:rzEraV(k,"def"),s});}return s;}catch(e){return 1;}}
+
+/* ---------- 5. Хуки в расчёт выстрела ---------- */
+/* H2: после расчёта скорости встречи (fireOne) — пробитие подкалиберного по [LO], кумулятивного — по выбранным ВВ/облицовке/отстоянию */
+function rzPen(a,g,B){a.rz=null;if(!RZ.on||!a||!B)return;const ke=a.type==="ke",heat=a.type==="heat";
+  const v0r=(B.v0||0)-(B.dvT||0),vimp=B.vx||a.vimp||1000;
+  if(ke&&a.key==="bops"){const r=rzRod(a,g);if(!r)return;let v=vimp;if(r.own&&r.v0&&v0r>200)v=r.v0*vimp/v0r;
+    const du=r.mat==="DU",rho=RZ_RHO[r.mat]||17.6,P=rzLO(r.L,r.D,rho,v/1000,260,7.85,0,du),pen0=a.pen;
+    if(!r.est){a.pen=Math.round(P);a.vimp=v;}
+    a.rz={kind:"lo",r,v,P,rho,du,pen0,m:rzRodMass(r),k:a.pen/Math.max(1,P)};return;}
+  if(ke&&(a.key==="apbc"||a.key==="cp"||a.key==="apds")){const cal=g.cal,m=a.key==="apds"?8.2e-6*Math.pow(cal,3):1.59e-5*Math.pow(cal,3);a.rz={kind:a.key==="apds"?"apds":"dm",v:vimp,m,cal,pen0:a.pen};return;}
+  if(heat){const S0=rzHeatSel(),cd=g.cal,ref=rzJet(cd,"compb","cu",RZ_SO0),J=rzJet(cd,S0.ex,S0.ln,S0.so),f=J.P/Math.max(1,ref.P),pen0=a.pen;
+    a.pen=Math.round(a.pen*f);
+    const Ln=RZLN[S0.ln],mj=.2*Ln.rho*Math.PI*(.425*cd/10)*(.85*cd/10)*(.02*cd/10)/1000;/* кг: 20 % массы конуса облицовки */
+    a.rz={kind:"jet",S:S0,J,ref,f,pen0,cd,mj,k:a.pen/Math.max(1,J.P)};return;}
+  if(a.type==="hesh"||a.type==="he")a.rz={kind:a.type,v:vimp};}
+/* начало прохода слоёв */
+function rzBegin(s,pen){RZ.cur=s;s.rzSteps=[];s.rzEra=[];s.rzPen0=pen;s.rzT=rzPlateT();s.rzDis=0;}
+/* H3: каждый сплошной слой — температурная поправка, T/D для твёрдой стали, керамика сбивает струю; запись шага протокола */
+function rzNeed(s,i,l,need,rem,mode,a){if(!RZ.on||!s.rzSteps)return need;const m=MAT[l.k];if(!m)return need;
+  const ke=mode==="ke",heat=mode==="heat",rod=a&&(a.key==="bops"||a.key==="apds"),T=s.rzT,n0=need,fx=[];
+  let v=(a&&a.rz&&a.rz.v)||s.vimp||1000;
+  const tk=rzTK(l.k,T,ke,rod,v);if(Math.abs(tk-1)>.004){need*=tk;fx.push(`T листа ${rzF(T)} °C: σт ×${rzF(rzSig(l.k,T),2)} → сопротивление ×${rzF(tk,3)}`);}
+  /* T/D: высокотвёрдая сталь эффективнее против длинного стержня при тонком листе (T/D<1,5 — сердечник не успевает «пройти» зону разрушения),
+     и слабее при толстом (адиабатический сдвиг, вырывание пробки); Gooch, Burkins: ARL-TR-2178 (2000) */
+  if(ke&&rod&&a.rz&&a.rz.r&&(m.beh==="hard"||m.beh==="dual")){const TD=l.t/Math.max(.05,(typeof cosA==="function"?cosA():1))/a.rz.r.D,k=rzCl(1+.12*(1.5-TD)/1.5,.9,1.12);need*=k;fx.push(`T/D = ${rzF(TD,1)} → ×${rzF(k,2)}`);}
+  /* струя за керамикой: радиальное растрескивание и обжатие отклоняют хвост струи (Held 2001) — следующие слои требуют +4 % */
+  if(heat&&s.rzDis>0){need*=1+.04*s.rzDis;fx.push(`струя возмущена керамикой: ×${rzF(1+.04*s.rzDis,2)}`);}
+  if(heat&&m.beh==="cer")s.rzDis=Math.min(2,s.rzDis+1);
+  s.rzSteps.push({i,k:l.k,t:l.t,n0,need,rem,fx,tough:rzTough(l.k,T)});return need;}
+function rzEnd(s,rem,pen,broken){if(s&&s.rzSteps){s.rzRemEnd=rem;s.rzBroken=broken;}RZ.cur=null;}
+
+/* ---------- 6. Остатки по слоям ---------- */
+/* стержень: «ёмкость» C = k·P_LO(L,v). За слой: скорость хвоста падает на Δv = Yp·t/(ρp·L) [TA], t — время прохода слоя при скорости
+   проникания u = v/(1+√(ρt/ρp)); затем длина L подбирается так, чтобы k·P_LO(L,v)=остаток ёмкости */
+function rzRodState(z,C,v){const r=z.r,rho=z.rho;if(C<=0)return {L:0,v:0,E:0};
+  let lo=0,hi=r.L;for(let it=0;it<40;it++){const mid=(lo+hi)/2;if(z.k*rzLO(Math.max(1,mid),r.D,rho,v/1000,260,7.85,0,z.du)<C)lo=mid;else hi=mid;}
+  const L=Math.min(r.L,(lo+hi)/2),m=rho*1000*Math.PI/4*Math.pow(r.D/1000,2)*L/1000;return {L,v,E:.5*m*v*v,m};}
+function rzWalk(s,a){const z=a&&a.rz;if(!z||!s.rzSteps)return [];const out=[];
+  if(z.kind==="lo"){let v=z.v,C=s.rzPen0,st=rzRodState(z,C,v);st.L=Math.min(st.L,z.r.L);
+    s.rzSteps.forEach((p,j)=>{const q=rzMat(p.k),rt=q.rho,pass=p.rem>=p.need;
+      if(p.rem<C-.5){const nst=rzRodState(z,p.rem,v);out.push({gap:1,from:st,to:nst,dC:C-p.rem});st=nst;C=p.rem;}
+      const u=v/(1+Math.sqrt(rt/z.rho)),thick=p.t/Math.max(.05,s.rzCos||1)/1000,tt=thick/Math.max(50,u),Yp=RZ_YP[z.r.mat]||1.8e9;
+      const dv=Math.min(v*.6,Yp*tt/(z.rho*1000*Math.max(.02,st.L/1000)));const v2=pass?Math.max(0,v-dv):0,C2=pass?p.rem-p.need:0;
+      const nst=pass?rzRodState(z,C2,v2):{L:Math.max(0,st.L*(1-p.rem/Math.max(1,p.need))*0),v:0,E:0};
+      out.push({p,from:st,to:nst,pass});st=nst;v=v2;C=C2;});
+    return out;}
+  if(z.kind==="dm"||z.kind==="apds"){/* калиберный/APDS: ёмкость ∝ v^1,43 (де Марр) или v^1,4 (игра) → v = v0·(C/C0)^(1/n) */
+    const n=z.kind==="dm"?1.43:1.4,C0=s.rzPen0||1;let C=C0;
+    s.rzSteps.forEach(p=>{const pass=p.rem>=p.need,vin=z.v*Math.pow(Math.max(0,p.rem)/C0,1/n),C2=pass?p.rem-p.need:0,vout=z.v*Math.pow(C2/C0,1/n);
+      out.push({p,from:{v:vin,E:.5*z.m*vin*vin},to:{v:vout,E:.5*z.m*vout*vout},pass});C=C2;});return out;}
+  if(z.kind==="jet"){/* глубина модели = ёмкость игры / k; скорость элемента струи у входа и выхода слоя */
+    const J=z.J,Pm=J.P,k=s.rzPen0/Math.max(1,Pm),vc=2.3,Ej=v=>z.mj/(6*(J.vt-vc))*Math.max(0,Math.pow(v,3)-Math.pow(vc,3))*1e6;
+    s.rzSteps.forEach(p=>{const pass=p.rem>=p.need,d1=Pm-p.rem/k,d2=pass?Pm-(p.rem-p.need)/k:Pm,v1=rzJetV(J,d1),v2=pass?rzJetV(J,d2):vc;
+      out.push({p,from:{v:v1*1000,E:Ej(v1)},to:{v:v2*1000,E:Ej(v2)},pass});});return out;}
+  return [];}
+
+/* ---------- 7. Отчёт «Разбор по слоям» и визуал ---------- */
+function rzBB(T){/* цвет абсолютно чёрного тела (приближение T. Helland), T в °C; ниже ≈ 525 °C (точка Дрейпера) свечения не видно */
+  const K=(T+273)/100;let r,g,b;r=K<=66?255:329.7*Math.pow(K-60,-.1332);g=K<=66?99.47*Math.log(K)-161.1:288.1*Math.pow(K-60,-.0755);b=K>=66?255:K<=19?0:138.5*Math.log(K-10)-305;
+  return [rzCl(r,0,255)/255,rzCl(g,0,255)/255,rzCl(b,0,255)/255];}
+function rzContactT(a,mode,s,kind){const fl=layers.find(l=>!l.spent&&l.k!=="gap"&&MAT[l.k].beh!=="slat");const q=fl?rzMat(fl.k):rzMat("rha"),T0=s.rzT!=null?s.rzT:rzPlateT();
+  if(mode==="ke"){const v=(a.rz&&a.rz.v)||s.vimp||1000;/* ~35 % удельной кинетической энергии уходит в тепло зоны контакта (Tate; Rosenberg & Dekel 2012) */
+    return Math.min(q.Tm,T0+.35*.5*v*v/q.c*(a.key==="bops"?1:.5));}
+  if(mode==="heat")return Math.min(q.Tm,1050);if(mode==="hesh"||mode==="he")return 900;return T0;}
+var RZFX=[];let rzRAF=0;
+function rzFxTick(){const now=performance.now();for(let i=RZFX.length-1;i>=0;i--){const f=RZFX[i],t=(now-f.t0)/1000;
+    if(t>f.life||!f.m.parent){if(f.m.parent)f.m.parent.remove(f.m);RZFX.splice(i,1);continue;}
+    /* остывание пятна: T(t)=T0+(Tp−T0)·(1−e^(−t/τ)) */const T=f.Tp+(f.T0-f.Tp)*Math.exp(-t/f.tau),c=rzBB(T),I=T<525?0:Math.min(1,Math.pow((T-500)/900,1.6));
+    f.m.material.color.setRGB(c[0],c[1],c[2]);f.m.material.opacity=I*.95;f.m.scale.setScalar(f.r*(1+.15*t));}
+  rzRAF=RZFX.length?requestAnimationFrame(rzFxTick):0;}
+function rzGlowTex(){if(rzGlowTex.t)return rzGlowTex.t;const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d"),g=x.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.35,"rgba(255,255,255,.65)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,64,64);return rzGlowTex.t=new THREE.CanvasTexture(c);}
+function rzGlow(s,T,r){if(typeof THREE==="undefined"||T<525||!s.to)return;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:rzGlowTex(),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.9}));
+  let n=new THREE.Vector3(0,0,-1);try{n.transformDirection(plate.matrixWorld);}catch(e){}sp.position.copy(s.to).addScaledVector(n,.012);scene.add(sp);
+  RZFX.push({m:sp,t0:performance.now(),life:MOBILE?3:5,T0:T,Tp:s.rzT!=null?s.rzT:20,tau:1.1,r});if(!rzRAF)rzRAF=requestAnimationFrame(rzFxTick);}
+function rzVisual(s,a,mode,kind){try{if(typeof reduce!=="undefined"&&reduce)return;if(!kind||kind==="rico"&&mode!=="ke")return;const cal=G().cal,Tc=rzContactT(a,mode,s,kind);s.rzTc=Tc;
+    rzGlow(s,Tc,Math.max(.05,Math.min(.22,cal/1000*1.3))*(kind==="pen"?1.2:.9));
+    let nb=new THREE.Vector3(0,0,1);try{nb.transformDirection(plate.matrixWorld);}catch(e){}
+    /* брызги расплава облицовки и металла кратера (медь ≈ 1085 °C) — летят назад от лица листа */
+    if(mode==="heat"&&typeof spkEmit==="function")spkEmit(s.to,nb.clone().negate().add(new THREE.Vector3(0,.35,0)),MOBILE?24:46,.85,5.5,{hot:1.05,life:1.6});
+    /* конус заброневых осколков: полуугол ≈ 20–30° для КЭ, ≈ 10–15° для струи (Arnold & Rottenkolber, BAD studies) */
+    if(s.through&&kind==="pen"&&typeof spkEmit==="function"){const bp=new THREE.Vector3(s.lx,s.ly,S.T/2+.02);plate.localToWorld(bp);
+      const ha=mode==="heat"?.22:.45,n=Math.round((MOBILE?.5:1)*(mode==="heat"?40:70)*Math.min(2,cal/100));spkEmit(bp,nb,n,ha,mode==="heat"?11:8,{hot:.95,life:1.2});}
+    if(mode==="hesh"&&s.rzScab&&typeof emit==="function"){const bp=new THREE.Vector3(s.lx,s.ly,S.T/2+.02);plate.localToWorld(bp);emit(bp,nb,MOBILE?8:14,.35,Math.min(12,s.rzScab.v/20),false,true);}
+  }catch(e){}}
+/* HESH: откол. Порог игры (≈1,2 калибра однородной стали) сохранён: волна давления P(x)=P0·e^(−x/λ), λ подобрана так, что на пороге P = σ_откола.
+   Скорость откольной тарелки v ≈ 2(Pтыл − σотк)/(ρc), толщина ≈ половина длины импульса (≤ t/2), диаметр ≈ 1,6 калибра */
+function rzHesh(s,cal){const fl=layers.find(l=>!l.spent&&l.k!=="gap");if(!fl)return null;const q=rzMat(fl.k),p=(typeof phy==="function"&&phy(fl.k))||{},hK=(G().custom&&G().heshK)||1;
+  const t=fl.t/Math.max(.05,(typeof cosA==="function"?cosA():1)),thr=cal*1.2*hK,P0=24,sp=(p.sp||3.5)*Math.max(.6,rzSig(fl.k,s.rzT)),lam=thr/Math.log(P0/sp),Pb=P0*Math.exp(-t/lam);
+  if(Pb<=sp)return {t,thr,Pb,sp,no:1,n:q.n};const ts=Math.min(t/2,.22*cal),ds=1.6*cal,mass=q.rho*1000*Math.PI/4*Math.pow(ds/1000,2)*ts/1000,v=2*(Pb-sp)*1e9/(q.rho*1000*(p.c||5.9)*1000);
+  return {t,thr,Pb,sp,ts,ds,mass,v,E:.5*mass*v*v,n:q.n};}
+function rzReport(s,a,mode,kind,out){if(!RZ.on||!a)return;const cal=G().cal,z=a.rz,T=s.rzT!=null?s.rzT:rzPlateT(),L=[],H=[];
+  const air=rzAirT();
+  try{s.rzCos=(typeof cosA==="function"?cosA():1);
+  L.push(`Температура листа ${rzF(T)} °C${RZ.air?" (как воздух)":` (воздух ${rzF(air)} °C)`}`);
+  if(z&&z.kind==="lo"){const r=z.r;
+    H.push(`<b>Подкалиберный: модель Ланца–Одерматта</b><br>${r.nm}: ${r.mat==="DU"?"обеднённый уран":"вольфрамовый сплав"} ρ=${rzF(z.rho,1)} г/см³, L=${r.L} мм, D=${rzF(r.D,1)} мм (L/D ${rzF(r.L/r.D,1)}), масса ${rzF(z.m,2)} кг; ${r.src}`);
+    H.push(`Скорость встречи ${Math.round(z.v)} м/с, энергия ${rzF(.5*z.m*z.v*z.v/1e6,2)} МДж. По нормали в катаную сталь (260 HB): <b>${Math.round(z.P)} мм</b>${r.est?` (оценка; в расчёте оставлено игровое пробитие ${z.pen0} мм)`:""}`);
+    L.push(`Сердечник ${r.nm}: L/D ${rzF(r.L/r.D,1)}, v=${Math.round(z.v)} м/с → Ланц–Одерматт ${Math.round(z.P)} мм по нормали`);}
+  if(z&&z.kind==="dm"){H.push(`<b>Калиберный бронебойный: формула де Марра</b> (игровая калибровка 188·v^1,43·(d/100)^1,07): v=${Math.round(z.v)} м/с, масса ≈ ${rzF(z.m,1)} кг, энергия ${rzF(.5*z.m*z.v*z.v/1e6,2)} МДж → ${a.pen} мм`);}
+  if(z&&z.kind==="jet"){const E=RZEX[z.S.ex],Ln=RZLN[z.S.ln],J=z.J,best=[1,2,3,4,6,8,10,15].map(c=>[c,rzJet(z.cd,z.S.ex,z.S.ln,c).P]);const bm=best.reduce((p,c)=>c[1]>p[1]?c:p);
+    H.push(`<b>Кумулятивная струя</b>: ВВ ${E.n} — D=${rzF(E.D,2)} км/с, P<sub>ЧЖ</sub>≈${E.P} ГПа, √2E=${rzF(E.g2e,2)} км/с; облицовка ${Ln.n} (ρ ${rzF(Ln.rho,2)}).`);
+    H.push(`Скорость головы струи ≈ ${rzF(J.vt,1)} км/с, хвоста ≈ 2,3 км/с; распад на частицы через ≈ ${Math.round(J.tb)} мкс; γ=√(ρт/ρстр)=${rzF(J.gam,2)}. Отстояние ${rzF(z.S.so,1)} кал. → модель ${Math.round(J.P)} мм (эталон Comp B/медь/2,5 кал. — ${Math.round(z.ref.P)} мм), множитель к игровому пробитию ×${rzF(z.f,2)}: ${z.pen0} → <b>${a.pen} мм</b>`);
+    H.push(`Кривая отстояния: ${best.map(b=>`${b[0]} кал. — ${Math.round(b[1])}`).join(" · ")} мм; оптимум ≈ ${bm[0]} кал.`);
+    L.push(`Струя: ${E.n.split(" (")[0]}, ${Ln.n}, v<sub></sub>головы ${rzF(J.vt,1)} км/с, отстояние ${rzF(z.S.so,1)} кал. → ×${rzF(z.f,2)} к пробитию`.replace("<sub></sub>",""));}
+  if(mode==="hesh"){const h=rzHesh(s,cal);if(h){s.rzScab=h.no?null:h;
+    H.push(`<b>Бронебойно-фугасный: откол</b> — лист «${lc(h.n)}» ${Math.round(h.t)} мм по лучу, порог откола игры ${Math.round(h.thr)} мм. Давление у тыла ≈ ${rzF(h.Pb,1)} ГПа против откольной прочности ${rzF(h.sp,1)} ГПа.`+(h.no?" Откола нет.":` Откольная тарелка: толщина ≈ ${Math.round(h.ts)} мм, диаметр ≈ ${Math.round(h.ds)} мм, масса ≈ ${rzF(h.mass,1)} кг, скорость ≈ ${Math.round(h.v)} м/с, энергия ≈ ${rzF(h.E/1000,1)} кДж`));
+    if(!h.no)L.push(`Откол: ≈ ${rzF(h.mass,1)} кг со скоростью ≈ ${Math.round(h.v)} м/с`);}}
+  if(mode==="he"){try{const w=heW(G(),a.key);H.push(`<b>Фугасный</b>: ТНТ-эквивалент ≈ ${rzF(w.We,2)} кг; давление детонации ВВ у поверхности ≈ 20 ГПа, но ударная волна в стали быстро затухает — пролом только тонких листов.`);}catch(e){}}
+  /* шаги по слоям */
+  const W=rzWalk(s,a),rows=[];
+  if(s.rzEra&&s.rzEra.length)s.rzEra.forEach(e=>{H.push(`ДЗ ${RZERA[e.k].n}: пластина по Гёрни ${rzF(e.v,2)} км/с (штатное ВВ — ${rzF(e.v0,2)} км/с) → действие на ${e.mode==="ke"?"стержень":"струю"} ×${rzF(e.s,2)}`);});
+  const fmtS=o=>o?(o.L!=null?`L ${Math.round(o.L)} мм · `:"")+`v ${Math.round(o.v)} м/с · E ${o.E>=1e5?rzF(o.E/1e6,2)+" МДж":rzF(o.E/1000,1)+" кДж"}`:"";
+  W.forEach((w,j)=>{if(w.gap){rows.push(`<tr class="rzg"><td>—</td><td colspan="4">между слоями (зазор/ДЗ/разрушение головной части): ёмкость −${Math.round(w.dC)} мм → ${fmtS(w.to)}</td></tr>`);return;}
+    const p=w.p,q=rzMat(p.k),los=p.t/Math.max(.05,s.rzCos);
+    rows.push(`<tr><td>${p.i+1}</td><td>${eE(q.n)}<br><small>${p.t} мм, по лучу ${Math.round(los)} мм</small></td><td>${Math.round(p.need)} мм-экв.${p.fx.length?`<br><small>${p.fx.map(eE).join("; ")}</small>`:""}${q.cl==="bcc"&&p.tough<.9?`<br><small>вязкость ${Math.round(p.tough*100)} % (KCV)</small>`:""}</td><td>${fmtS(w.from)}</td><td>${w.pass?fmtS(w.to):"<b>остановлен</b>"}</td></tr>`);
+    L.push(`  Шаг ${j+1} · слой ${p.i+1} ${lc(q.n).split(" (")[0]} ${p.t} мм: −${Math.round(p.need)} мм-экв.; ${w.pass?"после: "+fmtS(w.to).replace(/ · /g,", "):"остановлен"}`);});
+  if(!W.length&&s.rzSteps)s.rzSteps.forEach((p,j)=>{const q=rzMat(p.k);rows.push(`<tr><td>${p.i+1}</td><td>${eE(q.n)}<br><small>${p.t} мм</small></td><td>${Math.round(p.need)} мм-экв.${p.fx.length?`<br><small>${p.fx.map(eE).join("; ")}</small>`:""}</td><td>ёмкость ${Math.round(p.rem)} мм</td><td>${p.rem>=p.need?"ёмкость "+Math.round(p.rem-p.need)+" мм":"<b>остановлен</b>"}</td></tr>`);});
+  /* заброневое: конус и масса осколков */
+  if(s.through&&kind==="pen"&&(mode==="ke"||mode==="heat")){const last=[...layers].reverse().find(l=>l.k!=="gap"&&!isE(l.k));const q=last?rzMat(last.k):rzMat("rha");
+    const d=mode==="heat"?Math.max(15,.25*cal):(z&&z.r?1.6*z.r.D:.9*cal),md=q.rho*1000*Math.PI/4*Math.pow(d/1000,2)*((last?last.t:20)/1000)*(mode==="heat"?.35:.6),ha=mode==="heat"?12:25;
+    H.push(`<b>Заброневое</b>: конус осколков, полуугол ≈ ${ha}°, масса осколков брони ≈ ${rzF(md,2)} кг${mode==="ke"&&W.length&&W[W.length-1].to&&W[W.length-1].to.L!=null?`, остаток сердечника ${Math.round(W[W.length-1].to.L)} мм на ${Math.round(W[W.length-1].to.v)} м/с`:""}`);
+    L.push(`  За бронёй: конус ≈ ${ha}°, осколки брони ≈ ${rzF(md,2)} кг`);}
+  /* температура и свечение */
+  const Tc=s.rzTc;if(Tc&&kind)H.push(`Температура в точке удара ≈ ${Math.round(Tc)} °C${Tc>=525?" — светится "+(Tc>1150?"жёлто-белым":Tc>900?"оранжево-жёлтым":Tc>700?"вишнёво-красным":"тёмно-красным"):" — ниже точки Дрейпера (≈525 °C), не светится"}${mode==="heat"?"; сама медная струя ≈ 450 °C (ИК-пирометрия)":""}.`);
+  const cold=layers.filter(l=>l.k!=="gap"&&rzMat(l.k).cl==="bcc"&&rzTough(l.k,T)<.6);if(cold.length)H.push(`Холод: ${cold.map(l=>`«${lc(rzMat(l.k).n)}» — ${Math.round(rzTough(l.k,T)*100)} % вязкости (порог ≈ ${rzTT(l.k)} °C)`).join("; ")} — трещины длиннее, сколы чаще.`);
+  if(T>30)H.push(`Жара: сталь мягче (σт ×${rzF(rzSig("rha",T),3)} у катаной); полимеры теряют прочность сильнее (СВМПЭ ×${rzF(rzSig("pe",T),2)}).`);
+  }catch(e){console.error(e);}
+  if(L.length>1){out.push("Физика (Реализм):");L.forEach(x=>out.push(x.startsWith("  ")?x:"  · "+x));}
+  s.rzHTML=`${H.map(h=>`<p>${h}</p>`).join("")}${rows.length?`<div class="rzscroll"><table class="rzt"><thead><tr><th>№</th><th>Слой</th><th>Сопротивление</th><th>До слоя</th><th>После</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`:""}`;
+  try{rzVisual(s,a,mode,kind);}catch(e){}
+  setTimeout(()=>{try{rzShowRep(s);}catch(e){}},0);}
+function rzShowRep(s){const card=$("logCard");if(!card)return;let d=$("rzRep");
+  if(!d){d=document.createElement("details");d.id="rzRep";d.className="rzrep";d.innerHTML='<summary>Разбор по слоям (физика)</summary><div id="rzRepB"></div>';card.appendChild(d);
+    d.addEventListener("click",e=>e.stopPropagation());}
+  d.hidden=!RZ.on||!s.rzHTML;if(!d.hidden){if(s.rzTc)s.rzHTML=s.rzHTML.replace(/Температура в точке удара ≈ \d+/,"Температура в точке удара ≈ "+Math.round(s.rzTc));$("rzRepB").innerHTML=s.rzHTML;}}
+
+/* ---------- 8. Панель «Реализм» ---------- */
+function rzVal(){/* сверка с открытыми данными; скорость на 2 км: потеря ≈ 60 м/с на км для 125-мм БОПС (Odermatt, longrods.ch) */
+  const rows=[],v2=v0=>v0-120;
+  const ke=(nm,pub,src)=>{const r=RZKE[nm];const v=v2(r.v0),P=rzLO(r.L,r.D,RZ_RHO[r.mat],v/1000,260,7.85,0,r.mat==="DU");rows.push([nm+" (2 км, 0°)",Math.round(P),pub,src]);};
+  ke("3БМ42",500,"≈ 500–520 мм: Википедия «125 mm smoothbore ammunition»; учебник МГТУ");ke("3БМ60 «Свинец-2»",600,"≈ 600 мм (открытые оценки)");ke("M829",540,"540 мм: таблица Magier (WITU)");
+  {const r=RZKE["3БМ42"],P=rzLO(r.L,r.D,17.6,v2(r.v0)/1000,260,7.85,60,0)*Math.cos(Math.PI/3);rows.push(["3БМ42 (2 км, 60°, по нормали к листу)",Math.round(P),230,"≈ 220–250 мм; LO даёт больше на больших углах — ограничение модели"]);}
+  rows.push(["3БК29 (125 мм, Comp B/медь, 2,5 кал.)",Math.round(rzJet(125,"compb","cu",2.5).P),700,"≈ 700 мм: открытые данные"]);
+  rows.push(["3БК29 то же на ОКФОЛ",Math.round(rzJet(125,"okfol","cu",2.5).P),"750–800","3БК29М/3БК31 (открытые оценки)"]);
+  rows.push(["ПГ-7ВЛ (93 мм, ОКФОЛ, 1,2 кал.)",Math.round(rzJet(93,"okfol","cu",1.2).P),500,"≈ 500 мм: Википедия «PG-7VL»"]);
+  rows.push(["Контакт-1: скорость пластин",rzF(rzEraV("era","def"),2)+" км/с","≈ 1–1,5 км/с","Held; Mayseless 2011"]);
+  return rows;}
+function rzMatTable(){const ks=[...new Set(layers.filter(l=>l.k!=="gap"&&l.t>0).map(l=>l.k))];if(!ks.length)return "<i>Слоёв нет</i>";const T=rzPlateT();
+  return `<div class="rzscroll"><table class="rzt"><thead><tr><th>Материал</th><th>ρ, г/см³</th><th>HB</th><th>σт, МПа / HEL, ГПа</th><th>K<sub>IC</sub>, МПа√м</th><th>При ${rzF(T)} °C</th></tr></thead><tbody>${ks.map(k=>{const q=rzMat(k);
+    const tt=q.cl==="bcc"&&q.tt!=null&&q.tt>-200?`порог хладноломкости ≈ ${q.tt} °C; `:"";
+    return `<tr><td>${eE(q.n)}${q.src?`<br><small>${eE(q.src)}</small>`:""}</td><td>${rzF(q.rho,2)}</td><td>${q.hb?Math.round(q.hb):"—"}</td><td>${q.hel?rzF(q.hel,1)+" ГПа":q.sy?q.sy:"—"}</td><td>${q.K?rzF(typeof kEff==="function"?kEff(k):q.K,0):"—"}</td><td><small>${tt}σ ×${rzF(rzSig(k,T),2)}; вязкость ${Math.round(rzTough(k,T)*100)} %</small></td></tr>`;}).join("")}</tbody></table></div>`;}
+function rzUI(){const sec=$("t-armor");if(!sec||$("rzBox"))return;
+  if(MAT.hea&&MAT.hea.tt==null)MAT.hea.tt=-273;/* ГЦК-сплав: порога хладноломкости нет (Gludovatz 2014) */
+  const d=document.createElement("details");d.id="rzBox";d.className="rzbox";if(RZ.open)d.open=true;
+  const opt=(o,v)=>Object.keys(o).map(k=>`<option value="${k}"${k===v?" selected":""}>${o[k]}</option>`).join("");
+  const keO=Object.assign({auto:"по снаряду орудия"},Object.fromEntries(Object.keys(RZKE).filter(k=>k!=="3БМ42 «Манго»").map(k=>[k,k])),{custom:"свой (L, D, материал, v0)"});
+  const exO=Object.assign({def:"штатное (Comp B)"},Object.fromEntries(Object.keys(RZEX).filter(k=>k!=="pvv5").map(k=>[k,RZEX[k].n])));
+  const soO={0:"штатное (≈2,5 кал.)",1:"1 калибр",2:"2 калибра",3:"3 калибра",4:"4 калибра",6:"6 калибров",8:"8 калибров",10:"10 калибров",15:"15 калибров"};
+  d.innerHTML=`<summary>Реализм: физика, химия, материалы</summary>
+  <label class="rzrow"><input type="checkbox" id="rzOn"${RZ.on?" checked":""}> Физическая модель (Ланц–Одерматт, кумулятивная струя, Гёрни, температура)</label>
+  <div class="rzg2"><div><label for="rzT">Температура листа <b id="rzTv"></b></label><input id="rzT" type="range" min="-40" max="50" step="5" value="${RZ.Tp}"><label class="rzrow"><input type="checkbox" id="rzAir"${RZ.air?" checked":""}> как воздух</label></div>
+  <div><label for="rzKe">Сердечник БОПС</label><select id="rzKe">${opt(keO,RZ.ke)}</select><div id="rzKeC" class="rzg3"${RZ.ke==="custom"?"":" hidden"}><label>L, мм<input id="rzL" type="number" min="100" max="1000" value="${RZ.L}"></label><label>D, мм<input id="rzD" type="number" min="10" max="60" step=".5" value="${RZ.D}"></label><label>v0, м/с<input id="rzV" type="number" min="900" max="2200" value="${RZ.v0}"></label><label>Материал<select id="rzMt">${opt({W:"вольфрам",DU:"уран",WC:"карбид W",ST:"сталь"},RZ.mat)}</select></label></div></div>
+  <div><label for="rzEx">ВВ кумулятивного заряда</label><select id="rzEx">${opt(exO,RZ.ex)}</select></div>
+  <div><label for="rzLn">Облицовка</label><select id="rzLn">${opt({cu:"медь",ta:"тантал",st:"сталь"},RZ.ln)}</select></div>
+  <div><label for="rzSo">Отстояние подрыва</label><select id="rzSo">${opt(soO,String(RZ.so))}</select></div>
+  <div><label for="rzEra">ВВ в блоках ДЗ</label><select id="rzEra">${opt({def:"штатное",tnt:"ТНТ",pvv5:"ПВВ-5А",okfol:"ОКФОЛ"},RZ.era)}</select></div></div>
+  <div id="rzInfo" class="tag"></div>
+  <details class="rzsub"><summary>Свойства материалов листа</summary><div id="rzMats"></div></details>
+  <details class="rzsub"><summary>Сверка с открытыми данными</summary><div id="rzValT"></div></details>`;
+  sec.appendChild(d);
+  const st=document.createElement("style");st.textContent=`.rzbox{margin-top:8px;border:1px solid rgba(233,226,196,.18);border-radius:10px;padding:6px 8px}.rzbox>summary,.rzrep>summary,.rzsub>summary{cursor:pointer;font-weight:600}
+  .rzg2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 10px;margin:6px 0}.rzg2 select,.rzg2 input[type=range]{width:100%}.rzg3{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px}.rzg3 input,.rzg3 select{width:100%}
+  .rzrow{display:flex;gap:6px;align-items:center;margin:4px 0}.rzscroll{overflow-x:auto;max-width:100%}.rzt{border-collapse:collapse;font-size:12px;width:100%}.rzt td,.rzt th{border-bottom:1px solid rgba(233,226,196,.14);padding:3px 4px;text-align:left;vertical-align:top}
+  .rzt small{opacity:.75}.rzrep{margin-top:6px;font-size:12px}.rzrep p{margin:4px 0}.rzg td{opacity:.8;font-style:italic}.rzsub{margin-top:6px}`;document.head.appendChild(st);
+  const upd=()=>{RZ.on=$("rzOn").checked;RZ.air=$("rzAir").checked;RZ.Tp=+$("rzT").value;RZ.ke=$("rzKe").value;RZ.ex=$("rzEx").value;RZ.ln=$("rzLn").value;RZ.so=+$("rzSo").value;RZ.era=$("rzEra").value;
+    RZ.L=+$("rzL").value||600;RZ.D=+$("rzD").value||24;RZ.v0=+$("rzV").value||1700;RZ.mat=$("rzMt").value;$("rzKeC").hidden=RZ.ke!=="custom";$("rzT").disabled=RZ.air;rzSave();rzRefresh();};
+  ["rzOn","rzAir","rzT","rzKe","rzEx","rzLn","rzSo","rzEra","rzL","rzD","rzV","rzMt"].forEach(id=>{const e=$(id);e.addEventListener(e.type==="range"||e.type==="number"?"input":"change",upd);});
+  d.addEventListener("toggle",()=>{RZ.open=d.open;if(d.open)rzRefresh();});
+  if($("temp"))$("temp").addEventListener("input",()=>rzRefresh());
+  rzRefresh();}
+function rzRefresh(){if(!$("rzBox"))return;const T=rzPlateT();$("rzTv").textContent=(T>0?"+":"")+rzF(T)+" °C"+(RZ.air?" (воздух)":"");$("rzT").disabled=RZ.air;
+  try{const g=GP(G()),a={key:"bops"},r=rzRod(a,g);let t="";
+    if(r&&(ammoFor(g)||[]).includes("bops")){const rho=RZ_RHO[r.mat]||17.6,v=(r.v0||((typeof ROUNDV!=="undefined"&&ROUNDV[g.n]||{}).bops)||1650);t+=`БОПС ${r.nm}: L/D ${rzF(r.L/r.D,1)}, ρ ${rzF(rho,1)}, v0 ${v} м/с → в упор ${Math.round(rzLO(r.L,r.D,rho,v/1000,260,7.85,0,r.mat==="DU"))} мм по нормали${r.est?" (оценка)":""}. `;}
+    const S0=rzHeatSel(),cd=g.cal,J=rzJet(cd,S0.ex,S0.ln,S0.so),R0=rzJet(cd,"compb","cu",RZ_SO0);t+=`Струя ${g.cal} мм: ${RZLN[S0.ln].n}, v головы ${rzF(J.vt,1)} км/с, ×${rzF(J.P/R0.P,2)} к штатной.`;
+    $("rzInfo").textContent=RZ.on?t:"Физическая модель выключена — работает прежняя игровая модель.";}catch(e){$("rzInfo").textContent="";}
+  if($("rzBox").open){$("rzMats").innerHTML=rzMatTable();$("rzValT").innerHTML=`<div class="rzscroll"><table class="rzt"><thead><tr><th>Проверка</th><th>Модель</th><th>Опубл.</th><th>Источник</th></tr></thead><tbody>${rzVal().map(r=>`<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td>${r[2]}</td><td><small>${r[3]}</small></td></tr>`).join("")}</tbody></table></div>`;}}
+try{rzUI();}catch(e){console.error(e);}
 
 /* ===== v33: Героиня — реалистичная модель по фото (скелет со скиннингом) (≈1,70 м, длинные платиновые волосы, чёрный комбинезон, белый длинный кардиган, белые кроссовки), ставится на карту, управление от третьего лица ===== */
 const HERO={on:false,place:false,g:null,v:new THREE.Vector3(),vy:0,yaw:0,ph:0,spd:0,air:false,cy:0,cp:.28,cd:3.4,keys:{},joy:{x:0,y:0},run:false,jumpQ:false,save:null,col:[],colT:0,camP:null};
@@ -5689,7 +6049,7 @@ function vehMine(where){if(!S.veh||!VEH)return;if(!VS)vehReset();const v=VT[S.vt
   if(VS.crewLost>=v.crew&&!VS.kill){VS.kill="crew";msgs.push("✖ Экипаж выведен из строя");}
   $("res").textContent=msgs.join("\n");vehState();}
 /* хладноломкость стали: ниже порога вязко-хрупкого перехода сталь трескается вместо пластичного течения */
-function brOf(k){const m=MAT[k];if(!m)return 0;const Tz=$("temp")?parseFloat($("temp").value):NaN,T=isNaN(Tz)?15:Tz,tt=m.tt!=null?m.tt:k==="cast"?-20:{steel:-45,hard:-15,hc:-25,dual:-20}[m.beh];if(tt===undefined||T>=tt)return m.br;return Math.min(.95,m.br+(tt-T)*(m.beh==="hard"?.012:.008));}
+function brOf(k){const m=MAT[k];if(!m)return 0;const Tz=typeof rzPlateT==="function"?rzPlateT():$("temp")?parseFloat($("temp").value):NaN,T=isNaN(Tz)?15:Tz,tt=m.tt!=null?m.tt:k==="cast"?-20:{steel:-45,hard:-15,hc:-25,dual:-20}[m.beh];if(tt===undefined||T>=tt)return m.br;return Math.min(.95,m.br+(tt-T)*(m.beh==="hard"?.012:.008));}
 
 function boxHit(b,p){return p.x>=b[0]&&p.x<=b[1]&&p.y>=b[2]&&p.y<=b[3]&&p.z>=b[4]&&p.z<=b[5];}
 function vehToTur(p){const T0=VT[S.vt].tur,a=-(VEH.tg.rotation.y||0),x=p.x-T0.p[0],z=p.z-T0.p[2];return new THREE.Vector3(x*Math.cos(a)+z*Math.sin(a),p.y-T0.p[1]+(VEH.sag||0),-x*Math.sin(a)+z*Math.cos(a));}
