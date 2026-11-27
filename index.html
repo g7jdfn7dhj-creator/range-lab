@@ -3726,6 +3726,88 @@ heroTick=function(dt){if(BRD.anim){HERO.keys={};HERO.joy.x=HERO.joy.y=0;HERO.jum
     if(BRD.in&&((BRD.in==="veh"&&(!brdVehOK()||!S.drive.on))||(BRD.in==="own"&&!brdOwnOK()))){/* режим сменили или сняли галочку «Вождение» — героиня выходит */brdExit();}
     if(HERO.on||BRD.in||BRD.anim||BRD.cand){BRD.cand=brdFind();brdUI();}}catch(e){if(!BRD.er){BRD.er=1;console.error(e);}}};
 if(typeof vehTick==="function"){const _brdVehTick=vehTick;vehTick=function(dt,rdt){_brdVehTick(dt,rdt);try{if(BRD.park)brdPark();}catch(e){}};}
+/* ===== v39: машина сама стреляет. Пока героиня в машине-мишени, эта машина — стрелок: штатные «Выстрел», «Прицел», «Снаряд · сменить», заряжание, баллистика,
+   бронепробитие и протокол (fireOne → ballistics → vehShot → vehPrep → пробитие пакета) — только начало (дульный срез её пушки), направление (её башня и ствол)
+   и орудие с боекомплектом (2А46М / 2А42 / 2А72 / M2HB из таблицы орудий) подменены. Мишень — вторая машина штатного режима «Бронемашина» (тип — из «Тип машины»),
+   своя машина управляется штатным вождением (vehTick → driveTick) с подменой текущей машины на время её шага. ===== */
+const BRD_GUN={tank:"2А46М",bmp:"2А42",btr:"2А72",stryk:"M2HB Browning"};
+const BRD_SW=["mvx","vSpd","mvDir","vtur","vhead"];
+function brdGunFor(vt){let n=BRD_GUN[vt];if(!n){const T=VT[vt]&&VT[vt].tur,r=T&&T.gun?T.gun.r:0;n=r>.06?"2А46М":r>.03?"2А42":"M2HB Browning";}const i=guns.findIndex(g=>g.n===n);return i>=0?i:1;}
+/* обмен «текущей машины» штатного режима: VEH/VS/S.vt и её кинематика ↔ своя машина героини */
+function brdSwap(){const M=BRD.my;if(!M)return;let t=VEH;VEH=M.V;M.V=t;t=VS;VS=M.VS;M.VS=t;t=S.vt;S.vt=M.vt;M.vt=t;BRD_SW.forEach(k=>{const x=S[k];S[k]=M[k];M[k]=x;});M.sw=!M.sw;}
+function brdMine(){const M=BRD.my;return M?(M.sw?VEH:M.V):null;}
+/* линия огня: дульный срез её пушки, ось ствола; точка прицеливания — куда приходит ось ствола (машина-мишень или грунт) */
+function brdLine(){const V=brdMine();if(!V)return null;V.g.updateMatrixWorld(true);const vt=BRD.my.sw?S.vt:BRD.my.vt,L=(VT[vt].tur&&VT[vt].tur.gun?VT[vt].tur.gun.L:3);
+  const o=V.gp.localToWorld(new THREE.Vector3(0,0,L+.05)),d=new THREE.Vector3(0,0,1).transformDirection(V.gp.matrixWorld).normalize();let p=null;
+  let best=1500;try{const vis=V.g.visible;V.g.visible=false;const h=wpRay(o,d,1500);V.g.visible=vis;if(h){p=h.p.clone();best=o.distanceTo(p);}}catch(e){}
+  try{const T=BRD.my.sw?BRD.my.V:VEH;if(T&&T!==V&&T.meshes){T.g.updateMatrixWorld(true);const h=new THREE.Raycaster(o,d,0,best).intersectObjects(T.meshes,false)[0];if(h){p=h.point.clone();BRD.lnTgt=true;}else BRD.lnTgt=false;}}catch(e){}
+  if(!p)p=o.clone().addScaledVector(d,1500);return{o,d,p,r:o.distanceTo(p)};}
+const _brdMuz=muzzleWorld;muzzleWorld=function(){if(BRD.my&&BRD.fl)return BRD.fl.o.clone();if(BRD.my){const L=brdLine();if(L)return L.o;}return _brdMuz();};
+/* попадание: тот же расчёт, что у штатного vehShot (луч по геометрии машины, угол встречи по нормали, вторая баллистика с наклоном), но луч идёт по её линии огня */
+const _brdVehShot=vehShot;
+vehShot=function(B,ex,ey){const F=BRD.fl;if(!BRD.my||!F)return _brdVehShot(B,ex,ey);vehEnsure();const desc=B.desc||0;
+  const los=F.p.clone().sub(F.o).normalize(),psi=Math.atan2(los.x,los.z),up=new THREE.Vector3(0,1,0),rt=new THREE.Vector3().crossVectors(los,up).normalize(),up2=new THREE.Vector3().crossVectors(rt,los).normalize();
+  const d=los.clone().applyAxisAngle(rt,-desc).normalize();VEH.g.updateMatrixWorld(true);
+  const P=F.p.clone().addScaledVector(rt,-ex).addScaledVector(up2,ey),O=P.clone().addScaledVector(d,-Math.min(80,F.r*.8));
+  const rc=new THREE.Raycaster(O,d,0,400),h=rc.intersectObjects(VEH.meshes,false)[0];
+  if(!h){let mp=null;try{const g=wpRay(P.clone().addScaledVector(d,-1),d,400);if(g)mp=g.p.clone();}catch(e){}if(!mp)mp=P.clone().addScaledVector(d,R(6,14));mp.y=Math.max(.05,mp.y);return{hit:false,mp};}
+  const n=h.face.normal.clone().transformDirection(h.object.matrixWorld).normalize();if(n.dot(d)>0)n.negate();const zone=vehZone(h.object,h.point,n);
+  const nf=n.clone().applyAxisAngle(up,-psi);/* нормаль в системе стрелка: «вперёд» — по линии огня */
+  const tilt=Math.asin(Math.max(-1,Math.min(1,nf.y)))*180/Math.PI,yaw=Math.atan2(-nf.x,-nf.z)*180/Math.PI;
+  S.vAng=tilt;S.vYaw=yaw;let B2;try{B2=ballistics();}finally{S.vAng=S.vYaw=null;}Object.assign(B,{obl:B2.obl,oblN:B2.oblN,cN:B2.cN});
+  const q=new THREE.Quaternion();VEH.g.getWorldQuaternion(q);q.invert();
+  return{hit:true,pt:h.point.clone(),pL:VEH.g.worldToLocal(h.point.clone()),nL:n.clone().applyQuaternion(q),dL:d.clone().applyQuaternion(q),zone,tilt,yaw,part:h.object.userData.part,obj:h.object,wheel:h.object.userData.wheel,off:h.object.userData.off||0};};
+/* выстрел: штатный fireOne; на время вызова — дальность = измеренная до точки прицеливания, своя машина не «едет» в расчёте упреждения */
+const _brdFire=fireOne;
+fireOne=function(){if(!BRD.my)return _brdFire();const F=brdLine();if(!F)return;BRD.fl=F;const di=$("dist"),dv=di.value,dOn=S.drive.on,rv=S.rockV,lk=S.lock;
+  di.value=String(Math.max(20,Math.round(F.r)));S.balCache=null;S.drive.on=false;const n0=shots.length;
+  try{_brdFire();}finally{S.drive.on=dOn;S.recoil=0;S.recoilAge=0;S.rockV=rv;BRD.fl=null;S.balCache=null;}
+  if(shots.length>n0){const V=brdMine();if(V){BRD.rec=1;if(V.gpz0==null)V.gpz0=V.gp.position.z;}BRD.flT=.12;BRD.flD=F.d.clone();BRD.flO=F.o.clone();}};
+/* камера-прицел наводчика своей машины */
+function brdScopeEl(){if($("brdScope"))return;const st=document.createElement("style");st.textContent=`#brdScope{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,transparent 0,transparent 34vmin,rgba(0,0,0,.82) 35vmin)}
+#brdScope[hidden]{display:none!important}#brdScope i{position:absolute;left:50%;top:50%;background:rgba(255,190,60,.95)}#brdScope .h{width:22vmin;height:2px;margin:-1px 0 0 -11vmin}#brdScope .v{width:2px;height:22vmin;margin:-11vmin 0 0 -1px}
+#brdScope .c{width:1.6vmin;height:1.6vmin;margin:-.8vmin 0 0 -.8vmin;border-radius:50%;background:transparent;border:2px solid rgba(255,190,60,.95)}
+#brdScope b{position:absolute;left:50%;top:calc(50% + 13vmin);transform:translateX(-50%);font:600 13px/1.3 var(--ui,'UI Mono',ui-monospace,monospace);color:#ffbe3c;text-shadow:0 0 3px #000;white-space:nowrap;text-align:center}`;document.head.appendChild(st);
+  const s=document.createElement("div");s.id="brdScope";s.hidden=true;s.innerHTML='<i class="h"></i><i class="v"></i><i class="c"></i><b></b>';const cv=renderer.domElement;if(cv.parentNode)cv.parentNode.insertBefore(s,cv.nextSibling);else document.body.appendChild(s);
+  const el=renderer.domElement;let dr=null;el.addEventListener("pointerdown",e=>{if(!BRD.sight)return;dr={id:e.pointerId,x:e.clientX,y:e.clientY};});
+  el.addEventListener("pointermove",e=>{if(!BRD.sight||!dr||e.pointerId!==dr.id)return;const V=brdMine();if(!V)return;const k=(camera.fov/60)*.006;
+    const ms=BRD.my.sw?VS:BRD.my.VS;if(V.tg.parent===V.b&&!(ms&&ms.jam))V.tg.rotation.y-=(e.clientX-dr.x)*k;V.gp.rotation.x=Math.max(-.33,Math.min(.1,V.gp.rotation.x+(e.clientY-dr.y)*k));dr.x=e.clientX;dr.y=e.clientY;});
+  ["pointerup","pointercancel"].forEach(ev=>el.addEventListener(ev,e=>{if(dr&&e.pointerId===dr.id)dr=null;}));}
+function brdSight(on){brdScopeEl();BRD.sight=!!on&&!!BRD.my;$("brdScope").hidden=!BRD.sight;$("aimBtn").setAttribute("aria-pressed",BRD.sight);
+  if(BRD.sight){if(BRD.fov0==null)BRD.fov0=camera.fov;camera.fov=12;camera.updateProjectionMatrix();if(controls)controls.enabled=false;S.view=-1;brdLbl(false);views.forEach((_,j)=>{const b=$("v"+j);b&&b.setAttribute("aria-pressed","false");});
+    $("res").textContent="Прицел наводчика: перетаскивание — башня и ствол (вместе с ⟲ ⟳); дальномер меряет дальность до точки под маркой, СУО вводит прицел. «Выстрел» — огонь, «Снаряд · сменить» — выбор выстрела.";}
+  else{if(BRD.fov0!=null){camera.fov=BRD.fov0;camera.updateProjectionMatrix();BRD.fov0=null;}if(controls)controls.enabled=true;brdLbl(true);if(S.view===-1&&BRD.my)try{setView(2);}catch(e){}}}
+/* подписи брони (спрайты) в прицеле прячутся, после — как были */
+function brdLbl(on){const M=BRD.my;[VEH,M&&M.V].forEach(V=>{if(!V||!V.g)return;V.g.traverse(o=>{if(!o.isSprite)return;if(!on){if(o.userData.brdV==null){o.userData.brdV=o.visible;o.visible=false;}}else if(o.userData.brdV!=null){o.visible=o.userData.brdV;delete o.userData.brdV;}});});}
+/* «Прицел» в машине — вид наводчика; кнопки камер выводят из прицела. Обработчики подменяются только на время посадки */
+function brdHook(on){const ab=$("aimBtn");if(on){if(BRD.h0)return;BRD.h0={aim:ab.onclick,v:views.map((_,i)=>$("v"+i)&&$("v"+i).onclick)};ab.onclick=e=>{brdSight(!BRD.sight);};
+    views.forEach((_,i)=>{const b=$("v"+i);if(!b)return;const f=BRD.h0.v[i];b.onclick=e=>{if(BRD.sight)brdSight(false);return f&&f.call(b,e);};});}
+  else if(BRD.h0){ab.onclick=BRD.h0.aim;views.forEach((_,i)=>{const b=$("v"+i);if(b)b.onclick=BRD.h0.v[i];});BRD.h0=null;ab.setAttribute("aria-pressed",!!S.aimMode);}}
+/* посадка: своя машина отделяется от штатной «текущей», штатный режим строит машину-мишень на дальнем конце площадки */
+function brdArm(){if(BRD.my||!S.veh||!VEH)return;const M={V:VEH,VS,vt:S.vt,sw:false,g:S.g,a:S.a,vtSel:S.vt,dist:$("dist").value,dmin:$("dist").min,dstep:$("dist").step,vh0:S.vhead,tt:BRD.tgtT||"tank"};BRD_SW.forEach(k=>M[k]=S[k]);
+  BRD.my=M;VEH=null;VS=null;S.vt=M.tt;S.mvx=0;S.vSpd=0;S.mvDir=1;S.vtur=0;S.vhead=180;vehBuild();vehReset();VEH.g.visible=true;
+  S.g=brdGunFor(M.vt);renderAmmo();try{$("gName").textContent=G().n;$("gTag").textContent=`${G().cal} мм · ${VT[M.vt].n.replace(/\s*\(.*$/,"")} героини`;renderStats();}catch(e){}
+  $("dist").min="20";$("dist").step="1";brdHook(true);try{if($("vtype"))$("vtype").value=S.vt;vehUI();}catch(e){}
+  $("res").textContent=`Героиня в ${VT[M.vt].n}: стреляет её машина — ${G().n}, ${G().cal} мм (${ammoFor(G()).map(k=>roundName(k)).join(", ")}). Мишень — ${VT[S.vt].n} впереди (тип — в «Тип машины»). «Прицел» — вид наводчика.`;}
+function brdDisarm(){const M=BRD.my;if(!M)return;if(M.sw)brdSwap();if(BRD.sight)brdSight(false);
+  try{if(VEH&&VEH.g.parent)VEH.g.parent.remove(VEH.g);if(VEH&&VEH.tg&&VEH.tg.parent&&VEH.tg.parent!==VEH.b)VEH.tg.parent.remove(VEH.tg);}catch(e){}
+  VEH=M.V;VS=M.VS;S.vt=M.vt;BRD_SW.forEach(k=>S[k]=M[k]);S.vhead=M.vh0;BRD.tgtT=BRD.lastT||M.tt;BRD.my=null;if(VEH)VEH.g.visible=!!S.veh;
+  $("dist").min=M.dmin||"100";$("dist").step=M.dstep||"50";brdHook(false);$("dist").value=M.dist;S.g=M.g;S.a=M.a;renderAmmo();try{setGun(M.g);}catch(e){}try{if($("vtype"))$("vtype").value=S.vt;$("vhead").value=S.vhead;vehUI();}catch(e){}S.balCache=null;}
+const _brdSeat=brdSeat;brdSeat=function(k){_brdSeat(k);if(k==="veh")try{brdArm();}catch(e){console.error(e);}};
+const _brdExit=brdExit;brdExit=function(){if(BRD.my){try{BRD.lastT=S.vt;}catch(e){}brdDisarm();}return _brdExit();};
+/* кадр: машина-мишень — штатный шаг без вождения (впереди, носом к героине), своя машина — штатный шаг с вождением */
+if(typeof vehTick==="function"){const _vt2=vehTick;vehTick=function(dt,rdt){if(!BRD.my)return _vt2(dt,rdt);const dOn=S.drive.on;
+  S.drive.on=false;try{_vt2(dt,rdt);}finally{S.drive.on=dOn;}try{VEH.g.position.z=D-62;}catch(e){}
+  brdSwap();try{_vt2(dt,rdt);}catch(e){if(!BRD.er2){BRD.er2=1;console.error(e);}}finally{brdSwap();}};}
+const _brdHT2=heroTick;heroTick=function(dt){_brdHT2(dt);if(!BRD.my)return;try{const V=brdMine();
+  /* откат своей пушки, вспышка у её дульного среза */
+  if(V&&V.gpz0!=null){BRD.rec=Math.max(0,(BRD.rec||0)-dt*2.6);V.gp.position.z=V.gpz0-.3*Math.pow(BRD.rec,2)*Math.min(1,G().cal/100);}
+  if(BRD.flT>0&&BRD.flD){BRD.flT-=dt;const o=BRD.flO,d=BRD.flD,yaw=Math.atan2(d.x,d.z),el=-Math.asin(Math.max(-1,Math.min(1,d.y)));
+    try{if(flashX){flashX.position.copy(o).addScaledVector(d,.15);flashX.rotation.order="YXZ";flashX.rotation.set(el,yaw,flashX.rotation.z);}}catch(e){}try{if(S.glowSpr)S.glowSpr.position.copy(o).addScaledVector(d,.6);}catch(e){}}
+  BRD.lnT=(BRD.lnT||0)-dt;if(BRD.lnT<=0){BRD.lnT=.12;const L=brdLine();if(L){BRD.lastL=L;const r=Math.max(20,Math.round(L.r));$("dist").value=String(r);if($("distTxt"))$("distTxt").textContent=r+" м";}}
+  if(BRD.sight&&V){const vt=BRD.my.sw?S.vt:BRD.my.vt,T=VT[vt].tur||{rt:.8};V.g.updateMatrixWorld(true);const c=V.gp.localToWorld(new THREE.Vector3(-(T.rt||.8)*.55,.32,.4)),d=new THREE.Vector3(0,0,1).transformDirection(V.gp.matrixWorld);
+    camera.position.copy(c);camera.up.set(0,1,0);camera.lookAt(c.clone().addScaledVector(d,100));const L=BRD.lastL,b=$("brdScope").querySelector("b");
+    const t=`${G().n} · ${roundName(S.a)}\nД ${L?Math.round(L.r):"—"} м · ${S.loading?"заряжание "+Math.max(0,(1-S.load)*S.loadT).toFixed(1)+" с":"готово"}`;if(b.textContent!==t){b.textContent=t;b.style.whiteSpace="pre";}}}catch(e){if(!BRD.er3){BRD.er3=1;console.error(e);}}};
 /* ===== v33: Героиня — реалистичная модель по фото (скелет со скиннингом) (≈1,70 м, длинные платиновые волосы, чёрный комбинезон, белый длинный кардиган, белые кроссовки), ставится на карту, управление от третьего лица ===== */
 const HERO={on:false,place:false,g:null,v:new THREE.Vector3(),vy:0,yaw:0,ph:0,spd:0,air:false,cy:0,cp:.28,cd:3.4,keys:{},joy:{x:0,y:0},run:false,jumpQ:false,save:null,col:[],colT:0,camP:null};
 S.hero=HERO;
