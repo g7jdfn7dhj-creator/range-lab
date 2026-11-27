@@ -3692,11 +3692,14 @@ const WBAL={glock:{dmg:42,pen:2.5,fall:.35,vest:.12,am:"57-Н-181С, оболо�
   ak74m:{dmg:68,pen:7,fall:.08,vest:.9,am:"7Н6, стальной сердечник",wall:{brick:12,rc:5,aer:30,gpart:60,steel:.7}},
   svd:{dmg:115,pen:10,fall:.06,vest:1,am:"57-Н-323С ЛПС, стальной сердечник",wall:{brick:18,rc:8,aer:40,gpart:80,steel:1}}};
 /* стойкость слоя брони к пуле: множитель к толщине, мм эквивалента катаной стали */
-const WARM={rha:1,cast:.9,hh:1.25,alu:.33,al:.33,stb:.3,rub:.03,gap:0,sand:.15,cer:2.2,era5:.9,era:.9,k5:.9,nera:.8};
+const WARM={rha:1,cast:.9,hh:1.25,alu:.33,al:.33,stb:.3,rub:.03,gap:0,sand:.15,cer:2.2,era5:.9,era:.9,k5:.9,relikt:.9,nera:.8,ara:.3};
 const WAN={rha:"катаная броня",cast:"литая броня",hh:"высокотвёрдая сталь",alu:"алюминиевая броня",al:"алюминиевая броня",stb:"стеклотекстолит",rub:"резинотканевый экран",gap:"зазор",sand:"наполнитель",cer:"керамика",era5:"блок динамической защиты",era:"блок динамической защиты",k5:"блок динамической защиты"};
 const WZN={hullF:"лоб корпуса",hullS:"борт корпуса",hullR:"корма",roof:"крыша",turF:"лоб башни",turS:"борт башни",run:"ходовая часть",gun:"пушка"};
 const wF1=(x,n)=>(+x).toFixed(n==null?1:n).replace(".",",");
-function wpLog(s){WP.log=s;try{$("res").textContent=s;}catch(e){}}
+function wpLog(s){WP.log=s;try{$("res").textContent=s;}catch(e){}
+  /* в режиме героини протокол скрыт — дублируем строку в её HUD, гаснет через 5 с */
+  try{let el=$("hLog");const hh=$("heroHud");if(!el&&hh){el=document.createElement("div");el.id="hLog";el.style.cssText="position:absolute;left:50%;transform:translateX(-50%);top:calc(64px + env(safe-area-inset-top,0px));max-width:min(92vw,640px);padding:6px 12px;border-radius:10px;background:rgba(12,12,16,.72);color:#f4f1ea;font:12px/1.35 system-ui,sans-serif;pointer-events:none;transition:opacity .4s;text-align:center";hh.appendChild(el);}
+    if(el){el.textContent=s;el.style.opacity=1;clearTimeout(WP.logT);WP.logT=setTimeout(()=>{el.style.opacity=0;},5000);}}catch(e){}}
 /* луч против коробки [x0,y0,z0,x1,y1,z1] — расстояние входа и нормаль */
 function wBox(o,d,b){let t0=-1e9,t1=1e9,ax=-1,sg=1;for(let i=0;i<3;i++){const oi=o[i],di=d[i];if(Math.abs(di)<1e-9){if(oi<b[i]||oi>b[i+3])return null;continue;}
     let a=(b[i]-oi)/di,c=(b[i+3]-oi)/di,s=-1;if(a>c){const q=a;a=c;c=q;s=1;}if(a>t0){t0=a;ax=i;sg=s;}if(c<t1)t1=c;if(t0>t1)return null;}
@@ -3801,10 +3804,10 @@ function wpHitCar(w,B,h,d,dm){const c=h.car,pl=h.pl,nl=h.nl,dw=new THREE.Vector3
 function wpHitBld(w,B,h,d,dm){const e=h.e,mt=e.m,pl=h.pl,nl=h.nl;let nm=mt;try{nm=bNm(e,"n");}catch(e2){}
   if(mt==="glass"||mt==="tglass"||mt==="sky"){let ok=false;try{ok=bGlass(e,h.dl,4,"shot");}catch(e2){}try{bSnd("glass",pl,.6);}catch(e2){}if(ok){try{BLD.stat.shotWin=(BLD.stat.shotWin||0)+1;}catch(e2){}}
     wpLog(`${w.name} → ${nm}, ${dm}: стекло разбито, осколки посыпались.`);return h;}
-  const wc=(B.wall[mt]!=null?B.wall[mt]:B.wall.brick),thk=(h.len||0)*100,thru=mt!=="steel"&&thk>0&&thk<wc;
-  const r=(mt==="rc"?.022:mt==="gpart"?.02:.028)+w.calmm/1000*(mt==="brick"||mt==="aer"?2.2:1.4);
+  const wc=(B.wall[mt]!=null?B.wall[mt]:mt==="gkl"?B.wall.gpart:B.wall.brick),thk=(h.len||0)*100,thru=mt!=="steel"&&thk>0&&thk<wc;
+  const r=(mt==="rc"?.022:mt==="gpart"||mt==="gkl"?.02:.028)+w.calmm/1000*(mt==="brick"||mt==="aer"?2.2:1.4);
   try{bDecal(pl,nl,Math.max(.021,r));}catch(e2){}
-  const col=mt==="brick"?[.55,.3,.22]:mt==="aer"?[.8,.78,.72]:mt==="gpart"?[.9,.9,.88]:[.62,.62,.6];
+  const col=mt==="brick"?[.55,.3,.22]:mt==="aer"?[.8,.78,.72]:mt==="gpart"||mt==="gkl"?[.9,.9,.88]:[.62,.62,.6];
   if(mt==="steel")wSpark(h.p,h.n,d,.6,false);else{try{bDust(pl,col,.18+w.calmm/60);}catch(e2){}
     try{for(let i=0;i<4;i++)bShard([pl[0]+nl[0]*.03,pl[1]+nl[1]*.03,pl[2]+nl[2]*.03],[nl[0]*R(1,3)+R(-1,1),nl[1]*R(1,3)+R(0,1.5),nl[2]*R(1,3)+R(-1,1)],R(.015,.035));}catch(e2){}}
   if(thru){const q=bPt(pl,h.dl,h.len);try{bDecal(q,[h.dl[0],h.dl[1],h.dl[2]],Math.max(.021,r*1.4));}catch(e2){}}
