@@ -3698,8 +3698,8 @@ const WZN={hullF:"лоб корпуса",hullS:"борт корпуса",hullR:"
 const wF1=(x,n)=>(+x).toFixed(n==null?1:n).replace(".",",");
 function wpLog(s){WP.log=s;try{$("res").textContent=s;}catch(e){}
   /* в режиме героини протокол скрыт — дублируем строку в её HUD, гаснет через 5 с */
-  try{let el=$("hLog");const hh=$("heroHud");if(!el&&hh){el=document.createElement("div");el.id="hLog";el.style.cssText="position:absolute;left:50%;transform:translateX(-50%);top:calc(64px + env(safe-area-inset-top,0px));max-width:min(92vw,640px);padding:6px 12px;border-radius:10px;background:rgba(12,12,16,.72);color:#f4f1ea;font:12px/1.35 system-ui,sans-serif;pointer-events:none;transition:opacity .4s;text-align:center";hh.appendChild(el);}
-    if(el){el.textContent=s;el.style.opacity=1;clearTimeout(WP.logT);WP.logT=setTimeout(()=>{el.style.opacity=0;},5000);}}catch(e){}}
+  try{let el=$("hLog");const hh=$("heroHud");if(!el&&hh){el=document.createElement("div");el.id="hLog";el.style.cssText="position:absolute;left:50%;transform:translateX(-50%);top:calc("+(innerWidth<600?"156px":"64px")+" + env(safe-area-inset-top,0px));max-width:min(92vw,640px);padding:6px 12px;border-radius:10px;background:rgba(12,12,16,.72);color:#f4f1ea;font:12px/1.35 system-ui,sans-serif;pointer-events:none;transition:opacity .4s;text-align:center";hh.appendChild(el);}
+    if(el){el.textContent=s;el.style.opacity=1;clearTimeout(WP.logT);WP.logT=setTimeout(()=>{el.style.opacity=0;},6000);}}catch(e){}}
 /* луч против коробки [x0,y0,z0,x1,y1,z1] — расстояние входа и нормаль */
 function wBox(o,d,b){let t0=-1e9,t1=1e9,ax=-1,sg=1;for(let i=0;i<3;i++){const oi=o[i],di=d[i];if(Math.abs(di)<1e-9){if(oi<b[i]||oi>b[i+3])return null;continue;}
     let a=(b[i]-oi)/di,c=(b[i+3]-oi)/di,s=-1;if(a>c){const q=a;a=c;c=q;s=1;}if(a>t0){t0=a;ax=i;sg=s;}if(c<t1)t1=c;if(t0>t1)return null;}
