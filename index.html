@@ -3493,11 +3493,11 @@ function rzReport(s,a,mode,kind,out){if(!RZ.on||!a)return;if(s.rzT==null)s.rzT=r
   W=rzWalk(s,a);
   if(s.rzEra&&s.rzEra.length)s.rzEra.forEach(e=>{H.push(`ДЗ ${RZERA[e.k].n}: скорость метаемой пластины по Гёрни ${rzF(e.v,2)} км/с${Math.abs(e.s-1)>.005?` (со штатным ВВ — ${rzF(e.v0,2)} км/с) → действие на ${e.mode==="ke"?"стержень":"струю"} ×${rzF(e.s,2)}`:""}`);L.push(`ДЗ ${RZERA[e.k].n}: пластина ≈ ${rzF(e.v,2)} км/с${Math.abs(e.s-1)>.005?`, ×${rzF(e.s,2)}`:""}`);});
   const fmtS=o=>o?(o.L!=null?`L ${Math.round(o.L)} мм · `:"")+`v ${Math.round(o.v)} м/с · E ${o.E>=1e5?rzF(o.E/1e6,2)+" МДж":rzF(o.E/1000,1)+" кДж"}`:"";
-  let sn=0;W.forEach((w,j)=>{if(w.gap){rows.push(`<tr class="rzg"><td>—</td><td colspan="4">между слоями (зазор/ДЗ/разрушение головной части): ёмкость −${Math.round(w.dC)} мм → ${fmtS(w.to)}</td></tr>`);return;}
-    const p=w.p,q=rzMat(p.k),los=p.t/Math.max(.05,s.rzCos);
-    rows.push(`<tr><td>${p.i+1}</td><td>${eE(q.n)}<br><small>${p.t} мм, по лучу ${Math.round(los)} мм</small></td><td>${Math.round(p.need)} мм-экв.${p.fx.length?`<br><small>${p.fx.map(eE).join("; ")}</small>`:""}${q.cl==="bcc"&&p.tough<.9?`<br><small>вязкость ${Math.round(p.tough*100)} % (KCV)</small>`:""}</td><td>${fmtS(w.from)}</td><td>${w.pass?fmtS(w.to):"<b>остановлен</b>"}</td></tr>`);
+  let sn=0;W.forEach((w,j)=>{if(w.gap){rows.push({gap:1,dC:w.dC,to:w.to});return;}
+    const p=w.p,q=rzMat(p.k),los=p.t/Math.max(.05,s.rzCos),fx=p.fx.slice();if(q.cl==="bcc"&&p.tough<.9)fx.push(`вязкость ${Math.round(p.tough*100)} % (KCV)`);
+    rows.push({n:p.i+1,name:q.n,t:p.t,los,need:p.need,fx,from:w.from,to:w.to,pass:w.pass});
     L.push(`  Шаг ${++sn} · слой ${p.i+1} ${lc(q.n).split(" (")[0]} ${p.t} мм: −${Math.round(p.need)} мм-экв.; ${w.pass?"после: "+fmtS(w.to).replace(/ · /g,", "):"остановлен"}`);});
-  if(!W.length&&s.rzSteps)s.rzSteps.forEach((p,j)=>{const q=rzMat(p.k);rows.push(`<tr><td>${p.i+1}</td><td>${eE(q.n)}<br><small>${p.t} мм</small></td><td>${Math.round(p.need)} мм-экв.${p.fx.length?`<br><small>${p.fx.map(eE).join("; ")}</small>`:""}</td><td>ёмкость ${Math.round(p.rem)} мм</td><td>${p.rem>=p.need?"ёмкость "+Math.round(p.rem-p.need)+" мм":"<b>остановлен</b>"}</td></tr>`);});
+  if(!W.length&&s.rzSteps)s.rzSteps.forEach((p,j)=>{const q=rzMat(p.k);rows.push({n:p.i+1,name:q.n,t:p.t,los:p.t/Math.max(.05,s.rzCos||1),need:p.need,fx:p.fx.slice(),from:{C:p.rem},to:{C:p.rem-p.need},pass:p.rem>=p.need});});
   /* заброневое: конус и масса осколков */
   if(s.through&&kind==="pen"&&(mode==="ke"||mode==="heat")){const last=[...layers].reverse().find(l=>l.k!=="gap"&&!isE(l.k));const q=last?rzMat(last.k):rzMat("rha");
     const d=mode==="heat"?Math.max(15,.25*cal):(z&&z.r?1.6*z.r.D:.9*cal),md=q.rho*1000*Math.PI/4*Math.pow(d/1000,2)*((last?last.t:20)/1000)*(mode==="heat"?.35:.6),ha=mode==="heat"?12:25;
@@ -3509,13 +3509,53 @@ function rzReport(s,a,mode,kind,out){if(!RZ.on||!a)return;if(s.rzT==null)s.rzT=r
   if(T>28)H.push(`Жара: сталь мягче (σт ×${rzF(rzSig("rha",T),3)} у катаной); полимеры теряют прочность сильнее (СВМПЭ ×${rzF(rzSig("pe",T),2)}).`);
   }catch(e){console.error(e);}
   if(L.length>1){out.push("Физика (Реализм):");L.forEach(x=>out.push(x.startsWith("  ")?x:"  · "+x));}
-  s.rzHTML=`${H.map(h=>`<p>${h}</p>`).join("")}${rows.length?`<div class="rzscroll"><table class="rzt"><thead><tr><th>№</th><th>Слой</th><th>Сопротивление</th><th>До слоя</th><th>После</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`:""}`;
+  s.rzHTML=`${H.map(h=>`<p>${h}</p>`).join("")}${rzRowsHTML(rows)}`;
   try{rzVisual(s,a,mode,kind);}catch(e){}
   setTimeout(()=>{try{rzShowRep(s);}catch(e){}},0);}
-function rzShowRep(s){const card=$("logCard");if(!card)return;let d=$("rzRep");
-  if(!d){d=document.createElement("details");d.id="rzRep";d.className="rzrep";d.innerHTML='<summary>Разбор по слоям (физика)</summary><div id="rzRepB"></div>';card.appendChild(d);
-    d.addEventListener("click",e=>e.stopPropagation());}
-  d.hidden=!RZ.on||!s.rzHTML;if(!d.hidden){if(s.rzTc)s.rzHTML=s.rzHTML.replace(/Температура в точке удара ≈ \d+/,"Температура в точке удара ≈ "+Math.round(s.rzTc));$("rzRepB").innerHTML=s.rzHTML;}}
+/* v36: строки разбора — таблица на широком экране, компактные карточки на узком (≤600 px: имя и толщина в строку, сопротивление справа,
+   «до → после» одной моноширинной строкой) */
+function rzPair(f,t,pass){const r=x=>x==null||isNaN(x)?"—":Math.round(x);if(f&&f.C!=null)return `ёмкость ${r(f.C)}→${pass?r(t.C):"0"} мм`;if(!f)return "";
+  const P=[];if(f.L!=null)P.push(`L ${r(f.L)}→${pass&&t?r(t.L):"0"} мм`);P.push(`v ${r(f.v)}→${pass&&t?r(t.v):"0"} м/с`);
+  const mj=f.E>=1e5,u=x=>x==null?"—":mj?rzF(x/1e6,2):rzF(x/1000,1);P.push(`E ${u(f.E)}→${pass&&t?u(t.E):"0"} ${mj?"МДж":"кДж"}`);return P.join(" · ");}
+function rzOne(o){if(!o)return "";if(o.C!=null)return `ёмкость ${Math.round(o.C)} мм`;return (o.L!=null?`L ${Math.round(o.L)} мм · `:"")+`v ${Math.round(o.v)} м/с · E ${o.E>=1e5?rzF(o.E/1e6,2)+" МДж":rzF(o.E/1000,1)+" кДж"}`;}
+function rzRowsHTML(rows){if(!rows||!rows.length)return "";
+  const tb=`<div class="rzscroll rzwide"><table class="rzt"><thead><tr><th>№</th><th>Слой</th><th>Сопротивление</th><th>До слоя</th><th>После</th></tr></thead><tbody>${rows.map(w=>w.gap?
+    `<tr class="rzg"><td>—</td><td colspan="4">между слоями (зазор/ДЗ/разрушение головной части): ёмкость −${Math.round(w.dC)} мм → ${rzOne(w.to)}</td></tr>`:
+    `<tr><td>${w.n}</td><td>${eE(w.name)}<br><small>${w.t} мм, по лучу ${Math.round(w.los)} мм</small></td><td>${Math.round(w.need)} мм-экв.${w.fx.length?`<br><small>${w.fx.map(eE).join("; ")}</small>`:""}</td><td>${rzOne(w.from)}</td><td>${w.pass?rzOne(w.to):"<b>остановлен</b>"}</td></tr>`).join("")}</tbody></table></div>`;
+  const cards=`<div class="rzcards">${rows.map(w=>w.gap?`<div class="rzc rzcg">между слоями (зазор/ДЗ/обломки): −${Math.round(w.dC)} мм-экв.</div>`:
+    `<div class="rzc${w.pass?"":" rzstop"}"><div class="rzc1"><span><b>${w.n}</b> ${eE(w.name.split(" (")[0])} — ${w.t} мм${Math.abs(w.los-w.t)>=1?` (по лучу ${Math.round(w.los)})`:""}</span><b class="rzcr">${Math.round(w.need)} мм-экв.</b></div>
+    <div class="rzc2">${rzPair(w.from,w.to,w.pass)}${w.pass?"":" · <b>остановлен</b>"}</div>${w.fx.length?`<div class="rzc3">${w.fx.map(eE).join("; ")}</div>`:""}</div>`).join("")}</div>`;
+  return tb+cards;}
+/* v36: панель «Разбор по слоям» — отдельное окно поверх сцены: высота ≤ 60vh (с учётом вырезов экрана), своя прокрутка пальцем,
+   закреплённая шапка с ✕; открыть снова — кнопкой «Разбор» в протоколе. На телефоне сама не открывается. */
+const rzMobile=()=>{try{return matchMedia("(max-width:700px)").matches||matchMedia("(pointer:coarse)").matches;}catch(e){return false;}};
+function rzIso(el){/* касания и колесо внутри панели не уходят к сцене/камере и обработчикам протокола; браузер прокручивает сам */
+  ["touchstart","touchmove","touchend","pointerdown","pointermove","pointerup","wheel","click","dblclick","mousedown"].forEach(t=>el.addEventListener(t,e=>e.stopPropagation(),{passive:true}));}
+function rzPanelEl(){let p=$("rzPanel");if(p)return p;
+  p=document.createElement("div");p.id="rzPanel";p.className="rzpanel";p.setAttribute("role","dialog");p.setAttribute("aria-label","Разбор по слоям");p.hidden=true;
+  p.innerHTML='<div class="rzph"><b>Разбор по слоям</b><button type="button" id="rzClose" class="rzx" aria-label="Закрыть разбор">✕</button></div><div id="rzRepB" class="rzpb"></div>';
+  document.body.appendChild(p);rzIso(p);$("rzClose").addEventListener("click",()=>rzPanel(false,true));return p;}
+function rzPanel(open,user){const p=rzPanelEl();p.hidden=!open;if(user){RZ.repAuto=!!open;try{localStorage.setItem("grom.rzRep",open?"1":"0");}catch(e){}}
+  const c=$("rzChip");if(c){c.setAttribute("aria-pressed",String(!!open));if(open)c.classList.remove("rznew");}
+  if(open){const b=$("rzRepB");if(b)b.scrollTop=0;}}
+function rzChipEl(){let c=$("rzChip");if(c)return c;const card=$("logCard");if(!card)return null;
+  let box=$("logBtns");if(!box){box=document.createElement("div");box.id="logBtns";box.className="logbtns";card.appendChild(box);}
+  c=document.createElement("button");c.type="button";c.id="rzChip";c.className="rzchip";c.textContent="Разбор";c.hidden=true;c.setAttribute("aria-pressed","false");box.prepend(c);
+  c.addEventListener("click",e=>{e.stopPropagation();const p=rzPanelEl();rzPanel(p.hidden,true);});return c;}
+function rzShowRep(s){const old=$("rzRep");if(old)old.remove();const p=rzPanelEl(),c=rzChipEl(),ok=RZ.on&&!!s.rzHTML;
+  if(c)c.hidden=!ok;if(!ok){p.hidden=true;return;}
+  if(s.rzTc)s.rzHTML=s.rzHTML.replace(/Температура в точке удара ≈ \d+/,"Температура в точке удара ≈ "+Math.round(s.rzTc));$("rzRepB").innerHTML=s.rzHTML;
+  if(!p.hidden){$("rzRepB").scrollTop=0;return;}
+  if(!rzMobile()&&RZ.repAuto!==false)rzPanel(true);else if(c)c.classList.add("rznew");}
+try{const v=localStorage.getItem("grom.rzRep");if(v!=null)RZ.repAuto=v==="1";}catch(e){}
+/* v36: основной протокол — при раскрытии на телефоне тоже ✕ в углу и своя прокрутка (касания не сворачивают/не крутят сцену) */
+function rzLogUI(){const card=$("logCard"),res=$("res");if(!card||!res||$("logClose"))return;
+  let box=$("logBtns");if(!box){box=document.createElement("div");box.id="logBtns";box.className="logbtns";card.appendChild(box);}
+  const x=document.createElement("button");x.type="button";x.id="logClose";x.className="rzx logx";x.textContent="✕";x.setAttribute("aria-label","Свернуть протокол");box.appendChild(x);
+  x.addEventListener("click",e=>{e.stopPropagation();card.classList.remove("open");});
+  rzIso(box);["touchstart","touchmove","wheel"].forEach(t=>res.addEventListener(t,e=>{if(card.classList.contains("open"))e.stopPropagation();},{passive:true}));
+  rzChipEl();}
+try{rzLogUI();}catch(e){console.error(e);}
 
 /* ---------- 8. Панель «Реализм» ---------- */
 function rzVal(){/* сверка с открытыми данными; скорость на 2 км: потеря ≈ 60 м/с на км для 125-мм БОПС (Odermatt, longrods.ch) */
@@ -3529,7 +3569,11 @@ function rzVal(){/* сверка с открытыми данными; скор�
   rows.push(["Контакт-1: скорость пластин",rzF(rzEraV("era","def"),2)+" км/с","≈ 1–1,5 км/с","Held; Mayseless 2011"]);
   return rows;}
 function rzMatTable(){const ks=[...new Set(layers.filter(l=>l.k!=="gap"&&l.t>0).map(l=>l.k))];if(!ks.length)return "<i>Слоёв нет</i>";const T=rzPlateT();
-  return `<div class="rzscroll"><table class="rzt"><thead><tr><th>Материал</th><th>ρ, г/см³</th><th>HB</th><th>σт, МПа / HEL, ГПа</th><th>K<sub>IC</sub>, МПа√м</th><th>При ${rzF(T)} °C</th></tr></thead><tbody>${ks.map(k=>{const q=rzMat(k);
+  const cards=`<div class="rzcards">${ks.map(k=>{const q=rzMat(k),tt=q.cl==="bcc"&&q.tt!=null&&q.tt>-200?`порог хладноломкости ≈ ${q.tt} °C · `:"";
+    return `<div class="rzc"><div class="rzc1"><span><b>${eE(q.n.split(" (")[0])}</b></span><b class="rzcr">${rzF(q.rho,2)} г/см³</b></div>
+    <div class="rzc2">HB ${q.hb?Math.round(q.hb):"—"} · ${q.hel?"HEL "+rzF(q.hel,1)+" ГПа":"σт "+(q.sy||"—")+" МПа"} · K<sub>IC</sub> ${q.K?rzF(typeof kEff==="function"?kEff(k):q.K,0):"—"}</div>
+    <div class="rzc3">${tt}при ${rzF(T)} °C: σ ×${rzF(rzSig(k,T),2)}, вязкость ${Math.round(rzTough(k,T)*100)} %${q.src?`<br>${eE(q.src)}`:""}</div></div>`;}).join("")}</div>`;
+  return cards+`<div class="rzscroll rzwide"><table class="rzt"><thead><tr><th>Материал</th><th>ρ, г/см³</th><th>HB</th><th>σт, МПа / HEL, ГПа</th><th>K<sub>IC</sub>, МПа√м</th><th>При ${rzF(T)} °C</th></tr></thead><tbody>${ks.map(k=>{const q=rzMat(k);
     const tt=q.cl==="bcc"&&q.tt!=null&&q.tt>-200?`порог хладноломкости ≈ ${q.tt} °C; `:"";
     return `<tr><td>${eE(q.n)}${q.src?`<br><small>${eE(q.src)}</small>`:""}</td><td>${rzF(q.rho,2)}</td><td>${q.hb?Math.round(q.hb):"—"}</td><td>${q.hel?rzF(q.hel,1)+" ГПа":q.sy?q.sy:"—"}</td><td>${q.K?rzF(typeof kEff==="function"?kEff(k):q.K,0):"—"}</td><td><small>${tt}σ ×${rzF(rzSig(k,T),2)}; вязкость ${Math.round(rzTough(k,T)*100)} %</small></td></tr>`;}).join("")}</tbody></table></div>`;}
 function rzUI(){const sec=$("t-armor");if(!sec||$("rzBox"))return;
@@ -3554,7 +3598,27 @@ function rzUI(){const sec=$("t-armor");if(!sec||$("rzBox"))return;
   const st=document.createElement("style");st.textContent=`.rzbox{margin-top:8px;border:1px solid rgba(233,226,196,.18);border-radius:10px;padding:6px 8px}.rzbox>summary,.rzrep>summary,.rzsub>summary{cursor:pointer;font-weight:600}
   .rzg2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 10px;margin:6px 0}.rzg2 select,.rzg2 input[type=range]{width:100%}.rzg3{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px}.rzg3 input,.rzg3 select{width:100%}
   .rzrow{display:flex;gap:6px;align-items:center;margin:4px 0}.rzscroll{overflow-x:auto;max-width:100%}.rzt{border-collapse:collapse;font-size:12px;width:100%}.rzt td,.rzt th{border-bottom:1px solid rgba(233,226,196,.14);padding:3px 4px;text-align:left;vertical-align:top}
-  .rzt small{opacity:.75}.rzrep{margin-top:6px;font-size:12px}.rzrep p{margin:4px 0}.rzg td{opacity:.8;font-style:italic}.rzsub{margin-top:6px}`;document.head.appendChild(st);
+  .rzt small{opacity:.75}.rzrep{margin-top:6px;font-size:12px}.rzrep p{margin:4px 0}.rzg td{opacity:.8;font-style:italic}.rzsub{margin-top:6px}
+  /* v36: карточки вместо таблиц на узком экране */
+  .rzcards{display:none;flex-direction:column;gap:5px;margin:6px 0}.rzc{border:1px solid rgba(233,226,196,.16);padding:5px 7px;font-size:12px;line-height:1.35}.rzc.rzstop{border-color:rgba(255,194,46,.55)}
+  .rzc1{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.rzc1>span{min-width:0;overflow-wrap:anywhere}.rzcr{white-space:nowrap;flex:0 0 auto;color:var(--amber,#ffc22e)}
+  .rzc2{font:11px/1.4 var(--mono,ui-monospace,monospace);opacity:.92;margin-top:2px;overflow-wrap:anywhere}.rzc3{font-size:10.5px;opacity:.72;margin-top:2px}.rzcg{font-style:italic;opacity:.8}
+  @media (max-width:600px){.rzcards{display:flex}.rzwide{display:none}}
+  /* v36: окно разбора */
+  .rzpanel{position:fixed;z-index:40;left:max(8px,env(safe-area-inset-left,0px));right:max(8px,env(safe-area-inset-right,0px));top:calc(8px + env(safe-area-inset-top,0px));
+    max-height:min(60vh,calc(100vh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));max-height:min(60dvh,calc(100dvh - 16px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)));
+    display:flex;flex-direction:column;background:rgba(3,7,4,.95);border:1px solid var(--ln0,rgba(143,227,106,.35));color:var(--ink,#e3e9d4);font-size:12px;pointer-events:auto;touch-action:pan-y;box-sizing:border-box}
+  .rzpanel[hidden]{display:none!important}.rzpanel,.rzpanel *{touch-action:pan-y}
+  .rzph{position:sticky;top:0;z-index:1;flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:2px 2px 2px 12px;border-bottom:1px solid rgba(233,226,196,.16);background:rgba(3,7,4,.98);font-size:12.5px;color:var(--phos,#8fe36a)}
+  .rzx{min-width:44px;min-height:44px;padding:0;font-size:20px;line-height:1;background:transparent;border:1px solid rgba(233,226,196,.25);color:var(--ink,#e3e9d4);border-radius:0;cursor:pointer}
+  .rzpb{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:6px 12px 10px}.rzpb p{margin:4px 0}
+  @media (min-width:701px){.rzpanel{left:auto;right:auto;left:max(12px,env(safe-area-inset-left,0px));top:calc(64px + env(safe-area-inset-top,0px));width:min(600px,calc(100vw - 140px))}}
+  .logbtns{position:absolute;top:-36px;right:0;display:flex;gap:4px;z-index:2}
+  .rzchip{min-height:32px;padding:0 10px;font:600 10px var(--ui,ui-monospace,monospace);letter-spacing:.12em;text-transform:uppercase;background:rgba(2,6,3,.85);border:1px solid var(--ln0,rgba(143,227,106,.35));color:var(--phos,#8fe36a);border-radius:0;cursor:pointer}
+  .rzchip[hidden]{display:none}.rzchip.rznew{border-color:var(--amber,#ffc22e);color:var(--amber,#ffc22e)}.rzchip[aria-pressed="true"]{background:rgba(143,227,106,.15)}
+  .logx{display:none;min-width:40px;min-height:32px;font-size:16px;background:rgba(2,6,3,.9)}.log.open .logx{display:block}
+  .log.open #res{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+  #t-armor{overscroll-behavior:contain}`;document.head.appendChild(st);
   const upd=()=>{RZ.on=$("rzOn").checked;RZ.air=$("rzAir").checked;RZ.Tp=+$("rzT").value;RZ.ke=$("rzKe").value;RZ.ex=$("rzEx").value;RZ.ln=$("rzLn").value;RZ.so=+$("rzSo").value;RZ.era=$("rzEra").value;
     RZ.L=+$("rzL").value||600;RZ.D=+$("rzD").value||24;RZ.v0=+$("rzV").value||1700;RZ.mat=$("rzMt").value;$("rzKeC").hidden=RZ.ke!=="custom";$("rzT").disabled=RZ.air;rzSave();rzRefresh();};
   ["rzOn","rzAir","rzT","rzKe","rzEx","rzLn","rzSo","rzEra","rzL","rzD","rzV","rzMt"].forEach(id=>{const e=$(id);e.addEventListener(e.type==="range"||e.type==="number"?"input":"change",upd);});
@@ -3566,7 +3630,7 @@ function rzRefresh(){if(!$("rzBox"))return;const T=rzPlateT();$("rzTv").textCont
     if(r&&(ammoFor(g)||[]).includes("bops")){const rho=RZ_RHO[r.mat]||17.6,v=(r.v0||((typeof ROUNDV!=="undefined"&&ROUNDV[g.n]||{}).bops)||1650);t+=`БОПС ${r.nm}: L/D ${rzF(r.L/r.D,1)}, ρ ${rzF(rho,1)}, v0 ${v} м/с → в упор ${Math.round(rzLO(r.L,r.D,rho,v/1000,260,7.85,0,r.mat==="DU"))} мм по нормали${r.est?" (оценка)":""}. `;}
     const S0=rzHeatSel(),cd=g.cal,J=rzJet(cd,S0.ex,S0.ln,S0.so),R0=rzJet(cd,"compb","cu",RZ_SO0);t+=`Струя ${g.cal} мм: ${RZLN[S0.ln].n}, v головы ${rzF(J.vt,1)} км/с, ×${rzF(J.P/R0.P,2)} к штатной.`;
     $("rzInfo").textContent=RZ.on?t:"Физическая модель выключена — работает прежняя игровая модель.";}catch(e){$("rzInfo").textContent="";}
-  if($("rzBox").open){$("rzMats").innerHTML=rzMatTable();$("rzValT").innerHTML=`<div class="rzscroll"><table class="rzt"><thead><tr><th>Проверка</th><th>Модель</th><th>Опубл.</th><th>Источник</th></tr></thead><tbody>${rzVal().map(r=>`<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td>${r[2]}</td><td><small>${r[3]}</small></td></tr>`).join("")}</tbody></table></div>`;}}
+  if($("rzBox").open){$("rzMats").innerHTML=rzMatTable();const VR=rzVal();$("rzValT").innerHTML=`<div class="rzcards">${VR.map(r=>`<div class="rzc"><div class="rzc1"><span>${r[0]}</span></div><div class="rzc2">модель <b>${r[1]}</b> · опубл. ${r[2]}</div><div class="rzc3">${r[3]}</div></div>`).join("")}</div><div class="rzscroll rzwide"><table class="rzt"><thead><tr><th>Проверка</th><th>Модель</th><th>Опубл.</th><th>Источник</th></tr></thead><tbody>${VR.map(r=>`<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td>${r[2]}</td><td><small>${r[3]}</small></td></tr>`).join("")}</tbody></table></div>`;}}
 try{rzUI();}catch(e){console.error(e);}
 
 /* ===== v33: Героиня — реалистичная модель по фото (скелет со скиннингом) (≈1,70 м, длинные платиновые волосы, чёрный комбинезон, белый длинный кардиган, белые кроссовки), ставится на карту, управление от третьего лица ===== */
