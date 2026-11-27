@@ -3441,19 +3441,19 @@ function rzBB(T){/* цвет абсолютно чёрного тела (при�
   return [rzCl(r,0,255)/255,rzCl(g,0,255)/255,rzCl(b,0,255)/255];}
 function rzContactT(a,mode,s,kind){const fl=layers.find(l=>!l.spent&&l.k!=="gap"&&MAT[l.k].beh!=="slat");const q=fl?rzMat(fl.k):rzMat("rha"),T0=s.rzT!=null?s.rzT:rzPlateT();
   if(mode==="ke"){const v=(a.rz&&a.rz.v)||s.vimp||1000;/* ~35 % удельной кинетической энергии уходит в тепло зоны контакта (Tate; Rosenberg & Dekel 2012) */
-    return Math.min(q.Tm,T0+.35*.5*v*v/q.c*(a.key==="bops"?1:.5));}
+    return Math.min(q.Tm,T0+.35*.5*v*v/q.c*(a.key==="bops"||a.key==="apds"?1:.5));}
   if(mode==="heat")return Math.min(q.Tm,1050);if(mode==="hesh"||mode==="he")return 900;return T0;}
 var RZFX=[];let rzRAF=0;
 function rzFxTick(){const now=performance.now();for(let i=RZFX.length-1;i>=0;i--){const f=RZFX[i],t=(now-f.t0)/1000;
     if(t>f.life||!f.m.parent){if(f.m.parent)f.m.parent.remove(f.m);RZFX.splice(i,1);continue;}
-    /* остывание пятна: T(t)=T0+(Tp−T0)·(1−e^(−t/τ)) */const T=f.Tp+(f.T0-f.Tp)*Math.exp(-t/f.tau),c=rzBB(T),I=T<525?0:Math.min(1,Math.pow((T-500)/900,1.6));
-    f.m.material.color.setRGB(c[0],c[1],c[2]);f.m.material.opacity=I*.95;f.m.scale.setScalar(f.r*(1+.15*t));}
+    /* остывание пятна: T(t)=T0+(Tp−T0)·(1−e^(−t/τ)) */const T=f.Tp+(f.T0-f.Tp)*Math.exp(-t/f.tau),c=rzBB(T),I=T<525?0:Math.min(1,Math.pow((T-480)/620,1.3));
+    f.m.material.color.setRGB(c[0],c[1],c[2]);if(f.n&&typeof camera!=="undefined"){const fr=camera.position.clone().sub(f.m.position).dot(f.n)>0;if(f.m.material.depthTest===fr){f.m.material.depthTest=!fr;f.m.material.needsUpdate=true;}}f.m.material.opacity=I*.95;f.m.scale.setScalar(f.r*(1+.15*t));}
   rzRAF=RZFX.length?requestAnimationFrame(rzFxTick):0;}
 function rzGlowTex(){if(rzGlowTex.t)return rzGlowTex.t;const c=document.createElement("canvas");c.width=c.height=64;const x=c.getContext("2d"),g=x.createRadialGradient(32,32,0,32,32,32);
   g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.35,"rgba(255,255,255,.65)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,64,64);return rzGlowTex.t=new THREE.CanvasTexture(c);}
 function rzGlow(s,T,r){if(typeof THREE==="undefined"||T<525||!s.to)return;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:rzGlowTex(),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.9}));
-  let n=new THREE.Vector3(0,0,-1);try{n.transformDirection(plate.matrixWorld);}catch(e){}sp.position.copy(s.to).addScaledVector(n,.012);scene.add(sp);
-  RZFX.push({m:sp,t0:performance.now(),life:MOBILE?4:6,T0:T,Tp:s.rzT!=null?s.rzT:20,tau:2,r});if(!rzRAF)rzRAF=requestAnimationFrame(rzFxTick);}
+  let n=new THREE.Vector3(0,0,-1);try{n.transformDirection(plate.matrixWorld);}catch(e){}sp.position.copy(s.to).addScaledVector(n,.012);sp.renderOrder=20;scene.add(sp);
+  RZFX.push({m:sp,n,t0:performance.now(),life:MOBILE?4:6,T0:T,Tp:s.rzT!=null?s.rzT:20,tau:2,r});if(!rzRAF)rzRAF=requestAnimationFrame(rzFxTick);}
 function rzVisual(s,a,mode,kind){try{if(typeof reduce!=="undefined"&&reduce)return;if(!kind||kind==="rico"&&mode!=="ke")return;const cal=G().cal,Tc=rzContactT(a,mode,s,kind);s.rzTc=Tc;
     rzGlow(s,Tc,Math.max(.05,Math.min(.22,cal/1000*1.3))*(kind==="pen"?1.2:.9));
     let nb=new THREE.Vector3(0,0,1);try{nb.transformDirection(plate.matrixWorld);}catch(e){}
