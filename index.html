@@ -3633,6 +3633,191 @@ function rzRefresh(){if(!$("rzBox"))return;const T=rzPlateT();$("rzTv").textCont
   if($("rzBox").open){$("rzMats").innerHTML=rzMatTable();const VR=rzVal();$("rzValT").innerHTML=`<div class="rzcards">${VR.map(r=>`<div class="rzc"><div class="rzc1"><span>${r[0]}</span></div><div class="rzc2">модель <b>${r[1]}</b> · опубл. ${r[2]}</div><div class="rzc3">${r[3]}</div></div>`).join("")}</div><div class="rzscroll rzwide"><table class="rzt"><thead><tr><th>Проверка</th><th>Модель</th><th>Опубл.</th><th>Источник</th></tr></thead><tbody>${VR.map(r=>`<tr><td>${r[0]}</td><td><b>${r[1]}</b></td><td>${r[2]}</td><td><small>${r[3]}</small></td></tr>`).join("")}</tbody></table></div>`;}}
 try{rzUI();}catch(e){console.error(e);}
 
+/* ===== v37: посадка героини в технику. Своя машина на огневом рубеже — место наводчика: штатная пушка и баллистика тренажёра, спаренный ПКТ. Машина-мишень (Т-72Б, БМП-2, БТР-82А, Stryker) — место механика-водителя: штатное вождение (driveOn/driveTick, ▲▼◀▶, башня ⟲⟳), огонь из пушки и спаренного пулемёта по штатной модели попаданий (wpHit: бойцы, здания, машины, грунт) и подрыв ОФ-снаряда штатным boom() ===== */
+var BRD={in:null,cand:null,anim:null,park:null,el:0,cy:0,cp:.3,cd:1,cool:0,ccool:0,trigM:false,trigC:false,elK:0,box:{},aimT:0,aimP:null,rec:0,gpz:null,gpr:null,side:1,sel:null,lastHint:""};
+/* оружие машин-мишеней: имя, калибр, выстрел, темп; he — масса ВВ ОФ-снаряда, кг ТНТ */
+const BRD_W={tank:{main:{id:"v125",name:"2А46М (125 мм, ОФС)",calmm:125,he:3.4,rl:7,snd:{f:900,d:1.4,v:1.6,b:46},spr:.0005},coax:{id:"pkt",name:"ПКТ (7,62 мм)",calmm:7.62,rpm:700,snd:{f:5200,d:.18,v:.8,b:150},spr:.0018,cx:.42}},
+  bmp:{main:{id:"v30",name:"2А42 (30 мм, ОФЗ)",calmm:30,he:.049,rpm:500,snd:{f:2600,d:.35,v:1.2,b:80},spr:.0012},coax:{id:"pkt",name:"ПКТ (7,62 мм)",calmm:7.62,rpm:700,snd:{f:5200,d:.18,v:.8,b:150},spr:.0018,cx:.26}},
+  btr:{main:{id:"v30",name:"2А72 (30 мм, ОФЗ)",calmm:30,he:.049,rpm:350,snd:{f:2600,d:.35,v:1.2,b:80},spr:.0012},coax:{id:"pkt",name:"ПКТ (7,62 мм)",calmm:7.62,rpm:700,snd:{f:5200,d:.18,v:.8,b:150},spr:.0018,cx:.24}},
+  stryk:{main:{id:"m2",name:"M2HB (12,7 мм)",calmm:12.7,rpm:500,snd:{f:3600,d:.26,v:1.1,b:95},spr:.0014},coax:null}};
+const BRD_OWN_COAX={id:"pkt",name:"ПКТ спаренный (7,62 мм)",calmm:7.62,rpm:700,snd:{f:5200,d:.18,v:.8,b:150},spr:.0018};
+function brdBal(){try{if(typeof WBAL==="undefined"||WBAL.pkt)return;
+  WBAL.pkt={dmg:110,pen:9,fall:.05,vest:1,am:"7,62×54R ЛПС",wall:{brick:16,rc:7,aer:38,gpart:75,steel:.9}};
+  WBAL.m2={dmg:220,pen:22,fall:.04,vest:1,am:"12,7×99 M2 AP",wall:{brick:60,rc:25,aer:120,gpart:200,steel:3}};
+  WBAL.v30={dmg:999,pen:35,fall:.02,vest:1,am:"30×165 ОФЗ",wall:{brick:150,rc:60,aer:300,gpart:400,steel:6}};
+  WBAL.v125={dmg:999,pen:60,fall:.01,vest:1,am:"125 мм ОФС 3ОФ26",wall:{brick:400,rc:200,aer:800,gpart:900,steel:12}};}catch(e){}}
+const brdTouch=()=>!!(window.matchMedia&&matchMedia("(pointer:coarse)").matches);
+function brdOwnOK(){try{if(typeof tank==="undefined"||!tank||tank.visible===false)return false;return["tank","spg","ifv","truck"].includes(platOf(G()));}catch(e){return false;}}
+function brdVehOK(){try{return !!(S.veh&&typeof VEH!=="undefined"&&VEH&&VEH.g.visible&&VT[S.vt]&&VT[S.vt].tur&&VT[S.vt].run&&BRD_W[S.vt]);}catch(e){return false;}}
+function brdName(k){if(k==="own"){const g=G();return g.t||g.n;}const n=VT[S.vt].n;return n.replace(/^.*\(тип\s*/,"").replace(/\)$/,"").replace(/^БТР\s+/,"");}
+/* габарит машины в её собственной системе координат (без ствола): по видимым мешам */
+function brdBox(root,skip){root.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(root.matrixWorld).invert(),b=new THREE.Box3(),t=new THREE.Box3(),m=new THREE.Matrix4();
+  root.traverse(o=>{if(!o.isMesh||!o.geometry||o.isInstancedMesh)return;let p=o,ok=true;while(p&&p!==root){if(p.visible===false||(skip&&p===skip))ok=false;p=p.parent;}if(!ok)return;
+    const g=o.geometry;if(!g.boundingBox)g.computeBoundingBox();if(!g.boundingBox||!isFinite(g.boundingBox.min.x))return;t.copy(g.boundingBox).applyMatrix4(m.multiplyMatrices(inv,o.matrixWorld));
+    if(t.max.x-t.min.x>14||t.max.z-t.min.z>14)return;b.union(t);});
+  if(b.isEmpty()||b.max.x-b.min.x<.8)b.set(new THREE.Vector3(-1.7,0,-4.6),new THREE.Vector3(1.7,2.3,1.6));return b;}
+function brdInfo(k){let root,skip,key;if(k==="own"){root=tank;skip=typeof gunG!=="undefined"?gunG:null;key="own"+S.g;}else{root=VEH.g;skip=VEH.gp;key="veh"+S.vt+VEH.g.uuid;}
+  let b=BRD.box[key];if(!b){const rx=root.rotation.x,rz=root.rotation.z;root.rotation.x=0;root.rotation.z=0;b=BRD.box[key]=brdBox(root,skip);root.rotation.x=rx;root.rotation.z=rz;root.updateMatrixWorld(true);}
+  /* люк: у башни — над ней, у машин без башни — на крыше корпуса */
+  let hl;if(k==="veh"){const T=VT[S.vt].tur;hl=new THREE.Vector3(T.p[0]+T.rt*.4,T.p[1]+T.h,T.p[2]-.1);}else{let top=b.max.y;try{top=Math.min(b.max.y,(S.ax||2)+.55);}catch(e){}hl=new THREE.Vector3((b.min.x+b.max.x)/2+.35,top,(b.min.z+b.max.z)/2+(b.max.z-b.min.z)*.08);}
+  return{root,b,hl};}
+function brdDist(I,p){I.root.updateMatrixWorld(true);const l=I.root.worldToLocal(p.clone()),b=I.b;const dx=Math.max(b.min.x-l.x,0,l.x-b.max.x),dz=Math.max(b.min.z-l.z,0,l.z-b.max.z);return{d:Math.hypot(dx,dz),l};}
+function brdFind(){if(!HERO.on||!HERO.g||!HERO.g.visible||HERO.place||BRD.anim||BRD.in)return null;const p=HERO.g.position;let best=null;
+  const tryK=k=>{const I=brdInfo(k),r=brdDist(I,p);if(r.d<=4&&(!best||r.d<best.d))best={k,d:r.d,l:r.l,I};};
+  try{if(brdOwnOK())tryK("own");}catch(e){}try{if(brdVehOK())tryK("veh");}catch(e){}return best;}
+/* ---- интерфейс ---- */
+function brdCSS(){if($("brdCss"))return;const st=document.createElement("style");st.id="brdCss";st.textContent=`
+#brdBtn{position:fixed;left:16px;bottom:200px;z-index:31;min-height:48px;padding:8px 16px;border-radius:14px;border:1px solid rgba(240,194,79,.75);background:rgba(16,18,12,.86);color:#f0c24f;font:600 15px/1.15 'UI Mono',ui-monospace,monospace;letter-spacing:.04em;text-transform:uppercase;max-width:46vw;text-align:left;box-shadow:0 0 0 3px rgba(240,194,79,.15);touch-action:manipulation}
+#brdBtn small{display:block;font-size:11px;letter-spacing:.02em;text-transform:none;color:#d8d2bf;margin-top:2px}
+#brdBtn[hidden],#brdHud[hidden],#brdXh[hidden],#brdFire[hidden]{display:none!important}
+@media (pointer:fine){#brdBtn{left:50%;transform:translateX(-50%);bottom:18%;max-width:none}}
+#brdHud{position:fixed;left:12px;top:78px;z-index:31;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100vw - 100px)}
+#brdHud button,#brdFire{min-width:64px;min-height:48px;padding:6px 10px;border-radius:12px;border:1px solid rgba(240,194,79,.55);background:rgba(12,14,10,.84);color:#f0c24f;font:600 13px/1.1 'UI Mono',ui-monospace,monospace;text-transform:uppercase;touch-action:none;user-select:none;-webkit-user-select:none}
+#brdHud button[aria-pressed="true"],#brdFire[aria-pressed="true"]{background:rgba(240,194,79,.35);color:#1b1505}
+#brdHud #brdOut{border-color:rgba(255,120,120,.7);color:#ffb0a8}
+#brdFire{position:fixed;z-index:31;background:rgba(150,28,24,.86);border-color:rgba(255,140,120,.8);color:#fff;font-size:16px}
+#brdFire small{display:block;font-size:10px;text-transform:none;opacity:.85;margin-top:2px}
+#brdInfo{position:fixed;left:12px;z-index:30;padding:6px 10px;border:1px solid rgba(240,194,79,.35);background:rgba(8,10,7,.78);color:#f0c24f;font:12px/1.35 'UI Mono',ui-monospace,monospace;border-radius:10px;pointer-events:none;max-width:60vw}
+#brdInfo[hidden]{display:none!important}
+#brdXh{position:fixed;z-index:29;width:34px;height:34px;margin:-17px 0 0 -17px;pointer-events:none;border:2px solid rgba(255,214,120,.9);border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+#brdXh:before,#brdXh:after{content:"";position:absolute;background:rgba(255,214,120,.95);left:50%;top:50%}
+#brdXh:before{width:2px;height:12px;margin:-6px 0 0 -1px}#brdXh:after{width:12px;height:2px;margin:-1px 0 0 -6px}
+body.brdIn #heroBtn{visibility:hidden!important}
+body.brd-veh #fire{visibility:hidden!important}
+`;document.head.appendChild(st);}
+function brdEl(){if($("brdBtn"))return;brdCSS();const b=document.createElement("button");b.id="brdBtn";b.hidden=true;b.type="button";document.body.appendChild(b);
+  b.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();brdBoard();});["pointerdown","touchstart"].forEach(ev=>b.addEventListener(ev,e=>e.stopPropagation(),{passive:true}));
+  const h=document.createElement("div");h.id="brdHud";h.hidden=true;h.innerHTML='<button type="button" id="brdCoax">ПКТ</button><button type="button" id="brdUp" title="Ствол выше (R)">▲ ствол</button><button type="button" id="brdDn" title="Ствол ниже (V)">▼ ствол</button><button type="button" id="brdOut">Выйти</button>';document.body.appendChild(h);
+  const f=document.createElement("button");f.id="brdFire";f.type="button";f.hidden=true;f.innerHTML='Огонь';document.body.appendChild(f);
+  const inf=document.createElement("div");inf.id="brdInfo";inf.hidden=true;document.body.appendChild(inf);const x=document.createElement("div");x.id="brdXh";x.hidden=true;document.body.appendChild(x);
+  const hold=(el,on,off)=>{el.addEventListener("pointerdown",e=>{e.preventDefault();e.stopPropagation();try{el.setPointerCapture(e.pointerId);}catch(_){}on();el.setAttribute("aria-pressed","true");});
+    ["pointerup","pointercancel","lostpointercapture"].forEach(ev=>el.addEventListener(ev,e=>{off();el.setAttribute("aria-pressed","false");}));};
+  hold(f,()=>{BRD.trigM=true;},()=>{BRD.trigM=false;});
+  hold($("brdCoax"),()=>{BRD.trigC=true;},()=>{BRD.trigC=false;});
+  hold($("brdUp"),()=>{BRD.elK=-1;},()=>{BRD.elK=0;});hold($("brdDn"),()=>{BRD.elK=1;},()=>{BRD.elK=0;});
+  $("brdOut").addEventListener("click",e=>{e.preventDefault();e.stopPropagation();brdExit();});
+  /* камера в машине: перетаскивание — обзор вокруг, колесо — дальше/ближе */
+  const el=renderer.domElement;let dr=null;
+  el.addEventListener("pointerdown",e=>{if(BRD.in!=="veh")return;dr={id:e.pointerId,x:e.clientX,y:e.clientY};});
+  el.addEventListener("pointermove",e=>{if(BRD.in!=="veh"||!dr||e.pointerId!==dr.id)return;BRD.cy-=(e.clientX-dr.x)*.006;BRD.cp=Math.max(.05,Math.min(1.1,BRD.cp+(e.clientY-dr.y)*.004));dr.x=e.clientX;dr.y=e.clientY;});
+  ["pointerup","pointercancel"].forEach(ev=>el.addEventListener(ev,e=>{if(dr&&e.pointerId===dr.id)dr=null;}));
+  el.addEventListener("wheel",e=>{if(BRD.in!=="veh")return;BRD.cd=Math.max(.6,Math.min(2.2,BRD.cd*(e.deltaY>0?1.1:.9)));e.preventDefault();},{passive:false});}
+function brdPlace(){/* ряд кнопок — над нижней панелью; «Огонь» — на месте штатной кнопки «Выстрел» */
+  const bd=$("badge"),fr=$("fire");let top=78;if(bd){const r=bd.getBoundingClientRect();if(r.height)top=r.bottom+8;}
+  let rl=innerWidth-12;document.querySelectorAll(".rail button,#v0,#v1,#v2,#v3,#xray").forEach(b=>{const r=b.getBoundingClientRect();if(r.width&&r.top<top+60)rl=Math.min(rl,r.left);});
+  const h=$("brdHud");h.style.top=top+"px";h.style.maxWidth=Math.max(140,rl-12-8)+"px";
+  const f=$("brdFire");if(fr){const r=fr.getBoundingClientRect();if(r.width){f.style.left=r.left+"px";f.style.top=r.top+"px";f.style.width=r.width+"px";f.style.height=r.height+"px";}}
+  const inf=$("brdInfo");const hr=h.getBoundingClientRect();inf.style.top=(BRD.in==="veh"?Math.round(innerHeight*.34)+128:(hr.bottom||top+52)+8)+"px";}
+function brdUI(){brdEl();const b=$("brdBtn"),c=BRD.cand;const show=!!c&&!BRD.in&&!BRD.anim;b.hidden=!show;
+  if(show){const nm=brdName(c.k),role=c.k==="own"?"наводчик":"механик-водитель",t=brdTouch();const key=`${c.k}|${nm}|${t}`;
+    if(BRD.lastHint!==key){BRD.lastHint=key;b.innerHTML=(t?`Сесть · ${nm}`:`E — сесть · ${nm}`)+`<small>${role}${c.k==="own"?", штатная стрельба":", вождение и огонь"}</small>`;}
+    if(t){const j=$("heroJoy");let bt=200;if(j&&!j.hidden){const r=j.getBoundingClientRect();if(r.height)bt=innerHeight-r.top+14;}b.style.bottom=bt+"px";
+      /* не заходить на правый блок кнопок героини */let rl=innerWidth-12;["hAim","hRel","hFire","hCam","hJump","hRun"].forEach(i=>{const e=$(i);if(e&&!e.hidden&&e.offsetParent){const r=e.getBoundingClientRect();if(r.width)rl=Math.min(rl,r.left);}});b.style.maxWidth=Math.max(120,rl-16-10)+"px";}}
+  const inn=!!BRD.in;$("brdHud").hidden=!inn;$("brdFire").hidden=BRD.in!=="veh";$("brdInfo").hidden=!inn;$("brdXh").hidden=BRD.in!=="veh";
+  document.body.classList.toggle("brdIn",inn);document.body.classList.toggle("brd-veh",BRD.in==="veh");document.body.classList.toggle("brd-own",BRD.in==="own");
+  if(inn){const own=BRD.in==="own";$("brdUp").hidden=own;$("brdDn").hidden=own;const W=own?null:BRD_W[S.vt];
+    $("brdCoax").hidden=own?!["tank","ifv"].includes(platOf(G())):!(W&&W.coax);$("brdOut").textContent=brdTouch()?"Выйти":(own?"Выйти (E)":"Выйти (F)");
+    if(!own&&W)$("brdFire").innerHTML=`Огонь<small>${W.main.name.replace(/\s*\(.*$/,"")}</small>`;brdPlace();}}
+/* ---- посадка ---- */
+function brdBoard(){const c=BRD.cand||brdFind();if(!c||BRD.in||BRD.anim)return;const I=c.I,p0=HERO.g.position.clone();
+  const side=c.l.x>=(I.b.min.x+I.b.max.x)/2?1:-1;BRD.side=side;
+  const sideL=new THREE.Vector3(side>0?I.b.max.x+.3:I.b.min.x-.3,0,I.hl.z),p1=I.root.localToWorld(sideL.clone());p1.y=heroTerrain(p1.x,p1.z);
+  const p2=I.root.localToWorld(I.hl.clone().add(new THREE.Vector3(0,.12,0))),p3=I.root.localToWorld(I.hl.clone().add(new THREE.Vector3(0,-1.05,0)));
+  BRD.anim={k:c.k,t:0,dur:1.5,p0,p1,p2,p3,yaw0:HERO.g.rotation.y};BRD.cand=null;try{WP.aim=false;WP.trig=false;}catch(e){}
+  $("res").textContent=`Героиня забирается в ${brdName(c.k)} — ${c.k==="own"?"на место наводчика":"на место механика-водителя"}…`;brdUI();}
+function brdAnimTick(dt){const A=BRD.anim;if(!A)return;A.t+=dt;const u=Math.min(1,A.t/A.dur),g=HERO.g,P=new THREE.Vector3();let look=null;
+  if(u<.42){const k=u/.42,s=k*k*(3-2*k);P.lerpVectors(A.p0,A.p1,s);P.y=heroTerrain(P.x,P.z);look=A.p1.clone().sub(A.p0);}
+  else if(u<.78){const k=(u-.42)/.36,s=k*k*(3-2*k);P.lerpVectors(A.p1,A.p2,s);P.y+=Math.sin(Math.PI*k)*.45;look=A.p2.clone().sub(A.p1);}
+  else{const k=(u-.78)/.22;P.lerpVectors(A.p2,A.p3,k*k);}
+  g.position.copy(P);if(look){look.y=0;if(look.lengthSq()>.01){const y=Math.atan2(look.x,look.z);g.rotation.y=y;HERO.yaw=y;}}HERO.vy=0;HERO.air=false;HERO.spd=u<.42?1.4:0;
+  if(u>=1){BRD.anim=null;brdSeat(A.k);}}
+function brdSeat(k){BRD.sel=(typeof WP!=="undefined")?WP.sel:null;HERO.g.visible=false;heroOn(false);BRD.in=k;
+  if(k==="own"){try{setView(0);}catch(e){}const g=G();
+    $("res").textContent=`Героиня на месте наводчика ${g.t||""}: ${g.n}, ${g.cal} мм. «Выстрел» — штатная стрельба тренажёра (баллистика, бронепробитие, протокол)`+(["tank","ifv"].includes(platOf(g))?", «ПКТ» (G) — спаренный пулемёт":"")+`. ${brdTouch()?"«Выйти»":"E или F — выйти"}.`;}
+  else{driveOn(true);const d=S.drive;if(BRD.park&&BRD.park.v===VEH){d.x=BRD.park.x;d.z=BRD.park.z;d.hd=BRD.park.hd;}BRD.park=null;
+    S.view=-1;views.forEach((_,j)=>{const b=$("v"+j);b&&b.setAttribute("aria-pressed","false");});if(controls)controls.enabled=false;BRD.cy=0;BRD.cp=.3;BRD.cd=1;BRD.cool=0;BRD.ccool=0;BRD.el=0;BRD.camI=true;
+    BRD.gpz=VEH.gp.position.z;BRD.gpr=VEH.gp.rotation.x;BRD.rec=0;
+    $("res").textContent=`Героиня за рычагами ${brdName("veh")}. ${brdTouch()?"▲▼◀▶ — ход, ⟲⟳ — башня, «▲/▼ ствол» — возвышение, «Огонь» — пушка, «ПКТ» — пулемёт, перетаскивание — обзор, «Выйти» — выйти.":"W/S/A/D — ход, Q/E — башня, R/V — ствол выше/ниже, Пробел — пушка, G — пулемёт, мышь с кнопкой — обзор, колесо — дальше/ближе, F — выйти."}`;}
+  brdUI();}
+/* ---- высадка: свободное место у борта (сторона посадки, затем другая, корма, нос) ---- */
+function brdExit(){if(!BRD.in)return;const k=BRD.in,I=brdInfo(k);
+  if(k==="veh"){const d=S.drive;BRD.park={v:VEH,x:d.x,z:d.z,hd:d.hd};BRD.trigM=BRD.trigC=false;BRD.elK=0;driveOn(false);brdPark();if(VEH&&BRD.gpz!=null)VEH.gp.position.z=BRD.gpz;if(controls)controls.enabled=true;}
+  I.root.updateMatrixWorld(true);const b=I.b,xc=(b.min.x+b.max.x)/2,zc=(b.min.z+b.max.z)/2,s=BRD.side||1;
+  const C=[[s>0?b.max.x+1.1:b.min.x-1.1,zc],[s>0?b.min.x-1.1:b.max.x+1.1,zc],[xc,b.min.z-1.4],[xc,b.max.z+1.8],[s>0?b.max.x+2.2:b.min.x-2.2,zc+1.5]];
+  const other=k==="own"?(brdVehOK()?brdInfo("veh"):null):(brdOwnOK()?brdInfo("own"):null);let spot=null;
+  for(const q of C){const w=I.root.localToWorld(new THREE.Vector3(q[0],0,q[1]));const gt=heroTerrain(w.x,w.z);let ok=true;
+    if(other){const r=brdDist(other,w);if(r.d<.6)ok=false;}
+    try{const gy=heroGround(w.x,gt+2.5,w.z);if(gy-gt>.35)ok=false;}catch(e){}
+    if(ok){w.y=gt;spot=w;break;}}
+  if(!spot){spot=I.root.localToWorld(new THREE.Vector3(C[0][0],0,C[0][1]));spot.y=heroTerrain(spot.x,spot.z);}
+  BRD.in=null;document.body.classList.remove("brdIn","brd-veh","brd-own");
+  const c=I.root.localToWorld(new THREE.Vector3(xc,0,zc));heroSpawn(spot);const yaw=Math.atan2(spot.x-c.x,spot.z-c.z);HERO.g.rotation.y=HERO.yaw=yaw;/* камера — со стороны героини, лицом к машине: видно и её, и оставленную технику */HERO.cy=yaw+Math.PI*.82;HERO.camP=null;
+  try{if(BRD.sel!=null&&WP.sel!==BRD.sel&&typeof wpSelect==="function")wpSelect(BRD.sel);}catch(e){}
+  $("res").textContent=`Героиня вышла из ${brdName(k)} и стоит рядом; машина осталась там, где её оставили. Оружие героини снова в руках.`;brdUI();}
+/* машина-мишень после высадки остаётся там, где её оставили */
+function brdPark(){const P=BRD.park;if(!P||S.drive.on)return;if(!VEH||P.v!==VEH||!S.veh){BRD.park=null;return;}VEH.g.position.x=P.x;VEH.g.position.z=D+P.z;VEH.hd=P.hd;VEH.g.rotation.y=Math.PI+P.hd*Math.PI/180;}
+/* ---- огонь из машины-мишени ---- */
+let brdTr=null;
+function brdTracer(a,b2,col){try{if(!brdTr){const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3(0,0,1)]);brdTr=new THREE.Line(g,new THREE.LineBasicMaterial({color:0xffc070,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));brdTr.frustumCulled=false;brdTr.raycast=()=>{};scene.add(brdTr);}
+  const p=brdTr.geometry.attributes.position;p.setXYZ(0,a.x,a.y,a.z);p.setXYZ(1,b2.x,b2.y,b2.z);p.needsUpdate=true;brdTr.material.color.setHex(col||0xffc070);brdTr.visible=true;brdTr.userData.t=.07;}catch(e){}}
+function brdShoot(kind){brdBal();const W=BRD_W[S.vt];if(!W)return false;const w=kind==="main"?W.main:W.coax;if(!w)return false;
+  if(!VS||VS.kill){$("res").textContent="Машина выведена из строя — оружие не действует.";return false;}
+  if(kind==="main"&&VEH.brlBent){$("res").textContent="Ствол пушки повреждён — огонь из пушки невозможен, остался пулемёт.";return false;}
+  VEH.g.updateMatrixWorld(true);const gp=VEH.gp,L=VT[S.vt].tur.gun.L;const d=new THREE.Vector3(0,0,1).transformDirection(gp.matrixWorld).normalize();
+  const o=kind==="main"?gp.localToWorld(new THREE.Vector3(0,0,L+.35)):gp.localToWorld(new THREE.Vector3(w.cx||.3,.02,1.2)).addScaledVector(d,.6);
+  const sp=w.spr||.001;d.x+=(Math.random()-.5)*sp*2;d.y+=(Math.random()-.5)*sp*2;d.z+=(Math.random()-.5)*sp*2;d.normalize();
+  const vis=VEH.g.visible;let h=null;VEH.g.visible=false;try{h=wpHit(w,o,d);}catch(e){console.error(e);}VEH.g.visible=vis;
+  const end=h?h.p.clone():o.clone().addScaledVector(d,800);brdTracer(o,end,kind==="main"?0xffd080:0xffa060);
+  if(h&&w.he){try{boom(h.p.clone().addScaledVector(h.n||new THREE.Vector3(0,1,0),.15),w.he,{fill:"tnt"});}catch(e){console.error(e);}
+    if(w.calmm>=100)try{$("res").textContent+=` Подрыв ОФС: ${w.he} кг ВВ — фугасное и осколочное действие по штатной модели взрыва.`;}catch(e){}}
+  else if(!h&&kind==="main")$("res").textContent=`${w.name}: снаряд ушёл дальше 800 м.`;
+  try{fxa("exp",o.clone().addScaledVector(d,.3),Math.max(.6,Math.min(7,w.calmm/22)),w.calmm>=100?.3:.1,{glow:2});}catch(e){}try{fxaMuzzle(o,w.calmm,1);}catch(e){}try{wpSnd(w);}catch(e){}
+  if(kind==="main"){BRD.rec=1;if(w.calmm>=100)try{S.cam=Math.max(S.cam||0,.6);}catch(e){}}
+  return true;}
+function brdFireTick(dt){if(BRD.in!=="veh")return;const W=BRD_W[S.vt];if(!W)return;BRD.cool=Math.max(0,BRD.cool-dt);BRD.ccool=Math.max(0,BRD.ccool-dt);
+  if(BRD.trigM&&BRD.cool<=0){if(brdShoot("main"))BRD.cool=W.main.rl||60/W.main.rpm;else BRD.cool=.5;if(W.main.rl)BRD.trigM=false;}
+  if(BRD.trigC&&W.coax&&BRD.ccool<=0){if(brdShoot("coax"))BRD.ccool=60/W.coax.rpm;else BRD.ccool=.5;}
+  /* ствол: возвышение, откат */
+  if(BRD.elK)BRD.el=Math.max(-.24,Math.min(.09,BRD.el+BRD.elK*dt*.18));
+  if(VEH&&VEH.gp&&!VEH.brlBent&&BRD.gpr!=null)VEH.gp.rotation.x=BRD.gpr+BRD.el;
+  if(VEH&&VEH.gp&&BRD.gpz!=null){BRD.rec=Math.max(0,BRD.rec-dt*2.4);VEH.gp.position.z=BRD.gpz-.32*Math.pow(BRD.rec,2)*(W.main.calmm>=100?1:.25);}
+  const f=$("brdFire");if(f){const r=W.main.rl&&BRD.cool>0?`заряжание ${BRD.cool.toFixed(1)} с`:W.main.name.replace(/\s*\(.*$/,"");const s=f.querySelector("small");if(s&&s.textContent!==r)s.textContent=r;}}
+/* ---- камера за машиной: вслед за башней, обзор пальцем/мышью ---- */
+function brdCamTick(dt){if(BRD.in!=="veh"||!VEH)return;VEH.g.updateMatrixWorld(true);const c=new THREE.Vector3();VEH.g.getWorldPosition(c);
+  const f=new THREE.Vector3(0,0,1).transformDirection(VEH.gp.matrixWorld);f.y=0;if(f.lengthSq()<1e-6)f.set(0,0,1);f.normalize();
+  const a=Math.atan2(f.x,f.z)+BRD.cy,dist=(VT[S.vt].L||7)*1.25*BRD.cd+3,hgt=2.2+dist*Math.sin(BRD.cp)*.9;
+  const want=new THREE.Vector3(c.x-Math.sin(a)*dist*Math.cos(BRD.cp*.6),c.y+hgt,c.z-Math.cos(a)*dist*Math.cos(BRD.cp*.6));const gt=heroTerrain(want.x,want.z)+.6;if(want.y<gt)want.y=gt;
+  const tg=new THREE.Vector3(c.x+Math.sin(a)*6,c.y+1.9,c.z+Math.cos(a)*6);const k=BRD.camI?1:Math.min(1,dt*5);BRD.camI=false;
+  camera.position.lerp(want,k);if(controls){controls.target.lerp(tg,k);camera.lookAt(controls.target);}else camera.lookAt(tg);
+  /* прицельная марка: куда придёт выстрел пушки */
+  BRD.aimT-=dt;if(BRD.aimT<=0){BRD.aimT=.15;try{const gp=VEH.gp,L=VT[S.vt].tur.gun.L,o=gp.localToWorld(new THREE.Vector3(0,0,L+.35)),d=new THREE.Vector3(0,0,1).transformDirection(gp.matrixWorld).normalize();
+      const vis=VEH.g.visible;VEH.g.visible=false;let h=null;try{h=wpRay(o,d,800);}catch(e){}VEH.g.visible=vis;BRD.aimP=h?h.p.clone():o.clone().addScaledVector(d,400);}catch(e){}}
+  const x=$("brdXh");if(x&&BRD.aimP){const v=BRD.aimP.clone().project(camera);const on=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;x.style.visibility=on?"visible":"hidden";
+    if(on){x.style.left=((v.x+1)/2*innerWidth)+"px";x.style.top=((1-v.y)/2*innerHeight)+"px";}}
+  const inf=$("brdInfo");if(inf){const W=BRD_W[S.vt],sp=Math.abs((S.drive.v||0)*3.6),el=-(BRD.el)*180/Math.PI;const t=`${brdName("veh")} · ${Math.round(sp)} км/ч · башня ${S.vtur||0}° · ствол ${el>=0?"+":""}${el.toFixed(1)}°`+(VS&&VS.kill?" · ВЫВЕДЕНА ИЗ СТРОЯ":VS&&(VS.mob||VS.dmg.eng)?" · обездвижена":"");if(inf.textContent!==t)inf.textContent=t;}}
+/* спаренный пулемёт выверен по прицелу наводчика: точка прицеливания — мишень текущего режима */
+function brdOwnAim(){try{if(S.veh&&VEH&&typeof vehAimW==="function")return vehAimW();if(!S.bld&&typeof plate!=="undefined"&&plate){const w=new THREE.Vector3();plate.getWorldPosition(w);return w;}}catch(e){}return null;}
+function brdOwnTick(dt){if(BRD.in!=="own")return;BRD.ccool=Math.max(0,BRD.ccool-dt);
+  if(BRD.trigC&&BRD.ccool<=0&&["tank","ifv"].includes(platOf(G()))){brdBal();BRD.ccool=60/BRD_OWN_COAX.rpm;try{gunG.updateMatrixWorld(true);let d=new THREE.Vector3(0,0,1).transformDirection(gunG.matrixWorld).normalize();const o=gunG.localToWorld(new THREE.Vector3(.38,.04,1.6));const tp=brdOwnAim();if(tp)d=tp.sub(o).normalize();
+    const sp=BRD_OWN_COAX.spr;d.x+=(Math.random()-.5)*sp*2;d.y+=(Math.random()-.5)*sp*2;d.z+=(Math.random()-.5)*sp*2;d.normalize();const h=wpHit(BRD_OWN_COAX,o,d);brdTracer(o,h?h.p:o.clone().addScaledVector(d,800),0xffa060);wpSnd(BRD_OWN_COAX);}catch(e){console.error(e);}}
+  const inf=$("brdInfo");if(inf){const g=G(),t=`Наводчик · ${g.t||""} · ${g.n} ${g.cal} мм`;if(inf.textContent!==t)inf.textContent=t;}}
+/* ---- клавиши: перехват раньше героини и вождения ---- */
+addEventListener("keydown",e=>{if(e.target&&/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;const st=()=>{e.preventDefault();e.stopImmediatePropagation();};
+  if(!BRD.in){if(e.code==="KeyE"&&!e.repeat&&BRD.cand&&!BRD.anim){brdBoard();st();}return;}
+  if(e.code==="KeyF"||e.code==="Escape"||(e.code==="KeyE"&&BRD.in==="own")){if(!e.repeat)brdExit();st();return;}
+  if(e.code==="KeyG"){BRD.trigC=true;st();return;}
+  if(BRD.in==="veh"){if(e.code==="Space"){BRD.trigM=true;st();return;}if(e.code==="KeyR"){BRD.elK=-1;st();return;}if(e.code==="KeyV"){BRD.elK=1;st();return;}}},true);
+addEventListener("keyup",e=>{if(e.code==="KeyG")BRD.trigC=false;if(e.code==="Space"&&BRD.in==="veh"){if(!(BRD_W[S.vt]&&BRD_W[S.vt].main.rl))BRD.trigM=false;}if(e.code==="KeyR"||e.code==="KeyV")BRD.elK=0;},true);
+addEventListener("resize",()=>{try{if(BRD.in)brdPlace();}catch(e){}});
+/* ---- встраивание в кадр: героиня → посадка; машина-мишень → парковка и огонь ---- */
+const _brdHeroTick=heroTick;
+heroTick=function(dt){if(BRD.anim){HERO.keys={};HERO.joy.x=HERO.joy.y=0;HERO.jumpQ=false;}_brdHeroTick(dt);
+  try{if(BRD.anim)brdAnimTick(dt);
+    if(BRD.in&&((BRD.in==="veh"&&!brdVehOK())||(BRD.in==="own"&&!brdOwnOK()))){/* режим сменили — героиня выходит */brdExit();}
+    if(BRD.in==="veh"){brdFireTick(dt);brdCamTick(dt);}else if(BRD.in==="own")brdOwnTick(dt);
+    if(brdTr&&brdTr.visible){brdTr.userData.t-=dt;if(brdTr.userData.t<=0)brdTr.visible=false;}
+    if(HERO.on||BRD.in||BRD.anim||BRD.cand){BRD.cand=brdFind();brdUI();}}catch(e){if(!BRD.er){BRD.er=1;console.error(e);}}};
+if(typeof vehTick==="function"){const _brdVehTick=vehTick;vehTick=function(dt,rdt){_brdVehTick(dt,rdt);try{if(BRD.park)brdPark();}catch(e){}};}
 /* ===== v33: Героиня — реалистичная модель по фото (скелет со скиннингом) (≈1,70 м, длинные платиновые волосы, чёрный комбинезон, белый длинный кардиган, белые кроссовки), ставится на карту, управление от третьего лица ===== */
 const HERO={on:false,place:false,g:null,v:new THREE.Vector3(),vy:0,yaw:0,ph:0,spd:0,air:false,cy:0,cp:.28,cd:3.4,keys:{},joy:{x:0,y:0},run:false,jumpQ:false,save:null,col:[],colT:0,camP:null};
 S.hero=HERO;
@@ -3698,17 +3883,17 @@ function heroModel(){const G=new THREE.Group();
     for(let i=0;i<w*h/9;i++){const x=Math.random()*w,y=Math.random()*h,a=Math.random()*Math.PI*2,l=2+Math.random()*6,g=200+Math.random()*55|0;ctx.strokeStyle=`rgba(${g},${g-3},${g-9},.6)`;ctx.lineWidth=.5+Math.random()*.8;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(a)*l,y+Math.sin(a)*l);ctx.stroke();}
     for(let i=0;i<w*h/60;i++){const x=Math.random()*w,y=Math.random()*h;ctx.fillStyle="rgba(150,145,135,.12)";ctx.fillRect(x,y,1.5,1.5);}
     /* бахрома по краям */const fib=(x,y,dx,dy)=>{const g=215+Math.random()*40|0;ctx.strokeStyle=`rgba(${g},${g-2},${g-8},.85)`;ctx.lineWidth=.6+Math.random()*.7;ctx.beginPath();ctx.moveTo(x,y);ctx.quadraticCurveTo(x+dx*.5+Math.random()*3,y+dy*.5,x+dx,y+dy);ctx.stroke();};
-    for(let x=0;x<w;x+=1.2)fib(x,h-14,(Math.random()-.5)*5,6+Math.random()*8);if(edge)for(let y=0;y<h;y+=1.2){fib(14,y,-(6+Math.random()*8),(Math.random()-.5)*4);fib(w-14,y,6+Math.random()*8,(Math.random()-.5)*4);}};
+    for(let x=0;x<w;x+=1.6)fib(x,h-12,(Math.random()-.5)*3,3+Math.random()*4);if(edge)for(let y=0;y<h;y+=1.2){fib(14,y,-(6+Math.random()*8),(Math.random()-.5)*4);fib(w-14,y,6+Math.random()*8,(Math.random()-.5)*4);}};
   const coatTex=cTex(512,1024,(c,w,h)=>fur(c,w,h,true)),slvTex=cTex(256,512,(c,w,h)=>fur(c,w,h,false));
-  const coatM=new THREE.MeshStandardMaterial({map:coatTex,bumpMap:coatTex,bumpScale:.006,alphaTest:.45,side:THREE.DoubleSide,roughness:1,skinning:true});
+  const coatM=new THREE.MeshStandardMaterial({vertexColors:true,map:coatTex,bumpMap:coatTex,bumpScale:.006,alphaTest:.45,side:THREE.DoubleSide,roughness:1,skinning:true});
   const slvM=new THREE.MeshStandardMaterial({map:slvTex,bumpMap:slvTex,bumpScale:.006,alphaTest:.45,side:THREE.DoubleSide,roughness:1,skinning:true});
-  const CT=[[1.5,.072,.07],[1.47,.112,.084],[1.45,.17,.096],[1.43,.2,.104],[1.405,.21,.11],[1.37,.205,.116],[1.31,.2,.12],[1.23,.186,.117],[1.13,.173,.112],[1.04,.177,.114],[.96,.193,.124],[.89,.204,.134],[.78,.212,.14],
-    [.62,.222,.147],[.44,.232,.154],[.3,.24,.16],[.2,.244,.163],[.17,.245,.164]];
+  const CT=[[1.5,.072,.07],[1.47,.112,.084],[1.45,.17,.096],[1.43,.2,.104],[1.405,.21,.11],[1.37,.205,.116],[1.31,.198,.119],[1.23,.182,.114],[1.13,.168,.108],[1.04,.172,.11],[.96,.187,.12],[.89,.197,.128],[.78,.2,.13],
+    [.68,.201,.13],[.6,.202,.131],[.54,.203,.132],[.51,.204,.133]];
   {const C=46,ys=[];for(let i=0;i<CT.length-1;i++){const n=CT[i][0]-CT[i+1][0]>.1?3:1;for(let k=0;k<n;k++)ys.push(CT[i][0]+(CT[i+1][0]-CT[i][0])*k/n);}ys.push(CT[CT.length-1][0]);
-    const K=GB();K.grid(ys.length,C,(i,j)=>{const y=ys[i],gap=y>1.41?.5+(y-1.41)*8:.5+(1.41-y)*.1,a=gap+(Math.PI*2-2*gap)*j/(C-1),rx=ip(CT,y,1),rz=ip(CT,y,2),x=rx*Math.sin(a),ca=Math.cos(a);
+    const K=GB();K.grid(ys.length,C,(i,j)=>{const y=ys[i],gap=y>1.41?.5+(y-1.41)*8:.5+(1.41-y)*.1+sm(1.0,.6,y)*.32,a=gap+(Math.PI*2-2*gap)*j/(C-1),rx=ip(CT,y,1),rz=ip(CT,y,2),x=rx*Math.sin(a),ca=Math.cos(a);
       let z=rz*ca-.004;if(ca>0)z+=bust(y,x)*Math.pow(ca,.6)*.9;let w=spineW(Math.max(.97,y));const s=x>0?1:-1,ws=sm(.13,.19,Math.abs(x))*sm(1.33,1.41,y)*.7;if(ws>0){w=w.map(e=>[e[0],e[1]*(1-ws)]);w.push([BI(arm[s].sh),ws]);}
       const th=sm(.96,.8,y);if(th>0){const ab=Math.abs(a-Math.PI),wb=sm(1.95,1.25,ab),wf=1-wb;w=w.map(e=>[e[0],e[1]*(1-th)]);w.push([BI(coatB),th*wb],[BI(x>0?coatL:coatR),th*wf]);}
-      return[x,y,z,j/(C-1),(y-.17)/1.33,[1,1,1],w];},false);skinned(K,coatM);}
+      const fo=.5+.5*Math.sin(a*9+y*2.2),bk=Math.max(0,-ca),sd=1-Math.abs(ca),sh=(.8+.13*fo)*(1-.12*sd)*(1-.1*bk*sm(1.25,.9,y))*(y<.6?.9+.1*sm(.51,.6,y):1);return[x,y,z,j/(C-1),(y-.51)/.99,[sh*.93,sh*.9,sh*.84],w];},false);skinned(K,coatM);}
   /* рукава кардигана с широкими пушистыми манжетами */
   const ST=[[1.465,.045],[1.43,.06],[1.34,.055],[1.24,.051],[1.15,.049],[1.07,.05],[1.0,.054],[.955,.062],[.92,.07],[.885,.073],[.865,.071]];
   [1,-1].forEach(s=>{const K=GB();K.grid(ST.length,18,(i,j)=>{const y=ST[i][0],a=j/17*Math.PI*2,r=ST[i][1],x=s*.174+r*Math.sin(a),z=r*Math.cos(a)*.95;const t1=sm(1.17,1.09,y),t2=sm(.93,.88,y),tc=sm(1.38,1.47,y)*.6;
@@ -3766,11 +3951,17 @@ function heroModel(){const G=new THREE.Group();
   [1,-1].forEach(s=>{const e=rigid(eg,skinC,head,s*(AX-.004),HC[1]-.004,HC[2]-.012);e.rotation.y=s*(Math.PI/2-.35);e.scale.set(1,1,s);
     [0,1].forEach(k=>rigid(new THREE.TorusGeometry(.0075-k*.001,.0013,6,16),silver,head,s*(AX+.0015),HC[1]-.016+k*.012,HC[2]-.008-k*.006).rotation.y=Math.PI/2);});
   /* ===== волосы: длинные прямые платиновые, прямой пробор; пряди-ленты с текстурой волосков ===== */
-  const strandTex=cTex(128,1024,(x,w,h)=>{x.clearRect(0,0,w,h);const cols=["#f5f0e6","#e6e0d3","#d8d0c0","#fffbf2","#cdc4b2","#efe9dc"];x.fillStyle="rgba(232,226,212,.9)";x.fillRect(w*.12,0,w*.76,h*.9);
-    for(let i=0;i<150;i++){const px=8+Math.random()*(w-16),end=h*(.86+Math.random()*.14),c=cols[Math.random()*cols.length|0];x.strokeStyle=c;x.globalAlpha=.75+Math.random()*.25;x.lineWidth=1+Math.random()*2.6;
+  const strandTex=cTex(128,1024,(x,w,h)=>{x.clearRect(0,0,w,h);
+    /* плотная основа пряди: без дыр по всей длине, края слегка мягкие; кончики сужаются клином */
+    const base=x.createLinearGradient(0,0,w,0);base.addColorStop(0,"rgba(150,146,138,0)");base.addColorStop(.07,"#9a958c");base.addColorStop(.3,"#dcd7cc");base.addColorStop(.55,"#f1ede4");base.addColorStop(.8,"#cfcabf");base.addColorStop(.93,"#948f86");base.addColorStop(1,"rgba(150,146,138,0)");
+    x.fillStyle=base;x.beginPath();x.moveTo(0,0);x.lineTo(w,0);x.lineTo(w,h*.86);for(let i=6;i>=0;i--){const px=w*i/6;x.lineTo(px,h*(.9+((i*37)%7)/70));}x.lineTo(0,h*.86);x.closePath();x.fill();
+    const cols=["#f7f4ee","#e6e2da","#cbc6bb","#b0aaa0","#fffdf8","#a39e94"];x.globalCompositeOperation="source-atop";
+    for(let i=0;i<120;i++){const px=10+Math.random()*(w-20),end=h*(.82+Math.random()*.16),c=cols[Math.random()*cols.length|0];x.strokeStyle=c;x.globalAlpha=.35+Math.random()*.35;x.lineWidth=.8+Math.random()*1.8;
       x.beginPath();x.moveTo(px,0);for(let y=0;y<end;y+=32)x.lineTo(px+Math.sin(y*.01+i)*1.5,y);x.stroke();}x.globalAlpha=1;
-    const g=x.createLinearGradient(0,0,0,40);g.addColorStop(0,"rgba(200,192,175,.4)");g.addColorStop(1,"rgba(200,192,175,0)");x.globalCompositeOperation="source-atop";x.fillStyle=g;x.fillRect(0,0,w,40);});
-  const hairM2=new THREE.MeshStandardMaterial({color:0xe2dbcc,map:strandTex,alphaTest:.4,side:THREE.DoubleSide,roughness:.38,metalness:.05,skinning:true});
+    /* тень у корней и затемнение глубины к кончикам */
+    let g=x.createLinearGradient(0,0,0,120);g.addColorStop(0,"rgba(78,74,68,.55)");g.addColorStop(1,"rgba(78,74,68,0)");x.fillStyle=g;x.fillRect(0,0,w,120);
+    g=x.createLinearGradient(0,h*.55,0,h);g.addColorStop(0,"rgba(100,96,90,0)");g.addColorStop(1,"rgba(100,96,90,.35)");x.fillStyle=g;x.fillRect(0,h*.55,w,h*.45);x.globalCompositeOperation="source-over";});
+  const hairM2=new THREE.MeshStandardMaterial({vertexColors:true,color:0xeae6de,map:strandTex,alphaTest:.5,side:THREE.DoubleSide,roughness:.38,metalness:.05,skinning:true});
   /* шапка волос: ось сферы вдоль z, волоски идут от пробора вниз к вискам */
   const ps=Math.PI-.75,pl=Math.PI+1.5,uPart=(1.5*Math.PI-ps)/pl;
   const scalpTex=cTex(512,256,(x,w,h)=>{x.fillStyle="#e2dccd";x.fillRect(0,0,w,h);const cols=["#f3eee4","#d6cebd","#e9e3d6","#fffaf0","#cbc2b0"];
@@ -3784,13 +3975,13 @@ function heroModel(){const G=new THREE.Group();
       for(let i=0;i<=N;i++){const u=i/N,p=cv.getPoint(u);const rad=new THREE.Vector3(p.x-C0[0],0,p.z-C0[2]).normalize(),tan=new THREE.Vector3(rad.z,0,-rad.x).lerp(new THREE.Vector3(1,0,0),sm(.25,.55,u)).normalize();
         const w=(w0+(w1-w0)*u),wav=u>.65?Math.sin(u*24+lay*3)*.01*(u-.65)/.35:0;p.addScaledVector(tan,wav);
         const y=p.y,t1=sm(1.52,1.32,y),t2=sm(1.3,1.0,y),ws=[[BI(head),1-t1],[BI(hairM),t1*(1-t2)],[BI(hairL),t2]];
-        [-1,1].forEach(k=>{const q=p.clone().addScaledVector(tan,k*w/2);K.v(q.x,q.y,q.z,k<0?0:1,1-u,[1,1,1],ws);});}
+        const sh=(lay?1:.72)*(.86+.14*sm(0,.25,u))*(1-.06*Math.sin(lay*5+u*7));[-1,1].forEach(k=>{const q=p.clone().addScaledVector(tan,k*w/2);K.v(q.x,q.y,q.z,k<0?0:1,1-u,[sh,sh*.99,sh*.965],ws);});}
       for(let i=0;i<N;i++){const a=base+i*2;K.ix.push(a,a+2,a+1,a+1,a+2,a+3);}};
     for(let lay=0;lay<2;lay++)for(let i=0;i<22;i++){const s=i%2?1:-1,k=(i>>1)/10+(lay?.05:0),a=s*(1.0+k*(Math.PI-1.0)),sa=Math.sin(a),ca=Math.cos(a),j=(rnd()-.5)*.012,L=1.645-.72-rnd()*.06-(lay?.03:0),o=lay*.006;
       const p=[[s*.006,.108+o,.02-k*.09],[sa*(.064+o),.096+o,ca*(.072+o)-.01],[sa*(.084+o),.035,ca*(.092+o)-.012],[sa*(.088+o),-.04,ca*(.09+o)-.015]].map(q=>new THREE.Vector3(C0[0]+q[0],C0[1]+q[1],C0[2]+q[2]));
       if(k<.38){const x0=s*(.07+k*.13)+j;[[1.5,0],[1.36,.008],[1.2,.014],[1.05,.018],[L,.022]].forEach(([y,dx])=>{const x=x0+s*dx;p.push(new THREE.Vector3(x,y,cz(y,x,true)+o));});}
       else{const x0=sa*.15+j;[[1.5,.95],[1.36,1],[1.2,1],[1.05,1.02],[L,1.04]].forEach(([y,m])=>{const x=x0*m;p.push(new THREE.Vector3(x,y,cz(y,x,false)-o-(y>1.45?.0:.004)));});}
-      strand(p,.07+rnd()*.012,.05,lay+i*.37);}
+      strand(p,.092+rnd()*.012,.066,lay+i*.37);}
     skinned(K,hairM2);}
   /* ===== воротник-стойка: молния; цепочка с кулоном ===== */
   rigid(new THREE.BoxGeometry(.004,.05,.003),silver,neck,0,.008,.06).rotation.x=-.05;rigid(new THREE.BoxGeometry(.009,.014,.004),silver,neck,0,.026,.062);
