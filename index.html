@@ -3377,7 +3377,7 @@ const RZERA={era:{n:"Контакт-1 (4С20)",MC:4,ex:"pvv5"},era5:{n:"Конт
 function rzGurney(g2e,MC){return g2e*Math.pow(MC+1/3,-.5);}
 function rzEraV(k,sel){const e=RZERA[k]||RZERA.era,ex=RZEX[sel&&sel!=="def"?sel:e.ex]||RZEX.pvv5;return rzGurney(ex.g2e,e.MC);}
 /* взаимодействие пластины со струёй/стержнем ∝ скорости пластины (Mayseless, Int. J. Impact Eng. 2011): множитель к «срезу» ДЗ */
-function rzEraK(k,mode){try{if(!RZ.on||RZ.era==="def"||!RZERA[k])return 1;const r=rzEraV(k,RZ.era)/rzEraV(k,"def");
+function rzEraK(k,mode){try{if(!RZ.on||!RZERA[k])return 1;const r=RZ.era==="def"?1:rzEraV(k,RZ.era)/rzEraV(k,"def");
   const s=rzCl(mode==="ke"?Math.pow(r,.8):r,.6,1.35);const c=RZ.cur;if(c){c.rzEra=c.rzEra||[];c.rzEra.push({k,mode,v:rzEraV(k,RZ.era),v0:rzEraV(k,"def"),s});}return s;}catch(e){return 1;}}
 
 /* ---------- 5. Хуки в расчёт выстрела ---------- */
@@ -3453,7 +3453,7 @@ function rzGlowTex(){if(rzGlowTex.t)return rzGlowTex.t;const c=document.createEl
   g.addColorStop(0,"rgba(255,255,255,1)");g.addColorStop(.35,"rgba(255,255,255,.65)");g.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=g;x.fillRect(0,0,64,64);return rzGlowTex.t=new THREE.CanvasTexture(c);}
 function rzGlow(s,T,r){if(typeof THREE==="undefined"||T<525||!s.to)return;const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:rzGlowTex(),transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.9}));
   let n=new THREE.Vector3(0,0,-1);try{n.transformDirection(plate.matrixWorld);}catch(e){}sp.position.copy(s.to).addScaledVector(n,.012);scene.add(sp);
-  RZFX.push({m:sp,t0:performance.now(),life:MOBILE?3:5,T0:T,Tp:s.rzT!=null?s.rzT:20,tau:1.1,r});if(!rzRAF)rzRAF=requestAnimationFrame(rzFxTick);}
+  RZFX.push({m:sp,t0:performance.now(),life:MOBILE?4:6,T0:T,Tp:s.rzT!=null?s.rzT:20,tau:2,r});if(!rzRAF)rzRAF=requestAnimationFrame(rzFxTick);}
 function rzVisual(s,a,mode,kind){try{if(typeof reduce!=="undefined"&&reduce)return;if(!kind||kind==="rico"&&mode!=="ke")return;const cal=G().cal,Tc=rzContactT(a,mode,s,kind);s.rzTc=Tc;
     rzGlow(s,Tc,Math.max(.05,Math.min(.22,cal/1000*1.3))*(kind==="pen"?1.2:.9));
     let nb=new THREE.Vector3(0,0,1);try{nb.transformDirection(plate.matrixWorld);}catch(e){}
@@ -3470,7 +3470,7 @@ function rzHesh(s,cal){const fl=layers.find(l=>!l.spent&&l.k!=="gap");if(!fl)ret
   const t=fl.t/Math.max(.05,(typeof cosA==="function"?cosA():1)),thr=cal*1.2*hK,P0=24,sp=(p.sp||3.5)*Math.max(.6,rzSig(fl.k,s.rzT)),lam=thr/Math.log(P0/sp),Pb=P0*Math.exp(-t/lam);
   if(Pb<=sp)return {t,thr,Pb,sp,no:1,n:q.n};const ts=Math.min(t/2,.22*cal),ds=1.6*cal,mass=q.rho*1000*Math.PI/4*Math.pow(ds/1000,2)*ts/1000,v=2*(Pb-sp)*1e9/(q.rho*1000*(p.c||5.9)*1000);
   return {t,thr,Pb,sp,ts,ds,mass,v,E:.5*mass*v*v,n:q.n};}
-function rzReport(s,a,mode,kind,out){if(!RZ.on||!a)return;const cal=G().cal,z=a.rz,T=s.rzT!=null?s.rzT:rzPlateT(),L=[],H=[];
+function rzReport(s,a,mode,kind,out){if(!RZ.on||!a)return;const cal=G().cal,z=a.rz,T=s.rzT!=null?s.rzT:rzPlateT(),L=[],H=[];let W=[],rows=[];
   const air=rzAirT();
   try{s.rzCos=(typeof cosA==="function"?cosA():1);
   L.push(`Температура листа ${rzF(T)} °C${RZ.air?" (как воздух)":` (воздух ${rzF(air)} °C)`}`);
@@ -3480,7 +3480,7 @@ function rzReport(s,a,mode,kind,out){if(!RZ.on||!a)return;const cal=G().cal,z=a.
     L.push(`Сердечник ${r.nm}: L/D ${rzF(r.L/r.D,1)}, v=${Math.round(z.v)} м/с → Ланц–Одерматт ${Math.round(z.P)} мм по нормали`);}
   if(z&&z.kind==="dm"){H.push(`<b>Калиберный бронебойный: формула де Марра</b> (игровая калибровка 188·v^1,43·(d/100)^1,07): v=${Math.round(z.v)} м/с, масса ≈ ${rzF(z.m,1)} кг, энергия ${rzF(.5*z.m*z.v*z.v/1e6,2)} МДж → ${a.pen} мм`);}
   if(z&&z.kind==="jet"){const E=RZEX[z.S.ex],Ln=RZLN[z.S.ln],J=z.J,best=[1,2,3,4,6,8,10,15].map(c=>[c,rzJet(z.cd,z.S.ex,z.S.ln,c).P]);const bm=best.reduce((p,c)=>c[1]>p[1]?c:p);
-    H.push(`<b>Кумулятивная струя</b>: ВВ ${E.n} — D=${rzF(E.D,2)} км/с, P<sub>ЧЖ</sub>≈${E.P} ГПа, √2E=${rzF(E.g2e,2)} км/с; облицовка ${Ln.n} (ρ ${rzF(Ln.rho,2)}).`);
+    H.push(`<b>Кумулятивная струя</b>: ВВ ${E.n} — D=${rzF(E.D,2)} км/с, P<sub>ЧЖ</sub>≈${rzF(E.P,1)} ГПа, √2E=${rzF(E.g2e,2)} км/с; облицовка ${Ln.n} (ρ ${rzF(Ln.rho,2)}).`);
     H.push(`Скорость головы струи ≈ ${rzF(J.vt,1)} км/с, хвоста ≈ 2,3 км/с; распад на частицы через ≈ ${Math.round(J.tb)} мкс; γ=√(ρт/ρстр)=${rzF(J.gam,2)}. Отстояние ${rzF(z.S.so,1)} кал. → модель ${Math.round(J.P)} мм (эталон Comp B/медь/2,5 кал. — ${Math.round(z.ref.P)} мм), множитель к игровому пробитию ×${rzF(z.f,2)}: ${z.pen0} → <b>${a.pen} мм</b>`);
     H.push(`Кривая отстояния: ${best.map(b=>`${b[0]} кал. — ${Math.round(b[1])}`).join(" · ")} мм; оптимум ≈ ${bm[0]} кал.`);
     L.push(`Струя: ${E.n.split(" (")[0]}, ${Ln.n}, v<sub></sub>головы ${rzF(J.vt,1)} км/с, отстояние ${rzF(z.S.so,1)} кал. → ×${rzF(z.f,2)} к пробитию`.replace("<sub></sub>",""));}
@@ -3489,13 +3489,13 @@ function rzReport(s,a,mode,kind,out){if(!RZ.on||!a)return;const cal=G().cal,z=a.
     if(!h.no)L.push(`Откол: ≈ ${rzF(h.mass,1)} кг со скоростью ≈ ${Math.round(h.v)} м/с`);}}
   if(mode==="he"){try{const w=heW(G(),a.key);H.push(`<b>Фугасный</b>: ТНТ-эквивалент ≈ ${rzF(w.We,2)} кг; давление детонации ВВ у поверхности ≈ 20 ГПа, но ударная волна в стали быстро затухает — пролом только тонких листов.`);}catch(e){}}
   /* шаги по слоям */
-  const W=rzWalk(s,a),rows=[];
-  if(s.rzEra&&s.rzEra.length)s.rzEra.forEach(e=>{H.push(`ДЗ ${RZERA[e.k].n}: пластина по Гёрни ${rzF(e.v,2)} км/с (штатное ВВ — ${rzF(e.v0,2)} км/с) → действие на ${e.mode==="ke"?"стержень":"струю"} ×${rzF(e.s,2)}`);});
+  W=rzWalk(s,a);
+  if(s.rzEra&&s.rzEra.length)s.rzEra.forEach(e=>{H.push(`ДЗ ${RZERA[e.k].n}: скорость метаемой пластины по Гёрни ${rzF(e.v,2)} км/с${Math.abs(e.s-1)>.005?` (со штатным ВВ — ${rzF(e.v0,2)} км/с) → действие на ${e.mode==="ke"?"стержень":"струю"} ×${rzF(e.s,2)}`:""}`);L.push(`ДЗ ${RZERA[e.k].n}: пластина ≈ ${rzF(e.v,2)} км/с${Math.abs(e.s-1)>.005?`, ×${rzF(e.s,2)}`:""}`);});
   const fmtS=o=>o?(o.L!=null?`L ${Math.round(o.L)} мм · `:"")+`v ${Math.round(o.v)} м/с · E ${o.E>=1e5?rzF(o.E/1e6,2)+" МДж":rzF(o.E/1000,1)+" кДж"}`:"";
-  W.forEach((w,j)=>{if(w.gap){rows.push(`<tr class="rzg"><td>—</td><td colspan="4">между слоями (зазор/ДЗ/разрушение головной части): ёмкость −${Math.round(w.dC)} мм → ${fmtS(w.to)}</td></tr>`);return;}
+  let sn=0;W.forEach((w,j)=>{if(w.gap){rows.push(`<tr class="rzg"><td>—</td><td colspan="4">между слоями (зазор/ДЗ/разрушение головной части): ёмкость −${Math.round(w.dC)} мм → ${fmtS(w.to)}</td></tr>`);return;}
     const p=w.p,q=rzMat(p.k),los=p.t/Math.max(.05,s.rzCos);
     rows.push(`<tr><td>${p.i+1}</td><td>${eE(q.n)}<br><small>${p.t} мм, по лучу ${Math.round(los)} мм</small></td><td>${Math.round(p.need)} мм-экв.${p.fx.length?`<br><small>${p.fx.map(eE).join("; ")}</small>`:""}${q.cl==="bcc"&&p.tough<.9?`<br><small>вязкость ${Math.round(p.tough*100)} % (KCV)</small>`:""}</td><td>${fmtS(w.from)}</td><td>${w.pass?fmtS(w.to):"<b>остановлен</b>"}</td></tr>`);
-    L.push(`  Шаг ${j+1} · слой ${p.i+1} ${lc(q.n).split(" (")[0]} ${p.t} мм: −${Math.round(p.need)} мм-экв.; ${w.pass?"после: "+fmtS(w.to).replace(/ · /g,", "):"остановлен"}`);});
+    L.push(`  Шаг ${++sn} · слой ${p.i+1} ${lc(q.n).split(" (")[0]} ${p.t} мм: −${Math.round(p.need)} мм-экв.; ${w.pass?"после: "+fmtS(w.to).replace(/ · /g,", "):"остановлен"}`);});
   if(!W.length&&s.rzSteps)s.rzSteps.forEach((p,j)=>{const q=rzMat(p.k);rows.push(`<tr><td>${p.i+1}</td><td>${eE(q.n)}<br><small>${p.t} мм</small></td><td>${Math.round(p.need)} мм-экв.${p.fx.length?`<br><small>${p.fx.map(eE).join("; ")}</small>`:""}</td><td>ёмкость ${Math.round(p.rem)} мм</td><td>${p.rem>=p.need?"ёмкость "+Math.round(p.rem-p.need)+" мм":"<b>остановлен</b>"}</td></tr>`);});
   /* заброневое: конус и масса осколков */
   if(s.through&&kind==="pen"&&(mode==="ke"||mode==="heat")){const last=[...layers].reverse().find(l=>l.k!=="gap"&&!isE(l.k));const q=last?rzMat(last.k):rzMat("rha");
