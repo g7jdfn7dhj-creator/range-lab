@@ -3802,8 +3802,14 @@ if(typeof vehTick==="function"){const _vt2=vehTick;vehTick=function(dt,rdt){if(!
 const _brdHT2=heroTick;heroTick=function(dt){_brdHT2(dt);if(!BRD.my)return;try{const V=brdMine();
   /* откат своей пушки, вспышка у её дульного среза */
   if(V&&V.gpz0!=null){BRD.rec=Math.max(0,(BRD.rec||0)-dt*2.6);V.gp.position.z=V.gpz0-.3*Math.pow(BRD.rec,2)*Math.min(1,G().cal/100);}
-  if(BRD.flT>0&&BRD.flD){BRD.flT-=dt;const o=BRD.flO,d=BRD.flD,yaw=Math.atan2(d.x,d.z),el=-Math.asin(Math.max(-1,Math.min(1,d.y)));
-    try{if(flashX){flashX.position.copy(o).addScaledVector(d,.15);flashX.rotation.order="YXZ";flashX.rotation.set(el,yaw,flashX.rotation.z);}}catch(e){}try{if(S.glowSpr)S.glowSpr.position.copy(o).addScaledVector(d,.6);}catch(e){}}
+  /* штатная вспышка (тот же набор: конус, свечение, свет, пороховые облака дульного тормоза) — переносится к её дульному срезу по оси её ствола */
+  if(BRD.flD&&(S.flash>0||BRD.flT>0)){BRD.flT-=dt;const o=BRD.flO,d=BRD.flD,yaw=Math.atan2(d.x,d.z),el=-Math.asin(Math.max(-1,Math.min(1,d.y))),rt=new THREE.Vector3(d.z,0,-d.x).normalize();
+    try{if(flashX){flashX.position.copy(o).addScaledVector(d,.15);flashX.rotation.order="YXZ";flashX.rotation.set(el,yaw,flashX.rotation.z);}}catch(e){}
+    try{if(S.glowSpr)S.glowSpr.position.copy(o).addScaledVector(d,.8);}catch(e){}
+    try{const m=o.clone().addScaledVector(d,.6);flashM.position.copy(m);flashM.rotation.set(el,yaw,0,"YXZ");flashL.position.copy(m);
+      const g0=G(),k=Math.max(.25,g0.cal/120)*(g0.cls==="auto"||g0.cls==="mg"?.5:1),fl=Math.max(0,S.flash||0);
+      flashS.forEach((f,i)=>{const ox=(i===1?-.7:i===2?.7:0)*k*(1.2-fl*.4),oz=(i===3?1.4*k*(1.3-fl):i===0?.3*k:.1);f.position.copy(m).addScaledVector(rt,ox).addScaledVector(d,oz);if(i===3)f.position.y+=.05;});}catch(e){}
+    if(!(S.flash>0)&&BRD.flT<=0)BRD.flD=null;}
   BRD.lnT=(BRD.lnT||0)-dt;if(BRD.lnT<=0){BRD.lnT=.12;const L=brdLine();if(L){BRD.lastL=L;const r=Math.max(20,Math.round(L.r));$("dist").value=String(r);if($("distTxt"))$("distTxt").textContent=r+" м";}}
   if(BRD.sight&&V){const vt=BRD.my.sw?S.vt:BRD.my.vt,T=VT[vt].tur||{rt:.8};V.g.updateMatrixWorld(true);const c=V.gp.localToWorld(new THREE.Vector3(-(T.rt||.8)*.55,.32,.4)),d=new THREE.Vector3(0,0,1).transformDirection(V.gp.matrixWorld);
     camera.position.copy(c);camera.up.set(0,1,0);camera.lookAt(c.clone().addScaledVector(d,100));const L=BRD.lastL,b=$("brdScope").querySelector("b");
