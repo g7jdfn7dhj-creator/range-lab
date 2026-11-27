@@ -3671,7 +3671,7 @@ function brdEl(){if($("brdBtn"))return;brdCSS();const b=document.createElement("
   if(rail)rail.appendChild(o);else{o.style.cssText="position:fixed;right:12px;top:320px;z-index:31";document.body.appendChild(o);}
   o.addEventListener("click",e=>{e.preventDefault();e.stopPropagation();brdExit();});}
 function brdUI(){brdEl();const b=$("brdBtn"),c=BRD.cand;const show=!!c&&!BRD.in&&!BRD.anim;b.hidden=!show;
-  if(show){const nm=brdName(c.k),role=c.k==="own"?"место наводчика":"режим «Бронемашина»",t=brdTouch();const key=`${c.k}|${nm}|${t}`;
+  if(show){const nm=brdName(c.k),role=c.k==="veh"?"режим «Бронемашина»":(c.k==="free"||(typeof brdFreeVT==="function"&&brdFreeVT()))?"за рычаги · огонь из её пушки":"место наводчика",t=brdTouch();const key=`${c.k}|${nm}|${t}`;
     if(BRD.lastHint!==key){BRD.lastHint=key;b.innerHTML=(t?`Сесть · ${nm}`:`E — сесть · ${nm}`)+`<small>${role}</small>`;}
     if(t){const j=$("heroJoy");let bt=200;if(j&&!j.hidden){const r=j.getBoundingClientRect();if(r.height)bt=innerHeight-r.top+14;}b.style.bottom=bt+"px";
       let rl=innerWidth-12;["hAim","hRel","hFire","hCam","hJump","hRun"].forEach(i=>{const e=$(i);if(e&&!e.hidden&&e.offsetParent){const r=e.getBoundingClientRect();if(r.width)rl=Math.min(rl,r.left);}});b.style.maxWidth=Math.max(120,rl-16-10)+"px";}}
@@ -3683,7 +3683,7 @@ function brdBoard(){const c=BRD.cand||brdFind();if(!c||BRD.in||BRD.anim)return;c
   const sideL=new THREE.Vector3(side>0?I.b.max.x+.3:I.b.min.x-.3,0,I.hl.z),p1=I.root.localToWorld(sideL.clone());p1.y=heroTerrain(p1.x,p1.z);
   const p2=I.root.localToWorld(I.hl.clone().add(new THREE.Vector3(0,.12,0))),p3=I.root.localToWorld(I.hl.clone().add(new THREE.Vector3(0,-1.05,0)));
   BRD.anim={k:c.k,t:0,dur:1.5,p0,p1,p2,p3,yaw0:HERO.g.rotation.y};BRD.cand=null;try{WP.aim=false;WP.trig=false;}catch(e){}
-  $("res").textContent=`Героиня забирается в ${brdName(c.k)} — ${c.k==="own"?"на место наводчика":"режим «Бронемашина»"}…`;brdUI();}
+  $("res").textContent=`Героиня забирается в ${brdName(c.k)} — ${c.k==="veh"?"режим «Бронемашина»":(c.k==="free"||brdFreeVT())?"за рычаги":"на место наводчика"}…`;brdUI();}
 function brdAnimTick(dt){const A=BRD.anim;if(!A)return;A.t+=dt;const u=Math.min(1,A.t/A.dur),g=HERO.g,P=new THREE.Vector3();let look=null;
   if(u<.42){const k=u/.42,s=k*k*(3-2*k);P.lerpVectors(A.p0,A.p1,s);P.y=heroTerrain(P.x,P.z);look=A.p1.clone().sub(A.p0);}
   else if(u<.78){const k=(u-.42)/.36,s=k*k*(3-2*k);P.lerpVectors(A.p1,A.p2,s);P.y+=Math.sin(Math.PI*k)*.45;look=A.p2.clone().sub(A.p1);}
@@ -3740,7 +3740,7 @@ function brdMine(){const M=BRD.my;return M?(M.sw?VEH:M.V):null;}
 function brdLine(){const V=brdMine();if(!V)return null;V.g.updateMatrixWorld(true);const vt=BRD.my.sw?S.vt:BRD.my.vt,L=(VT[vt].tur&&VT[vt].tur.gun?VT[vt].tur.gun.L:3);
   const o=V.gp.localToWorld(new THREE.Vector3(0,0,L+.05)),d=new THREE.Vector3(0,0,1).transformDirection(V.gp.matrixWorld).normalize();let p=null;
   let best=1500;try{const vis=V.g.visible;V.g.visible=false;const h=wpRay(o,d,1500);V.g.visible=vis;if(h){p=h.p.clone();best=o.distanceTo(p);}}catch(e){}
-  try{const T=BRD.my.sw?BRD.my.V:VEH;if(T&&T!==V&&T.meshes){T.g.updateMatrixWorld(true);const h=new THREE.Raycaster(o,d,0,best).intersectObjects(T.meshes,false)[0];if(h){p=h.point.clone();BRD.lnTgt=true;}else BRD.lnTgt=false;}}catch(e){}
+  try{const T=BRD.my.sw?BRD.my.V:VEH;if(T&&T!==V&&T.meshes&&T.g.visible&&S.veh){T.g.updateMatrixWorld(true);const h=new THREE.Raycaster(o,d,0,best).intersectObjects(T.meshes,false)[0];if(h){p=h.point.clone();BRD.lnTgt=true;}else BRD.lnTgt=false;}}catch(e){}
   if(!p)p=o.clone().addScaledVector(d,1500);return{o,d,p,r:o.distanceTo(p)};}
 const _brdMuz=muzzleWorld;muzzleWorld=function(){if(BRD.my&&BRD.fl)return BRD.fl.o.clone();if(BRD.my){const L=brdLine();if(L)return L.o;}return _brdMuz();};
 /* попадание: тот же расчёт, что у штатного vehShot (луч по геометрии машины, угол встречи по нормали, вторая баллистика с наклоном), но луч идёт по её линии огня */
@@ -3760,8 +3760,10 @@ vehShot=function(B,ex,ey){const F=BRD.fl;if(!BRD.my||!F)return _brdVehShot(B,ex,
 /* выстрел: штатный fireOne; на время вызова — дальность = измеренная до точки прицеливания, своя машина не «едет» в расчёте упреждения */
 const _brdFire=fireOne;
 fireOne=function(){if(!BRD.my)return _brdFire();const F=brdLine();if(!F)return;BRD.fl=F;const di=$("dist"),dv=di.value,dOn=S.drive.on,rv=S.rockV,lk=S.lock;
-  di.value=String(Math.max(20,Math.round(F.r)));S.balCache=null;S.drive.on=false;const n0=shots.length;
-  try{_brdFire();}finally{S.drive.on=dOn;S.recoil=0;S.recoilAge=0;S.rockV=rv;BRD.fl=null;S.balCache=null;}
+  const dmn=di.min,dst=di.step;di.min="20";di.step="1";di.value=String(Math.max(20,Math.round(F.r)));S.balCache=null;S.drive.on=false;const n0=shots.length;
+  const PA=(!S.veh&&!S.bld)?brdPlateAim(F):null;
+  try{_brdFire();}finally{S.drive.on=dOn;S.recoil=0;S.recoilAge=0;S.rockV=rv;BRD.fl=null;S.balCache=null;if(PA)PA.undo();if(BRD.my&&BRD.my.free){di.value=dv;di.min=dmn;di.step=dst;}}
+  if(PA&&shots.length>n0){const sh=shots[shots.length-1];if(sh&&sh.miss){sh.to=F.p.clone();}}
   if(shots.length>n0){const V=brdMine();if(V){BRD.rec=1;if(V.gpz0==null)V.gpz0=V.gp.position.z;}BRD.flT=.12;BRD.flD=F.d.clone();BRD.flO=F.o.clone();}};
 /* камера-прицел наводчика своей машины */
 function brdScopeEl(){if($("brdScope"))return;const st=document.createElement("style");st.textContent=`#brdScope{position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 50%,transparent 0,transparent 34vmin,rgba(0,0,0,.82) 35vmin)}
@@ -3796,10 +3798,11 @@ function brdDisarm(){const M=BRD.my;if(!M)return;if(M.sw)brdSwap();if(BRD.sight)
 const _brdSeat=brdSeat;brdSeat=function(k){_brdSeat(k);if(k==="veh")try{brdArm();}catch(e){console.error(e);}};
 const _brdExit=brdExit;brdExit=function(){if(BRD.my){try{BRD.lastT=S.vt;}catch(e){}brdDisarm();}return _brdExit();};
 /* кадр: машина-мишень — штатный шаг без вождения (впереди, носом к героине), своя машина — штатный шаг с вождением */
-if(typeof vehTick==="function"){const _vt2=vehTick;vehTick=function(dt,rdt){if(!BRD.my)return _vt2(dt,rdt);const dOn=S.drive.on;
-  S.drive.on=false;try{_vt2(dt,rdt);}finally{S.drive.on=dOn;}try{VEH.g.position.z=D-62;}catch(e){}
+if(typeof vehTick==="function"){const _vt2=vehTick;BRD.vt0=_vt2;vehTick=function(dt,rdt){if(!BRD.my)return _vt2(dt,rdt);const dOn=S.drive.on;
+  S.drive.on=false;try{_vt2(dt,rdt);}finally{S.drive.on=dOn;}if(BRD.my.free){BRD.vtS=1;brdFreeStep(dt,rdt,_vt2);return;}try{VEH.g.position.z=D-62;}catch(e){}
   brdSwap();try{_vt2(dt,rdt);}catch(e){if(!BRD.er2){BRD.er2=1;console.error(e);}}finally{brdSwap();}};}
-const _brdHT2=heroTick;heroTick=function(dt){_brdHT2(dt);if(!BRD.my)return;try{const V=brdMine();
+const _brdHT2=heroTick;heroTick=function(dt){_brdHT2(dt);try{if(typeof ramTick==="function")ramTick(dt);}catch(e){}if(!BRD.my)return;
+  if(BRD.my.free&&!BRD.vtS)brdFreeStep(dt,dt,BRD.vt0);BRD.vtS=0;try{const V=brdMine();
   /* откат своей пушки, вспышка у её дульного среза */
   if(V&&V.gpz0!=null){BRD.rec=Math.max(0,(BRD.rec||0)-dt*2.6);V.gp.position.z=V.gpz0-.3*Math.pow(BRD.rec,2)*Math.min(1,G().cal/100);}
   /* штатная вспышка (тот же набор: конус, свечение, свет, пороховые облака дульного тормоза) — переносится к её дульному срезу по оси её ствола */
@@ -3810,10 +3813,144 @@ const _brdHT2=heroTick;heroTick=function(dt){_brdHT2(dt);if(!BRD.my)return;try{c
       const g0=G(),k=Math.max(.25,g0.cal/120)*(g0.cls==="auto"||g0.cls==="mg"?.5:1),fl=Math.max(0,S.flash||0);
       flashS.forEach((f,i)=>{const ox=(i===1?-.7:i===2?.7:0)*k*(1.2-fl*.4),oz=(i===3?1.4*k*(1.3-fl):i===0?.3*k:.1);f.position.copy(m).addScaledVector(rt,ox).addScaledVector(d,oz);if(i===3)f.position.y+=.05;});}catch(e){}
     if(!(S.flash>0)&&BRD.flT<=0)BRD.flD=null;}
-  BRD.lnT=(BRD.lnT||0)-dt;if(BRD.lnT<=0){BRD.lnT=.12;const L=brdLine();if(L){BRD.lastL=L;const r=Math.max(20,Math.round(L.r));$("dist").value=String(r);if($("distTxt"))$("distTxt").textContent=r+" м";}}
+  BRD.lnT=(BRD.lnT||0)-dt;if(BRD.lnT<=0){BRD.lnT=.12;const L=brdLine();if(L){BRD.lastL=L;const r=Math.max(20,Math.round(L.r));if(!BRD.my.free){$("dist").value=String(r);if($("distTxt"))$("distTxt").textContent=r+" м";}}}
   if(BRD.sight&&V){const vt=BRD.my.sw?S.vt:BRD.my.vt,T=VT[vt].tur||{rt:.8};V.g.updateMatrixWorld(true);const c=V.gp.localToWorld(new THREE.Vector3(-(T.rt||.8)*.55,.32,.4)),d=new THREE.Vector3(0,0,1).transformDirection(V.gp.matrixWorld);
     camera.position.copy(c);camera.up.set(0,1,0);camera.lookAt(c.clone().addScaledVector(d,100));const L=BRD.lastL,b=$("brdScope").querySelector("b");
     const t=`${G().n} · ${roundName(S.a)}\nД ${L?Math.round(L.r):"—"} м · ${S.loading?"заряжание "+Math.max(0,(1-S.load)*S.loadT).toFixed(1)+" с":"готово"}`;if(b.textContent!==t){b.textContent=t;b.style.whiteSpace="pre";}}}catch(e){if(!BRD.er3){BRD.er3=1;console.error(e);}}};
+
+/* лист на стойке: точка встречи — пересечение оси её ствола с лицевой гранью листа, угол встречи — по нормали листа относительно её линии огня */
+function brdPlateAim(F){if(typeof plate==="undefined")return null;plate.updateMatrixWorld(true);const sv={am:S.aimMode,aim:S.aim,va:S.vAng,vy:S.vYaw};
+  const oL=plate.worldToLocal(F.o.clone()),pL=plate.worldToLocal(F.p.clone()),dL=pL.sub(oL).normalize(),zf=-(S.T||.05)/2;let aim=[40,40];
+  if(dL.z>1e-4){const t=(zf-oL.z)/dL.z;if(t>0)aim=[oL.x+dL.x*t,oL.y+dL.y*t];}
+  const n=new THREE.Vector3(0,0,-1).transformDirection(plate.matrixWorld).normalize(),psi=Math.atan2(F.d.x,F.d.z),nf=n.clone().applyAxisAngle(new THREE.Vector3(0,1,0),-psi);
+  S.aimMode=true;S.aim=aim;S.vAng=Math.asin(Math.max(-1,Math.min(1,nf.y)))*180/Math.PI;S.vYaw=Math.atan2(-nf.x,-nf.z)*180/Math.PI;S.balCache=null;
+  return{aim,undo(){S.aimMode=sv.am;S.aim=sv.aim;S.vAng=sv.va;S.vYaw=sv.vy;S.balCache=null;}};}
+/* здание: тот же bldShot (трасса bTrace по конструкциям, грунт), но луч идёт от её дульного среза по оси ствола с рассеиванием */
+if(typeof bldShot==="function"){const _brdBS=bldShot;bldShot=function(B,ex,ey){const F=BRD.fl;if(!BRD.my||!F)return _brdBS(B,ex,ey);
+  const los=F.p.clone().sub(F.o).normalize(),up=new THREE.Vector3(0,1,0),rt=new THREE.Vector3().crossVectors(los,up).normalize(),up2=new THREE.Vector3().crossVectors(rt,los).normalize();
+  const P=F.p.clone().addScaledVector(rt,ex).addScaledVector(up2,ey),dw=P.sub(F.o).normalize().applyAxisAngle(rt,-(Math.min(.3,B.desc||0))).normalize();
+  BLD.g.updateMatrixWorld(true);const oL=BLD.g.worldToLocal(F.o.clone()),dLv=BLD.g.worldToLocal(F.o.clone().add(dw)).sub(oL).normalize(),o=[oL.x,oL.y,oL.z],d=[dLv.x,dLv.y,dLv.z];
+  const H=bTrace(o,d,900).sort((a,b)=>a.t0-b.t0);let gy=0;const tg=d[1]<-1e-4?(o[1]-gy)/-d[1]:1e9;
+  if(H.length&&H[0].t0<tg){const p=bPt(o,d,Math.max(0,H[0].t0));return{hit:true,o,d,p,pw:bW(p)};}
+  const tm=Math.min(tg,650),p=bPt(o,d,tm);if(tg<=650)try{p[1]=Math.max(gy,bFloorY(p[0],p[2],p[1]+.5));}catch(e){}return{hit:false,o,d,mp:bW(p),ground:tg<=650};};}
+/* ===== v40: техника во всех режимах. Машина огневого рубежа (танк, БМП/БТР, САУ на гусеничном шасси) в любом режиме — «Лист брони», «Бронемашина», «Здание» —
+   становится машиной героини: штатное вождение (driveTick), её же орудие с боекомплектом через штатный fireOne, прицел наводчика (v39), выход — рядом с машиной.
+   Попадание считается штатно по режиму: лист на стойке (точка и угол встречи — по оси её ствола), машина-мишень (vehShot v39), здание (bldShot по её линии огня). ===== */
+function brdFreeVT(){try{if(typeof tank==="undefined"||!tank||tank.visible===false)return null;const g=G(),p=platOf(g);
+  if(p==="tank"||p==="spg")return"tank";if(p==="ifv"){if(/2А72/.test(g.n))return"btr";if(g.cal<20&&VT.stryk)return"stryk";return"bmp";}return null;}catch(e){return null;}}
+function brdLocal(w){const v=w.clone();try{farG.updateMatrixWorld(true);farG.worldToLocal(v);}catch(e){}return v;}
+/* сборка своей машины штатным конструктором (vehBuild/vehReset) — с подменой «текущей машины», чтобы не тронуть мишень */
+function brdMakeFree(vt){const sv={V:VEH,VS,vt:S.vt,vh:S.vhead,vtur:S.vtur,mvx:S.mvx};VEH=null;VS=null;S.vt=vt;S.vtur=0;let V,Vs;
+  try{vehBuild();vehReset();V=VEH;Vs=VS;}finally{VEH=sv.V;VS=sv.VS;S.vt=sv.vt;S.vhead=sv.vh;S.vtur=sv.vtur;S.mvx=sv.mvx;}V.g.visible=true;return{V,VS:Vs};}
+function brdArmFree(re){if(BRD.my)return;let P=re&&BRD.fp;const M={free:true,sw:false,g:S.g,a:S.a,dist:$("dist").value,dmin:$("dist").min,dstep:$("dist").step,d0:Object.assign({},S.drive,{keys:null})};
+  if(P){M.V=P.V;M.VS=P.VS;M.vt=P.vt;M.mvx=P.x;M.vSpd=0;M.mvDir=1;M.vtur=P.vtur||0;M.vhead=P.hd;M.dx=P.x;M.dz=P.z;M.hd=P.hd;M.plat=P.plat;M.g=P.g!=null?P.g:S.g;BRD.fp=null;}
+  else{const vt=brdFreeVT();if(!vt)return;const r=brdMakeFree(vt);M.V=r.V;M.VS=r.VS;M.vt=vt;M.plat=true;
+    tank.updateMatrixWorld(true);const w=new THREE.Vector3();tank.getWorldPosition(w);const l=brdLocal(w),ry=tank.rotation.y||0;
+    M.dx=l.x;M.dz=l.z-D;M.hd=(ry-Math.PI)*180/Math.PI;M.mvx=l.x;M.vSpd=0;M.mvDir=1;M.vtur=0;M.vhead=M.hd;
+    M.V.g.position.set(l.x,0,l.z);M.V.hd=M.hd;M.V.g.rotation.y=Math.PI+M.hd*Math.PI/180;tank.visible=false;BRD.platHid=true;}
+  BRD.my=M;const d=S.drive;d.on=true;d.keys={};d.x=M.dx;d.z=M.dz;d.hd=M.hd;d.v=0;d.vp=0;
+  if($("dpad"))$("dpad").hidden=false;if($("move")){M.mv=$("move").value;$("move").value="0";try{updMove();}catch(e){}$("move").disabled=true;}
+  brdHook(true);try{renderAmmo();$("gName").textContent=G().n;$("gTag").textContent=`${G().cal} мм · ${VT[M.vt].n.replace(/\s*\(.*$/,"")} героини`;}catch(e){}
+  try{setView(2);}catch(e){}
+  $("res").textContent=`Героиня за рычагами: ${VT[M.vt].n}. Вождение — ▲▼◀▶ (W/S/A/D), башня — ⟲ ⟳ (Q/E). Стреляет её машина — ${G().n}, ${G().cal} мм (${ammoFor(G()).map(k=>roundName(k)).join(", ")}). «Прицел» — вид наводчика. Машина таранит препятствия.`;}
+function brdDisarmFree(){const M=BRD.my;if(!M||!M.free)return;if(M.sw)brdSwap();if(BRD.sight)brdSight(false);const d=S.drive;
+  BRD.fp={V:M.V,VS:M.VS,vt:M.vt,x:d.x,z:d.z,hd:d.hd,vtur:M.vtur,plat:M.plat,g:S.g};
+  M.V.g.position.x=d.x;M.V.g.position.z=D+d.z;M.V.hd=d.hd;M.V.g.rotation.y=Math.PI+d.hd*Math.PI/180;
+  Object.assign(d,M.d0,{keys:{}});d.on=false;d.v=0;if($("dpad"))$("dpad").hidden=!(S.veh&&d.on);
+  if($("move")){$("move").disabled=false;if(M.mv!=null){$("move").value=M.mv;try{updMove();}catch(e){}}}
+  BRD.my=null;brdHook(false);$("dist").min=M.dmin||"100";$("dist").step=M.dstep||"50";$("dist").value=M.dist;
+  /* огневой рубеж: штатное орудие снова на месте */
+  if(BRD.platHid){tank.visible=true;BRD.platHid=false;}S.g=M.g;S.a=M.a;try{renderAmmo();setGun(M.g);}catch(e){}S.balCache=null;}
+/* осмотр: припаркованная машина героини — кандидат на посадку */
+function brdFreeInfo(){const P=BRD.my&&BRD.my.free?{V:brdMine(),vt:BRD.my.sw?S.vt:BRD.my.vt}:BRD.fp;if(!P)return null;const root=P.V.g,key="free"+root.uuid;
+  let b=BRD.box[key];if(!b){const rx=root.rotation.x,rz=root.rotation.z;root.rotation.x=0;root.rotation.z=0;b=BRD.box[key]=brdBox(root,P.V.gp);root.rotation.x=rx;root.rotation.z=rz;root.updateMatrixWorld(true);}
+  const T=VT[P.vt].tur;const hl=T?new THREE.Vector3(T.p[0]+T.rt*.4,T.p[1]+T.h,T.p[2]-.1):new THREE.Vector3((b.min.x+b.max.x)/2+.35,Math.min(b.max.y,(VT[P.vt].top||2)+.1),(b.min.z+b.max.z)/2);return{root,b,hl};}
+const _brdInfo0=brdInfo;brdInfo=function(k){if(k==="free")return brdFreeInfo();return _brdInfo0(k);};
+const _brdName0=brdName;brdName=function(k){if(k==="free"||(k==="own"&&brdFreeVT())){const vt=k==="free"?(BRD.my&&BRD.my.free?BRD.my.vt&&(BRD.my.sw?S.vt:BRD.my.vt):BRD.fp&&BRD.fp.vt):brdFreeVT();
+  if(k==="own"){const g=G();return g.t||g.n;}return VT[vt]?VT[vt].n.replace(/^.*\(тип\s*/,"").replace(/\)$/,""):"машина";}return _brdName0(k);};
+const _brdFind0=brdFind;brdFind=function(){let best=_brdFind0();try{if(BRD.fp&&BRD.fp.V.g.visible&&HERO.on&&HERO.g&&HERO.g.visible&&!HERO.place&&!BRD.anim&&!BRD.in){const I=brdFreeInfo(),r=brdDist(I,HERO.g.position);
+  if(r.d<=4&&(!best||r.d<best.d))best={k:"free",d:r.d,l:r.l,I};}}catch(e){}return best;};
+const _brdSeat3=brdSeat;brdSeat=function(k){if(k==="free"||(k==="own"&&brdFreeVT())){BRD.sel=(typeof WP!=="undefined")?WP.sel:null;HERO.g.visible=false;heroOn(false);BRD.in="free";
+    try{brdArmFree(k==="free");}catch(e){console.error(e);}brdUI();return;}return _brdSeat3(k);};
+const _brdExit3=brdExit;brdExit=function(){if(BRD.in==="free"){try{brdDisarmFree();}catch(e){console.error(e);}}return _brdExit3();};
+/* шаг своей машины: штатный vehTick/driveTick с подменой «текущей машины»; площадка режима «Бронемашина» её не ограничивает */
+function brdFreeStep(dt,rdt,vt0){const M=BRD.my;if(!M||!M.free)return;brdSwap();const sv=S.veh;S.veh=true;BRD.fStep=true;
+  try{vt0(dt,rdt);}catch(e){if(!BRD.er4){BRD.er4=1;console.error(e);}}finally{S.veh=sv;BRD.fStep=false;brdSwap();}}
+const _brdDrv=driveTick;driveTick=function(dt){if(!BRD.fStep)return _brdDrv(dt);const d=S.drive,x0=d.x,z0=d.z;d.x=0;d.z=0;
+  try{_brdDrv(dt);}finally{const dx=d.x,dz=d.z;d.x=x0+dx;d.z=z0+dz;S.mvx=d.x;}try{brdRam(dt,x0,z0);}catch(e){if(!BRD.er5){BRD.er5=1;console.error(e);}}};
+/* ===== v40: таран. Любая ведомая машина (героиня за рычагами или штатное «Вождение» режима «Бронемашина») сталкивается с препятствиями:
+   энергия удара E = ½·m·v² по боевой массе машины (штатная физика vehPhys) и её скорости. Лёгкие препятствия (легковые машины, деревья, люди, стойка с листом)
+   сминаются/сбиваются и отнимают у машины часть скорости (неупругий удар); стены здания проламываются штатным разрушением (bBreach), если энергии хватает
+   на пролом (удельная работа пролома × пятно контакта × толщина), иначе машина упирается и стена трескается; другие машины — удар с обменом импульсом. ===== */
+const RAM={t:0,log:"",tf:[],trees:null,cool:new Map()};
+const RAM_K={rc:3.0e6,brick:.9e6,aer:.35e6,glass:0,wood:.12e6,metal:1.6e6};/* Дж/м³ — игровая удельная работа пролома (изгиб и срез стенки, а не дробление всего объёма) */
+function ramMsg(t){RAM.log=t;try{if(!S.lock)$("res").textContent=t;}catch(e){}}
+function ramObb(cx,cz,hx,hz,yaw){const c=Math.cos(yaw),s=Math.sin(yaw);return{c:[cx,cz],u:[[c,-s],[s,c]],h:[hx,hz]};}/* оси: «x» и «z» после поворота на yaw вокруг вертикали */
+function ramSat(A,B){const ax=[A.u[0],A.u[1],B.u[0],B.u[1]],d=[B.c[0]-A.c[0],B.c[1]-A.c[1]];let minO=1e9;
+  for(const a of ax){const pa=A.h[0]*Math.abs(A.u[0][0]*a[0]+A.u[0][1]*a[1])+A.h[1]*Math.abs(A.u[1][0]*a[0]+A.u[1][1]*a[1]),pb=B.h[0]*Math.abs(B.u[0][0]*a[0]+B.u[0][1]*a[1])+B.h[1]*Math.abs(B.u[1][0]*a[0]+B.u[1][1]*a[1]),dd=Math.abs(d[0]*a[0]+d[1]*a[1]),o=pa+pb-dd;if(o<=0)return 0;minO=Math.min(minO,o);}return minO;}
+/* поворот: в three.js rotation.y=θ переводит локальную ось x в (cosθ,0,−sinθ), ось z — в (sinθ,0,cosθ) */
+function ramObbOf(cx,cz,hx,hz,ry){const c=Math.cos(ry),s=Math.sin(ry);return{c:[cx,cz],u:[[c,-s],[s,c]],h:[hx,hz]};}
+function ramMine(){/* ведомая сейчас машина: на время шага вождения VEH — она */return VEH;}
+function ramOthers(me){const L=[];try{const M=BRD.my;if(M){const o=M.sw?M.V:VEH;if(o&&o!==me&&o.g.visible&&o.g.parent)L.push({V:o,vt:o.t||(M.sw?M.vt:S.vt)});}
+  if(BRD.fp&&BRD.fp.V!==me&&BRD.fp.V.g.visible)L.push({V:BRD.fp.V,vt:BRD.fp.vt,park:true});}catch(e){}return L;}
+function ramSnd(p){try{sVeh("clatter",p.clone());}catch(e){}}
+function brdRam(dt,px,pz){const d=S.drive;if(!d||!d.on)return;const V=ramMine();if(!V||!V.g)return;const sp=Math.abs(d.v||0);if(sp<.25)return;
+  const v=VT[S.vt]||VT[V.t]||{L:6,W:3.2},P=V.phys||(typeof vehPhys==="function"?vehPhys():{total:20}),m=(P.total||20)*1000,KE=()=>.5*m*d.v*d.v;
+  const hr=d.hd*Math.PI/180,f=new THREE.Vector3(-Math.sin(hr),0,-Math.cos(hr)),mv=f.clone().multiplyScalar(Math.sign(d.v));
+  V.g.updateMatrixWorld(true);const c=new THREE.Vector3();V.g.getWorldPosition(c);const L=v.L||6.5,W=v.W||3.3,kmh=x=>Math.round(Math.abs(x)*3.6),MJ=E=>(E/1e6).toFixed(E<1e6?2:1).replace(".",",")+" МДж";
+  const me=ramObbOf(c.x,c.z,W/2,L/2,V.g.rotation.y);const now=performance.now()/1000;const block=(why)=>{d.x=px;d.z=pz;d.v=-.12*d.v;d.vp=d.v;};
+  const slow=(Ed)=>{const E=KE();d.v=Math.sign(d.v)*Math.sqrt(Math.max(0,E-Ed)*2/m);d.vp=d.v;return E;};
+  const nm=(VT[S.vt]&&VT[S.vt].n||"машина").replace(/\s*\(тип\s*/," (").replace(/^.*\(/,"").replace(/\)$/,""),mt=(m/1000).toFixed(1).replace(".",",");
+  /* 1) другие машины */
+  for(const o of ramOthers(V)){const vo=VT[o.vt]||v,po=o.V.phys||{total:vo.mass||20},m2=(po.total||vo.mass||20)*1000,w=new THREE.Vector3();o.V.g.getWorldPosition(w);
+    const ov=ramSat(me,ramObbOf(w.x,w.z,(vo.W||3.2)/2,(vo.L||6.5)/2,o.V.g.rotation.y));if(!ov)continue;const to=w.clone().sub(c);to.y=0;if(to.dot(mv)<=0)continue;
+    const E=KE(),v1=d.v*m/(m+m2),Eabs=E-.5*(m+m2)*v1*v1;
+    if(o.park&&m>m2*1.4){o.V.g.position.addScaledVector(mv,ov+.05);d.v=v1;d.vp=d.v;}else block();
+    if(!RAM.cool.get(o.V)||now-RAM.cool.get(o.V)>1.2){RAM.cool.set(o.V,now);ramSnd(w);
+      ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч ударила ${VT[o.vt].n} (${(m2/1000).toFixed(1).replace(".",",")} т). Энергия удара ${MJ(E)}, поглощено в смятии ${MJ(Eabs)}${o.park&&m>m2*1.4?" — машину сдвинуло":" — машины упёрлись"}.`);}}
+  /* 2) стойка с листом (режим «Лист брони») */
+  try{if(!S.veh&&!S.bld&&typeof stand!=="undefined"&&stand.visible){const w=new THREE.Vector3();stand.getWorldPosition(w);if(ramSat(me,ramObbOf(w.x,w.z,1.4,.9,0))){
+    if(!S.fallen){const E=slow(6e4);S.fallen=true;S.fall=0;S.fallFrom=pivot.rotation.x;try{sFall();}catch(e){}for(let i=0;i<10;i++)try{puff(new THREE.Vector3(w.x+R(-1.2,1.2),.3,w.z+R(-.8,.8)),false,.7,0x9a8c68,new THREE.Vector3(R(-2,2),R(.3,1.2),R(-1,2)),R(2,3.5));}catch(e){}
+      ramMsg(`Таран: ${nm} (${mt} т, ${kmh(sp)} км/ч, ${MJ(E)}) снесла стойку — лист брони опрокинут (≈60 кДж на излом стоек).`);}else block();}}}catch(e){}
+  /* 3) здание, машины на улице, бойцы — в системе координат здания */
+  if(S.bld&&typeof BLD!=="undefined"&&BLD&&BLD.g.visible){BLD.g.updateMatrixWorld(true);const lc=BLD.g.worldToLocal(c.clone()),lf=BLD.g.worldToLocal(c.clone().add(mv)).sub(lc).normalize();
+    const lrt=new THREE.Vector3(lf.z,0,-lf.x),reach=L/2+sp*dt+.25;let hitW=null;
+    for(const k of[-.42,0,.42]){const o=[lc.x+lrt.x*W*k,lc.y+.9,lc.z+lrt.z*W*k],dd=[lf.x,0,lf.z];let H=[];try{H=bTrace(o,dd,reach).sort((a,b)=>a.t0-b.t0);}catch(e){}
+      for(const h of H){const e=h.e;if(e.gnd||h.t0>reach)continue;if(typeof bIsGl==="function"&&bIsGl(e)){try{bGlass(e,dd,Math.max(4,sp),"ke");}catch(x){}continue;}if(e.k==="s")continue;if(!hitW||h.t0<hitW.h.t0)hitW={h,o,dd};break;}}
+    if(hitW){const e=hitW.h.e,pt=bPt(hitW.o,hitW.dd,Math.max(0,hitW.h.t0)),th=Math.min(1.2,Math.max(.05,(hitW.h.t1-hitW.h.t0)||.3)),A=W*1.8,k=RAM_K[e.m]!=null?RAM_K[e.m]:(e.k==="p"?RAM_K.wood:1.0e6),need=k*A*th,E=KE();
+      const mat={rc:"железобетон",brick:"кирпич",aer:"газобетон"}[e.m]||(e.k==="p"?"перегородка":"конструкция");const last=RAM.cool.get(e);
+      if(E>need){try{bBreach(e,pt,Math.max(1.2,W*.55),hitW.dd,{We:.04});}catch(x){}try{bDmgCells(e,pt,W*.6,1.4,hitW.dd,{v:Math.min(9,sp*.8),flat:1});}catch(x){}
+        try{bFlush();}catch(x){}try{for(let i=0;i<3;i++)bDust([pt[0]+R(-1,1),pt[1]+R(-.5,.8),pt[2]+R(-1,1)],[.62,.57,.5],1.4);}catch(x){}try{bSnd("fall",pt,.6);}catch(x){}try{if(typeof bSupportCheck==="function")bSupportCheck();}catch(x){}
+        slow(need);RAM.cool.set(e,now);ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч — ${MJ(E)} — проломила стену (${mat}, ${Math.round(th*1000)} мм): на пролом ушло ≈${MJ(need)}, скорость после стены ${kmh(d.v)} км/ч.`);}
+      else{block();if(!last||now-last>1){RAM.cool.set(e,now);try{bDmgCells(e,pt,W*.35,Math.min(1,.25+E/need),hitW.dd,{v:2});bFlush();}catch(x){}try{bDust(pt,[.62,.57,.5],1);}catch(x){}ramSnd(c);
+        ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч — ${MJ(E)} — стена (${mat}, ${Math.round(th*1000)} мм) выдержала: на пролом нужно ≈${MJ(need)}. Стена дала трещины, машина упёрлась. Разгонитесь сильнее или выберите стену тоньше.`);}}}
+    /* легковые машины: давятся под гусеницами/колёсами */
+    const ml=ramObbOf(lc.x,lc.z,W/2,L/2,Math.atan2(lf.x,lf.z)+Math.PI);
+    for(const cr of BLD.cars||[]){if(cr.crush||cr.ry==null)continue;if(Math.abs(cr.x-lc.x)>9||Math.abs(cr.z-lc.z)>9)continue;const T=CAR_T[cr.t||0]||CAR_T[0];
+      if(!ramSat(ml,ramObbOf(cr.x,cr.z,2.25*T.L,.9*T.W,cr.ry)))continue;cr.crush=1;const E=slow(Math.min(KE()*.5,1300*sp*sp*.5*.6));
+      try{const Pb=BLD.P.carB,Pc=BLD.P.carC,gy=cr.gy||0;Pb.m.setMatrixAt(cr.bi,bMR(cr.x,gy+.2+.16*T.H,cr.z,T.L*1.04,T.H*.42,T.W*1.08,cr.ry));Pb.dirty=1;
+        Pc.m.setMatrixAt(cr.ci,bMR(cr.x+Math.cos(cr.ry)*T.cx*T.L,gy+.32+.36*T.H*.42+.08*T.ch,cr.z-Math.sin(cr.ry)*T.cx*T.L,T.cl,T.ch*.22,T.W*.9,cr.ry));Pc.dirty=1;
+        bTint(Pb,cr.bi,_bc.setRGB(.42,.4,.38));bTint(Pc,cr.ci,_bc.setRGB(.5,.52,.55));bFlush();}catch(x){}
+      for(let i=0;i<16;i++)try{bShard([cr.x+R(-1,1),(cr.gy||0)+1,cr.z+R(-.8,.8)],[lf.x*R(1,3)+R(-1.5,1.5),R(.5,2.5),lf.z*R(1,3)+R(-1.5,1.5)],R(.03,.08));}catch(x){}try{bSnd("glass",[cr.x,(cr.gy||0)+1,cr.z],.8);}catch(x){}ramSnd(c);
+      ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч раздавила легковую машину (≈1,3 т): кузов смят до ≈40% высоты, стёкла высыпались; машина потеряла ≈${kmh(sp-Math.abs(d.v))} км/ч.`);}
+    /* бойцы на пути */
+    try{for(const Pp of PPL.L||[]){if(Pp.st)continue;const pm=Pp.m.position;if(Math.abs(pm.x-lc.x)>8||Math.abs(pm.z-lc.z)>8)continue;if(!ramSat(ml,ramObbOf(pm.x,pm.z,.3,.3,0)))continue;
+      Pp.st=1;Pp.fall=0;Pp.yy=pm.y;Pp.ax=Math.sign((pm.x-lc.x)*lf.z-(pm.z-lc.z)*lf.x)||1;PPL.log++;ramMsg(`Таран: ${nm} (${mt} т, ${kmh(sp)} км/ч) сбила бойца — погиб.`);}}catch(x){}}
+  /* 4) деревья полигона: валятся по ходу машины */
+  try{ramTrees(c,me,mv,sp,m,slow,nm);}catch(x){}}
+function ramTreeIdx(){if(RAM.trees)return RAM.trees;const L=[];try{(WORLD&&WORLD.trees||[]).forEach(mh=>{const A=mh.instanceMatrix.array,n=Math.min(mh.count,A.length/16);for(let i=0;i<n;i++){const x=A[i*16+12],z=A[i*16+14];if(x===0&&z===0)continue;L.push([mh,i]);}});}catch(e){}RAM.trees=L;return L;}
+function ramTrees(c,me,mv,sp,m,slow,nm){const L=ramTreeIdx();if(!L.length)return;const M4=new THREE.Matrix4(),p=new THREE.Vector3(),q=new THREE.Quaternion(),s=new THREE.Vector3();let n=0,seen=new Set();
+  for(const [mh,i] of L){if(mh.userData.ramDown&&mh.userData.ramDown[i])continue;const A=mh.instanceMatrix.array;if(A[i*16+15]===0)continue;p.set(A[i*16+12],A[i*16+13],A[i*16+14]);mh.localToWorld(p);
+    if(Math.abs(p.x-c.x)>7||Math.abs(p.z-c.z)>7)continue;if(!ramSat(me,ramObbOf(p.x,p.z,.35,.35,0)))continue;const key=Math.round(p.x*10)+","+Math.round(p.z*10);
+    (mh.userData.ramDown=mh.userData.ramDown||{})[i]=1;RAM.tf.push({mh,i,t:0,ax:new THREE.Vector3(mv.z,0,-mv.x),base:A.slice(i*16,i*16+16)});
+    if(!seen.has(key)){seen.add(key);n++;for(let k=0;k<4;k++)try{puff(new THREE.Vector3(p.x+R(-.6,.6),.4,p.z+R(-.6,.6)),false,.6,0x6f6a4c,new THREE.Vector3(R(-1,1),R(.4,1.2),R(-1,1)),R(2,3));}catch(x){}}}
+  if(n){const E=slow(n*4e4);ramMsg(`Таран: ${nm} (${(m/1000).toFixed(1).replace(".",",")} т, ${Math.round(sp*3.6)} км/ч) повалила ${n===1?"дерево":n+" дерева"} — на излом ствола ≈40 кДж каждое.`);}}
+function ramTick(dt){if(!RAM.tf.length)return;const M=new THREE.Matrix4(),R4=new THREE.Matrix4(),T1=new THREE.Matrix4(),T2=new THREE.Matrix4();
+  RAM.tf=RAM.tf.filter(F=>{F.t=Math.min(1,F.t+dt*1.4);const a=Math.pow(F.t,1.8)*1.45,b=F.base;M.fromArray(b);const bx=b[12],by=b[13],bz=b[14];
+    const axL=F.ax.clone();T1.makeTranslation(-bx,-by,-bz);R4.makeRotationAxis(axL.normalize(),a);T2.makeTranslation(bx,by,bz);M.premultiply(T1).premultiply(R4).premultiply(T2);
+    M.toArray(F.mh.instanceMatrix.array,F.i*16);F.mh.instanceMatrix.needsUpdate=true;return F.t<1;});}
+/* таран и для штатного вождения (без героини) */
+if(!BRD.fStepWrapped){BRD.fStepWrapped=1;const _rd=driveTick;driveTick=function(dt){if(BRD.fStep)return _rd(dt);const d=S.drive,px=d.x,pz=d.z;_rd(dt);try{if(d.on&&S.veh)brdRam(dt,px,pz);}catch(e){if(!BRD.er6){BRD.er6=1;console.error(e);}}};}
 /* ===== v33: Героиня — реалистичная модель по фото (скелет со скиннингом) (≈1,70 м, длинные платиновые волосы, чёрный комбинезон, белый длинный кардиган, белые кроссовки), ставится на карту, управление от третьего лица ===== */
 const HERO={on:false,place:false,g:null,v:new THREE.Vector3(),vy:0,yaw:0,ph:0,spd:0,air:false,cy:0,cp:.28,cd:3.4,keys:{},joy:{x:0,y:0},run:false,jumpQ:false,save:null,col:[],colT:0,camP:null};
 S.hero=HERO;
