@@ -3780,12 +3780,12 @@ function brdScopeEl(){if($("brdScope"))return;const st=document.createElement("s
 function brdSight(on){brdScopeEl();BRD.sight=!!on&&!!BRD.my;$("brdScope").hidden=!BRD.sight;$("aimBtn").setAttribute("aria-pressed",BRD.sight);
   if(BRD.sight){if(BRD.fov0==null)BRD.fov0=camera.fov;camera.fov=12;camera.updateProjectionMatrix();if(controls)controls.enabled=false;S.view=-1;brdLbl(false);views.forEach((_,j)=>{const b=$("v"+j);b&&b.setAttribute("aria-pressed","false");});
     $("res").textContent="Прицел наводчика: перетаскивание — башня и ствол (вместе с ⟲ ⟳); дальномер меряет дальность до точки под маркой, СУО вводит прицел. «Выстрел» — огонь, «Снаряд · сменить» — выбор выстрела.";}
-  else{if(BRD.fov0!=null){camera.fov=BRD.fov0;camera.updateProjectionMatrix();BRD.fov0=null;}if(controls)controls.enabled=true;brdLbl(true);if(S.view===-1&&BRD.my)try{setView(2);}catch(e){}}}
+  else{if(BRD.fov0!=null){camera.fov=BRD.fov0;camera.updateProjectionMatrix();BRD.fov0=null;}if(controls)controls.enabled=true;brdLbl(true);if(S.view===-1&&BRD.my)try{setView(2);}catch(e){}BRD.camP=null;}}
 /* подписи брони (спрайты) в прицеле прячутся, после — как были */
 function brdLbl(on){const M=BRD.my;[VEH,M&&M.V].forEach(V=>{if(!V||!V.g)return;V.g.traverse(o=>{if(!o.isSprite)return;if(!on){if(o.userData.brdV==null){o.userData.brdV=o.visible;o.visible=false;}}else if(o.userData.brdV!=null){o.visible=o.userData.brdV;delete o.userData.brdV;}});});}
 /* «Прицел» в машине — вид наводчика; кнопки камер выводят из прицела. Обработчики подменяются только на время посадки */
 function brdHook(on){const ab=$("aimBtn");if(on){if(BRD.h0)return;BRD.h0={aim:ab.onclick,v:views.map((_,i)=>$("v"+i)&&$("v"+i).onclick)};ab.onclick=e=>{brdSight(!BRD.sight);};
-    views.forEach((_,i)=>{const b=$("v"+i);if(!b)return;const f=BRD.h0.v[i];b.onclick=e=>{if(BRD.sight)brdSight(false);return f&&f.call(b,e);};});}
+    views.forEach((_,i)=>{const b=$("v"+i);if(!b)return;const f=BRD.h0.v[i];b.onclick=e=>{if(BRD.sight)brdSight(false);BRD.camP=null;return f&&f.call(b,e);};});}
   else if(BRD.h0){ab.onclick=BRD.h0.aim;views.forEach((_,i)=>{const b=$("v"+i);if(b)b.onclick=BRD.h0.v[i];});BRD.h0=null;ab.setAttribute("aria-pressed",!!S.aimMode);}}
 /* посадка: своя машина отделяется от штатной «текущей», штатный режим строит машину-мишень на дальнем конце площадки */
 function brdArm(){if(BRD.my||!S.veh||!VEH)return;const M={V:VEH,VS,vt:S.vt,sw:false,g:S.g,a:S.a,vtSel:S.vt,dist:$("dist").value,dmin:$("dist").min,dstep:$("dist").step,vh0:S.vhead,tt:BRD.tgtT||"tank"};BRD_SW.forEach(k=>M[k]=S[k]);
@@ -3844,7 +3844,10 @@ function brdLocal(w){const v=w.clone();try{farG.updateMatrixWorld(true);farG.wor
 /* сборка своей машины штатным конструктором (vehBuild/vehReset) — с подменой «текущей машины», чтобы не тронуть мишень */
 function brdMakeFree(vt){const sv={V:VEH,VS,vt:S.vt,vh:S.vhead,vtur:S.vtur,mvx:S.mvx};VEH=null;VS=null;S.vt=vt;S.vtur=0;let V,Vs;
   try{vehBuild();vehReset();V=VEH;Vs=VS;}finally{VEH=sv.V;VS=sv.VS;S.vt=sv.vt;S.vhead=sv.vh;S.vtur=sv.vtur;S.mvx=sv.mvx;}V.g.visible=true;return{V,VS:Vs};}
-function brdArmFree(re){if(BRD.my)return;let P=re&&BRD.fp;const M={free:true,sw:false,g:S.g,a:S.a,dist:$("dist").value,dmin:$("dist").min,dstep:$("dist").step,d0:Object.assign({},S.drive,{keys:null})};
+/* смена режима: героиня выходит, оставленная машина возвращается на огневой рубеж (штатное орудие уже там) */
+function brdFreeDrop(){const P=BRD.fp;if(!P)return;BRD.fp=null;try{P.V.g.parent&&P.V.g.parent.remove(P.V.g);if(P.V.tg&&P.V.tg.parent&&P.V.tg.parent!==P.V.b)P.V.tg.parent.remove(P.V.tg);vehDispose(P.V);}catch(e){}}
+function brdModeHook(){const t=$("tmode");if(!t||!t.onchange||t.onchange.__brd)return;const f=t.onchange,h=function(e){try{if(BRD.in==="free")brdExit();brdFreeDrop();}catch(x){console.error(x);}return f.call(this,e);};h.__brd=1;t.onchange=h;}
+function brdArmFree(re){if(BRD.my)return;brdModeHook();let P=re&&BRD.fp;const M={free:true,sw:false,g:S.g,a:S.a,dist:$("dist").value,dmin:$("dist").min,dstep:$("dist").step,d0:Object.assign({},S.drive,{keys:null})};
   if(P){M.V=P.V;M.VS=P.VS;M.vt=P.vt;M.mvx=P.x;M.vSpd=0;M.mvDir=1;M.vtur=P.vtur||0;M.vhead=P.hd;M.dx=P.x;M.dz=P.z;M.hd=P.hd;M.plat=P.plat;M.g=P.g!=null?P.g:S.g;BRD.fp=null;}
   else{const vt=brdFreeVT();if(!vt)return;const r=brdMakeFree(vt);M.V=r.V;M.VS=r.VS;M.vt=vt;M.plat=true;
     tank.updateMatrixWorld(true);const w=new THREE.Vector3();tank.getWorldPosition(w);const l=brdLocal(w),ry=tank.rotation.y||0;
@@ -3853,9 +3856,9 @@ function brdArmFree(re){if(BRD.my)return;let P=re&&BRD.fp;const M={free:true,sw:
   BRD.my=M;const d=S.drive;d.on=true;d.keys={};d.x=M.dx;d.z=M.dz;d.hd=M.hd;d.v=0;d.vp=0;
   if($("dpad"))$("dpad").hidden=false;if($("move")){M.mv=$("move").value;$("move").value="0";try{updMove();}catch(e){}$("move").disabled=true;}
   brdHook(true);try{renderAmmo();$("gName").textContent=G().n;$("gTag").textContent=`${G().cal} мм · ${VT[M.vt].n.replace(/\s*\(.*$/,"")} героини`;}catch(e){}
-  try{setView(2);}catch(e){}
+  try{setView(2);brdChase(true);}catch(e){}
   $("res").textContent=`Героиня за рычагами: ${VT[M.vt].n}. Вождение — ▲▼◀▶ (W/S/A/D), башня — ⟲ ⟳ (Q/E). Стреляет её машина — ${G().n}, ${G().cal} мм (${ammoFor(G()).map(k=>roundName(k)).join(", ")}). «Прицел» — вид наводчика. Машина таранит препятствия.`;}
-function brdDisarmFree(){const M=BRD.my;if(!M||!M.free)return;if(M.sw)brdSwap();if(BRD.sight)brdSight(false);const d=S.drive;
+function brdDisarmFree(){const M=BRD.my;if(!M||!M.free)return;BRD.camP=null;if(M.sw)brdSwap();if(BRD.sight)brdSight(false);const d=S.drive;
   BRD.fp={V:M.V,VS:M.VS,vt:M.vt,x:d.x,z:d.z,hd:d.hd,vtur:M.vtur,plat:M.plat,g:S.g};
   M.V.g.position.x=d.x;M.V.g.position.z=D+d.z;M.V.hd=d.hd;M.V.g.rotation.y=Math.PI+d.hd*Math.PI/180;
   Object.assign(d,M.d0,{keys:{}});d.on=false;d.v=0;if($("dpad"))$("dpad").hidden=!(S.veh&&d.on);
@@ -3876,8 +3879,12 @@ const _brdSeat3=brdSeat;brdSeat=function(k){if(k==="free"||(k==="own"&&brdFreeVT
     try{brdArmFree(k==="free");}catch(e){console.error(e);}brdUI();return;}return _brdSeat3(k);};
 const _brdExit3=brdExit;brdExit=function(){if(BRD.in==="free"){try{brdDisarmFree();}catch(e){console.error(e);}}return _brdExit3();};
 /* шаг своей машины: штатный vehTick/driveTick с подменой «текущей машины»; площадка режима «Бронемашина» её не ограничивает */
-function brdFreeStep(dt,rdt,vt0){const M=BRD.my;if(!M||!M.free)return;brdSwap();const sv=S.veh;S.veh=true;BRD.fStep=true;
-  try{vt0(dt,rdt);}catch(e){if(!BRD.er4){BRD.er4=1;console.error(e);}}finally{S.veh=sv;BRD.fStep=false;brdSwap();}}
+function brdFreeStep(dt,rdt,vt0){const M=BRD.my;if(!M||!M.free)return;brdSwap();const sv=S.veh;BRD.svVeh=sv;S.veh=true;BRD.fStep=true;const vw=S.view;S.view=-2;
+  try{vt0(dt,rdt);}catch(e){if(!BRD.er4){BRD.er4=1;console.error(e);}}finally{S.view=vw;S.veh=sv;BRD.fStep=false;brdSwap();}try{brdChase(false);}catch(e){}}
+/* камера «Мишень» в любом режиме едет за её машиной (как штатная камера у мишени при вождении) */
+function brdChase(init){const V=brdMine();if(!V||!controls||BRD.sight||S.view!==2)return;const p=new THREE.Vector3();V.g.getWorldPosition(p);p.y+=1.3;
+  if(init||!BRD.camP){const hr=S.drive.hd*Math.PI/180,f=new THREE.Vector3(-Math.sin(hr),0,-Math.cos(hr));controls.target.copy(p);camera.position.copy(p).addScaledVector(f,-15).add(new THREE.Vector3(4,6.5,0));controls.update();BRD.camP=p.clone();return;}
+  const dl=p.clone().sub(BRD.camP);BRD.camP.copy(p);controls.target.add(dl);camera.position.add(dl);}
 const _brdDrv=driveTick;driveTick=function(dt){if(!BRD.fStep)return _brdDrv(dt);const d=S.drive,x0=d.x,z0=d.z;d.x=0;d.z=0;
   try{_brdDrv(dt);}finally{const dx=d.x,dz=d.z;d.x=x0+dx;d.z=z0+dz;S.mvx=d.x;}try{brdRam(dt,x0,z0);}catch(e){if(!BRD.er5){BRD.er5=1;console.error(e);}}};
 /* ===== v40: таран. Любая ведомая машина (героиня за рычагами или штатное «Вождение» режима «Бронемашина») сталкивается с препятствиями:
@@ -3911,7 +3918,7 @@ function brdRam(dt,px,pz){const d=S.drive;if(!d||!d.on)return;const V=ramMine();
     if(!RAM.cool.get(o.V)||now-RAM.cool.get(o.V)>1.2){RAM.cool.set(o.V,now);ramSnd(w);
       ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч ударила ${VT[o.vt].n} (${(m2/1000).toFixed(1).replace(".",",")} т). Энергия удара ${MJ(E)}, поглощено в смятии ${MJ(Eabs)}${o.park&&m>m2*1.4?" — машину сдвинуло":" — машины упёрлись"}.`);}}
   /* 2) стойка с листом (режим «Лист брони») */
-  try{if(!S.veh&&!S.bld&&typeof stand!=="undefined"&&stand.visible){const w=new THREE.Vector3();stand.getWorldPosition(w);if(ramSat(me,ramObbOf(w.x,w.z,1.4,.9,0))){
+  try{if(!(BRD.fStep?BRD.svVeh:S.veh)&&!S.bld&&typeof stand!=="undefined"&&stand.visible){const w=new THREE.Vector3();stand.getWorldPosition(w);if(ramSat(me,ramObbOf(w.x,w.z,1.4,.9,0))){
     if(!S.fallen){const E=slow(6e4);S.fallen=true;S.fall=0;S.fallFrom=pivot.rotation.x;try{sFall();}catch(e){}for(let i=0;i<10;i++)try{puff(new THREE.Vector3(w.x+R(-1.2,1.2),.3,w.z+R(-.8,.8)),false,.7,0x9a8c68,new THREE.Vector3(R(-2,2),R(.3,1.2),R(-1,2)),R(2,3.5));}catch(e){}
       ramMsg(`Таран: ${nm} (${mt} т, ${kmh(sp)} км/ч, ${MJ(E)}) снесла стойку — лист брони опрокинут (≈60 кДж на излом стоек).`);}else block();}}}catch(e){}
   /* 3) здание, машины на улице, бойцы — в системе координат здания */
