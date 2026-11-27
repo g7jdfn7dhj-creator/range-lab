@@ -10134,9 +10134,11 @@ function pplTick(dt){if(!PPL.L.length)return;const t=performance.now()/1000;try{
     if(P.cy>sup+.04){if(!P.fl){P.fl=1;P.f0=P.cy;}P.vy-=9.8*dt;P.cy+=P.vy*dt;
       if(P.cy<=sup){P.cy=sup;P.vy=0;P.fl=0;if(!P.st&&P.f0-sup>1){P.st=2;P.fall=0;P.ax=P.ax||1;P.yy=sup;PPL.log++;}}}
     else{P.cy=sup;P.vy=0;P.fl=0;}
+    if(P.st&&P.hk&&typeof pplHeroFall==="function"){pplHeroFall(P,m,U,dt);return;}
     if(P.st){const k=P.fall*P.fall;if(P.fall<1)P.fall=Math.min(1,P.fall+dt*2.2);m.rotation.x=P.ax*k*Math.PI/2*.98;m.position.y=P.cy+.15*k;return;}
     m.position.y=P.cy;
     if(!P.pat){m.rotation.z=Math.sin(t*.8+P.ph)*.02;}
+    if(P.fx>0&&typeof pplFlinch==="function")pplFlinch(P,m,U,dt);
     const F=U.flag;if(F){const a=F.geometry.attributes.position,b=U.fx0,w=+(($("wind")||{}).value)||3;for(let i=0;i<a.count;i++){const x=b[i*3];a.setZ(i,Math.sin(x*4.2-t*(4+Math.abs(w)*.3)+P.ph)*.09*x+(.05+Math.min(.3,Math.abs(w)*.02))*x*x);}a.needsUpdate=true;}});}
 /* разрыв: p — точка в мировых координатах, W — масса ВВ (кг) */
 function pplBlast(p,W){if(!PPL.L.length||!BLD||!(W>0))return;let lp;try{lp=BLD.g.worldToLocal(p.clone());}catch(e){return;}
