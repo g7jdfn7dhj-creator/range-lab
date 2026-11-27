@@ -3724,7 +3724,8 @@ function wpSoldierRay(o,d,far){if(!S.bld||typeof PPL==="undefined"||!PPL.L||!PPL
 /* здание: стены, перекрытия, окна (bTrace — в координатах здания) */
 function wpBldRay(o,d,far){if(!S.bld||!BLD||!BLD.g.visible||typeof bTrace!=="function")return null;farG.updateMatrixWorld(true);
   const lo=BLD.g.worldToLocal(o.clone()),le=BLD.g.worldToLocal(o.clone().addScaledVector(d,1)),ld=le.sub(lo),sc=ld.length();ld.normalize();const O=[lo.x,lo.y,lo.z],D=[ld.x,ld.y,ld.z];
-  let best=null;try{const H=bTrace(O,D,far*sc);if(H.length){const h=H[0],t=Math.max(0,h.t0);best={kind:"bld",e:h.e,h,dist:t/sc,pl:bPt(O,D,t),nl:h.n,dl:D,len:h.len,p:bW(bPt(O,D,t)),n:null};}}catch(e){}
+  let best=null;try{const H=bTrace(O,D,far*sc);if(H.length){const h=H[0],t=Math.max(0,h.t0);let len=h.len||0,end=h.t1;for(let i=1;i<H.length;i++){const q=H[i];if(q.t0-end>.02||q.e.m==="glass"||q.e.m==="tglass"||q.e.m==="sky")break;len+=q.len||0;end=Math.max(end,q.t1);}
+      best={kind:"bld",e:h.e,h,dist:t/sc,pl:bPt(O,D,t),nl:h.n,dl:D,len,p:bW(bPt(O,D,t)),n:null};}}catch(e){}
   /* машины на улице: кузов (тонкая сталь) и салон (стёкла) */
   for(const c of BLD.cars||[]){if(c.ry==null||c.burn)continue;const dx=O[0]-c.x,dz=O[2]-c.z;if(Math.hypot(dx,dz)>far*sc+6)continue;const k=Math.cos(c.ry),s=Math.sin(c.ry),T=CAR_T[c.t||0];
     const oL=[dx*k-dz*s,O[1],dx*s+dz*k],dL=[D[0]*k-D[2]*s,D[1],D[0]*s+D[2]*k],by=c.gy+.32+.36*T.H,top=c.gy+.32+.72*T.H,cy=top+.29*T.ch;
