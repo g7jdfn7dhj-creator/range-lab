@@ -3741,6 +3741,8 @@ function brdLine(){const V=brdMine();if(!V)return null;V.g.updateMatrixWorld(tru
   const o=V.gp.localToWorld(new THREE.Vector3(0,0,L+.05)),d=new THREE.Vector3(0,0,1).transformDirection(V.gp.matrixWorld).normalize();let p=null;
   let best=1500;try{const vis=V.g.visible;V.g.visible=false;const h=wpRay(o,d,1500);V.g.visible=vis;if(h){p=h.p.clone();best=o.distanceTo(p);}}catch(e){}
   try{const T=BRD.my.sw?BRD.my.V:VEH;if(T&&T!==V&&T.meshes&&T.g.visible&&S.veh){T.g.updateMatrixWorld(true);const h=new THREE.Raycaster(o,d,0,best).intersectObjects(T.meshes,false)[0];if(h){p=h.point.clone();BRD.lnTgt=true;}else BRD.lnTgt=false;}}catch(e){}
+  try{if(S.bld&&typeof BLD!=="undefined"&&BLD&&BLD.g.visible){BLD.g.updateMatrixWorld(true);const oL=BLD.g.worldToLocal(o.clone()),dL=BLD.g.worldToLocal(o.clone().add(d)).sub(oL).normalize(),H=bTrace([oL.x,oL.y,oL.z],[dL.x,dL.y,dL.z],p?o.distanceTo(p):1500).sort((a,b)=>a.t0-b.t0);
+    if(H.length){const q=bW(bPt([oL.x,oL.y,oL.z],[dL.x,dL.y,dL.z],Math.max(0,H[0].t0)));if(!p||o.distanceTo(q)<o.distanceTo(p))p=q;}}}catch(e){}
   if(!p)p=o.clone().addScaledVector(d,1500);return{o,d,p,r:o.distanceTo(p)};}
 const _brdMuz=muzzleWorld;muzzleWorld=function(){if(BRD.my&&BRD.fl)return BRD.fl.o.clone();if(BRD.my){const L=brdLine();if(L)return L.o;}return _brdMuz();};
 /* попадание: тот же расчёт, что у штатного vehShot (луч по геометрии машины, угол встречи по нормали, вторая баллистика с наклоном), но луч идёт по её линии огня */
@@ -3898,7 +3900,7 @@ function brdRam(dt,px,pz){const d=S.drive;if(!d||!d.on)return;const V=ramMine();
   const v=VT[S.vt]||VT[V.t]||{L:6,W:3.2},P=V.phys||(typeof vehPhys==="function"?vehPhys():{total:20}),m=(P.total||20)*1000,KE=()=>.5*m*d.v*d.v;
   const hr=d.hd*Math.PI/180,f=new THREE.Vector3(-Math.sin(hr),0,-Math.cos(hr)),mv=f.clone().multiplyScalar(Math.sign(d.v));
   V.g.updateMatrixWorld(true);const c=new THREE.Vector3();V.g.getWorldPosition(c);const L=v.L||6.5,W=v.W||3.3,kmh=x=>Math.round(Math.abs(x)*3.6),MJ=E=>(E/1e6).toFixed(E<1e6?2:1).replace(".",",")+" МДж";
-  const me=ramObbOf(c.x,c.z,W/2,L/2,V.g.rotation.y);const now=performance.now()/1000;const block=(why)=>{d.x=px;d.z=pz;d.v=-.12*d.v;d.vp=d.v;};
+  const me=ramObbOf(c.x,c.z,W/2,L/2,V.g.rotation.y);RAM.t+=dt;const now=RAM.t;const block=(why)=>{d.x=px;d.z=pz;d.v=-.12*d.v;d.vp=d.v;};
   const slow=(Ed)=>{const E=KE();d.v=Math.sign(d.v)*Math.sqrt(Math.max(0,E-Ed)*2/m);d.vp=d.v;return E;};
   const nm=(VT[S.vt]&&VT[S.vt].n||"машина").replace(/\s*\(тип\s*/," (").replace(/^.*\(/,"").replace(/\)$/,""),mt=(m/1000).toFixed(1).replace(".",",");
   /* 1) другие машины */
@@ -3917,13 +3919,13 @@ function brdRam(dt,px,pz){const d=S.drive;if(!d||!d.on)return;const V=ramMine();
     const lrt=new THREE.Vector3(lf.z,0,-lf.x),reach=L/2+sp*dt+.25;let hitW=null;
     for(const k of[-.42,0,.42]){const o=[lc.x+lrt.x*W*k,lc.y+.9,lc.z+lrt.z*W*k],dd=[lf.x,0,lf.z];let H=[];try{H=bTrace(o,dd,reach).sort((a,b)=>a.t0-b.t0);}catch(e){}
       for(const h of H){const e=h.e;if(e.gnd||h.t0>reach)continue;if(typeof bIsGl==="function"&&bIsGl(e)){try{bGlass(e,dd,Math.max(4,sp),"ke");}catch(x){}continue;}if(e.k==="s")continue;if(!hitW||h.t0<hitW.h.t0)hitW={h,o,dd};break;}}
-    if(hitW){const e=hitW.h.e,pt=bPt(hitW.o,hitW.dd,Math.max(0,hitW.h.t0)),th=Math.min(1.2,Math.max(.05,(hitW.h.t1-hitW.h.t0)||.3)),A=W*1.8,k=RAM_K[e.m]!=null?RAM_K[e.m]:(e.k==="p"?RAM_K.wood:1.0e6),need=k*A*th,E=KE();
-      const mat={rc:"железобетон",brick:"кирпич",aer:"газобетон"}[e.m]||(e.k==="p"?"перегородка":"конструкция");const last=RAM.cool.get(e);
-      if(E>need){try{bBreach(e,pt,Math.max(1.2,W*.55),hitW.dd,{We:.04});}catch(x){}try{bDmgCells(e,pt,W*.6,1.4,hitW.dd,{v:Math.min(9,sp*.8),flat:1});}catch(x){}
+    if(hitW){const e=hitW.h.e,pt=bPt(hitW.o,hitW.dd,Math.max(0,hitW.h.t0)),th=Math.min(1.2,Math.max(.05,e.th||(hitW.h.t1-hitW.h.t0)||.3)),col=e.k==="c",A=col?Math.min(W,.6)*1.8:W*1.8,k=RAM_K[e.m]!=null?RAM_K[e.m]:(e.k==="p"?RAM_K.wood:1.0e6),need=k*A*th,E=KE();
+      const mat=(col?"колонна, ":"стена, ")+({rc:"железобетон",brick:"кирпич",aer:"газобетон",steel:"сталь"}[e.m]||(e.k==="p"?"перегородка":"конструкция"));const last=RAM.cool.get(e);
+      if(E>need){if(col){try{bColDmg(e,9,hitW.dd,"таран");}catch(x){}}else{try{bBreach(e,pt,Math.max(1.2,W*.55),hitW.dd,{We:.04});}catch(x){}try{bDmgCells(e,pt,W*.6,1.4,hitW.dd,{v:Math.min(9,sp*.8),flat:1});}catch(x){}}
         try{bFlush();}catch(x){}try{for(let i=0;i<3;i++)bDust([pt[0]+R(-1,1),pt[1]+R(-.5,.8),pt[2]+R(-1,1)],[.62,.57,.5],1.4);}catch(x){}try{bSnd("fall",pt,.6);}catch(x){}try{if(typeof bSupportCheck==="function")bSupportCheck();}catch(x){}
-        slow(need);RAM.cool.set(e,now);ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч — ${MJ(E)} — проломила стену (${mat}, ${Math.round(th*1000)} мм): на пролом ушло ≈${MJ(need)}, скорость после стены ${kmh(d.v)} км/ч.`);}
-      else{block();if(!last||now-last>1){RAM.cool.set(e,now);try{bDmgCells(e,pt,W*.35,Math.min(1,.25+E/need),hitW.dd,{v:2});bFlush();}catch(x){}try{bDust(pt,[.62,.57,.5],1);}catch(x){}ramSnd(c);
-        ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч — ${MJ(E)} — стена (${mat}, ${Math.round(th*1000)} мм) выдержала: на пролом нужно ≈${MJ(need)}. Стена дала трещины, машина упёрлась. Разгонитесь сильнее или выберите стену тоньше.`);}}}
+        slow(need);RAM.cool.set(e,now);ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч — ${MJ(E)} — проломила препятствие (${mat}, ${Math.round(th*1000)} мм): на пролом ушло ≈${MJ(need)}, скорость после стены ${kmh(d.v)} км/ч.`);}
+      else{block();if(!last||now-last>4||E>1.5*(RAM.cool.get("E"+e.id)||0)){RAM.cool.set(e,now);RAM.cool.set("E"+e.id,E);try{if(col)bColDmg(e,.6*E/need,hitW.dd,"таран");else bDmgCells(e,pt,W*.35,Math.min(1,.25+E/need),hitW.dd,{v:2});bFlush();}catch(x){}try{bDust(pt,[.62,.57,.5],1);}catch(x){}ramSnd(c);
+        ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч — ${MJ(E)} — препятствие (${mat}, ${Math.round(th*1000)} мм) выдержало: на пролом нужно ≈${MJ(need)}. Трещины и сколы, машина упёрлась. Разгонитесь сильнее или выберите преграду тоньше.`);}}}
     /* легковые машины: давятся под гусеницами/колёсами */
     const ml=ramObbOf(lc.x,lc.z,W/2,L/2,Math.atan2(lf.x,lf.z)+Math.PI);
     for(const cr of BLD.cars||[]){if(cr.crush||cr.ry==null)continue;if(Math.abs(cr.x-lc.x)>9||Math.abs(cr.z-lc.z)>9)continue;const T=CAR_T[cr.t||0]||CAR_T[0];
@@ -3932,7 +3934,7 @@ function brdRam(dt,px,pz){const d=S.drive;if(!d||!d.on)return;const V=ramMine();
         Pc.m.setMatrixAt(cr.ci,bMR(cr.x+Math.cos(cr.ry)*T.cx*T.L,gy+.32+.36*T.H*.42+.08*T.ch,cr.z-Math.sin(cr.ry)*T.cx*T.L,T.cl,T.ch*.22,T.W*.9,cr.ry));Pc.dirty=1;
         bTint(Pb,cr.bi,_bc.setRGB(.42,.4,.38));bTint(Pc,cr.ci,_bc.setRGB(.5,.52,.55));bFlush();}catch(x){}
       for(let i=0;i<16;i++)try{bShard([cr.x+R(-1,1),(cr.gy||0)+1,cr.z+R(-.8,.8)],[lf.x*R(1,3)+R(-1.5,1.5),R(.5,2.5),lf.z*R(1,3)+R(-1.5,1.5)],R(.03,.08));}catch(x){}try{bSnd("glass",[cr.x,(cr.gy||0)+1,cr.z],.8);}catch(x){}ramSnd(c);
-      ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч раздавила легковую машину (≈1,3 т): кузов смят до ≈40% высоты, стёкла высыпались; машина потеряла ≈${kmh(sp-Math.abs(d.v))} км/ч.`);}
+      ramMsg(`Таран: ${nm} (${mt} т) на ${kmh(sp)} км/ч раздавила легковую машину (≈1,3 т): кузов смят до ≈40% высоты, стёкла высыпались; ${sp-Math.abs(d.v)>.28?`машина потеряла ≈${kmh(sp-Math.abs(d.v))} км/ч`:`скорость почти не упала: танк тяжелее легковушки ≈${Math.round(m/1300)}×`}.`);}
     /* бойцы на пути */
     try{for(const Pp of PPL.L||[]){if(Pp.st)continue;const pm=Pp.m.position;if(Math.abs(pm.x-lc.x)>8||Math.abs(pm.z-lc.z)>8)continue;if(!ramSat(ml,ramObbOf(pm.x,pm.z,.3,.3,0)))continue;
       Pp.st=1;Pp.fall=0;Pp.yy=pm.y;Pp.ax=Math.sign((pm.x-lc.x)*lf.z-(pm.z-lc.z)*lf.x)||1;PPL.log++;ramMsg(`Таран: ${nm} (${mt} т, ${kmh(sp)} км/ч) сбила бойца — погиб.`);}}catch(x){}}
