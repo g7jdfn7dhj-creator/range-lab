@@ -3572,9 +3572,7 @@ function wpFire(){const H=HERO,w=WPN[WP.sel],G=WP.hold[WP.sel];if(!G||WP.rl>0||W
   if(WP.mags[WP.sel]<=0){wpReload();return;}WP.mags[WP.sel]--;WP.cool=w.rpm?60/w.rpm:(w.pistol?.12:.25);
   G.h.updateMatrixWorld(true);const mz=G.h.localToWorld(G.muz.clone());let tp=WP.aimK>.5?wpAimPoint():mz.clone().add(new THREE.Vector3(0,0,1).applyQuaternion(G.h.quaternion).multiplyScalar(80));
   const d=tp.sub(mz).normalize(),sp=w.spr*(WP.aimK>.5?1:4)*(H.spd>.5?2:1);d.x+=(Math.random()-.5)*sp*2;d.y+=(Math.random()-.5)*sp*2;d.z+=(Math.random()-.5)*sp*2;d.normalize();
-  const hit=wpRay(mz,d,800);if(hit){const sz=(w.calmm/1000)*(hit.kind==="ground"?5:2.6)+.006;wpDecal(hit.p,hit.n,sz);
-    const metal=hit.obj&&hit.obj.material&&(hit.obj.material.metalness>.3);try{if(metal||(S.veh&&hit.obj))impactFlash(hit.p.clone(),w.calmm*8,"rico");}catch(e){}
-    try{puff(hit.p.clone().addScaledVector(hit.n,.05),false,hit.kind==="ground"?.35:.22,hit.kind==="ground"?0x8b7a62:0x9a948a,hit.n.clone().multiplyScalar(.8),.9);}catch(e){}}
+  try{wpHit(w,mz,d);}catch(e){console.error(e);}
   /* вспышка, отдача, гильза, звук */
   if(!WP.fl&&typeof flashTex==="function"){const t=flashTex();if(t){WP.fl=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,fog:false}));WP.fl.renderOrder=8;WP.fl.raycast=()=>{};scene.add(WP.fl);}}
   if(WP.fl){WP.fl.position.copy(mz).addScaledVector(d,.04);const s=w.pistol?.22:w.id==="svd"?.36:.3;WP.fl.scale.set(s,s,1);WP.fl.material.rotation=Math.random()*6.28;WP.fl.visible=true;WP.flT=.045;}
@@ -3686,6 +3684,131 @@ try{(function(){const top=$("heroTop"),hud=$("heroHud");if(!top||!hud)return;
   addEventListener("keyup",e=>{if(e.code==="KeyF")WP.trig=false;},true);
   const xh=$("heroXh");setInterval(()=>{if(xh)xh.className=WPN[WP.sel].scope&&WP.aimK>.6?"scope":"";},150);
 })();}catch(e){console.error("wpn ui",e);}
+/* ===== v34: попадания пуль героини — бойцы по зонам, техника по бронированию, здания и машины ===== */
+/* баллистика по оружию: dmg — урон (из 100 ОЗ) по незащищённой груди вблизи; pen — пробитие гомогенной брони, мм, по нормали на 10 м;
+   fall — потеря пробития на 100 м (доля); vest — доля урона, прошедшая через бронежилет; wall — пробитие кирпича/бетона/газобетона/гипсокартона, см */
+const WBAL={glock:{dmg:42,pen:2.5,fall:.35,vest:.12,am:"57-Н-181С, оболочечная со стальным сердечником",wall:{brick:4,rc:1.5,aer:12,gpart:30,steel:.25}},
+  mp5:{dmg:45,pen:3,fall:.3,vest:.12,am:"57-Н-181С",wall:{brick:4.5,rc:1.8,aer:14,gpart:32,steel:.3}},
+  ak74m:{dmg:68,pen:7,fall:.08,vest:.9,am:"7Н6, стальной сердечник",wall:{brick:12,rc:5,aer:30,gpart:60,steel:.7}},
+  svd:{dmg:115,pen:10,fall:.06,vest:1,am:"57-Н-323С ЛПС, стальной сердечник",wall:{brick:18,rc:8,aer:40,gpart:80,steel:1}}};
+/* стойкость слоя брони к пуле: множитель к толщине, мм эквивалента катаной стали */
+const WARM={rha:1,cast:.9,hh:1.25,alu:.33,al:.33,stb:.3,rub:.03,gap:0,sand:.15,cer:2.2,era5:.9,era:.9,k5:.9,nera:.8};
+const WAN={rha:"катаная броня",cast:"литая броня",hh:"высокотвёрдая сталь",alu:"алюминиевая броня",al:"алюминиевая броня",stb:"стеклотекстолит",rub:"резинотканевый экран",gap:"зазор",sand:"наполнитель",cer:"керамика",era5:"блок динамической защиты",era:"блок динамической защиты",k5:"блок динамической защиты"};
+const WZN={hullF:"лоб корпуса",hullS:"борт корпуса",hullR:"корма",roof:"крыша",turF:"лоб башни",turS:"борт башни",run:"ходовая часть",gun:"пушка"};
+const wF1=(x,n)=>(+x).toFixed(n==null?1:n).replace(".",",");
+function wpLog(s){WP.log=s;try{$("res").textContent=s;}catch(e){}}
+/* луч против коробки [x0,y0,z0,x1,y1,z1] — расстояние входа и нормаль */
+function wBox(o,d,b){let t0=-1e9,t1=1e9,ax=-1,sg=1;for(let i=0;i<3;i++){const oi=o[i],di=d[i];if(Math.abs(di)<1e-9){if(oi<b[i]||oi>b[i+3])return null;continue;}
+    let a=(b[i]-oi)/di,c=(b[i+3]-oi)/di,s=-1;if(a>c){const q=a;a=c;c=q;s=1;}if(a>t0){t0=a;ax=i;sg=s;}if(c<t1)t1=c;if(t0>t1)return null;}
+  if(t1<0)return null;const n=[0,0,0];if(ax>=0)n[ax]=sg;return{t:Math.max(0,t0),n};}
+function wSph(o,d,c,r){const ox=o[0]-c[0],oy=o[1]-c[1],oz=o[2]-c[2],b=ox*d[0]+oy*d[1]+oz*d[2],q=ox*ox+oy*oy+oz*oz-r*r,h=b*b-q;if(h<0)return null;const t=-b-Math.sqrt(h);if(t<0)return null;
+  return{t,n:[(ox+d[0]*t)/r,(oy+d[1]*t)/r,(oz+d[2]*t)/r]};}
+/* зоны бойца в его локальных координатах (лицом к +z, ступни в 0) */
+const WPZ=[["head","голова",1,null,[0,1.655,0],.135],["neck","шея",1,null,[0,1.5,0],.075],
+  ["chest","грудь (бронежилет)",2,[-.24,1.0,-.17,.24,1.47,.17]],["pelvis","таз",3,[-.2,.8,-.14,.2,1.0,.14]],
+  ["armL","левая рука",4,[.2,.9,-.08,.38,1.46,.46]],["armR","правая рука",4,[-.38,.9,-.08,-.2,1.46,.46]],
+  ["legL","левая нога",5,[.02,0,-.12,.21,.84,.12]],["legR","правая нога",5,[-.21,0,-.12,-.02,.84,.12]]];
+function wpSoldierRay(o,d,far){if(!S.bld||typeof PPL==="undefined"||!PPL.L||!PPL.L.length||!BLD||!BLD.g.visible)return null;let best=null;const c=new THREE.Vector3(),q=new THREE.Vector3();
+  farG.updateMatrixWorld(true);
+  for(const P of PPL.L){const m=P.m;if(!m.visible)continue;m.updateMatrixWorld(true);c.set(0,.9,0);m.localToWorld(c);
+    /* грубый отсев: расстояние от луча до центра > 1,5 м */
+    q.copy(c).sub(o);const t=q.dot(d);if(t<0||t>far)continue;if(q.addScaledVector(d,-t).length()>1.5)continue;
+    const lo=m.worldToLocal(o.clone()),le=m.worldToLocal(o.clone().addScaledVector(d,1)),ld=le.sub(lo);const sc=ld.length();ld.normalize();const O=[lo.x,lo.y,lo.z],D=[ld.x,ld.y,ld.z];
+    for(const z of WPZ){const h=z[3]?wBox(O,D,z[3]):wSph(O,D,z[4],z[5]);if(!h)continue;const dist=h.t/sc;if(dist>far||(best&&dist>=best.dist))continue;
+      const p=m.localToWorld(new THREE.Vector3(O[0]+D[0]*h.t,O[1]+D[1]*h.t,O[2]+D[2]*h.t)),n=new THREE.Vector3(h.n[0],h.n[1],h.n[2]).transformDirection(m.matrixWorld);
+      best={kind:"ppl",P,zone:z,dist,p,n,ld:new THREE.Vector3(D[0],D[1],D[2])};}}
+  return best;}
+/* здание: стены, перекрытия, окна (bTrace — в координатах здания) */
+function wpBldRay(o,d,far){if(!S.bld||!BLD||!BLD.g.visible||typeof bTrace!=="function")return null;farG.updateMatrixWorld(true);
+  const lo=BLD.g.worldToLocal(o.clone()),le=BLD.g.worldToLocal(o.clone().addScaledVector(d,1)),ld=le.sub(lo),sc=ld.length();ld.normalize();const O=[lo.x,lo.y,lo.z],D=[ld.x,ld.y,ld.z];
+  let best=null;try{const H=bTrace(O,D,far*sc);if(H.length){const h=H[0],t=Math.max(0,h.t0);best={kind:"bld",e:h.e,h,dist:t/sc,pl:bPt(O,D,t),nl:h.n,dl:D,len:h.len,p:bW(bPt(O,D,t)),n:null};}}catch(e){}
+  /* машины на улице: кузов (тонкая сталь) и салон (стёкла) */
+  for(const c of BLD.cars||[]){if(c.ry==null||c.burn)continue;const dx=O[0]-c.x,dz=O[2]-c.z;if(Math.hypot(dx,dz)>far*sc+6)continue;const k=Math.cos(c.ry),s=Math.sin(c.ry),T=CAR_T[c.t||0];
+    const oL=[dx*k-dz*s,O[1],dx*s+dz*k],dL=[D[0]*k-D[2]*s,D[1],D[0]*s+D[2]*k],by=c.gy+.32+.36*T.H,top=c.gy+.32+.72*T.H,cy=top+.29*T.ch;
+    const parts=[["body",[-2.2*T.L,by-.34*T.H,-.88*T.W,2.2*T.L,by+.3*T.H,.88*T.W]],["glass",[T.cx*T.L-1.12*T.cl,cy-.3*T.ch,-.76*T.W,T.cx*T.L+1.12*T.cl,cy+.28*T.ch,.76*T.W]]];
+    for(const[pt,b]of parts){const h=wBox(oL,dL,b);if(!h)continue;const dist=h.t/sc;if(dist>far||(best&&dist>=best.dist))continue;
+      const nl=[h.n[0]*k+h.n[2]*s,h.n[1],-h.n[0]*s+h.n[2]*k],pl=[O[0]+D[0]*h.t,O[1]+D[1]*h.t,O[2]+D[2]*h.t];
+      best={kind:"car",car:c,part:pt,dist,pl,nl,dl:D,front:Math.abs(h.n[0])>.5,p:bW(pl),n:null};}}
+  if(best)best.n=new THREE.Vector3(best.nl[0],best.nl[1],best.nl[2]).transformDirection(BLD.g.matrixWorld);return best;}
+function wpVehRay(o,d,far){if(!S.veh||typeof VEH==="undefined"||!VEH||!VEH.g.visible||!VEH.meshes)return null;const rc=new THREE.Raycaster(o,d,0,far);const h=rc.intersectObjects(VEH.meshes,false).find(q=>q.object.visible);
+  if(!h)return null;const n=h.face?h.face.normal.clone().transformDirection(h.object.matrixWorld):d.clone().negate();if(n.dot(d)>0)n.negate();return{kind:"veh",dist:h.distance,p:h.point.clone(),n,obj:h.object};}
+function wSpark(p,n,d,k,rico){try{if(typeof spkEmit==="function"){const r=d.clone().addScaledVector(n,-2*d.dot(n));spkEmit(p.clone(),rico?r.add(new THREE.Vector3(0,.1,0)):n.clone().multiplyScalar(.8).addScaledVector(r,.4),Math.round((rico?26:16)*k),rico?.22:.7,rico?60:35,{hot:1.15,life:rico?.8:.5});}}catch(e){}
+  try{impactFlash(p.clone().addScaledVector(n,.02),Math.max(30,40*k),"rico");}catch(e){}}
+/* главный обработчик выстрела: ближайшее из бойца, машины, здания, техники, рельефа */
+function wpHit(w,o,d){const B=WBAL[w.id]||WBAL.ak74m,C=[];const far=800;
+  const g=wpRay(o,d,far);const vh=wpVehRay(o,d,far),bl=wpBldRay(o,d,far),pp=wpSoldierRay(o,d,far);
+  if(g&&!(S.veh&&g.obj)&&!(S.bld&&g.kind==="mesh"&&bl))C.push(g);[vh,bl,pp].forEach(x=>x&&C.push(x));if(!C.length){wpLog(`${w.name}: промах — пуля ушла в поле.`);return null;}
+  C.sort((a,b)=>a.dist-b.dist);const h=C[0],dist=h.dist,pen=B.pen*Math.max(.2,1-B.fall*dist/100),cal=w.calmm,dm=`${wF1(dist,0)} м`;
+  if(h.kind==="ppl")return wpHitMan(w,B,h,d,dm);
+  if(h.kind==="veh")return wpHitVeh(w,B,h,d,pen,dm);
+  if(h.kind==="car")return wpHitCar(w,B,h,d,dm);
+  if(h.kind==="bld")return wpHitBld(w,B,h,d,dm);
+  /* рельеф или стенд */
+  const sz=(cal/1000)*(h.kind==="ground"?5:2.6)+.006;wpDecal(h.p,h.n,sz);
+  const metal=h.obj&&h.obj.material&&(h.obj.material.metalness>.3);if(metal)wSpark(h.p,h.n,d,.6,false);
+  try{puff(h.p.clone().addScaledVector(h.n,.05),false,h.kind==="ground"?.35:.22,h.kind==="ground"?0x8b7a62:0x9a948a,h.n.clone().multiplyScalar(.8),.9);}catch(e){}
+  wpLog(h.kind==="ground"?`${w.name}: попадание в грунт, ${dm} — фонтанчик земли.`:`${w.name}: попадание в ${metal?"металл — искры":"мишень"}, ${dm}.`);return h;}
+/* боец: урон по зоне, бронежилет, гибель, ранение, вздрагивание */
+function wpHitMan(w,B,h,d,dm){const P=h.P,z=h.zone,R0=()=>.88+Math.random()*.24;let dmg=0,lethal=false,txt="";
+  if(P.hp==null)P.hp=100;
+  if(P.st){/* тело уже лежит */try{puff(h.p.clone(),false,.12,0x6a2a22,h.n.clone().multiplyScalar(.4),.5);}catch(e){}wpLog(`${w.name}: попадание в тело убитого (${z[1]}), ${dm}.`);return h;}
+  if(z[2]===1){lethal=true;dmg=999;txt=`${z[1]} — смертельно`;}
+  else{const zk=[0,0,1,.85,.35,.45][z[2]];let k=zk;if(z[2]===2){k*=B.vest;txt=B.vest<.3?`${z[1]}: пуля задержана бронежилетом, запреградная травма`:`${z[1]}: бронежилет пробит`;}else txt=z[1];
+    dmg=Math.round(B.dmg*k*R0());}
+  P.hp-=dmg;const died=lethal||P.hp<=0;
+  /* направление удара в координатах бойца: от стрелка, вдоль луча */
+  const ld=h.ld;P.hd=ld.z<0?-1:1;P.hs=ld.x;
+  if(died){P.st=1;P.hk=1;P.ft=0;P.fall=0;P.kind=z[2]===1?"head":z[2]===5?"leg":"body";P.ax=-P.hd;P.tw=(Math.random()-.5)*.6+(-P.hs*.5);P.hp=0;PPL.log=(PPL.log||0)+1;
+    try{if(P.m.userData.wg&&P.m.userData.wg.fl)P.m.userData.wg.fl.visible=false;}catch(e){}}
+  else if(z[2]===5&&P.hp<55){P.st=3;P.hk=1;P.ft=0;P.fall=0;P.kind="wound";P.ax=-P.hd;P.tw=(Math.random()-.5)*.4;}
+  else{P.fx=1;P.fxa=-P.hd;P.fxs=-P.hs;}
+  try{puff(h.p.clone().addScaledVector(h.n,.03),false,.1,0x7a1c14,h.n.clone().multiplyScalar(.6).add(d.clone().multiplyScalar(.6)),.45);}catch(e){}
+  const alive=PPL.L.filter(q=>!q.st).length;
+  wpLog(`${w.name} → боец №${PPL.L.indexOf(P)+1}, ${dm}: ${txt}${dmg<999?`, урон ${dmg}`:""}. `+(died?`Убит${z[2]===1?" (попадание в голову)":""}.`:P.st===3?`Ранен в ногу, упал (${P.hp} ОЗ).`:`Ранен, ${Math.max(0,P.hp)} ОЗ из 100 — вздрогнул.`)+` Живых бойцов: ${alive}.`);return h;}
+/* анимация вздрагивания и падения (вызывается из pplTick) */
+function pplFlinch(P,m,U,dt){P.fx=Math.max(0,P.fx-dt*3.2);const s=Math.sin((1-P.fx)*Math.PI)*(P.fx>0?1:0);m.rotation.x=P.fxa*.22*s;m.rotation.z=(P.fxs||0)*.12*s;}
+function pplHeroFall(P,m,U,dt){P.ft=(P.ft||0)+dt;const t=P.ft,cl=x=>Math.max(0,Math.min(1,x));
+  /* убит в голову — ноги подламываются сразу; в корпус — короткий шаг-пошатывание, потом падение; ранен в ногу — оседает на колено и заваливается набок */
+  const d0=P.kind==="head"?0:P.kind==="wound"?.05:.12,kn=cl((t-d0)/.32),kk=kn*kn*(3-2*kn),tp=cl((t-d0-.18)/(P.kind==="wound"?.9:.62)),te=tp*tp,bo=tp>=1?0:0;
+  let rx=P.ax*(Math.PI/2)*.97*te;const end=cl((t-d0-.8)/.25);rx+=P.ax*Math.sin(end*Math.PI)*.05;/* лёгкий отскок при ударе о землю */
+  if(P.kind==="wound")rx*=.55;
+  m.rotation.x=rx;m.rotation.z=(P.tw||0)*te+(P.kind==="wound"?.9*te*Math.sign(P.tw||1):0);
+  /* приседание на подломленных ногах, затем тело ложится: высота таза уходит к земле */
+  const drop=.42*kk*(1-te)+(P.kind==="wound"?.25*te:0);m.position.y=(P.cy||0)-drop+.12*te;
+  const lg=-1.25*kk*(1-te*.8);if(U.legL){U.legL.rotation.x=lg;U.legR.rotation.x=lg*(P.kind==="leg"?.6:.9);}
+  if(U.armL&&t<1.6){const a=-.3-1*(1-te);U.armL.rotation.x=a;U.armR.rotation.x=a*.8;}
+  if(t>1.6)P.fall=1;}
+/* техника: слои брони зоны, угол встречи, пробитие */
+function wpHitVeh(w,B,h,d,pen,dm){const v=VT[S.vt],n=h.n,cosA=Math.max(.05,-d.dot(n)),ang=Math.acos(Math.min(1,cosA))*180/Math.PI;let zone="hullS";try{zone=vehZone(h.obj,h.p,n);}catch(e){}
+  const pk=vehPack(zone);let left=pen,stop=-1,eq=0,t0=0;for(let i=0;i<pk.length;i++){const k=WARM[pk[i][0]]!=null?WARM[pk[i][0]]:.6,e=pk[i][1]*k/cosA;eq+=e;if(left>=e){left-=e;}else{stop=i;break;}}
+  const ricoA=w.pistol?60:68,rico=ang>ricoA&&stop>=0,ok=stop<0,first=pk[0]||["rha",0],L0=stop>=0?pk[stop]:first;
+  const vhc={part:h.obj.userData.part||"hull",pL:VEH.g.worldToLocal(h.p.clone()),nL:n.clone().transformDirection(new THREE.Matrix4().copy(VEH.g.matrixWorld).invert()),dL:d.clone().transformDirection(new THREE.Matrix4().copy(VEH.g.matrixWorld).invert())};
+  const c=w.calmm/1000;try{if(ok)vehDecal(vhc,"hole",Math.max(.02,c*2.6),Math.max(.02,c*2.6),.002);else if(rico)vehDecal(vhc,"gouge",Math.max(.05,c*9),Math.max(.012,c*2),.002);else vehDecal(vhc,"dent",Math.max(.025,c*3.2),Math.max(.025,c*3.2),.002);}catch(e){}
+  wSpark(h.p,n,d,ok?.5:1,rico||!ok);try{wpSnd&&0;}catch(e){}
+  const lay=pk.filter(l=>l[0]!=="gap").map(l=>`${WAN[l[0]]||l[0]} ${l[1]} мм`).join(" + ");
+  wpLog(`${w.name} (${B.am}) → ${v.n}, ${WZN[zone]||zone}, ${dm}, угол встречи ${Math.round(ang)}°: бронепробитие пули ≈${wF1(pen)} мм, `+(ok?`преграда ≈${wF1(eq)} мм — ПРОБИТИЕ, пробоина, искры.`:rico?`рикошет от «${WAN[L0[0]]||L0[0]}» — борозда и сноп искр.`:`не пробил (${lay}) — отметина, искры.`));return h;}
+/* машина на улице: кузов — тонкая сталь 0,8 мм, пробивается любой пулей; стёкла: боковые закалённые рассыпаются, лобовое триплекс трескается */
+function wpHitCar(w,B,h,d,dm){const c=h.car,pl=h.pl,nl=h.nl,dw=new THREE.Vector3(h.dl[0],h.dl[1],h.dl[2]);c.hits=(c.hits||0)+1;let txt="";
+  if(h.part==="body"){try{bDecal(pl,nl,.02+w.calmm/1000);}catch(e){}wSpark(h.p,h.n,d,.45,false);c.holes=(c.holes||0)+1;txt=`кузов (сталь 0,8 мм) пробит навылет — пробоина №${c.holes}, искры`;}
+  else{c.gh=(c.gh||0)+1;try{bDecal(pl,nl,.035+w.calmm/700);}catch(e){}
+    const brk=!h.front||c.gh>=3||w.id==="svd";
+    if(brk&&!c.gb){c.gb=1;c.gl=1;try{bTint(BLD.P.carC,c.ci,_bc.setRGB(2.2,2.3,2.4));}catch(e){}for(let i=0;i<14;i++)try{bShard([pl[0]+R(-.3,.3),pl[1]+R(-.2,.2),pl[2]+R(-.3,.3)],[h.dl[0]*R(1,3)+R(-1,1),R(-.5,1.5),h.dl[2]*R(1,3)+R(-1,1)],R(.03,.08));}catch(e){}
+      try{bSnd("glass",pl,.5);}catch(e){}txt=h.front?"лобовое стекло (триплекс) разбито":"боковое закалённое стекло рассыпалось в крошку";}
+    else if(c.gb)txt="стекло уже разбито — пуля прошла в салон";
+    else{try{bTint(BLD.P.carC,c.ci,_bc.setRGB(1.35+.25*c.gh,1.4+.25*c.gh,1.45+.25*c.gh));}catch(e){}txt=`лобовое стекло (триплекс): пробоина и паутина трещин (${c.gh}-е попадание)`;}}
+  wpLog(`${w.name} → легковая машина, ${dm}: ${txt}.`);return h;}
+/* здание: стёкла бьются, стены — выбоина, крошка и пыль; тонкие преграды пробиваются насквозь */
+function wpHitBld(w,B,h,d,dm){const e=h.e,mt=e.m,pl=h.pl,nl=h.nl;let nm=mt;try{nm=bNm(e,"n");}catch(e2){}
+  if(mt==="glass"||mt==="tglass"||mt==="sky"){let ok=false;try{ok=bGlass(e,h.dl,4,"shot");}catch(e2){}try{bSnd("glass",pl,.6);}catch(e2){}if(ok){try{BLD.stat.shotWin=(BLD.stat.shotWin||0)+1;}catch(e2){}}
+    wpLog(`${w.name} → ${nm}, ${dm}: стекло разбито, осколки посыпались.`);return h;}
+  const wc=(B.wall[mt]!=null?B.wall[mt]:B.wall.brick),thk=(h.len||0)*100,thru=mt!=="steel"&&thk>0&&thk<wc;
+  const r=(mt==="rc"?.022:mt==="gpart"?.02:.028)+w.calmm/1000*(mt==="brick"||mt==="aer"?2.2:1.4);
+  try{bDecal(pl,nl,Math.max(.021,r));}catch(e2){}
+  const col=mt==="brick"?[.55,.3,.22]:mt==="aer"?[.8,.78,.72]:mt==="gpart"?[.9,.9,.88]:[.62,.62,.6];
+  if(mt==="steel")wSpark(h.p,h.n,d,.6,false);else{try{bDust(pl,col,.18+w.calmm/60);}catch(e2){}
+    try{for(let i=0;i<4;i++)bShard([pl[0]+nl[0]*.03,pl[1]+nl[1]*.03,pl[2]+nl[2]*.03],[nl[0]*R(1,3)+R(-1,1),nl[1]*R(1,3)+R(0,1.5),nl[2]*R(1,3)+R(-1,1)],R(.015,.035));}catch(e2){}}
+  if(thru){const q=bPt(pl,h.dl,h.len);try{bDecal(q,[h.dl[0],h.dl[1],h.dl[2]],Math.max(.021,r*1.4));}catch(e2){}}
+  wpLog(`${w.name} → ${nm}${thk?`, толщина ${wF1(thk,0)} см`:""}, ${dm}: `+(mt==="steel"?"сталь — искры, вмятина.":thru?`пробита насквозь (пробитие ≈${wF1(wc,0)} см), выбоина с обеих сторон, пыль.`:`выбоина, каменная крошка и пыль; пуля застряла (пробитие ≈${wF1(wc,0)} см).`));return h;}
 let last=performance.now();
 let tickErr=0;
 function tick(t){requestAnimationFrame(tick);try{tickBody(t);}catch(e){if(++tickErr<=5)console.error("tick error ("+tickErr+")",e);}}
@@ -8665,7 +8788,7 @@ function bOutside(){const P=BLD.P,GM={},G2=B_GEO;
   /* машины: у тротуара и на стоянке */
   BLD.M.rim=new THREE.MeshStandardMaterial({color:0xc4c8cc,metalness:.85,roughness:.3});BLD.M.lamp=new THREE.MeshBasicMaterial({color:0xffffff});bPool("carB",carBodyGeo(),BLD.M.car,190,{cast:true});bPool("carC",carCabinGeo(),BLD.M.carG,190,{cast:true});bPool("carW",carTyreGeo(),BLD.M.tyre,760);bPool("carR",carRimGeo(),BLD.M.rim,760);bPool("carL",bevelBoxGeo(.1,.13,.32,.04),BLD.M.lamp,800,{recv:false});
   const cols=[[.92,.92,.9],[.92,.92,.9],[.7,.71,.72],[.08,.08,.09],[.38,.39,.4],[.12,.16,.3],[.55,.08,.06],[.74,.69,.58],[.2,.3,.22]];
-  const car=(x,z,ry)=>{const c=cols[(Math.random()*cols.length)|0],gy=bGroundY(x,z),t=Math.random()<.5?0:Math.random()<.5?1:Math.random()<.7?2:3,{bi,ci}=carBuild(P,x,gy,z,ry,c,t);BLD.cars.push({x,z,bi,ci});};
+  const car=(x,z,ry)=>{const c=cols[(Math.random()*cols.length)|0],gy=bGroundY(x,z),t=Math.random()<.5?0:Math.random()<.5?1:Math.random()<.7?2:3,{bi,ci}=carBuild(P,x,gy,z,ry,c,t);BLD.cars.push({x,z,bi,ci,ry,t,gy});};
   for(let x=-52;x<224;x+=6.3){if(x>74&&x<88)continue;if(Math.random()<.68)car(x+R(-.3,.3),-8.25,Math.random()<.5?0:Math.PI);}
   for(let x=1.3;x<156;x+=2.6){if(Math.random()<.62)car(x,76.6,Math.PI/2);if(Math.random()<.55)car(x,81.6,-Math.PI/2);if(Math.random()<.45)car(x,93.6,Math.PI/2);if(Math.random()<.4)car(x,98.6,-Math.PI/2);}
   for(let x=-50;x<224;x+=R(14,40))car(x,Math.random()<.5?-14:-19.3,Math.random()<.5?0:Math.PI);
