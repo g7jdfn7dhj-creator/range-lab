@@ -3300,14 +3300,14 @@ const RZM={
 function rzTT(k){const m=MAT[k];if(!m)return null;if(m.tt!=null)return m.tt;if(RZM[k]&&RZM[k].tt!=null)return RZM[k].tt;return k==="cast"?-20:{steel:-45,hard:-15,hc:-25,dual:-20}[m.beh];}
 function rzMat(k){const m=MAT[k]||{},r=RZM[k]||{},p=(typeof phy==="function"&&phy(k))||{};
   return {k,n:m.n||k,beh:m.beh,cl:RZCL[m.beh]||"bcc",rho:m.dens||7.85,hb:(typeof bhnOf==="function"?bhnOf(k):0)||0,sy:r.sy,hel:r.hel,kcv:r.kcv,K:p.K,Tm:r.Tm||p.Tm||1480,c:r.c||460,Tg:r.Tg,tt:rzTT(k),src:r.src||""};}
-/* прочность от температуры (к +20 °C): ОЦК-сталь на холоде ≈ +0,11 %/°C (Peierls), выше — разупрочнение Джонсона–Кука m=1 [JC];
+/* прочность от температуры (к +15 °C): ОЦК-сталь на холоде ≈ +0,11 %/°C (Peierls), выше — разупрочнение Джонсона–Кука m=1 [JC];
    ГЦК Al ≈ +0,04 %/°C; Ti ≈ +0,18 %/°C; полимеры — сильная зависимость (СВМПЭ, связующие); резина на морозе твердеет */
-function rzSig(k,T){const q=rzMat(k),d=20-T;
+function rzSig(k,T){const q=rzMat(k),d=15-T;/* опорная температура 15 °C — как воздух по умолчанию в игре (МСА) */
   if(q.cl==="cer")return 1;
-  if(q.cl==="poly"){let f=d>0?1+.004*d:1-.006*(-d);if(k==="pe"&&T>20)f=1-.0075*(T-20);return rzCl(f,.6,1.3);}
+  if(q.cl==="poly"){let f=d>0?1+.004*d:1-.006*(-d);if(k==="pe"&&T>15)f=1-.0075*(T-15);return rzCl(f,.6,1.3);}
   if(q.cl==="rub"){return rzCl(d>0?1+.012*d+(T<(q.Tg||-60)+15?.6:0):1-.004*(-d),.8,2.2);}
   const a={bcc:.0011,fcc:.0004,hcp:.0018,w:.0007}[q.cl]||.001;
-  if(d>0)return 1+a*d;return Math.max(.5,1-(T-20)/Math.max(200,q.Tm-20));}
+  if(d>0)return 1+a*d;return Math.max(.5,1-(T-15)/Math.max(200,q.Tm-15));}
 /* доля ударной вязкости (переходная кривая Шарпи tanh, нижняя полка 0,1) — только ОЦК; ГЦК/ВЭС не охрупчиваются */
 function rzTough(k,T){const q=rzMat(k);
   if(q.cl==="bcc"&&q.tt!=null&&q.tt>-200){const T0=q.tt-12;return .1+.9*(.5+.5*Math.tanh((T-T0)/16));}
@@ -3332,8 +3332,8 @@ function rzLO(L,D,rho,v,bhn,rhoT,th,du){const c=RZ_LO,H=Math.min(480,bhn||260);
   return L*c.a*(du?1.08:1)/Math.tanh(c.b0+c.b1*L/D)*Math.pow(Math.max(.05,Math.cos((th||0)*Math.PI/180)),c.m)*Math.sqrt(rho/(rhoT||7.85))*Math.exp(-(c.c0+c.c1*H)*H/(rho*1000*Math.pow(Math.max(.3,v),2)));}
 /* сердечники: открытые данные (Википедия «125 mm smoothbore ammunition», btvt.info, Lanz/Odermatt longrods.ch); D — по массе, «≈» — оценка */
 const RZKE={
-  "3БМ42":{L:532,D:25.7,mat:"W",v0:1700,src:"«Манго»: 2 сердечника W в стальной рубашке, 4,85 кг; D по массе"},
-  "3БМ42 «Манго»":{L:532,D:25.7,mat:"W",v0:1700,src:"4,85 кг; D по массе"},
+  "3БМ42":{L:532,D:25.7,mat:"W",v0:1700,src:"«Манго»: сердечник W в стальной рубашке; D подобран по массе 4,85 кг"},
+  "3БМ42 «Манго»":{L:532,D:25.7,mat:"W",v0:1700,src:"сердечник W в стальной рубашке; D подобран по массе 4,85 кг"},
   "3БМ59 «Свинец-1»":{L:640,D:22,mat:"DU",v0:1660,src:"U-сплав, L≈640, L/D≈29 (≈)"},
   "3БМ60 «Свинец-2»":{L:640,D:22,mat:"W",v0:1660,src:"W-сплав, L≈640 (≈)"},
   "3БМ69 «Вакуум-1»":{L:900,D:24,mat:"DU",v0:1660,src:"U-сплав, L≈900 (≈)"},
@@ -3465,12 +3465,13 @@ function rzVisual(s,a,mode,kind){try{if(typeof reduce!=="undefined"&&reduce)retu
     if(mode==="hesh"&&s.rzScab&&typeof emit==="function"){const bp=new THREE.Vector3(s.lx,s.ly,S.T/2+.02);plate.localToWorld(bp);emit(bp,nb,MOBILE?8:14,.35,Math.min(12,s.rzScab.v/20),false,true);}
   }catch(e){}}
 /* HESH: откол. Порог игры (≈1,2 калибра однородной стали) сохранён: волна давления P(x)=P0·e^(−x/λ), λ подобрана так, что на пороге P = σ_откола.
+   Холод: хрупкая сталь откалывается легче — σотк ×(0,75+0,25·доля вязкости); жара: σотк падает вместе с σт.
    Скорость откольной тарелки v ≈ 2(Pтыл − σотк)/(ρc), толщина ≈ половина длины импульса (≤ t/2), диаметр ≈ 1,6 калибра */
 function rzHesh(s,cal){const fl=layers.find(l=>!l.spent&&l.k!=="gap");if(!fl)return null;const q=rzMat(fl.k),p=(typeof phy==="function"&&phy(fl.k))||{},hK=(G().custom&&G().heshK)||1;
-  const t=fl.t/Math.max(.05,(typeof cosA==="function"?cosA():1)),thr=cal*1.2*hK,P0=24,sp=(p.sp||3.5)*Math.max(.6,rzSig(fl.k,s.rzT)),lam=thr/Math.log(P0/sp),Pb=P0*Math.exp(-t/lam);
+  const t=fl.t/Math.max(.05,(typeof cosA==="function"?cosA():1)),thr=cal*1.2*hK,P0=24,sp20=p.sp||3.5,lam=thr/Math.log(P0/sp20),T=s.rzT!=null?s.rzT:rzPlateT(),sp=sp20*(T<20?.75+.25*rzTough(fl.k,T):Math.max(.6,rzSig(fl.k,T))),Pb=P0*Math.exp(-t/lam);
   if(Pb<=sp)return {t,thr,Pb,sp,no:1,n:q.n};const ts=Math.min(t/2,.22*cal),ds=1.6*cal,mass=q.rho*1000*Math.PI/4*Math.pow(ds/1000,2)*ts/1000,v=2*(Pb-sp)*1e9/(q.rho*1000*(p.c||5.9)*1000);
   return {t,thr,Pb,sp,ts,ds,mass,v,E:.5*mass*v*v,n:q.n};}
-function rzReport(s,a,mode,kind,out){if(!RZ.on||!a)return;const cal=G().cal,z=a.rz,T=s.rzT!=null?s.rzT:rzPlateT(),L=[],H=[];let W=[],rows=[];
+function rzReport(s,a,mode,kind,out){if(!RZ.on||!a)return;if(s.rzT==null)s.rzT=rzPlateT();const cal=G().cal,z=a.rz,T=s.rzT!=null?s.rzT:rzPlateT(),L=[],H=[];let W=[],rows=[];
   const air=rzAirT();
   try{s.rzCos=(typeof cosA==="function"?cosA():1);
   L.push(`Температура листа ${rzF(T)} °C${RZ.air?" (как воздух)":` (воздух ${rzF(air)} °C)`}`);
@@ -3505,7 +3506,7 @@ function rzReport(s,a,mode,kind,out){if(!RZ.on||!a)return;const cal=G().cal,z=a.
   /* температура и свечение */
   const Tc=s.rzTc;if(Tc&&kind)H.push(`Температура в точке удара ≈ ${Math.round(Tc)} °C${Tc>=525?" — светится "+(Tc>1150?"жёлто-белым":Tc>900?"оранжево-жёлтым":Tc>700?"вишнёво-красным":"тёмно-красным"):" — ниже точки Дрейпера (≈525 °C), не светится"}${mode==="heat"?"; сама медная струя ≈ 450 °C (ИК-пирометрия)":""}.`);
   const cold=layers.filter(l=>l.k!=="gap"&&rzMat(l.k).cl==="bcc"&&rzTough(l.k,T)<.6);if(cold.length)H.push(`Холод: ${cold.map(l=>`«${lc(rzMat(l.k).n)}» — ${Math.round(rzTough(l.k,T)*100)} % вязкости (порог ≈ ${rzTT(l.k)} °C)`).join("; ")} — трещины длиннее, сколы чаще.`);
-  if(T>30)H.push(`Жара: сталь мягче (σт ×${rzF(rzSig("rha",T),3)} у катаной); полимеры теряют прочность сильнее (СВМПЭ ×${rzF(rzSig("pe",T),2)}).`);
+  if(T>28)H.push(`Жара: сталь мягче (σт ×${rzF(rzSig("rha",T),3)} у катаной); полимеры теряют прочность сильнее (СВМПЭ ×${rzF(rzSig("pe",T),2)}).`);
   }catch(e){console.error(e);}
   if(L.length>1){out.push("Физика (Реализм):");L.forEach(x=>out.push(x.startsWith("  ")?x:"  · "+x));}
   s.rzHTML=`${H.map(h=>`<p>${h}</p>`).join("")}${rows.length?`<div class="rzscroll"><table class="rzt"><thead><tr><th>№</th><th>Слой</th><th>Сопротивление</th><th>До слоя</th><th>После</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`:""}`;
