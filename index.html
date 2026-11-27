@@ -3754,33 +3754,37 @@ function wpHit(w,o,d){const B=WBAL[w.id]||WBAL.ak74m,C=[];const far=800;
 /* боец: урон по зоне, бронежилет, гибель, ранение, вздрагивание */
 function wpHitMan(w,B,h,d,dm){const P=h.P,z=h.zone,R0=()=>.88+Math.random()*.24;let dmg=0,lethal=false,txt="";
   if(P.hp==null)P.hp=100;
-  if(P.st){/* тело уже лежит */try{puff(h.p.clone(),false,.12,0x6a2a22,h.n.clone().multiplyScalar(.4),.5);}catch(e){}wpLog(`${w.name}: попадание в тело убитого (${z[1]}), ${dm}.`);return h;}
+  if(P.st&&P.st!==3){/* тело уже лежит */try{puff(h.p.clone(),false,.12,0x6a2a22,h.n.clone().multiplyScalar(.4),.5);}catch(e){}wpLog(`${w.name}: попадание в тело убитого (${z[1]}), ${dm}.`);return h;}
   if(z[2]===1){lethal=true;dmg=999;txt=`${z[1]} — смертельно`;}
   else{const zk=[0,0,1,.85,.35,.45][z[2]];let k=zk;if(z[2]===2){k*=B.vest;txt=B.vest<.3?`${z[1]}: пуля задержана бронежилетом, запреградная травма`:`${z[1]}: бронежилет пробит`;}else txt=z[1];
     dmg=Math.round(B.dmg*k*R0());}
+  if(P.m.rotation.order!=="YXZ")P.m.rotation.order="YXZ";/* наклон тела — в собственных осях бойца, после разворота по азимуту */
   P.hp-=dmg;const died=lethal||P.hp<=0;
   /* направление удара в координатах бойца: от стрелка, вдоль луча */
   const ld=h.ld;P.hd=ld.z<0?-1:1;P.hs=ld.x;
-  if(died){P.st=1;P.hk=1;P.ft=0;P.fall=0;P.kind=z[2]===1?"head":z[2]===5?"leg":"body";P.ax=-P.hd;P.tw=(Math.random()-.5)*.6+(-P.hs*.5);P.hp=0;PPL.log=(PPL.log||0)+1;
+  const wnd=P.st===3;
+  if(died&&wnd){P.st=1;P.kind="wdie";P.t2=P.ft||0;P.hp=0;PPL.log=(PPL.log||0)+1;}
+  else if(died){P.st=1;P.hk=1;P.ft=0;P.fall=0;P.kind=z[2]===1?"head":z[2]===5?"leg":"body";P.ax=-P.hd;P.tw=(Math.random()-.5)*.6+(-P.hs*.5);P.hp=0;PPL.log=(PPL.log||0)+1;
     try{if(P.m.userData.wg&&P.m.userData.wg.fl)P.m.userData.wg.fl.visible=false;}catch(e){}}
+  else if(wnd){/* раненый на земле — дёргается, остаётся лежать */}
   else if(z[2]===5&&P.hp<55){P.st=3;P.hk=1;P.ft=0;P.fall=0;P.kind="wound";P.ax=-P.hd;P.tw=(Math.random()-.5)*.4;}
   else{P.fx=1;P.fxa=-P.hd;P.fxs=-P.hs;}
   try{puff(h.p.clone().addScaledVector(h.n,.03),false,.1,0x7a1c14,h.n.clone().multiplyScalar(.6).add(d.clone().multiplyScalar(.6)),.45);}catch(e){}
   const alive=PPL.L.filter(q=>!q.st).length;
   wpLog(`${w.name} → боец №${PPL.L.indexOf(P)+1}, ${dm}: ${txt}${dmg<999?`, урон ${dmg}`:""}. `+(died?`Убит${z[2]===1?" (попадание в голову)":""}.`:P.st===3?`Ранен в ногу, упал (${P.hp} ОЗ).`:`Ранен, ${Math.max(0,P.hp)} ОЗ из 100 — вздрогнул.`)+` Живых бойцов: ${alive}.`);return h;}
 /* анимация вздрагивания и падения (вызывается из pplTick) */
-function pplFlinch(P,m,U,dt){P.fx=Math.max(0,P.fx-dt*3.2);const s=Math.sin((1-P.fx)*Math.PI)*(P.fx>0?1:0);m.rotation.x=P.fxa*.22*s;m.rotation.z=(P.fxs||0)*.12*s;}
-function pplHeroFall(P,m,U,dt){P.ft=(P.ft||0)+dt;const t=P.ft,cl=x=>Math.max(0,Math.min(1,x));
+function pplFlinch(P,m,U,dt){P.fx=Math.max(0,P.fx-dt*3.2);const s=Math.sin((1-P.fx)*Math.PI)*(P.fx>0?1:0);m.rotation.x=P.fxa*.13*s;m.rotation.z=(P.fxs||0)*.08*s;}
+function pplHeroFall(P,m,U,dt){P.ft=(P.ft||0)+dt;const t=P.ft,cl=x=>Math.max(0,Math.min(1,x)),wk0=P.kind==="wound"||P.kind==="wdie";
   /* убит в голову — ноги подламываются сразу; в корпус — короткий шаг-пошатывание, потом падение; ранен в ногу — оседает на колено и заваливается набок */
-  const d0=P.kind==="head"?0:P.kind==="wound"?.05:.12,kn=cl((t-d0)/.32),kk=kn*kn*(3-2*kn),tp=cl((t-d0-.18)/(P.kind==="wound"?.9:.62)),te=tp*tp,bo=tp>=1?0:0;
+  const d0=P.kind==="head"?0:wk0?.05:.12,kn=cl((t-d0)/.32),kk=kn*kn*(3-2*kn),tp=cl((t-d0-.18)/(wk0?.9:.62)),te=tp*tp,bo=tp>=1?0:0;
   let rx=P.ax*(Math.PI/2)*.97*te;const end=cl((t-d0-.8)/.25);rx+=P.ax*Math.sin(end*Math.PI)*.05;/* лёгкий отскок при ударе о землю */
-  if(P.kind==="wound")rx*=.55;
-  m.rotation.x=rx;m.rotation.z=(P.tw||0)*te+(P.kind==="wound"?.9*te*Math.sign(P.tw||1):0);
+  const wk=P.kind==="wound"||P.kind==="wdie";if(wk)rx*=P.kind==="wdie"?.55+.45*cl((t-(P.t2||0))/.6):.55;
+  m.rotation.x=rx;m.rotation.z=(P.tw||0)*te+(wk?.9*te*Math.sign(P.tw||1):0);
   /* приседание на подломленных ногах, затем тело ложится: высота таза уходит к земле */
-  const drop=.42*kk*(1-te)+(P.kind==="wound"?.25*te:0);m.position.y=(P.cy||0)-drop+.12*te;
+  const drop=.42*kk*(1-te)+(wk?.25*te:0);m.position.y=(P.cy||0)-drop+.12*te;
   const lg=-1.25*kk*(1-te*.8);if(U.legL){U.legL.rotation.x=lg;U.legR.rotation.x=lg*(P.kind==="leg"?.6:.9);}
   if(U.armL&&t<1.6){const a=-.3-1*(1-te);U.armL.rotation.x=a;U.armR.rotation.x=a*.8;}
-  if(t>1.6)P.fall=1;}
+  if(t>1.6&&P.kind!=="wdie")P.fall=1;}
 /* техника: слои брони зоны, угол встречи, пробитие */
 function wpHitVeh(w,B,h,d,pen,dm){const v=VT[S.vt],n=h.n,cosA=Math.max(.05,-d.dot(n)),ang=Math.acos(Math.min(1,cosA))*180/Math.PI;let zone="hullS";try{zone=vehZone(h.obj,h.p,n);}catch(e){}
   const pk=vehPack(zone);let left=pen,stop=-1,eq=0,t0=0;for(let i=0;i<pk.length;i++){const k=WARM[pk[i][0]]!=null?WARM[pk[i][0]]:.6,e=pk[i][1]*k/cosA;eq+=e;if(left>=e){left-=e;}else{stop=i;break;}}
